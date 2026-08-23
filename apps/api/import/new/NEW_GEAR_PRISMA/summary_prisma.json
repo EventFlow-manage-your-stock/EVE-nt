@@ -1,0 +1,18 @@
+{
+  "exporter_version": "2.0-PRISMA",
+  "finished_at": "2026-08-15 22:30:57",
+  "categories": 71,
+  "warehouses": 5,
+  "source_models": 607,
+  "case_models_generated": 380,
+  "models_total_for_prisma": 987,
+  "source_items": 2514,
+  "case_items_generated": 484,
+  "items_total_for_prisma": 2998,
+  "case_relations_matched": 1343,
+  "case_relations_unmatched": 923,
+  "case_relations_ambiguous": 248,
+  "photos": 407,
+  "errors": 0,
+  "xlsx": "/Users/michalstrykowski/Desktop/NEW_GEAR_PRISMA/NEW_sprzet_do_EVE_NT_PRISMA.xlsx"
+}

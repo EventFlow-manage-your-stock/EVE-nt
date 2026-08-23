@@ -1,0 +1,355 @@
+<html><head><link href="/admin/assets/7d5bd11f/css/bootstrap.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/35872764/css/kv-grid.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/67ec638a/css/bootstrap-dialog-bs3.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/35872764/css/jquery.resizableColumns.css?v=1758706583" rel="stylesheet"/>
+<style>
+    .offer-status-button {
+        cursor: pointer;
+    }
+    .ns-status-control--offer {
+        min-width: 96px;
+        height: 28px;
+        min-height: 28px;
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+</style>
+<style>
+.table-bordered > thead > tr > th, .table-bordered > thead > tr > td {
+    background-color: #ffffff;
+}
+.grid-view > .kv-grid-container > table {
+    border-spacing: 0;
+} 
+.table-bordered {
+    border: none;
+}
+.kv-grid-table > tbody > tr > td {
+    border-right: none;
+    border-left: none;
+}
+.system-link {
+    color: #43B7D6;
+    font-size: 12px;
+}
+.table-responsive > table > tbody > tr {
+    background-color: #ffffff;
+}
+.table-responsive {
+  overflow-x: auto;
+}
+</style>
+<script src="/admin/assets/67ec638a/js/dialog.js?v=1758706583"></script>
+<script>var krajeeDialogDefaults_1883eb53 = {"alert":{"type":"type-info","title":"Informacja","buttonLabel":"<span class=\"glyphicon glyphicon-ok\"></span> Ok"},"confirm":{"type":"type-warning","title":"Potwierdzenie","btnOKClass":"btn-warning","btnOKLabel":"<span class=\"glyphicon glyphicon-ok\"></span> Ok","btnCancelLabel":"<span class=\"glyphicon glyphicon-ban-circle\"></span>  Anuluj"},"prompt":{"draggable":false,"title":"Informacja","buttons":[{"label":"Anuluj","icon":"glyphicon glyphicon-ban-circle","cssClass":"btn-default"},{"label":"Ok","icon":"glyphicon glyphicon-ok","cssClass":"btn-primary"}],"closable":false},"dialog":{"draggable":true,"title":"Informacja","buttons":[{"label":"Anuluj","icon":"glyphicon glyphicon-ban-circle","cssClass":"btn-default"},{"label":"Ok","icon":"glyphicon glyphicon-ok","cssClass":"btn-primary"}]}};
+var krajeeDialog_e48a4427 = {"id":"w1"};
+var krajeeDialog=new KrajeeDialog(true,krajeeDialog_e48a4427,krajeeDialogDefaults_1883eb53);</script> </head><body><div class="panel-body">
+<h3></h3>
+<div class="row">
+<div class="col-md-12 d-flex mb-40">
+<a class="btn btn-sm btn-white d-flex" href="/admin/offer/default/create?event_id=5251" target="_blank"> <label class="green-add"></label>Stwórz nową</a><a class="btn btn-sm btn-white d-flex" href="/admin/offer/default/create-from-event?event_id=5251" target="_blank"> <label class="green-add"></label>Stwórz ofertę na podstawie wydarzenia</a><a class="btn purple small-btn btn-white" href="/admin/offer/default/assign-to-event?event_id=5251"><div class="icon-cloud-download"></div>Importuj z ofert</a><a class="btn small-btn systems m-0-15 btn-white add-to-offer" href="/admin/warehouse/assign-gear-item-to-offer?event_id=5251"><div class="icon-cloud-upload"></div>Zarezerwuj sprzęt z oferty na wydarzenie</a> </div>
+</div>
+<div class="row">
+<div class="col-md-12">
+<div class="panel_mid_blocks" style=" overflow-y:auto;">
+<div class="panel_block" style="width:2500px;">
+<div class="grid-view is-bs3 kv-grid-bs3 hide-resize" data-krajee-grid="kvGridInit_09cd9326" data-krajee-ps="ps_w0_container" id="w0"><div class="table-responsive kv-grid-container" id="w0-container"><table class="kv-grid-table table table-condensed kv-table-wrap table-bordered table-striped"><thead class="kv-table-header w0">
+<tr><th data-col-seq="0">Duplikuj</th><th data-col-seq="1">Nazwa Projektu</th><th data-col-seq="2">Data sporządzenia ofery</th><th data-col-seq="3">Przygotował</th><th data-col-seq="4">Status</th><th data-col-seq="5">Multimedia</th><th data-col-seq="6">Kratownice / Podesty / Elementy montażowe</th><th data-col-seq="7">Prąd</th><th data-col-seq="8">Transport</th><th data-col-seq="9">Obsługa</th><th data-col-seq="10">Inne</th><th data-col-seq="11">Suma</th><th data-col-seq="12"></th></tr>
+</thead>
+<tbody>
+<tr class="w0" data-key="172"><td class="w0" data-col-seq="0"><a class="btn purple-circle btn-icon-circle" data-offer-event-id="5251" data-offer-event-name="Dobry Dźwięk/ event H&amp;M/ Gądki" data-offer-id="172" href="/admin/offer/default/duplicate?id=172"><span class="icon-copy"></span></a></td><td class="w0" data-col-seq="1"><a class="system-link" href="/admin/offer/default/view?id=172">Dobry Dźwięk/ event H&amp;M/ Gądki Ekran LED 4x2.5m i 1x 2.5m</a></td><td class="w0" data-col-seq="2">2026-08-14</td><td class="w0" data-col-seq="3">Piechnik Piotr</td><td class="w0" data-col-seq="4"><a class="ns-status-control ns-status-control--offer offer-status-button" data-offerid="172" data-status="8" href="#" style="--ns-status-color: #fff2cc;"><span class="ns-status-label">Nowa</span></a></td><td class="w0" data-col-seq="5">4 435,00 zł</td><td class="w0" data-col-seq="6">217,50 zł</td><td class="w0" data-col-seq="7">140,00 zł</td><td class="w0" data-col-seq="8">500,00 zł</td><td class="w0" data-col-seq="9">5 700,00 zł</td><td class="w0" data-col-seq="10">0,00 zł</td><td class="w0" data-col-seq="11">10 992,50 zł</td><td class="w0" data-col-seq="12"><a class="delete-from-event" data-id="172" href="/admin/offer/default/offer-event?event_id=5251"><div class="clear-box-black"></div></a></td></tr>
+<tr class="w0" data-key="167"><td class="w0" data-col-seq="0"><a class="btn purple-circle btn-icon-circle" data-offer-event-id="5251" data-offer-event-name="Dobry Dźwięk/ event H&amp;M/ Gądki" data-offer-id="167" href="/admin/offer/default/duplicate?id=167"><span class="icon-copy"></span></a></td><td class="w0" data-col-seq="1"><a class="system-link" href="/admin/offer/default/view?id=167">Dobry Dźwięk/ event H&amp;M/ Gądki TV</a></td><td class="w0" data-col-seq="2">2026-08-13</td><td class="w0" data-col-seq="3">Piechnik Piotr</td><td class="w0" data-col-seq="4"><a class="ns-status-control ns-status-control--offer offer-status-button" data-offerid="167" data-status="8" href="#" style="--ns-status-color: #fff2cc;"><span class="ns-status-label">Nowa</span></a></td><td class="w0" data-col-seq="5">3 040,00 zł</td><td class="w0" data-col-seq="6">0,00 zł</td><td class="w0" data-col-seq="7">0,00 zł</td><td class="w0" data-col-seq="8">500,00 zł</td><td class="w0" data-col-seq="9">3 300,00 zł</td><td class="w0" data-col-seq="10">0,00 zł</td><td class="w0" data-col-seq="11">6 840,00 zł</td><td class="w0" data-col-seq="12"><a class="delete-from-event" data-id="167" href="/admin/offer/default/offer-event?event_id=5251"><div class="clear-box-black"></div></a></td></tr>
+</tbody></table></div>
+</div> </div>
+</div>
+</div>
+</div>
+</div>
+<script id="offer-status-popup-template" type="text/template">
+        <div id="offer-status-popup" class="ns-status-popup">
+            <form id="offer-status-popup-form" class="ns-status-form">
+                <input type="hidden" name="offer_id" id="offer-status-popup-offer">
+                <input type="hidden" name="status" id="offer-status-popup-value" class="ns-status-value">
+
+                <div class="form-group">
+                    <label>Status oferty</label>
+
+                    <div class="ns-status-search-wrap">
+                        <i class="fa fa-search"></i>
+                        <input type="search"
+                               id="offer-status-popup-search"
+                               class="ns-status-search"
+                               placeholder="Szukaj statusu..."
+                               autocomplete="off">
+                    </div>
+
+                    <div class="ns-status-list">
+                                                    <button type="button"
+                                    class="ns-status-option"
+                                    data-status="8"
+                                    data-color="#fff2cc"
+                                    data-search="nowa"
+                                    style="--ns-status-color: #fff2cc;">
+                                <span class="ns-status-dot"></span>
+                                <span class="ns-status-option-name">Nowa</span>
+                                <i class="fa fa-check ns-status-check"></i>
+                            </button>
+                                                    <button type="button"
+                                    class="ns-status-option"
+                                    data-status="1"
+                                    data-color="#00ff00"
+                                    data-search="zaakceptowana"
+                                    style="--ns-status-color: #00ff00;">
+                                <span class="ns-status-dot"></span>
+                                <span class="ns-status-option-name">Zaakceptowana</span>
+                                <i class="fa fa-check ns-status-check"></i>
+                            </button>
+                                                    <button type="button"
+                                    class="ns-status-option"
+                                    data-status="5"
+                                    data-color="#000000"
+                                    data-search="oferta przegrana"
+                                    style="--ns-status-color: #000000;">
+                                <span class="ns-status-dot"></span>
+                                <span class="ns-status-option-name">Oferta przegrana</span>
+                                <i class="fa fa-check ns-status-check"></i>
+                            </button>
+                                            </div>
+
+                                            <a class="ns-status-manage" href="/admin/offer-statut/index"><i class="fa fa-cog"></i><span>Zarzadzaj statusami</span></a>                                    </div>
+            </form>
+        </div>
+        <div id="offer-status-popup-overlay" class="ns-status-popup-overlay"></div>
+    </script>
+<script type="text/javascript">
+        function loadTabsAfterChange() {
+                        $("#tab-crew").empty().load("/admin/event/crew-tab?id=5251");
+                                    $("#tab-vehicle").empty().load("/admin/event/vehicle-tab?id=5251");
+                                    $("#tab-finances").empty().load("/admin/event/finance-tab?id=5251");
+                        $("#tab-offer").empty().load("/admin/event/offer-tab?id=5251");
+        }
+    </script>
+<script src="/admin/assets/a766414d/jquery.js?v=1758706583"></script>
+<script src="/admin/assets/78f58a8c/yii.js?v=1758706583"></script>
+<script src="/admin/assets/78f58a8c/yii.gridView.js?v=1758706583"></script>
+<script src="/admin/assets/7d5bd11f/js/bootstrap.js?v=1758706583"></script>
+<script src="/admin/assets/67ec638a/js/bootstrap-dialog.js?v=1758706583"></script>
+<script src="/admin/assets/67ec638a/js/dialog-yii.js?v=1758706583"></script>
+<script src="/admin/assets/35872764/js/kv-grid-export.js?v=1758706583"></script>
+<script src="/admin/assets/35872764/js/jquery.resizableColumns.js?v=1758706583"></script>
+<script>krajeeYiiConfirm('krajeeDialog');
+var kvGridExp_59414e8c={"gridId":"w0","action":"/admin/gridview/export/download","module":"gridview","encoding":"utf-8","bom":1,"target":"_blank","messages":{"allowPopups":"Aby pobrać dane, odblokuj wyskakujące okienka","confirmDownload":"Kliknij Ok aby kontynuować","downloadProgress":"Generacja pliku eksportu. Proszę czekać...","downloadComplete":"Request submitted! You may safely close this dialog after saving your downloaded file."},"exportConversions":[{"from":"<span class=\"glyphicon glyphicon-ok-sign text-success\" style=\"font-weight:bold\"></span>","to":"Aktywny"},{"from":"<span class=\"glyphicon glyphicon-remove-sign text-danger\" style=\"font-weight:bold\"></span>","to":"Nieaktywny"}],"skipExportElements":[".sr-only",".hide"],"showConfirmAlert":true};
+var kvGridExp_5c76a28c={"filename":"eksportowanie tabeli","showHeader":true,"showPageSummary":true,"showFooter":true};
+var kvGridExp_ec310c0c={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_59414e8c,"genOpts":kvGridExp_5c76a28c,"alertMsg":"Pobieranie danych w postaci pliku HTML","config":{"cssFile":["https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"]}};
+var kvGridExp_a717b9d9={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_59414e8c,"genOpts":kvGridExp_5c76a28c,"alertMsg":"Pobieranie danych w postaci pliku CSV","config":{"colDelimiter":",","rowDelimiter":"\r\n"}};
+var kvGridExp_ef13de3a={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_59414e8c,"genOpts":kvGridExp_5c76a28c,"alertMsg":"Pobieranie danych w postaci pliku tekstowego","config":{"colDelimiter":"\t","rowDelimiter":"\r\n"}};
+var kvGridExp_202951ad={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_59414e8c,"genOpts":kvGridExp_5c76a28c,"alertMsg":"Pobieranie danych w postaci pliku Excel","config":{"worksheet":"Eksportuj arkusz","cssFile":""}};
+var kvGridExp_cc7cccd1={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_59414e8c,"genOpts":kvGridExp_5c76a28c,"alertMsg":"Plik PDF zostanie wygenerowany do pobrania","config":{"mode":"UTF-8","format":"A4-L","destination":"D","marginTop":20,"marginBottom":20,"cssInline":".kv-wrap{padding:20px}","methods":{"SetHeader":[{"odd":{"L":{"content":"Yii2 Grid Eksport (PDF)","font-size":8,"color":"#333333"},"C":{"content":"Eksport tabeli","font-size":16,"color":"#333333"},"R":{"content":"Wygenerowano: Sat, 15-Aug-2026","font-size":8,"color":"#333333"}},"even":{"L":{"content":"Yii2 Grid Eksport (PDF)","font-size":8,"color":"#333333"},"C":{"content":"Eksport tabeli","font-size":16,"color":"#333333"},"R":{"content":"Wygenerowano: Sat, 15-Aug-2026","font-size":8,"color":"#333333"}}}],"SetFooter":[{"odd":{"L":{"content":"© Krajee Yii2 Extensions","font-size":8,"font-style":"B","color":"#999999"},"R":{"content":"[ {PAGENO} ]","font-size":10,"font-style":"B","font-family":"serif","color":"#333333"},"line":true},"even":{"L":{"content":"© Krajee Yii2 Extensions","font-size":8,"font-style":"B","color":"#999999"},"R":{"content":"[ {PAGENO} ]","font-size":10,"font-style":"B","font-family":"serif","color":"#333333"},"line":true}}]},"options":{"title":"Eksport tabeli","subject":"PDF wygenerowano za pomocą rozszerzenia kartik-v/yii2-grid","keywords":"krajee, grid, export, yii2-grid, pdf"},"contentBefore":"","contentAfter":""}};
+var kvGridExp_d9dc8c42={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_59414e8c,"genOpts":kvGridExp_5c76a28c,"alertMsg":"The JSON export file will be generated for download.","config":{"colHeads":[],"slugColHeads":false,"jsonReplacer":function(k,v){return typeof(v)==='string'?$.trim(v):v},"indentSpace":4}};
+var kvGridInit_09cd9326=function(){
+jQuery('#w0 .export-html').gridexport(kvGridExp_ec310c0c);jQuery('#w0 .export-csv').gridexport(kvGridExp_a717b9d9);jQuery('#w0 .export-txt').gridexport(kvGridExp_ef13de3a);jQuery('#w0 .export-xls').gridexport(kvGridExp_202951ad);jQuery('#w0 .export-pdf').gridexport(kvGridExp_cc7cccd1);jQuery('#w0 .export-json').gridexport(kvGridExp_d9dc8c42);jQuery('#w0-container').resizableColumns('destroy').resizableColumns({"store":null,"resizeFromBody":false});
+};
+kvGridInit_09cd9326();
+jQuery('#w0').yiiGridView({"filterUrl":"\/admin\/event\/offer-tab?id=5251","filterSelector":"#w0-filters input, #w0-filters select","filterOnFocusOut":true});
+
+(function() {
+    var offerStatusChangeUrl = "\/admin\/offer\/default\/change-status";
+
+    $("#offer-status-popup, #offer-status-popup-overlay").remove();
+    if ($("#offer-status-popup-template").length) {
+        $("body").append($("#offer-status-popup-template").html());
+    }
+
+    $(document).off("click.offerStatusPopup", ".offer-status-button").on("click.offerStatusPopup", ".offer-status-button", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var button = $(this);
+        var offerId = String(button.data("offerid") || "");
+        var currentStatus = String(button.attr("data-status") || "");
+        var popup = $("#offer-status-popup");
+        var buttonPos = button.offset();
+
+        $("#offer-status-popup-offer").val(offerId);
+        $("#offer-status-popup-value").val(currentStatus);
+        $("#offer-status-popup-search").val("");
+        $("#offer-status-popup .ns-status-option").show().each(function() {
+            $(this).toggleClass("is-active", String($(this).attr("data-status")) === currentStatus);
+        });
+
+        popup.data("button", button);
+        popup.css({
+            top: buttonPos.top + button.outerHeight() + 5,
+            left: buttonPos.left
+        });
+
+        var rightEdge = buttonPos.left + popup.outerWidth();
+        var windowWidth = $(window).width();
+        if (rightEdge > windowWidth) {
+            popup.css("left", windowWidth - popup.outerWidth() - 10);
+        }
+
+        var popupTop = parseFloat(popup.css("top"));
+        var bottomEdge = popupTop + popup.outerHeight();
+        var viewportBottom = $(window).scrollTop() + $(window).height();
+        if (bottomEdge > viewportBottom) {
+            popup.css("top", Math.max($(window).scrollTop() + 10, buttonPos.top - popup.outerHeight() - 5));
+        }
+
+        $("#offer-status-popup-overlay").show();
+        popup.addClass("active");
+        setTimeout(function() {
+            $("#offer-status-popup-search").focus();
+        }, 0);
+    });
+
+    $(document).off("click.offerStatusPopup", "#offer-status-popup .ns-status-option").on("click.offerStatusPopup", "#offer-status-popup .ns-status-option", function(e) {
+        e.preventDefault();
+
+        var option = $(this);
+        var status = String(option.attr("data-status"));
+        var currentStatus = String($("#offer-status-popup-value").val());
+
+        if (currentStatus === status) {
+            closeOfferStatusPopup();
+            return;
+        }
+
+        $("#offer-status-popup-value").val(status);
+        $("#offer-status-popup .ns-status-option").removeClass("is-active");
+        option.addClass("is-active");
+        $("#offer-status-popup-form").trigger("submit");
+    });
+
+    $(document).off("submit.offerStatusPopup", "#offer-status-popup-form").on("submit.offerStatusPopup", "#offer-status-popup-form", function(e) {
+        e.preventDefault();
+
+        var offerId = $("#offer-status-popup-offer").val();
+        var status = $("#offer-status-popup-value").val();
+        var selectedOption = $("#offer-status-popup .ns-status-option.is-active");
+        var button = $("#offer-status-popup").data("button");
+
+        if (!offerId || !status || !selectedOption.length) {
+            if (typeof toastr !== "undefined") {
+                toastr.error("Wybierz status");
+            }
+            return;
+        }
+
+        $.ajax({
+            url: offerStatusChangeUrl + "?id=" + encodeURIComponent(offerId) + "&status=" + encodeURIComponent(status),
+            type: "GET",
+            success: function() {
+                var color = selectedOption.attr("data-color") || "#337ab7";
+                var name = selectedOption.find(".ns-status-option-name").text();
+
+                if (!button || !button.length) {
+                    button = $(".offer-status-button[data-offerid=\"" + offerId + "\"]");
+                }
+
+                if (button.length) {
+                    button.attr("data-status", status);
+                    button.data("status", status);
+                    button.get(0).style.setProperty("--ns-status-color", color);
+                    button.find(".ns-status-label").text(name);
+                }
+
+                closeOfferStatusPopup();
+
+                if (typeof toastr !== "undefined") {
+                    toastr.success("Status zmieniony");
+                }
+                if (typeof loadTabsAfterChange === "function") {
+                    loadTabsAfterChange();
+                }
+            },
+            error: function() {
+                if (typeof toastr !== "undefined") {
+                    toastr.error("Wystapil blad podczas zmiany statusu");
+                }
+            }
+        });
+    });
+
+    $(document).off("click.offerStatusPopup", "#offer-status-popup-overlay").on("click.offerStatusPopup", "#offer-status-popup-overlay", function() {
+        closeOfferStatusPopup();
+    });
+
+    $(document).off("input.offerStatusPopup", "#offer-status-popup-search").on("input.offerStatusPopup", "#offer-status-popup-search", function() {
+        var search = normalizeOfferStatusText($(this).val());
+        $("#offer-status-popup .ns-status-option").each(function() {
+            var text = normalizeOfferStatusText($(this).attr("data-search") || $(this).text());
+            $(this).toggle(text.indexOf(search) !== -1);
+        });
+    });
+
+    $(document).off("keydown.offerStatusPopup", "#offer-status-popup-search").on("keydown.offerStatusPopup", "#offer-status-popup-search", function(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+        }
+    });
+
+    $(document).off("keydown.offerStatusPopupEsc").on("keydown.offerStatusPopupEsc", function(e) {
+        if (e.keyCode === 27) {
+            closeOfferStatusPopup();
+        }
+    });
+
+    function closeOfferStatusPopup() {
+        $("#offer-status-popup").removeClass("active");
+        $("#offer-status-popup-overlay").hide();
+    }
+
+    function normalizeOfferStatusText(text) {
+        text = String(text || "");
+        if (typeof text.normalize === "function") {
+            text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+        return text.toLowerCase();
+    }
+})();
+
+
+
+    $(".sub_block").on("click",function(){
+        var _this = $(this),
+        icon = _this.find("i"),
+        box = _this.closest("tr").next(".offer-gear-details");
+        if(_this.hasClass("active")){
+            icon.removeClass("glyphicon-arrow-up").addClass("glyphicon-arrow-down");
+            _this.removeClass("active");
+            box.hide(300);
+        } else {
+            icon.removeClass("glyphicon-arrow-down").addClass("glyphicon-arrow-up");
+            _this.addClass("active");
+            box.show(300);
+        }
+
+        return false;
+    });
+
+    $(".delete-from-event").on("click",function(){
+        var _this = $(this),
+        data = {
+            itemId: _this.data("id"),
+            add: 0
+        };
+
+        Swal.fire({
+            title: "Czy chcesz usunąć ofertę z wydarzenia?",
+            text: "Oferta po usunięciu z wydarzenia zostanie nadal dostępna w zakładce oferty.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Tak",
+            cancelButtonText: "Nie",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(_this.attr("href"), data, function(response){
+                    location.reload();
+                });
+            }
+        });
+
+        return false;
+    });
+</script></body></html>

@@ -1,0 +1,2113 @@
+<html><head><link href="/admin/css/ion.rangeSlider.skinModern.css?v=1784219907" rel="stylesheet"/>
+<link href="/admin/css/ion.rangeSlider.css?v=1784219907" rel="stylesheet"/>
+<link href="/admin/assets/7d5bd11f/css/bootstrap.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/94cd7c58/css/activeform.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/65b8ec51/css/select2.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/1cb333af/css/select2-addl.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/1cb333af/css/select2-krajee-bs3.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/d8669f62/css/kv-widgets.css?v=1758706583" rel="stylesheet"/>
+<style>
+
+
+#total-highlighted{
+padding-top:10px;
+}
+#total-highlighted a{
+background-color: #43B7D6;
+    border-radius: 5px;
+    color: #ffffff;
+    margin-left:20px;
+    padding:2px 10px;
+}
+.users.highlighted1 img.img-circle.img-very-small{
+border: 5px solid yellow;
+    width: 47px;
+    height: 47px;
+}
+.users.highlighted2 img.img-circle.img-very-small{
+border: 5px solid #9ACD32;
+    width: 47px;
+    height: 47px;
+}
+.users.highlighted3 img.img-circle.img-very-small{
+border: 5px solid #00FF7F;
+    width: 47px;
+    height: 47px;
+}
+.img-circle {
+    width: 45px;
+    height: 45px;
+}
+@media (min-width: 1200px){
+.modal-lg {
+    width: 1200px;
+}
+}
+.time {
+    color: rgba(67, 183, 214, 100);
+}
+.add-event-role, .copy-event-role {
+    padding: 5px 5px 5px 10px;
+}
+.vertical-timeline-icon {
+    border: unset;
+    border-radius: unset;
+}
+.vertical-timeline-content::before {
+    content: unset;
+}
+.vertical-timeline-content {
+    background-color: #ffffff !important;
+    border-radius: 10px;
+    border: 1px solid #DCE0E7;
+}
+.team-members img.img-circle.img-very-small {
+    width: 37px;
+    height: 37px;
+    margin: 0;
+}
+.cols {
+    float: left;
+    margin: 26px 0;
+}
+h2 .team-members {
+}
+.col_s {
+    float: left;
+    width: 35px;
+    min-height: 10px;
+    margin-top: 5px;
+}
+.badge.confirm-bagde {
+    right: -5px;
+    bottom: -12px;
+}
+.badge.status-bagde {
+    left: -5px;
+}
+.panel > .systems {
+    padding: 5px;
+    justify-content: center;
+    font-size: 14px;
+}
+.col-md-12 > .panel > .panel-body {
+    border: 1px solid #DCE0E7 !important;
+    border-radius: 10px !important;
+    margin: 5px 0 0 0;
+    font-size: 12px;
+    color: #233153;
+    font-family: Lato;
+    padding: 20px 10px !important;
+}
+.circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #FFB613;
+    margin: 15px 5px;
+}
+.panel-body > .col-md-1 {
+    width: 25px;
+    margin: 0;
+    padding: 0;
+}
+.col-md-11 span {
+    color: #8D929B;
+}
+#vertical-timeline2 .vertical-timeline-content {
+    margin: 0 0 5px 0;
+    padding: 0;
+}
+.assign-user {
+    margin: 15px 5px;
+}
+.irs-from, .irs-to, .irs-single {
+    background: #43b7d6;
+}
+.irs-from::after, .irs-to::after, .irs-single::after {
+    border-top-color: #43b7d6;
+}
+.irs-line-mid, .irs-line-left, .irs-line-right, .irs-diapason, .irs-slider {
+//    background: url("/admin/site/img/new_desktop/sprite-skin-flat.png") repeat-x;
+    background-color: rgba(0, 0, 0, 0);
+    background-position-x: 0%;
+    background-position-y: none;
+    background-repeat: repeat-x;
+    background-attachment: scroll;
+    background-image: url("/admin/site/img/new_desktop/sprite-skin-flat.png");
+    background-size: auto;
+    background-origin: padding-box;
+    background-clip: border-box;
+}
+table { 
+    border-spacing: 0 5px;
+    border-collapse: initial; 
+}
+#tablehistories> tbody > tr > td:first-child {
+    border-left: 1px solid #DCE0E7;
+}
+#tablehistories > tbody > tr > td:last-child {
+    border-right: 1px solid #DCE0E7;
+}
+#tablehistories > tbody > tr:last-child > td {
+    border-bottom: 1px solid #DCE0E7;
+}
+.down-active, .up-active {
+    width: 50px;
+    margin: 15px 0;
+}
+.title-schedule {
+    font-size: 12px;
+    margin: 0 5px;
+}
+.send-reminders-toggle-wrap {
+    display: flex;
+    align-items: center;
+    margin-left: 4px;
+    gap: 0px;
+    min-height: 32px;
+}
+.send-reminders-toggle-wrap form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+.send-reminders-switch-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+.send-reminders-switch {
+    position: relative;
+    display: inline-flex;
+    width: 26px;
+    height: 15px;
+    margin: 0;
+    cursor: pointer;
+}
+.send-reminders-switch-slider {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border-radius: 999px;
+    background: #c6ced6;
+    transition: background-color .18s ease, box-shadow .18s ease;
+}
+.send-reminders-switch-slider::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.22);
+    transition: transform .18s ease;
+}
+#sendreminderscheckbox:checked + .send-reminders-switch .send-reminders-switch-slider {
+    background: #2196f3;
+}
+#sendreminderscheckbox:checked + .send-reminders-switch .send-reminders-switch-slider::before {
+    transform: translateX(11px);
+}
+#sendreminderscheckbox:focus + .send-reminders-switch .send-reminders-switch-slider {
+    box-shadow: 0 0 0 1px rgba(33, 150, 243, .18);
+}
+.send-reminders-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    color: #475569;
+    max-width: 80px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.12;
+    white-space: normal;
+    margin-left: 2px;
+}
+.send-reminders-info.cf-icon-info {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    margin-left: 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    color: #64748b;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: help;
+}
+.send-reminders-info.cf-icon-info:hover,
+.send-reminders-info.cf-icon-info:focus {
+    color: #43B7D6;
+    background: transparent;
+    outline: 0;
+}
+.send-reminders-info::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    z-index: 10000;
+    width: max-content;
+    max-width: 260px;
+    padding: 7px 9px;
+    border-radius: 6px;
+    background: #111827;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: center;
+    white-space: normal;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, 4px);
+    transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    pointer-events: none;
+}
+.send-reminders-info::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 3px);
+    border-width: 5px 5px 0;
+    border-style: solid;
+    border-color: #111827 transparent transparent;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%);
+    transition: opacity .15s ease, visibility .15s ease;
+}
+.send-reminders-info:hover::after,
+.send-reminders-info:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+.send-reminders-info::after,
+.send-reminders-info::before {
+    display: none;
+}
+.send-reminders-floating-tooltip {
+    position: fixed;
+    z-index: 100000;
+    max-width: 280px;
+    padding: 7px 9px;
+    border-radius: 6px;
+    background: #111827;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    pointer-events: none;
+}
+.send-reminders-floating-tooltip.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.dark-mode .send-reminders-toggle-label {
+    color: var(--dark-text);
+}
+.dark-mode .send-reminders-info.cf-icon-info {
+    color: var(--dark-text);
+    background: transparent;
+}
+.dark-mode .send-reminders-info.cf-icon-info:hover,
+.dark-mode .send-reminders-info.cf-icon-info:focus {
+    color: #43B7D6;
+}
+.send-reminders-toggle-wrap .help-block {
+    display: none;
+}
+.form-vertical {
+    padding: 0 0;
+}
+.long {
+    width: 95% !important;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    height: auto !important;
+    min-height: 38px !important;
+    max-height: 78px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 3px 28px 3px 6px !important;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple .select2-selection__rendered {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+    min-height: 32px;
+    flex: 0 1 auto;
+    width: auto;
+    margin: 0;
+    list-style: none;
+    padding: 0 !important;
+    overflow: visible;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple .select2-selection__rendered:empty {
+    display: none !important;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple .select2-selection__rendered:not(:has(.select2-selection__choice)) {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    flex: 0 0 0 !important;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple .select2-selection__choice {
+    display: inline-flex;
+    align-items: center;
+    float: none !important;
+    max-width: calc(100% - 128px);
+    margin: 2px 4px 2px 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple .select2-search--inline {
+    display: flex;
+    float: none !important;
+    flex: 1 1 180px;
+    min-width: 180px;
+    margin: 2px 0 !important;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple .select2-selection__rendered:empty + .select2-search--inline {
+    flex-basis: 100%;
+    min-width: 100%;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple .select2-selection__rendered:not(:has(.select2-selection__choice)) + .select2-search--inline {
+    flex: 1 1 100%;
+    min-width: 100%;
+}
+.crew-user-filter-select .select2-container--krajee-bs3 .select2-selection--multiple .select2-search--inline .select2-search__field {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 28px !important;
+    margin: 0 !important;
+    padding: 4px 2px !important;
+    line-height: 20px;
+}
+.image-circles-table {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+.search-field {
+    border-radius: 5px;
+    width: 330px;
+    border: 1px solid #dddddd;
+    padding: 0 0 0 25px;
+    height: 30px;
+}
+
+table { 
+    border-spacing: 0 5px;
+    border-collapse: initial; 
+}
+.table-bordered > tbody > tr > td:first-child {
+    border-left: 1px solid #DCE0E7 !important;
+}
+.table-bordered > tbody > tr > td:last-child {
+    border-right: 1px solid #DCE0E7 !important;
+}
+
+#crew-manage-grid-filters td {
+    border-right: none;
+    border-left: none;
+    border-top: none;
+    border-bottom: none;
+}
+.table-bordered > tbody > tr > td {
+    padding: 0 !important;
+    border-top: 1px solid #DCE0E7;
+    border-bottom: 1px solid #DCE0E7 !important;
+}
+#crew-manage-grid-filters td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+#crew-manage-grid-filters td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.table-striped > tbody > tr:nth-of-type(2n+1) {
+    background-color: #ffffff !important;
+}
+
+.table-bordered > thead > tr > th, .table-bordered > thead > tr > td {
+    background-color: #ffffff !important;
+}
+
+#tablehistories > thead > tr > th, 
+#extra-user-table > thead > tr > th, 
+#tablehistories > tbody > tr > th, 
+#extra-user-table > tbody > tr > th, 
+#tablehistories > tfoot > tr > th, 
+#extra-user-table > tfoot > tr > th, 
+#tablehistories > thead > tr > td, 
+#extra-user-table > thead > tr > td, 
+#tablehistories > tbody > tr > td, 
+#extra-user-table > tbody > tr > td, 
+#tablehistories > tfoot > tr > td,
+#extra-user-table > tfoot > tr > td {
+    padding: 0 !important;
+}
+
+.table-dialog {
+    width: 350px;
+//    height: 250px;
+    background-color: #ffffff;
+//    border: 1px solid #555555;
+    border-radius: 5px;
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000; 
+  padding: 15px;
+}
+</style>
+<script>window.s2options_3267a624 = {"themeCss":".select2-container--krajee-bs3","sizeCss":"","doReset":true,"doToggle":false,"doOrder":false};
+window.select2_d331b1a2 = {"tags":false,"allowClear":false,"minimumInputLength":1,"ajax":{"url":"\/admin\/crew\/user-select","dataType":"json","delay":250,"data":function(params) { return {q: params.term || ""}; },"processResults":function(data) { return data; }},"theme":"krajee-bs3","width":"100%","placeholder":"wybierz pracownika","language":"pl"};
+
+window.s2options_669e5a8e = {"themeCss":".select2-container--krajee-bs3","sizeCss":"","doReset":true,"doToggle":true,"doOrder":false};
+window.select2_e695fbc9 = {"allowClear":true,"theme":"krajee-bs3","width":"100%","placeholder":"Wyszukaj","language":"pl"};
+
+window.select2_08704d72 = {"allowClear":true,"theme":"krajee-bs3","width":"100%","placeholder":"Użytkownicy...","language":"pl"};
+</script></head><body><div class="panel-body" data-tab-locked="0" id="crew-tab-content">
+<div class="cf-sticky-panel">
+<!--            <div class="row" style="margin-bottom: 10px;">-->
+<!--                <div class="col-md-7">--><!-- -->
+<!--</div>-->
+<!--                <div class="col-md-5"></div>-->
+<!--            </div>-->
+<div class="row">
+<div class="col-md-8 d-flex">
+<a class="btn add-green small-btn assign-user" href="/admin/crew/manage-ajax?id=241" style="margin:0;"><div class="add-green-circle"></div>Dodaj ekipę</a> <a class="btn small-btn m-0-5 btn-pink add-green add-crew-offer-modal" href="/admin/event/add-crew-offer-modal?id=241"><div class="add-green-circle"></div>Dodaj zapotrzebowanie</a> <a class="btn small-btn systems btn-purple send-reminders" href="/admin/site/send-reminders-event?id=241"><div class="icon-send"></div>Wyślij powiadomienia do ekipy teraz</a> <div class="send-reminders-toggle-wrap">
+<form action="/admin/event/crew-tab?id=241" class="form-vertical kv-form-bs3" id="w0" method="post" role="form">
+<input name="_csrf" type="hidden" value="K0ePxtpq-FoX_B5_mErspii3-S4-8HRoF2B87xwukotzc9qunlrKF3WFL0rtKLj8RPW0R1a4MiJFUTDdSBb_5g=="/> <input name="Event[send_reminders]" type="hidden" value="0"/><input checked="" class="send-reminders-switch-input" id="sendreminderscheckbox" name="Event[send_reminders]" type="checkbox" value="1"/> <label aria-label="Automatyczne powiadomienia" class="send-reminders-switch" for="sendreminderscheckbox">
+<span class="send-reminders-switch-slider"></span>
+</label>
+</form> <span class="send-reminders-toggle-label">Automatyczne powiadomienia</span>
+<button aria-label="Automatyczne wysyłanie powiadomień do ekipy" class="cf-icon-info send-reminders-info" data-tooltip="Automatyczne wysyłanie powiadomień do ekipy" type="button">
+<i class="fa fa-info-circle"></i>
+</button>
+</div>
+</div>
+<div class="col-md-4 d-flex justify-content-end">
+<a class="btn purple small-btn btn-pink copy-modal-crew m-0-5" href="/admin/event/copy-from?id=241&amp;type=crew"><div class="icon-copy"></div>Skopiuj ekipę z innego wydarzenia</a><a class="btn add-green small-btn add-schedule2" href="/admin/event/add-schedule?id=241"><div class="add-green-circle"></div>Dodaj etap harmonogramu</a>
+</div>
+</div>
+<div class="row d-flex" style="margin-left:0; margin-right:0; margin-top:5px;">
+<div style="align-items: center; width: 330px">
+<div class="fast-add" style="     width: 325px;
+
+
+    ">
+<span style="margin-left:10px; margin-right:0px">Szybkie dodawanie:</span><form action="/admin/event/crew-tab?id=241" class="offer-new-gear-form form-vertical kv-form-bs3" id="w1" method="post" style="padding:0 0 0 0;">
+<input name="_csrf" type="hidden" value="K0ePxtpq-FoX_B5_mErspii3-S4-8HRoF2B87xwukotzc9qunlrKF3WFL0rtKLj8RPW0R1a4MiJFUTDdSBb_5g=="/><div class="form-group highlight-addon field-add-event-user required">
+<div class="kv-plugin-loading loading-add-event-user"> </div><select aria-required="true" class="add-event-user form-control" data-krajee-select2="select2_d331b1a2" data-s2-options="s2options_3267a624" id="add-event-user" name="EventUser[user_id]" style="width: 100%; height: 1px; visibility: hidden;">
+<option value="">wybierz pracownika</option>
+</select>
+<div class="help-block help-block-error"></div>
+</div></form>
+</div>
+</div>
+<div class="crew-user-filter-select" style="min-width: 300px; ">
+<span id="parent-s2-togall-6a80c1e0b3239" style="display:none"><span class="s2-togall-button s2-togall-select" id="s2-togall-6a80c1e0b3239"><span class="s2-select-label"><i class="glyphicon glyphicon-unchecked"></i>Zaznacz wszystkie</span><span class="s2-unselect-label"><i class="glyphicon glyphicon-check"></i>Odznacz wszystkie</span></span></span><div class="kv-plugin-loading loading-6a80c1e0b3239"> </div><select allowclear="" class="form-control" data-krajee-select2="select2_e695fbc9" data-s2-options="s2options_669e5a8e" id="6a80c1e0b3239" multiple="" name="user-select2[]" size="4" style="width: 100%; height: 1px; visibility: hidden;">
+</select> </div>
+<div class="col-md-3" id="total-highlighted" style="padding-top:0">
+<div class="header-right">
+<div class="btn btn-sm btn-white d-flex video-button" data-video-link="planowanie" style="">
+<div class="youtube-video-green"></div>
+                            Zobacz jak działa planowanie                        </div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="videoModalLabel" class="modal fade" id="videoModal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="videoModalLabel">Video</h5>
+<button aria-label="Close" class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body">
+<div class="embed-responsive embed-responsive-16by9">
+<iframe allowfullscreen="" class="embed-responsive-item" id="videoIframe" src=""></iframe>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" style="margin: 15px 0 0 0">
+<div class="redblock p-5">
+<span>Dodaj komentarz<span class="info-white" title="Tylko jeden komentarz dla jednego użytkownika. Jeśli w grupie, komentarz nadpisze się dla tego użytkownika"></span></span>
+<div class="add-green-circle edit-cooment-users" data-comment="" data-user-id="" style="position: absolute; top: 8px; left: 13px; cursor: pointer"></div>
+<div class="comment-box" id="comment-box">
+<div class="row" style="color: #555555; margin: 0 0 15px 0;">
+<span>Dodaj komentarz</span>
+<i class="glyphicon glyphicon-remove close-box" style="position: absolute;right: 10px;top: 10px;"></i>
+</div>
+<div class="row" style="margin: 0 0 10px 0;">
+</div>
+<div class="row" style="margin: 0 0 10px 0;">
+<textarea class="form-control1" id="comment-event-user" rows="6" style="border-radius: 5px; border: 1px solid #bbbbbb; width: 100%; color: #000000"></textarea>
+</div>
+<div class="row np-nm justify-content-center d-flex">
+<div class="btn small-btn systems" id="button-event-user" style="width: 62px;font-size: 12px;">Zapisz                        </div>
+</div>
+</div>
+</div>
+<div class="row mt-5 border for-comment">
+</div>
+</div>
+<div class="row mt-30">
+<div class="col-md-12">
+<div class="vertical-container dark-timeline" id="vertical-timeline2" style="width:100%; max-width:100%;">
+<div class="vertical-timeline-block" id="scheduleRow439">
+<div class="vertical-timeline-icon" style="left:370px;">
+<div class="callendar"></div>
+</div>
+<span class="vertical-date">
+<h3 class="system-fonts" style="font-size: 14px; font-weight: 900; margin: 0 0 10px 0;">Event                                            
+                                        </h3>
+<div class="row np-nm d-flex" style="margin-bottom: 10px">
+<div class="col-md np-nm">
+<span class="time" style="display: block;">Od: 2026.09.13 00:00</span>
+<span class="time" style="display: block; margin-bottom: 5px">Do: 2026-09-17 - 23:59</span>
+</div>
+<div class="col-md np-nm">
+<div class="row np-nm d-flex">
+<div class="col-md np-nm">
+<span class="user-icone" style="margin: 0 10px;"></span>
+</div>
+<div class="col-md np-nm" style="display: flex;flex-direction: column;margin: -6px 0;">
+<span>Zapotrzebowanie: 0 os.</span>
+<span>Dodanych: 0 os.</span>
+</div>
+</div>
+</div>
+<div class="col-md np-nm" style="margin:-6px 0;">
+<div class="row d-flex crew-schedule-actions-row">
+<div class="crew-schedule-actions">
+<button aria-expanded="false" aria-label="Akcje" class="cf-btn-row-more crew-schedule-actions-trigger" type="button">
+<i class="icon-ellipsis"></i>
+</button>
+<div class="event-actions-menu crew-schedule-actions-menu" style="display:none;">
+<a class="event-actions-item add-crew-offer-modal" href="/admin/event/add-crew-offer-modal?id=241">Dodaj zapotrzebowanie</a> <a class="event-actions-item copy-event-role" href="/admin/crew/copy-event-role?id=241&amp;schedule=Event">Skopiuj zapotrzebowanie</a> <button class="event-actions-item crew-schedule-chat-action" data-schedule-id="439" type="button">
+                                                        Chat                                                    </button>
+<button class="event-actions-item crew-schedule-message-action" data-schedule-id="439" type="button">
+                                                        Wiadomość                                                    </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</span>
+<div class="vertical-timeline-content" style="margin-left:410px; min-height:70px; padding: 3px;">
+<div class="col_s">
+<a class="assign-user" data-role-id="" data-time_type="1" href="/admin/crew/manage-ajax?id=241&amp;role_id=&amp;schedule=Event" style="position:relative;">
+<div class="green-add"></div>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!--        <div style="clear:both"></div>-->
+<div class="row np-nm" style="margin-top:50px">
+<div class="row d-flex np-nm mb-5" style="position: relative">
+<div style="margin-right: 10px; width: 250px">
+<span id="parent-s2-togall-6a80c1e0b357c" style="display:none"><span class="s2-togall-button s2-togall-select" id="s2-togall-6a80c1e0b357c"><span class="s2-select-label"><i class="glyphicon glyphicon-unchecked"></i>Zaznacz wszystkie</span><span class="s2-unselect-label"><i class="glyphicon glyphicon-check"></i>Odznacz wszystkie</span></span></span><div class="kv-plugin-loading loading-6a80c1e0b357c"> </div><select allowclear="" class="form-control" data-krajee-select2="select2_08704d72" data-s2-options="s2options_669e5a8e" id="6a80c1e0b357c" multiple="" name="user-select[]" size="4" style="width: 100%; height: 1px; visibility: hidden;">
+</select> <!--                    <div class="to-search" style="margin: 5px 0 0 3px;position: absolute;"></div>-->
+<!--                    <input type="text" class="search-field" id="searchInput">-->
+<!--                    <div class="to-remove" style="margin: 0 0 -5px -25px;"></div>-->
+</div>
+<div style="margin-right: 10px">
+<select class="form-control" id="user-filter" name="filter-user">
+<option value="1">Widok bez podziału na etapy</option>
+<option value="2">Widok z podziałem na etapy</option>
+</select>
+</div>
+<div class="btn btn-sm btn-white" id="add-to-comment" style="margin-right: 10px; height: 29px"><span class="to-comment"></span>Dodaj komentarz                    </div>
+<div class="comment-box" id="comment-box-without" style="display: none;">
+<div class="row" style="color: #555555; margin: 0 0 15px 0; height: 29px">
+                            Dodaj komentarz                        </div>
+<div class="row" style="margin: 0 0 10px 0; height: 29px">
+<textarea class="form-control1" id="comment-event-user-without" rows="6" style="border-radius: 5px; border: 1px solid #bbbbbb; width: 100%; color: #000000"></textarea>
+</div>
+<div class="row np-nm justify-content-center d-flex">
+<div class="btn small-btn systems" id="button-event-user-without" style="width: 62px;font-size: 12px;">Zapisz                            </div>
+</div>
+</div>
+<div class="btn btn-sm btn-white export-excel" style="margin-right: 10px; height: 29px">
+<span class="to-excel"></span> Exportuj                    </div>
+<div class="btn btn-sm btn-white add-owner" onclick="addOwnerUser(241)" style="margin-right: 10px; height: 29px">
+                        Dodaj/Edytuj pracowników spoza systemu                    </div>
+</div>
+<div id="user-tables">
+<div class="row np-nm" id="first-table">
+<table class="kv-grid-table table table-condensed kv-table-wrap table-striped sort-user" id="tablehistories" style="border-spacing: 0 5px !important;border-collapse: initial;">
+<thead>
+<tr>
+<th class="xs-column">
+<input id="check-allin-first-table" type="checkbox"/>
+</th>
+<th class="xs-column">#</th>
+<th></th>
+<th>Nazwisko</th>
+<th>Imię</th>
+<th>Telefon</th>
+<th>Adres e-mail</th>
+<th>Rola na evencie</th>
+<th class="lg-column">Czas pracy</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<!-- --></div>
+<div class="row np-nm" id="second-table" style="display: none">
+<table class="kv-grid-table table table-condensed kv-table-wrap table-striped sort-user" style="border-spacing: 0 5px !important;border-collapse: initial;">
+<thead>
+<tr>
+<th><input id="all-etap" type="checkbox"/></th>
+<th></th>
+<th></th>
+<th>Nazwisko</th>
+<th>Imię</th>
+<th>Telefon</th>
+<th>Adres e-mail</th>
+<th>Rola na evencie</th>
+<th>Czas pracy</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+<div class="modal fade" id="addCommentModal" role="dialog" tabindex="-1">
+<div class="modal-dialog" role="document">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">×</button>
+<h4 class="modal-title">Dodaj komentarz</h4>
+</div>
+<div class="modal-body">
+<div class="form-group">
+<label for="comment-text">komentarz</label>
+<textarea class="form-control" id="comment-text" rows="4"></textarea>
+</div>
+<div class="alert alert-danger" id="comment-error" style="display:none;"></div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-default" data-dismiss="modal" type="button">
+                    Zamknij                </button>
+<button class="btn btn-success" id="submit-comment" type="button">
+                    Zapisz                </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+    var $addToCommentBtn = $('#add-to-comment');
+    if ($addToCommentBtn.length) {
+        $addToCommentBtn.off('click');
+    }
+
+    $(document)
+        .off('click.addCommentModal', '#add-to-comment')
+        .on('click.addCommentModal', '#add-to-comment', function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        var users = [];
+
+        $('.selected-users:checked').each(function () {
+            users.push($(this).val());
+        });
+
+        if (users.length === 0) {
+            toastr.error('Nie wybrano żadnych użytkowników')
+            return;
+        }
+
+        $('#comment-text').val('');
+        $('#comment-error').hide();
+        $('#addCommentModal').modal('show');
+    });
+
+
+    $(document).on('click', '#submit-comment', function () {
+
+        var users = [];
+        $('.selected-users:checked').each(function () {
+            users.push($(this).val());
+        });
+
+        var comment = $('#comment-text').val().trim();
+
+        if (comment.length === 0) {
+            $('#comment-error').text('Komentarz nie może być pusty').show();
+            return;
+        }
+
+        $.ajax({
+            url: '/admin/user/add-comment',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                users: users,
+                comment: comment,
+                _csrf: yii.getCsrfToken()
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#addCommentModal').modal('hide');
+                    toastr.success('Komentarz dodany')
+                } else {
+                    $('#comment-error').text(response.message).show();
+                }
+            },
+            error: function () {
+                $('#comment-error').text('Błąd serwera').show();
+            }
+        });
+    });
+
+</script>
+</div>
+<div class="table-dialog" style="display: none">
+<div class="row np-nm" style="color: #101010; font-weight: 700; margin-bottom: 15px">
+                    Zaznaczonych: <span id="count-users">0</span>
+<span id="hide-modal" style="position: absolute;right: 15px; cursor: pointer">X</span>
+</div>
+<div class="row np-nm d-flex" style="margin-bottom: 15px">
+<div class="col-md-9 np-nm">
+<textarea class="form-control" cols="30" id="user-comment" name="comment" placeholder="Komentarz" rows="3"></textarea>
+</div>
+<div class="col-md-3 np-nm" style="display: flex;justify-content: center;margin: auto;">
+<div class="btn btn-sm btn-green" id="send-comment-user">
+                                Zapisz                            </div>
+</div>
+</div>
+<div class="row np-nm d-flex" style="margin-bottom: 15px">
+<div class="btn btn-sm btn-white d-flex" onclick="openChatGroup()" style="margin-right: 10px"><span class="user-chat-icone"></span>Rozpocznij chat                    </div>
+<div class="btn btn-sm btn-white d-flex send-message-modal" style="margin-right: 10px;position: absolute;right: 10px;">
+<span class="user-send-icone"></span>Wyślij wiadomość                    </div>
+</div>
+<div class="row np-nm d-flex" style="justify-content: center; margin-bottom: 15px; height: 29px;">
+<span class="btn btn-sm btn-white export-excel" style="left: 15px;position: absolute;"><span class="to-excel"></span>Exportuj</span>
+<span class="btn btn-sm btn-white" onclick="calendars()" style="right: 15px;position: absolute;">
+<span class="call-icone" style="margin: -5px 5px -5px 0;"></span>
+                        Kal. dostępności                    </span>
+</div>
+<div class="row np-nm d-flex" style="justify-content: center; margin-bottom: 15px; height: 29px;">
+<span class="btn btn-sm btn-white" onclick="loadFilterCalendar('/admin/crew/manage-ajax?id=241')"><span class="call-user" style="margin: -5px 5px -5px 0;"></span> Planuj</span>
+</div>
+<div class="row np-nm d-flex" style="margin-bottom: 15px">
+<div class="btn btn-sm delete-items-plan" style="background-color: #BD3124; color: #ffffff; width: 100%; position: relative">
+<span class="clear-box-white" style="position: absolute; left: 5px"></span>Usuń zaznaczone                    </div>
+</div>
+</div>
+</div>
+</div>
+<input class="d-none" id="for-users-notification" type="text"/>
+<script>
+
+        var userIds = [];
+
+        function newVal(ids) {
+            userIds = Array.isArray(ids) ? ids : (ids ? [ids] : []);
+        }
+
+        function reloadScheduleRow(id) {
+            $("#scheduleRow" + id).load('/admin/crew/load-schedule-row?event=241&id=' + id);
+        }
+
+        function reloadCrewTab() {
+            $("#tab-crew").empty();
+            $("#tab-crew").load("/admin/event/crew-tab?id=241");
+        }
+
+        function loadUserTables() {
+            $("#user-tables").load('/admin/crew/load-table-user?id=241');
+        }
+
+
+        function calendars() {
+            var start = '2026-09-13 00:00:00';
+            var end = '2026-09-17 23:59:00';
+
+            var startFormatted = formatDate(start);
+            var endFormatted = formatDate(end);
+            var usersString = userss.join(',');
+
+            if (userss.length > 0) {
+                window.open(`/admin/crew/calendar-users?ids=${usersString}&start=${startFormatted}&end=${endFormatted}`)
+            }
+        }
+
+        function formatDate(dateStr) {
+            var date = new Date(dateStr);
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            return day + '-' + month + '-' + year;
+        }
+
+        function loadFilterCalendar(link) {
+            var usersString = userss.join(',');
+            loadCalendar(link + '&ids=' + usersString)
+        }
+
+        function loadCalendar(link) {
+            if (window.localStorage) {
+                var crewDraftSuffix = '-241';
+                for (var i = localStorage.length - 1; i >= 0; i--) {
+                    var key = localStorage.key(i);
+                    if (key && key.indexOf('crew-drafts-') === 0 && key.slice(-crewDraftSuffix.length) === crewDraftSuffix) {
+                        localStorage.removeItem(key);
+                    }
+                }
+            }
+            var modal = $("#ekipa_modal");
+            var modalContent = modal.find(".modalContent");
+            modalContent.html("");
+            modalContent.load(link, function () {
+                var modalHeader = $("#ekipa_modal .modal-header");
+                modalHeader.html(
+                    //"Dodajesz Ekipe do Eventu: // <button type=\"button\" class=\"btn btn-sm btn-green close-btn\" style=\"float: right\" aria-label=\"Close\"><span aria-hidden=\"true\">Zamknij</span></button>"
+                );
+                $(".close-btn").on("click", function () {
+                    modal.modal("hide");
+                });
+            });
+            modal.modal("show");
+            clearCrew();
+        }
+
+        function filterTable(ids) {
+            var table;
+            ids = ids.map(Number);
+            if ($('#first-table').is(':visible')) {
+                table = $('#first-table table tbody tr');
+            } else {
+                table = $('#second-table table tbody tr');
+            }
+
+            table.each(function () {
+                if (ids.length > 0) {
+                    var userId = $(this).data('user');
+
+                    if (ids.includes(userId)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                } else {
+                    $(this).show();
+                }
+            });
+        }
+
+        function addOwnerUser(id) {
+            var modal = $("#new-modal");
+            var dialog = modal.find(".modal-dialog");
+            var link = `/admin/event/add-owner?event=${id}`
+            modal.find('.modalContent').empty().html(loaderHtml);
+            dialog.animate({
+                width: 880
+            }, 500);
+
+            dialog.promise().done(function () {
+                modal.modal("show").find(".modalContent").empty().load(link);
+            });
+        }
+
+        function openChatShdeule(id) {
+            var modal = $("#new-modal");
+            var dialog = modal.find(".modal-dialog");
+            var link = `/admin/chat/modal-chat?schedule=${id}`
+            modal.find('.modalContent').empty().html(loaderHtml);
+            dialog.animate({
+                width: 540
+            }, 500);
+
+            dialog.promise().done(function () {
+                modal.modal("show").find(".modalContent").empty().load(link);
+            });
+        }
+
+        function openChatGroup() {
+            var modal = $("#new-modal");
+            var dialog = modal.find(".modal-dialog");
+            var link = `/admin/chat/modal-group`;
+
+            // $('#ekipa_modal').css('opacity', '0.1')
+            modal.find('.modalContent').empty().html(loaderHtml);
+            dialog.animate({
+                width: 540
+            }, 500);
+
+            dialog.promise().done(function () {
+                $.post(link, {ids: userss})
+                    .done(function (response) {
+                        modal.modal("show").find(".modalContent").empty().html(response);
+                        clearCrew();
+                    })
+                    .fail(function () {
+                        modal.find('.modalContent').empty().html(loaderHtml);
+                    });
+            });
+
+        }
+
+        function openMessageGroup(id) {
+            var modal = $("#new-modal");
+            var dialog = modal.find(".modal-dialog");
+            var link = `/admin/event-message/modal-group?event=${id}`;
+
+            modal.find('.modalContent').empty().html(loaderHtml);
+            dialog.animate({
+                width: 540
+            }, 500);
+
+            dialog.promise().done(function () {
+                $.post(link, {ids: userss})
+                    .done(function (response) {
+                        modal.modal("show").find(".modalContent").empty().html(response);
+                        clearCrew();
+                    })
+                    .fail(function () {
+                        modal.find('.modalContent').empty().html(loaderHtml);
+                    });
+            });
+        }
+
+
+        function openMessageModal(id) {
+            var modal = $("#new-modal");
+            var dialog = modal.find(".modal-dialog");
+            var link = `/admin/event-message/modal-message?schedule=${id}`
+            modal.find('.modalContent').empty().html(loaderHtml);
+            dialog.animate({
+                width: 540
+            }, 500);
+
+            dialog.promise().done(function () {
+                modal.modal("show").find(".modalContent").empty().load(link);
+            });
+        }
+
+        $(document).on('click', '.edit-cooment-users', function () {
+            // console.log('okokok')
+            $('#comment-event-user').val($(this).attr('data-comment'));
+            var dataUsers = $(this).attr('data-user-id');
+            var usersArray = dataUsers.split(',');
+            $('#select-event-users').val(usersArray).trigger('change');
+            $('#comment-box').css('display', 'block');
+        })
+
+        $(document).ready(function () {
+            var addCommentButton = $('#add-comment-plus');
+            var commentBox = $('#comment-box');
+
+            addCommentButton.on('click', function () {
+                if (commentBox.css('display') === 'block') {
+                    commentBox.css('display', 'none');
+                } else {
+                    commentBox.css('display', 'block');
+                }
+            });
+        });
+
+        $('#button-event-user').on('click', function () {
+            var selectedUsers = $('#select-event-users').val();
+            if (!Array.isArray(selectedUsers)) {
+                selectedUsers = selectedUsers ? [selectedUsers] : [];
+            }
+            var comment = $('#comment-event-user').val() || '';
+            if (selectedUsers.length === 0) {
+                toastr.warning('Wybierz przynajmniej jednego pracownika.');
+                return;
+            }
+
+            $('#comment-box').css('display', 'none');
+            var data = {
+                users: selectedUsers,
+                comment: comment
+            };
+            sendComment(data, comment, selectedUsers)
+                //$.ajax({
+                //    url: '/admin/user/set-comment?event=' + //,
+                //    method: 'POST',
+                //    data: data,
+                //    success: function (response) {
+                //        $('#select-event-users').val('')
+                //        $('#comment-event-user').val('')
+                //        $('#comment-box').css('display', 'none');
+                //        createCommentBlock(response, comment, userIds)
+                //        //$("#tab-crew").empty().load("////");
+                //    },
+                //    error: function (xhr, status, error) {
+                //        console.error('Ошибка: ' + error);
+                //    }
+                //});
+        })
+
+        function sendComment(data, comment, selectedUsers) {
+            var usersForComment = Array.isArray(selectedUsers) ? selectedUsers : (Array.isArray(data.users) ? data.users : []);
+            $.ajax({
+                url: '/admin/user/set-comment?event=' + 241,
+                method: 'POST',
+                data: data,
+                success: function (response) {
+                    $('#select-event-users').val(null).trigger('change')
+                    $('#comment-event-user').val('')
+                    $('#comment-box').css('display', 'none');
+                    $('#user-comment').val('');
+                    userIds = [];
+                    reloadCrewTab();
+                    //$("#tab-crew").empty().load("//");
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        }
+
+    </script>
+<script type="text/javascript">
+        var CrewChanged = false;
+        var VehicleChanged = false;
+        var values = [];
+                values[439] = ['2026-09-13 00:00', '2026-09-13 00:30', '2026-09-13 01:00', '2026-09-13 01:30', '2026-09-13 02:00', '2026-09-13 02:30', '2026-09-13 03:00', '2026-09-13 03:30', '2026-09-13 04:00', '2026-09-13 04:30', '2026-09-13 05:00', '2026-09-13 05:30', '2026-09-13 06:00', '2026-09-13 06:30', '2026-09-13 07:00', '2026-09-13 07:30', '2026-09-13 08:00', '2026-09-13 08:30', '2026-09-13 09:00', '2026-09-13 09:30', '2026-09-13 10:00', '2026-09-13 10:30', '2026-09-13 11:00', '2026-09-13 11:30', '2026-09-13 12:00', '2026-09-13 12:30', '2026-09-13 13:00', '2026-09-13 13:30', '2026-09-13 14:00', '2026-09-13 14:30', '2026-09-13 15:00', '2026-09-13 15:30', '2026-09-13 16:00', '2026-09-13 16:30', '2026-09-13 17:00', '2026-09-13 17:30', '2026-09-13 18:00', '2026-09-13 18:30', '2026-09-13 19:00', '2026-09-13 19:30', '2026-09-13 20:00', '2026-09-13 20:30', '2026-09-13 21:00', '2026-09-13 21:30', '2026-09-13 22:00', '2026-09-13 22:30', '2026-09-13 23:00', '2026-09-13 23:30', '2026-09-14 00:00', '2026-09-14 00:30', '2026-09-14 01:00', '2026-09-14 01:30', '2026-09-14 02:00', '2026-09-14 02:30', '2026-09-14 03:00', '2026-09-14 03:30', '2026-09-14 04:00', '2026-09-14 04:30', '2026-09-14 05:00', '2026-09-14 05:30', '2026-09-14 06:00', '2026-09-14 06:30', '2026-09-14 07:00', '2026-09-14 07:30', '2026-09-14 08:00', '2026-09-14 08:30', '2026-09-14 09:00', '2026-09-14 09:30', '2026-09-14 10:00', '2026-09-14 10:30', '2026-09-14 11:00', '2026-09-14 11:30', '2026-09-14 12:00', '2026-09-14 12:30', '2026-09-14 13:00', '2026-09-14 13:30', '2026-09-14 14:00', '2026-09-14 14:30', '2026-09-14 15:00', '2026-09-14 15:30', '2026-09-14 16:00', '2026-09-14 16:30', '2026-09-14 17:00', '2026-09-14 17:30', '2026-09-14 18:00', '2026-09-14 18:30', '2026-09-14 19:00', '2026-09-14 19:30', '2026-09-14 20:00', '2026-09-14 20:30', '2026-09-14 21:00', '2026-09-14 21:30', '2026-09-14 22:00', '2026-09-14 22:30', '2026-09-14 23:00', '2026-09-14 23:30', '2026-09-15 00:00', '2026-09-15 00:30', '2026-09-15 01:00', '2026-09-15 01:30', '2026-09-15 02:00', '2026-09-15 02:30', '2026-09-15 03:00', '2026-09-15 03:30', '2026-09-15 04:00', '2026-09-15 04:30', '2026-09-15 05:00', '2026-09-15 05:30', '2026-09-15 06:00', '2026-09-15 06:30', '2026-09-15 07:00', '2026-09-15 07:30', '2026-09-15 08:00', '2026-09-15 08:30', '2026-09-15 09:00', '2026-09-15 09:30', '2026-09-15 10:00', '2026-09-15 10:30', '2026-09-15 11:00', '2026-09-15 11:30', '2026-09-15 12:00', '2026-09-15 12:30', '2026-09-15 13:00', '2026-09-15 13:30', '2026-09-15 14:00', '2026-09-15 14:30', '2026-09-15 15:00', '2026-09-15 15:30', '2026-09-15 16:00', '2026-09-15 16:30', '2026-09-15 17:00', '2026-09-15 17:30', '2026-09-15 18:00', '2026-09-15 18:30', '2026-09-15 19:00', '2026-09-15 19:30', '2026-09-15 20:00', '2026-09-15 20:30', '2026-09-15 21:00', '2026-09-15 21:30', '2026-09-15 22:00', '2026-09-15 22:30', '2026-09-15 23:00', '2026-09-15 23:30', '2026-09-16 00:00', '2026-09-16 00:30', '2026-09-16 01:00', '2026-09-16 01:30', '2026-09-16 02:00', '2026-09-16 02:30', '2026-09-16 03:00', '2026-09-16 03:30', '2026-09-16 04:00', '2026-09-16 04:30', '2026-09-16 05:00', '2026-09-16 05:30', '2026-09-16 06:00', '2026-09-16 06:30', '2026-09-16 07:00', '2026-09-16 07:30', '2026-09-16 08:00', '2026-09-16 08:30', '2026-09-16 09:00', '2026-09-16 09:30', '2026-09-16 10:00', '2026-09-16 10:30', '2026-09-16 11:00', '2026-09-16 11:30', '2026-09-16 12:00', '2026-09-16 12:30', '2026-09-16 13:00', '2026-09-16 13:30', '2026-09-16 14:00', '2026-09-16 14:30', '2026-09-16 15:00', '2026-09-16 15:30', '2026-09-16 16:00', '2026-09-16 16:30', '2026-09-16 17:00', '2026-09-16 17:30', '2026-09-16 18:00', '2026-09-16 18:30', '2026-09-16 19:00', '2026-09-16 19:30', '2026-09-16 20:00', '2026-09-16 20:30', '2026-09-16 21:00', '2026-09-16 21:30', '2026-09-16 22:00', '2026-09-16 22:30', '2026-09-16 23:00', '2026-09-16 23:30', '2026-09-17 00:00', '2026-09-17 00:30', '2026-09-17 01:00', '2026-09-17 01:30', '2026-09-17 02:00', '2026-09-17 02:30', '2026-09-17 03:00', '2026-09-17 03:30', '2026-09-17 04:00', '2026-09-17 04:30', '2026-09-17 05:00', '2026-09-17 05:30', '2026-09-17 06:00', '2026-09-17 06:30', '2026-09-17 07:00', '2026-09-17 07:30', '2026-09-17 08:00', '2026-09-17 08:30', '2026-09-17 09:00', '2026-09-17 09:30', '2026-09-17 10:00', '2026-09-17 10:30', '2026-09-17 11:00', '2026-09-17 11:30', '2026-09-17 12:00', '2026-09-17 12:30', '2026-09-17 13:00', '2026-09-17 13:30', '2026-09-17 14:00', '2026-09-17 14:30', '2026-09-17 15:00', '2026-09-17 15:30', '2026-09-17 16:00', '2026-09-17 16:30', '2026-09-17 17:00', '2026-09-17 17:30', '2026-09-17 18:00', '2026-09-17 18:30', '2026-09-17 19:00', '2026-09-17 19:30', '2026-09-17 20:00', '2026-09-17 20:30', '2026-09-17 21:00', '2026-09-17 21:30', '2026-09-17 22:00', '2026-09-17 22:30', '2026-09-17 23:00', '2026-09-17 23:30', '2026-09-17 23:59' ];
+        
+        $(document).off('click', ".edit_user").on("click", ".edit_user", function (e) {
+            e.preventDefault();
+            var modal1 = $("#change-dates-evenet");
+            modal1.modal("show");
+            modal1.find(".modalContent").empty();
+            modal1.find(".modalContent").load("/admin/planboard/user-form?event_id=" + 241 + "&user_id=" + $(this).data("userid") + "&role=0&in_event=1");
+        });
+
+        $(document).off('click', '.remove-extra-user').on('click', '.remove-extra-user', function (e) {
+            e.preventDefault()
+            var link = $(this).attr('href')
+            var row = $(this).closest('tr')
+            crew = false;
+            $.ajax({
+                url: link,
+                type: 'GET',
+                success: function (response) {
+                    for (var i = 0; i < response.schedules.length; i++) {
+                        reloadScheduleRow(response.schedules[i]);
+                    }
+                    row.remove()
+                    // $(this).closest('tr').remove()
+                    toastr.success('Removed')
+                    //loadTabs('crew')
+                    message = false
+                },
+                error: function (e) {
+                    console.log(e)
+                }
+            })
+        })
+
+    </script>
+<script>
+        $(document).off('input', '#searchInput').on('input', '#searchInput', function () {
+            var input = $(this);
+            var table = document.getElementById("tablehistories");
+            var tbody = table.getElementsByTagName("tbody")[0];
+            var rows = tbody.getElementsByTagName("tr");
+            var searchText = input.val().toLowerCase();
+
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var cells = row.getElementsByTagName("td");
+                var match = false;
+
+                for (var j = 0; j < cells.length; j++) {
+                    var cell = cells[j];
+                    if (cell.textContent.toLowerCase().indexOf(searchText) !== -1) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+            ;
+        })
+
+        // var userss = [];
+        var plan = []
+
+        // var extra = []
+
+        function uniqueValues(values) {
+            var seen = {};
+            var result = [];
+
+            values.forEach(function (value) {
+                if (value === undefined || value === null || value === '') {
+                    return;
+                }
+
+                var key = String(value);
+                if (!seen[key]) {
+                    seen[key] = true;
+                    result.push(key);
+                }
+            });
+
+            return result;
+        }
+
+        function syncSelectedUsersState() {
+            var userIds = [];
+            var extraIds = [];
+            var planIds = [];
+
+            $('#user-tables input[type="checkbox"]:checked, #vertical-timeline2 input[type="checkbox"]:checked').each(function () {
+                var $checkbox = $(this);
+                var userId = $checkbox.data('user');
+                var extraUser = $checkbox.data('extra-user');
+                var dataPlan = $checkbox.data('plan');
+
+                if (userId !== undefined && userId !== null && userId !== '') {
+                    userIds.push(userId);
+                }
+
+                if (extraUser !== undefined && extraUser !== null && extraUser !== '') {
+                    extraIds.push(extraUser);
+                }
+
+                if (dataPlan !== undefined && dataPlan !== null && dataPlan !== '') {
+                    planIds.push(dataPlan);
+                }
+            });
+
+            userss = uniqueValues(userIds);
+            extra = uniqueValues(extraIds);
+            plan = uniqueValues(planIds);
+
+            $('#for-users-notification').val(userss.join(','));
+            updateSelectedUsersMenu();
+        }
+
+
+        $(document).off('click', '#send-comment-user').on('click', '#send-comment-user', function () {
+            var comment = $('#user-comment').val();
+            sendToServerComment(comment);
+            clearCrew();
+        })
+
+        $(document).off('click', '#button-event-user-without').on('click', '#button-event-user-without', function () {
+            var comment = $('#comment-event-user-without').val()
+            sendToServerComment(comment)
+            clearCrew();
+        })
+
+        function sendToServerComment(comment) {
+            if (userss.length > 0) {
+                var data = {
+                    users: userss,
+                    comment: comment
+                };
+                sendComment(data, comment)
+
+            }
+        }
+
+        function selectedUsers() {
+            syncSelectedUsersState();
+        }
+
+        $('#check-all').on('click', function () {
+            var isChecked = $(this).prop('checked');
+            $('input.selected-users').prop('checked', isChecked);
+            syncSelectedUsersState();
+        })
+
+        $('#add-to-comment').off('click.legacyInlineComment').on('click.legacyInlineComment', function (e) {
+            if ($('#addCommentModal').length) {
+                $('#comment-box-without').hide();
+                return;
+            }
+
+            var $commentBox = $('#comment-box-without');
+            if (userss.length > 0) {
+                if ($commentBox.is(':visible')) {
+                    $commentBox.hide();
+                } else {
+                    var buttonOffset = $('#add-to-comment').offset();
+                    var buttonWidth = $('#add-to-comment').outerWidth();
+                    var commentBoxWidth = $commentBox.outerWidth();
+                    var leftPosition = buttonOffset.left + buttonWidth - 200;
+                    var windowWidth = $(window).width();
+                    if (leftPosition + commentBoxWidth > windowWidth) {
+                        leftPosition = windowWidth - commentBoxWidth;
+                    }
+
+                    $commentBox.css({
+                        'position': 'absolute',
+                        'left': leftPosition + 'px',
+                        'display': 'block'
+                    });
+                }
+            }
+        })
+
+        $('#remove-users').on('click', function () {
+            selectedUsers();
+            if (userss.length > 0) {
+                swal({
+                    title: "Na pewno chcesz usunąć?",
+                    text: "Odpięcie pracownika spowoduje usunięcie его godzin pracy dla tego wydarzenia",
+                    icon: "info",
+                    buttons: {
+                        cancel: "Nie",
+                        yes: {
+                            text: "Tak",
+                            value: "yes",
+                        },
+                    },
+                }).then((value) => {
+                    switch (value) {
+                        case "yes":
+                            var data = {
+                                users: userss,
+                            };
+                            $.ajax({
+                                url: '/admin/crew/assign-users?id=' + 241,
+                                method: 'POST',
+                                data: data,
+                                success: function (response) {
+
+                                    for (i = 0; i < response.schedules.length; i++) {
+                                        reloadScheduleRow(response.schedules[i]);
+                                    }
+
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error('Error: ' + error);
+                                }
+                            });
+                            break;
+                    }
+                });
+            }
+        })
+
+
+    </script>
+<script>
+        $(document).off('change', '#user-filter').on('change', '#user-filter', function () {
+            clearCrew();
+            if ($(this).val() == 1) {
+                $('#first-table').show()
+                $('#second-table').hide()
+            } else {
+                $('#first-table').hide()
+                $('#second-table').show()
+            }
+        })
+
+        $(document).off('change', '#all-etap').on('change', '#all-etap', function () {
+            var isChecked = $(this).is(':checked');
+            $('.sort-user td input[type="checkbox"]').prop('checked', isChecked).trigger('change');
+        })
+
+        $(document).off('change', '#check-all').on('change', '#check-all', function () {
+            var isChecked = $(this).is(':checked');
+            $('.sort-user-first td input[type="checkbox"]').prop('checked', isChecked).trigger('change');
+            syncSelectedUsersState();
+        })
+
+        $(document).off('change', '#vertical-timeline2 input[type="checkbox"]').on('change', '#vertical-timeline2 input[type="checkbox"]', function () {
+            syncSelectedUsersState();
+            if (typeof showHide === 'function') {
+                showHide();
+            }
+        })
+
+
+        $(document).off('click', '#hide-modal').on('click', '#hide-modal', function () {
+            $('.table-dialog').hide()
+        })
+
+        //$(document).off('click', '.delete-items-plan').on('click', '.delete-items-plan', function () {
+        //
+        //    if (extra.length > 0) {
+        //        var req = extra.map(function (id) {
+        //            return $.post(`/admin/crew/remove-extra?id=${id}`);
+        //        });
+        //
+        //        Promise.all(req)
+        //            .then(function (responses) {
+        //
+        //                responses.forEach(function (response, index) {
+        //                    $('.sort-user tr[data-extra-user="' + extra[index] + '"]').remove()
+        //                });
+        //                for (var i=0; i<response.schedules.length; i++)
+        //                {
+        //                    reloadScheduleRow(response.schedules[i]);
+        //                }
+        //                clearCrew();
+        //                showHide();
+        //                toastr.success('Usunięto');
+        //            })
+        //            .catch(function (error) {
+        //                toastr.error('Nie usuniento')
+        //            });
+        //    }
+        //
+        //    if (plan.length > 0) {
+        //        var requests = plan.map(function (id) {
+        //            return $.post(`/admin/crew/assign-etap?id=${id}`);
+        //        });
+        //        Promise.all(requests)
+        //            .then(function (responses) {
+        //                toastr.success('Usunięto')
+        //                responses.forEach(function (response, index) {
+        //                    $('.sort-user tr[data-plan="' + plan[index] + '"]').remove();
+        //                    for (var i=0; i<response.schedules.length; i++)
+        //                    {
+        //                        reloadScheduleRow(response.schedules[i]);
+        //                    }
+        //
+        //                });
+        //                clearCrew();
+        //                showHide()
+        //            })
+        //            .catch(function (error) {
+        //                toastr.error('Nie usuniento')
+        //            });
+        //    }
+        //    if ((userss.length > 0)&&(plan.length==0)) {
+        //        var requests = userss.map(function (id) {
+        //            return $.post(`/admin/crew/assign-user?id=//`, {itemid:id, add:0});
+        //        });
+        //        Promise.all(requests)
+        //            .then(function (responses) {
+        //                toastr.success('Usunięto')
+        //                responses.forEach(function (response, index) {
+        //                    $('.sort-user tr[data-user="' + userss[index] + '"]').remove();
+        //                    for (var i=0; i<response.schedules.length; i++)
+        //                    {
+        //                        reloadScheduleRow(response.schedules[i]);
+        //                    }
+        //
+        //                });
+        //                clearCrew();
+        //                showHide()
+        //            })
+        //            .catch(function (error) {
+        //                toastr.error('Nie usuniento')
+        //            });
+        //    }
+        //})
+
+        // $(".remove-crew-member").click(function (e) {
+        //     e.preventDefault();
+        //     swal({
+        //         title: "' . Yii::t('app', 'Na pewno chcesz usunąć?') . '",
+        //         text: "' . Yii::t('app', 'Odpięcie pracownika spowoduje usunięcie jego godzin pracy dla tego wydarzenia') . '",
+        //         icon: "info",
+        //         buttons: {
+        //             cancel: "' . Yii::t('app', 'Nie') . '",
+        //             yes: {
+        //                 text: "' . Yii::t('app', 'Tak') . '",
+        //                 value: "yes",
+        //             },
+        //         },
+        //     })
+        //         .then((value) => {
+        //             switch (value) {
+        //                 case "yes":
+        //                     $.post($(this).prop("href"), $(this).data(), function (response) {
+        //                         for (i = 0; i < response.schedules.length; i++) {
+        //                             reloadScheduleRow(response.schedules[i]);
+        //                         }
+        //                     });
+        //                     $(this).parent().parent().remove();
+        //                     break;
+        //             }
+        //         });
+        //
+        // });
+
+        $(document).off('change', '.sort-user tr input[data-main="1"]').on('change', '.sort-user tr input[data-main="1"]', function () {
+            var schedule = $(this).data('schedule')
+            var isChecked = $(this).is(':checked');
+            $('.sort-user tr input[data-sce="' + schedule + '"]').prop('checked', isChecked).trigger('change');
+        })
+
+        //$(document).off('click', '.export-excel').on('click', '.export-excel', function () {
+        //    var scheduleIds = [];
+        //    var planedIds = []
+        //    var event =         //
+        //    $('input[type="checkbox"]:checked').each(function () {
+        //        var scheduleId = $(this).data('schedule');
+        //        var planedId = $(this).data('plan')
+        //        if (scheduleId) {
+        //            scheduleIds.push(scheduleId);
+        //        }
+        //        if (planedId) {
+        //            planedIds.push(planedId)
+        //        }
+        //    });
+        //
+        //    // if (scheduleIds.length > 0) {
+        //    $.ajax({
+        //        url: `/admin/crew/full-excel?event=${event}`,
+        //        type: 'POST',
+        //        data: {schedules: scheduleIds, users: userss, planed: planedIds, extra: extra},
+        //        success: function (response) {
+        //            clearCrew()
+        //            showHide()
+        //            var modal = $('#new-modal')
+        //            modal.modal('show')
+        //            var dialog = modal.find('.modal-dialog');
+        //            dialog.animate({
+        //                width: 600
+        //            }, 500);
+        //            dialog.promise().done(function () {
+        //                modal.modal('show').find('.modalContent').empty().html(response);
+        //            });
+        //        },
+        //        error: function (xhr, status, error) {
+        //            console.error('Error:', error);
+        //            // Обработка ошибки
+        //        }
+        //    });
+        //    // } else {
+        //    //     window.open(`/admin/crew/excel?id=${event}`)
+        //    // }
+        //
+        //})
+
+    </script>
+<script>
+        $(document).off('change', '#check-allin-first-table').on('change', '#check-allin-first-table', function () {
+            var isChecked = $(this).is(':checked');
+            $('#tablehistories td input[type="checkbox"]').prop('checked', isChecked).trigger('change');
+        })
+    </script>
+<script>
+        function createCommentBlock(resp, comment, ids) {
+            var userIds = resp.users.map(function (user) {
+                return user.id;
+            });
+            var userIdString = userIds.join(',');
+            var forRem = $(`.comm[data-comm="${comment}"]`)
+            forRem.find('.users').remove();
+            resp.users.forEach(function (user) {
+                var comm = $(`.comm[data-comm="${comment}"]`)
+                $(`.users[data-user-id="${user.id}"]`).remove()
+
+                var el = $(`.red-message[data-user="${user.id}"]`)
+
+                el.show()
+                el.attr('title', comment)
+                if (comm.length) {
+                    $(`.edit-cooment-users[data-comment="${comment}"]`).attr('data-user-id', userIdString)
+                    createUserElement(user.id, `/uploads/user/${user.photo}`, `${user.first_name} ${user.last_name}`, comm);
+                } else {
+                    var commentDiv = $('<div></div>', {
+                        class: 'row d-flex comm',
+                        css: {
+                            margin: '5px 0',
+                            border: '1px solid #bbbbbb',
+                            borderRadius: '5px',
+                            padding: '5px'
+                        },
+                        'data-comm': comment
+                    });
+                    var div1 = $(`<div style="margin: auto 15px;"><strong data-comm="${comment}">${comment}</strong></div>`);
+                    var div2 = $(`<div class="edit-cooment-users edit-symbol" style="margin: auto 0; cursor: pointer;" data-user-id="${userIdString}" data-comment="${comment}"></div>`);
+                    $('.for-comment').append(commentDiv);
+                    var newComm = $(`.comm[data-comm="${comment}"]`)
+                    newComm.append(div1, div2);
+                    createUserElement(user.id, `/uploads/user/${user.photo}`, `${user.first_name} ${user.last_name}`, newComm);
+                }
+            })
+            $('.comm').each(function () {
+                if ($(this).find('.users').length === 0) {
+                    $(this).remove();
+                }
+            });
+
+        }
+
+        function createUserElement(userId, imgUrl, userName, div) {
+            var userDiv = $('<div></div>', {
+                class: 'row users',
+                'data-user-id': userId,
+                css: {
+                    margin: '0 10px',
+                    width: '60px',
+                    textAlign: 'center'
+                }
+            });
+            var userImg = $('<img>', {
+                class: 'img-circle img-very-small',
+                src: imgUrl,
+                alt: ''
+            });
+            var userNameSpan = $('<span></span>', {
+                text: userName,
+                css: {
+                    wordWrap: 'anywhere'
+                }
+            });
+
+            userDiv.append(userImg).append(userNameSpan);
+
+            div.prepend(userDiv);
+        }
+
+        function showOnCalendar(val) {
+
+            $('.row.users').removeClass('highlighted1');
+            $('.row.users').removeClass('highlighted2');
+            $('.row.users').removeClass('highlighted3');
+            val = val.map(Number);
+            j = 1;
+            var total = 0;
+            $("#totat-highlighted").html("");
+            if (val.length > 0) {
+                for (var i = 0; i < val.length; i++) {
+
+                    if (j == 4) {
+                        j = 1;
+                    }
+                    $('.row.users').each(function () {
+
+                        if (parseInt($(this).data("id")) == val[i]) {
+                            total++;
+                            $(this).addClass("highlighted" + j);
+                            if (i == 0) {
+                                var scrollDiv = $(this).offset().top;
+
+                                //window.scrollTo({ top: scrollDiv, behavior: 'smooth'});
+                                scrollTo = scrollDiv;
+                            }
+                        }
+                    });
+                    j++;
+                }
+                if (total > 0)
+                    $("#total-highlighted").html("Znaleziono: " + total + '<a>Idź do >></a>');
+            }
+        }
+
+        function updateSelectedUsersMenu() {
+            const selectedUsersList = Array.isArray(userss) ? userss : [];
+            const extraUsersList = Array.isArray(extra) ? extra : [];
+            const count = new Set([...selectedUsersList, ...extraUsersList]).size;
+
+            $('#count-users').text(count);
+
+            if (count > 0) {
+                $('.table-dialog').fadeIn(150);
+            } else {
+                $('.table-dialog').fadeOut(150);
+            }
+        }
+
+        $(document).off('change', '#user-tables input[type="checkbox"]').on('change', '#user-tables input[type="checkbox"]', function () {
+            syncSelectedUsersState();
+        });
+
+        $(document).off('click', '#hide-modal').on('click', '#hide-modal', function () {
+            $('.table-dialog').fadeOut(150);
+        });
+
+        $(document).off('change', '#check-all').on('change', '#check-all', function () {
+            const isChecked = $(this).is(':checked');
+            $('input.selected-users').prop('checked', isChecked);
+
+            syncSelectedUsersState();
+        });
+
+        var scrollTo = 0;
+    </script>
+<script src="/admin/assets/baf1216c/js/ion.rangeSlider.min.js?v=1758706583"></script>
+<script src="/admin/assets/a766414d/jquery.js?v=1758706583"></script>
+<script src="/admin/assets/78f58a8c/yii.js?v=1758706583"></script>
+<script src="/admin/assets/78f58a8c/yii.activeForm.js?v=1758706583"></script>
+<script src="/admin/assets/7d5bd11f/js/bootstrap.js?v=1758706583"></script>
+<script src="/admin/assets/94cd7c58/js/activeform.js?v=1758706583"></script>
+<script src="/admin/assets/65b8ec51/js/select2.full.js?v=1758706583"></script>
+<script src="/admin/assets/65b8ec51/js/i18n/pl.js?v=1758706583"></script>
+<script src="/admin/assets/1cb333af/js/select2-krajee.js?v=1758706583"></script>
+<script src="/admin/assets/d8669f62/js/kv-widgets.js?v=1758706583"></script>
+<script>var $el=jQuery("#w0 .kv-hint-special");if($el.length){$el.each(function(){$(this).activeFieldHint()});}
+jQuery('#w0').yiiActiveForm([], []);
+var $el=jQuery("#w1 .kv-hint-special");if($el.length){$el.each(function(){$(this).activeFieldHint()});}
+jQuery&&jQuery.pjax&&(jQuery.pjax.defaults.maxCacheLength=0);
+if (jQuery('#add-event-user').data('select2')) { jQuery('#add-event-user').select2('destroy'); }
+jQuery.when(jQuery('#add-event-user').select2(select2_d331b1a2)).done(initS2Loading('add-event-user','s2options_3267a624'));
+
+if (jQuery('#6a80c1e0b3239').data('select2')) { jQuery('#6a80c1e0b3239').select2('destroy'); }
+jQuery.when(jQuery('#6a80c1e0b3239').select2(select2_e695fbc9)).done(initS2Loading('6a80c1e0b3239','s2options_669e5a8e'));
+jQuery('#6a80c1e0b3239').on('change', function() { 
+                                showOnCalendar($(this).val())
+                             });
+
+if (jQuery('#6a80c1e0b357c').data('select2')) { jQuery('#6a80c1e0b357c').select2('destroy'); }
+jQuery.when(jQuery('#6a80c1e0b357c').select2(select2_08704d72)).done(initS2Loading('6a80c1e0b357c','s2options_669e5a8e'));
+jQuery('#6a80c1e0b357c').on('change', function() { 
+                                filterTable($(this).val())
+                             });
+
+
+
+$(".show-calendars").click(function(e){
+
+    e.preventDefault();
+    if ($(this).hasClass("active")){
+
+        $("#calendars_"+$(this).data("roleid")+"_"+$(this).data("scheduleid")).hide();
+    }else{
+        $("#calendars_"+$(this).data("roleid")+"_"+$(this).data("scheduleid")).show();
+        $("#calendars_"+$(this).data("roleid")+"_"+$(this).data("scheduleid")).find(".js-range-slider").each(function()
+        {
+            $(this).ionRangeSlider({
+                type: "double",
+                min:0,
+                max: values[$(this).data("scheduleid")].length,
+                from: values[$(this).data("scheduleid")].indexOf($(this).data("start")),
+                to: values[$(this).data("scheduleid")].indexOf($(this).data("end")),
+                values: values[$(this).data("scheduleid")],
+                onFinish: function (data) {
+//                            console.log(data.from_value, data.from_value);
+                    //zapisujemy
+                            var data2 = {
+                                working_id: data.input.data("id"),
+                                start: data.from_value,
+                                end: data.from_value,
+                            };
+                            $.post("/admin/crew/update-working-time", data2, function(response){
+                                if (response.success==1)
+                                {
+                                    toastr.success(response.message);
+                                }
+                            });
+                },
+            });
+        });
+    }
+    $(this).toggleClass("active");
+    
+});
+
+$(document).on("click", "#total-highlighted a", function(e){
+    e.preventDefault();
+    window.scroll({ top: scrollTo, behavior: "smooth"});
+});
+
+$(document)
+    .off("click.crewScheduleActions", ".crew-schedule-actions-trigger")
+    .on("click.crewScheduleActions", ".crew-schedule-actions-trigger", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $trigger = $(this);
+        var $menu = $trigger.closest(".crew-schedule-actions").find(".crew-schedule-actions-menu");
+
+        $(".crew-schedule-actions-menu").not($menu).hide();
+        $(".crew-schedule-actions-trigger").not($trigger).attr("aria-expanded", "false");
+        $("#event-actions-menu").hide();
+        $("#floating-schedule-menu").remove();
+
+        $menu.toggle();
+        $trigger.attr("aria-expanded", $menu.is(":visible") ? "true" : "false");
+    });
+
+$(document)
+    .off("click.crewScheduleChat", ".crew-schedule-chat-action")
+    .on("click.crewScheduleChat", ".crew-schedule-chat-action", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        $(".crew-schedule-actions-menu").hide();
+        $(".crew-schedule-actions-trigger").attr("aria-expanded", "false");
+        openChatShdeule($(this).data("schedule-id"));
+    });
+
+$(document)
+    .off("click.crewScheduleMessage", ".crew-schedule-message-action")
+    .on("click.crewScheduleMessage", ".crew-schedule-message-action", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        $(".crew-schedule-actions-menu").hide();
+        $(".crew-schedule-actions-trigger").attr("aria-expanded", "false");
+        openMessageModal($(this).data("schedule-id"));
+    });
+
+$(document)
+    .off("click.crewScheduleActionsClose")
+    .on("click.crewScheduleActionsClose", function(){
+        $(".crew-schedule-actions-menu").hide();
+        $(".crew-schedule-actions-trigger").attr("aria-expanded", "false");
+    });
+//$( ".add-event-role").unbind( "click" );
+//$(".copy-event-role").unbind( "click" );
+//$(".delete-event-role").unbind( "click" );
+$(".remove-crew-member").unbind( "click" );
+$(".copy-modal-crew").unbind( "click" );
+
+$(document).on("click", ".add-event-role", function(e){
+    e.preventDefault();
+           var modal = $("#ekipa_modal");
+           modal.find(".modalContent").empty();
+           modal.modal("show");
+           modal.find(".modalContent").load($(this).attr("href"));   
+});
+
+$(document).on("click", ".copy-event-role", function(e){
+    e.preventDefault();
+    var modal = $("#copy_modal_crew");
+    modal.modal("show").find(".modalContent").load($(this).attr("href"));
+});
+
+$(document).on("click", ".delete-event-role", function(e){
+        e.preventDefault();
+    var modal = $("#copy_modal_crew");
+    modal.modal("show").find(".modalContent").load($(this).attr("href"));
+
+});
+
+
+
+
+
+$("#ekipa_modal").off("hidden.bs.modal").on("hidden.bs.modal", function () {
+    // do something…
+    //przeładowujemy okienko ekipy
+    if (CrewChanged)
+    {
+        $("#tab-crew").empty();
+        $("#tab-crew").load("/admin/event/crew-tab?id=241");
+    }
+    if (VehicleChanged)
+    {
+        $("#tab-vehicle").empty();
+        $("#tab-vehicle").load("/admin/event/vehicle-tab?id=241");
+    }
+    
+});
+
+$("#selectWorkingTime").change(function(){
+    $(".wt-all").hide();
+    if ($(this).val()==1)
+    {
+        $(".wt-all").show();
+    }
+    if ($(this).val()==2)
+    {
+        $(".packing").show();
+    }
+    if ($(this).val()==3)
+    {
+        $(".montage").show();
+    }
+    if ($(this).val()==4)
+    {
+        $(".event").show();
+    }
+    if ($(this).val()==5)
+    {
+        $(".disassembly").show();
+    }
+});
+
+
+
+$(".remove-crew-member").click(function(e){
+    e.preventDefault();
+    swal({
+            title: "Na pewno chcesz usunąć?",
+            text: "Odpięcie pracownika spowoduje usunięcie jego godzin pracy dla tego wydarzenia oraz wszystkie koszty i diety z nim powiązane",
+            icon:"info",
+          buttons: {
+            cancel: "Nie",
+            yes: {
+              text: "Tak",
+              value: "yes",
+            },
+          },
+        })
+        .then((value) => {
+          switch (value) {
+            case "yes":
+              $.post($(this).prop("href"), $(this).data(), function(response){
+                    for (i=0; i<response.schedules.length; i++)
+                    {
+                        reloadScheduleRow(response.schedules[i]);
+                    }
+              });
+
+                $(this).parent().parent().parent().remove();
+                
+              break;       
+          }
+        });
+    
+});
+
+$(".send-noti").click(function(e){
+    e.preventDefault();
+    var el = $(this);
+    $.post($(this).prop("href"), null, function(){
+        alert("Powiadomienia zostały wysłane");
+        el.hide("slow");
+    });
+}); 
+
+$("#sendreminderscheckbox").change(function(){
+//    console.log($(this).prop("checked"))
+    $.post("/admin/event/save-reminders?id=241", {send_reminders:$(this).prop("checked")});
+});
+
+var activeSendRemindersTooltipTrigger = null;
+
+function positionSendRemindersTooltip(trigger, tooltip) {
+    if (!trigger || !trigger.length || !tooltip || !tooltip.length) {
+        return;
+    }
+
+    var rect = trigger[0].getBoundingClientRect();
+    var tooltipWidth = tooltip.outerWidth();
+    var tooltipHeight = tooltip.outerHeight();
+    var left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+    var top = rect.top - tooltipHeight - 8;
+
+    left = Math.max(8, Math.min(left, window.innerWidth - tooltipWidth - 8));
+
+    if (top < 8) {
+        top = rect.bottom + 8;
+    }
+
+    tooltip.css({
+        left: left + "px",
+        top: top + "px"
+    });
+}
+
+function showSendRemindersTooltip(trigger) {
+    var el = $(trigger);
+    var text = el.attr("data-tooltip");
+
+    if (!text) {
+        return;
+    }
+
+    activeSendRemindersTooltipTrigger = el;
+
+    var tooltip = $("#send-reminders-floating-tooltip");
+    if (!tooltip.length) {
+        tooltip = $("<div>", {
+            id: "send-reminders-floating-tooltip",
+            class: "send-reminders-floating-tooltip"
+        }).appendTo("body");
+    }
+
+    tooltip.text(text).addClass("is-visible");
+    positionSendRemindersTooltip(el, tooltip);
+}
+
+function hideSendRemindersTooltip() {
+    activeSendRemindersTooltipTrigger = null;
+    $("#send-reminders-floating-tooltip").removeClass("is-visible");
+}
+
+$(document)
+    .off("mouseenter.sendRemindersTooltip focus.sendRemindersTooltip", ".send-reminders-info")
+    .on("mouseenter.sendRemindersTooltip focus.sendRemindersTooltip", ".send-reminders-info", function() {
+        showSendRemindersTooltip(this);
+    });
+
+$(document)
+    .off("mouseleave.sendRemindersTooltip blur.sendRemindersTooltip", ".send-reminders-info")
+    .on("mouseleave.sendRemindersTooltip blur.sendRemindersTooltip", ".send-reminders-info", function() {
+        hideSendRemindersTooltip();
+    });
+
+$(window)
+    .off("scroll.sendRemindersTooltip resize.sendRemindersTooltip")
+    .on("scroll.sendRemindersTooltip resize.sendRemindersTooltip", function() {
+        var tooltip = $("#send-reminders-floating-tooltip");
+        if (activeSendRemindersTooltipTrigger && tooltip.hasClass("is-visible")) {
+            positionSendRemindersTooltip(activeSendRemindersTooltipTrigger, tooltip);
+        }
+    });
+
+$(".send-reminders").click(function(e){
+    e.preventDefault();
+    $.post($(this).prop("href"), null, function(){
+        toastr.success("Powiadomienia zostały wysłane.");
+    });
+});
+
+$(".notification-checkbox").change(function(){
+    var noti = 0;
+    if ($(this).prop("checked")) {
+        noti = 1;
+    }
+    if (!$(this).prop("checked")) {
+        $(".send-noti").slideDown("slow");
+    }
+    else {
+        $(".send-noti").slideUp("slow");
+    }
+
+    var data = { main: { eventNotifications: noti } };
+    $.post("/admin/setting/change-event-notifications", data);
+});
+
+$(".copy-modal-crew").on("click", function(e){
+    e.preventDefault();
+    var modal = $("#copy_modal_crew");
+    modal.modal("show").find(".modalContent").load($(this).attr("href"));
+});
+
+
+
+
+
+$(document).off("click", ".js-toggle-event-tab-lock").on("click", ".js-toggle-event-tab-lock", function(e) {
+    e.preventDefault();
+    var $btn = $(this);
+    var url = $btn.data("url") || $btn.attr("href");
+    var reloadTarget = $btn.data("reload-target");
+    var reloadUrl = $btn.data("reload-url");
+    $btn.prop("disabled", true);
+    $.post(url, function(response){
+        if (response && response.success) {
+            $(reloadTarget).empty().load(reloadUrl);
+        } else {
+            alert(response && response.message ? response.message : "Nie udało się zmienić blokady.");
+            $btn.prop("disabled", false);
+        }
+    }).fail(function(){
+        alert("Błąd podczas zmiany blokady zakładki.");
+        $btn.prop("disabled", false);
+    });
+});
+
+
+(function() {
+    var $tab = $("#crew-tab-content");
+    $(document).off("click.crewTabLocked submit.crewTabLocked change.crewTabLocked");
+    if (!$tab.length || parseInt($tab.data("tab-locked"), 10) !== 1) {
+        return;
+    }
+
+    var lockMessage = "Zakładka Ekipa jest zablokowana.";
+
+    if ($tab.find(".js-tab-lock-info").length === 0) {
+        $tab.prepend("<div class=\"alert alert-warning js-tab-lock-info\" style=\"margin-bottom:10px;\">"+lockMessage+"</div>");
+    }
+
+    var blockedClickSelectors = ".add-crew-offer-modal, .assign-user, .delete-event-role, .copy-modal-crew, .add-schedule2, .field-add-event-user, .remove-crew-member, .edit_user, .add-owner, .show-calendars, .crew-schedule-actions-trigger, .crew-schedule-chat-action, .crew-schedule-message-action";
+
+    $tab.find(".add-owner").each(function(){
+        var old = $(this).attr("onclick");
+        if (old) {
+            $(this).attr("data-lock-onclick", old);
+            $(this).removeAttr("onclick");
+        }
+    });
+
+    $tab.find("#add-event-user").off("change").on("change.crewLockedDirect", function(e){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        toastr.warning(lockMessage);
+        return false;
+    });
+
+    $tab.find(blockedClickSelectors).off("click").on("click.crewLockedDirect", function(e){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        toastr.warning(lockMessage);
+        return false;
+    });
+
+    $(document)
+        .on("click.crewTabLocked", "#crew-tab-content a, #crew-tab-content button, #crew-tab-content .btn, #crew-tab-content .select2-selection, #crew-tab-content .add-green-circle, #crew-tab-content .edit-symbol", function(e) {
+            if ($(e.target).closest(".js-toggle-event-tab-lock").length) {
+                return true;
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            toastr.warning(lockMessage);
+            return false;
+        })
+        .on("submit.crewTabLocked", "#crew-tab-content form", function(e) {
+            if ($(e.target).find(".js-toggle-event-tab-lock").length) {
+                return true;
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            toastr.warning(lockMessage);
+            return false;
+        })
+        .on("change.crewTabLocked", "#crew-tab-content input, #crew-tab-content select, #crew-tab-content textarea", function(e) {
+            if ($(e.target).closest(".js-toggle-event-tab-lock").length) {
+                return true;
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            toastr.warning(lockMessage);
+            return false;
+        });
+})();
+
+
+    $(".add-schedule2").click(function(e){
+        e.preventDefault();
+        $("#schedule-modal").find(".modal-body").empty();
+        $("#schedule-modal").modal("show").find(".modal-body").load($(this).attr("href"));
+    });
+    $(".add-schedule2").on("contextmenu",function(){
+       return false;
+    }); 
+</script></body></html>

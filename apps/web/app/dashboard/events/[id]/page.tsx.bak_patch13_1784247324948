@@ -1,0 +1,1270 @@
+'use client';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  Box,
+  CheckSquare,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  DollarSign,
+  FileArchive,
+  FileText,
+  History,
+  Loader2,
+  MapPin,
+  MessageSquare,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  Truck,
+  Users,
+  Wrench,
+} from 'lucide-react';
+import { api } from '../../../../lib/api';
+import { Button, Card, Field, inputClass } from '../../../../components/ProductUI';
+import { DataTable } from '../../../../components/DataTable';
+import { OfferDuplicateTargetModal } from '../../../../components/OfferDuplicateTargetModal';
+import { googleMapsDirectionsUrl } from '../../../../lib/googleMaps';
+
+// EVENTFLOW_PRODUCT_POLISH_V8:
+// Ten ekran przywraca układ panelu wydarzenia z pierwotnej wersji z GitHuba,
+// ale zostawia poprawki produktowe z późniejszych patchy: brak miesiąca księgowania w formularzu,
+// statusy poboczne, Google Maps, oferty jako relacja 1:N oraz zakładki modułowe.
+
+const TABS = [
+  { id: 'chat', label: 'Chat', icon: MessageSquare },
+  { id: 'zadania', label: 'Zadania', icon: CheckSquare },
+  { id: 'szczegoly', label: 'Szczegóły', icon: FileText },
+  { id: 'sprzet', label: 'Sprzęt', icon: Box },
+  { id: 'sprzet_zew', label: 'Sprzęt zewnętrzny', icon: Wrench },
+  { id: 'zalaczniki', label: 'Załączniki', icon: FileArchive },
+  { id: 'oferty', label: 'Oferty', icon: DollarSign },
+  { id: 'ekipa', label: 'Ekipa', icon: Users },
+  { id: 'flota', label: 'Flota', icon: Truck },
+  { id: 'historia', label: 'Historia', icon: History },
+];
+
+function toSelect(v: any) { return v === null || v === undefined ? '' : String(v); }
+function toDateInput(v: any) { return v ? String(v).slice(0, 16) : ''; }
+function numOrNull(v: any) { return v === '' || v === null || v === undefined ? null : Number(v); }
+function strOrNull(v: any) { return v === '' || v === null || v === undefined ? null : String(v); }
+function money(v: any) { return `${Number(v || 0).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`; }
+function dateTime(v: any) { return v ? new Date(v).toLocaleString('pl-PL') : '-'; }
+function initials(u: any) { return u?.imie || u?.nazwisko ? `${u?.imie?.[0] || ''}${u?.nazwisko?.[0] || ''}`.toUpperCase() : '?'; }
+
+function numberOrZero(value: any) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function modelCategoryId(model: any) {
+  return String(model?.kategoria?.id || model?.id_kategorii || model?.kategoria_id || '');
+}
+
+function getCategoryParentId(category: any) {
+  return category?.id_rodzica || category?.id_kategorii_glownej || category?.id_kategorii_nadrzednej || category?.parent_id || category?.id_parent || null;
+}
+
+function flattenCategories(categories: any[]): any[] {
+  const result: any[] = [];
+  const walk = (items: any[], parent: any = null, level = 0) => {
+    for (const item of items || []) {
+      const copy = { ...item, parent, level };
+      result.push(copy);
+      if (item.dzieci?.length) walk(item.dzieci, copy, level + 1);
+      if (item.children?.length) walk(item.children, copy, level + 1);
+      if (item.podkategorie?.length) walk(item.podkategorie, copy, level + 1);
+    }
+  };
+  walk(categories || []);
+  return result;
+}
+
+function buildCategoryTree(categories: any[]) {
+  const flatInput = flattenCategories(categories || []);
+  const byId = new Map<string, any>();
+
+  for (const cat of flatInput) {
+    byId.set(String(cat.id), { ...cat, dzieci: [], _parentId: getCategoryParentId(cat) ? String(getCategoryParentId(cat)) : null });
+  }
+
+  for (const cat of Array.from(byId.values())) {
+    if (!cat._parentId && cat.parent?.id) cat._parentId = String(cat.parent.id);
+  }
+
+  const roots: any[] = [];
+  for (const cat of Array.from(byId.values())) {
+    if (cat._parentId && byId.has(cat._parentId)) byId.get(cat._parentId).dzieci.push(cat);
+    else roots.push(cat);
+  }
+
+  const sortByOrder = (items: any[]) => {
+    items.sort((a, b) => numberOrZero(a.kolejnosc) - numberOrZero(b.kolejnosc) || String(a.nazwa || '').localeCompare(String(b.nazwa || ''), 'pl'));
+    items.forEach((item) => sortByOrder(item.dzieci || []));
+  };
+  sortByOrder(roots);
+
+  return { roots, byId };
+}
+
+function descendantsOf(categoryId: string, byId: Map<string, any>) {
+  const ids = new Set<string>();
+  const walk = (id: string) => {
+    if (!id || ids.has(id)) return;
+    ids.add(id);
+    const cat = byId.get(id);
+    for (const child of cat?.dzieci || []) walk(String(child.id));
+  };
+  walk(categoryId);
+  return ids;
+}
+
+function categoryPath(categoryId: string, byId: Map<string, any>) {
+  const parts: string[] = [];
+  let current = byId.get(categoryId);
+  let guard = 0;
+  while (current && guard < 12) {
+    parts.unshift(current.nazwa);
+    current = current._parentId ? byId.get(String(current._parentId)) : null;
+    guard++;
+  }
+  return parts.join(' / ');
+}
+
+export default function EventDetailsPage() {
+  const params = useParams();
+  const router = useRouter();
+  const isNew = params.id === 'new';
+  const [activeTab, setActiveTab] = useState('szczegoly');
+  const [eventData, setEventData] = useState<any>(null);
+  const [form, setForm] = useState<any>({ data_start: '', data_koniec: '' });
+  const [dict, setDict] = useState<any>({ typy: [], statusy: [], statusyMagazynowe: [], statusyKsiegowe: [], kontrahenci: [], miejsca: [], uzytkownicy: [] });
+  const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [offerName, setOfferName] = useState('');
+  const [duplicateTarget, setDuplicateTarget] = useState<any>(null);
+
+  async function loadDictionaries() {
+    const [typy, statusy, statusyMagazynowe, statusyKsiegowe, kontrahenci, miejsca, uzytkownicy] = await Promise.all([
+      api.get('/api/slowniki/typy-wydarzen').catch(() => ({ data: [] })),
+      api.get('/api/slowniki/statusy-wydarzenia').catch(() => ({ data: [] })),
+      api.get('/api/slowniki/statusy-magazynowe').catch(() => ({ data: [] })),
+      api.get('/api/slowniki/statusy-ksiegowe').catch(() => ({ data: [] })),
+      api.get('/api/slowniki/kontrahenci').catch(() => ({ data: [] })),
+      api.get('/api/slowniki/miejsca').catch(() => ({ data: [] })),
+      api.get('/api/slowniki/uzytkownicy').catch(() => ({ data: [] })),
+    ]);
+    setDict({
+      typy: typy.data || [],
+      statusy: statusy.data || [],
+      statusyMagazynowe: statusyMagazynowe.data || [],
+      statusyKsiegowe: statusyKsiegowe.data || [],
+      kontrahenci: kontrahenci.data || [],
+      miejsca: miejsca.data || [],
+      uzytkownicy: uzytkownicy.data || [],
+    });
+  }
+
+  async function loadEvent() {
+    if (isNew) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.get(`/api/wydarzenia/${params.id}`);
+      const e = res.data;
+      setEventData(e);
+      setOfferName(e?.nazwa ? `Oferta - ${e.nazwa}` : 'Nowa oferta');
+      setForm({
+        nazwa: e.nazwa || '',
+        id_typu_wydarzenia: toSelect(e.id_typu_wydarzenia),
+        id_statusu_wydarzenia: toSelect(e.id_statusu_wydarzenia),
+        id_statusu_magazynowego: toSelect(e.id_statusu_magazynowego),
+        id_statusu_ksiegowego: toSelect(e.id_statusu_ksiegowego),
+        id_oferty_glownej: toSelect(e.id_oferty_glownej),
+        id_managera: toSelect(e.id_managera),
+        id_kontrahenta: toSelect(e.id_kontrahenta),
+        id_miejsca: toSelect(e.id_miejsca),
+        data_start: toDateInput(e.data_start),
+        data_koniec: toDateInput(e.data_koniec),
+        miejsce_reczne: e.miejsce_reczne || '',
+        adres_reczny: e.adres_reczny || '',
+        opis: e.opis || e.uwagi || '',
+      });
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err.message || 'Nie udało się wczytać wydarzenia.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { loadDictionaries(); loadEvent(); }, [params.id]);
+
+  const payload = useMemo(() => ({
+    nazwa: strOrNull(form.nazwa),
+    opis: strOrNull(form.opis),
+    data_start: strOrNull(form.data_start),
+    data_koniec: strOrNull(form.data_koniec),
+    id_typu_wydarzenia: numOrNull(form.id_typu_wydarzenia),
+    id_statusu_wydarzenia: numOrNull(form.id_statusu_wydarzenia),
+    id_statusu_magazynowego: numOrNull(form.id_statusu_magazynowego),
+    id_statusu_ksiegowego: numOrNull(form.id_statusu_ksiegowego),
+    id_oferty_glownej: numOrNull(form.id_oferty_glownej),
+    id_kontrahenta: numOrNull(form.id_kontrahenta),
+    id_miejsca: numOrNull(form.id_miejsca),
+    id_managera: numOrNull(form.id_managera),
+    miejsce_reczne: strOrNull(form.miejsce_reczne),
+    adres_reczny: strOrNull(form.adres_reczny),
+  }), [form]);
+
+  async function submit(e?: any) {
+    e?.preventDefault?.();
+    setSaving(true);
+    setError('');
+    try {
+      if (isNew) {
+        const r = await api.post('/api/wydarzenia', payload);
+        router.push(`/dashboard/events/${r.data.id}`);
+      } else {
+        await api.put(`/api/wydarzenia/${params.id}`, payload);
+        await loadEvent();
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err.message || 'Nie udało się zapisać wydarzenia.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function remove() {
+    if (!confirm('Na pewno usunąć wydarzenie?')) return;
+    await api.delete(`/api/wydarzenia/${params.id}`);
+    router.push('/dashboard/events');
+  }
+
+  async function createOffer() {
+    if (isNew) return;
+    const r = await api.post('/api/oferty', {
+      nazwa: offerName || `Oferta - ${form.nazwa || eventData?.nazwa || params.id}`,
+      id_wydarzenia: Number(params.id),
+      id_kontrahenta: numOrNull(form.id_kontrahenta),
+    });
+    router.push(`/dashboard/offers/${r.data.id}`);
+  }
+
+  async function duplicateOffer(offer: any) {
+    setDuplicateTarget(offer);
+  }
+
+  if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-cyan-600" /> <span className="ml-3 font-bold text-slate-500">Ładowanie danych wydarzenia...</span></div>;
+
+  const offers = eventData?.oferty || [];
+  const maps = googleMapsDirectionsUrl(form.adres_reczny);
+  const currentManager = dict.uzytkownicy.find((u: any) => String(u.id) === String(form.id_managera)) || eventData?.manager;
+
+  return (
+    <div className="mx-auto max-w-[1800px] space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
+          <button onClick={() => router.back()} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 hover:bg-slate-50"><ArrowLeft size={16} /> Powrót</button>
+          <span>/</span>
+          <Link href="/dashboard/calendar" className="hover:text-cyan-700">Kalendarz</Link>
+          <span>/</span>
+          <span className="font-black text-slate-900">{isNew ? 'Nowe wydarzenie' : eventData?.nazwa}</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => router.back()}><ArrowLeft size={16} className="inline" /> Powrót</Button>
+          {!isNew && <Button variant="danger" onClick={remove}><Trash2 size={16} className="inline" /> Usuń</Button>}
+          <Button onClick={submit} disabled={saving}><Save size={16} className="inline" /> {saving ? 'Zapisywanie...' : 'Zapisz'}</Button>
+        </div>
+      </div>
+
+      {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">{error}</div>}
+
+      {!isNew && (
+        <div className="grid gap-3 md:grid-cols-4">
+          <Metric label="Numer" value={eventData?.numer || `#${eventData?.id}`} />
+          <Metric label="Oferty" value={`${offers.length}`} />
+          <Metric label="Zakres" value={`${dateTime(eventData?.data_start)} → ${dateTime(eventData?.data_koniec)}`} />
+        </div>
+      )}
+
+      <form onSubmit={submit} className="grid gap-5 xl:grid-cols-[1.1fr_.9fr_1.1fr]">
+        <Card className="space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.25em] text-cyan-600">Dane wydarzenia</p>
+              <h1 className="mt-1 text-2xl font-black text-slate-900">{form.nazwa || 'Nowe wydarzenie'}</h1>
+            </div>
+            {eventData?.status && <span className="rounded-xl px-3 py-2 text-sm font-black text-white" style={{ backgroundColor: eventData.status.kolor || '#0891B2' }}>{eventData.status.ikona || '●'} {eventData.status.nazwa}</span>}
+            {eventData?.status_magazynowy && <span className="rounded-xl px-3 py-2 text-sm font-black text-white" style={{ backgroundColor: eventData.status_magazynowy.kolor || '#F97316' }}>{eventData.status_magazynowy.ikona || '📦'} {eventData.status_magazynowy.nazwa}</span>}
+            {eventData?.status_ksiegowy && <span className="rounded-xl px-3 py-2 text-sm font-black text-white" style={{ backgroundColor: eventData.status_ksiegowy.kolor || '#22C55E' }}>{eventData.status_ksiegowy.ikona || '💰'} {eventData.status_ksiegowy.nazwa}</span>}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Nazwa"><input className={inputClass} value={form.nazwa || ''} onChange={(e) => setForm({ ...form, nazwa: e.target.value })} required /></Field>
+            <Field label="Typ wydarzenia"><select className={inputClass} value={form.id_typu_wydarzenia || ''} onChange={(e) => setForm({ ...form, id_typu_wydarzenia: e.target.value })}><option value="">Wybierz</option>{dict.typy.map((t: any) => <option key={t.id} value={t.id}>{t.nazwa}</option>)}</select></Field>
+            <Field label="Start"><input type="datetime-local" className={inputClass} value={form.data_start || ''} onChange={(e) => setForm({ ...form, data_start: e.target.value })} /></Field>
+            <Field label="Koniec"><input type="datetime-local" className={inputClass} value={form.data_koniec || ''} onChange={(e) => setForm({ ...form, data_koniec: e.target.value })} /></Field>
+            <Field label="Klient"><select className={inputClass} value={form.id_kontrahenta || ''} onChange={(e) => setForm({ ...form, id_kontrahenta: e.target.value })}><option value="">Brak</option>{dict.kontrahenci.map((k: any) => <option key={k.id} value={k.id}>{k.nazwa}</option>)}</select></Field>
+            <Field label="Status główny"><select className={inputClass} value={form.id_statusu_wydarzenia || ''} onChange={(e) => setForm({ ...form, id_statusu_wydarzenia: e.target.value })}><option value="">Wybierz</option>{dict.statusy.map((s: any) => <option key={s.id} value={s.id}>{s.ikona || '●'} {s.nazwa}</option>)}</select></Field>
+            <Field label="Miejsce z bazy"><select className={inputClass} value={form.id_miejsca || ''} onChange={(e) => setForm({ ...form, id_miejsca: e.target.value })}><option value="">Wpiszę ręcznie</option>{dict.miejsca.map((m: any) => <option key={m.id} value={m.id}>{m.nazwa}</option>)}</select></Field>
+            <Field label="Miejsce ręcznie"><input className={inputClass} value={form.miejsce_reczne || ''} onChange={(e) => setForm({ ...form, miejsce_reczne: e.target.value })} /></Field>
+          </div>
+          <Field label="Adres / Google Maps"><input className={inputClass} value={form.adres_reczny || ''} onChange={(e) => setForm({ ...form, adres_reczny: e.target.value })} />{maps && <a className="mt-2 inline-flex items-center gap-1 text-xs font-black text-cyan-700" href={maps} target="_blank"><MapPin size={14} /> Otwórz trasę w Google Maps</a>}</Field>
+          <Field label="Opis"><textarea className={`${inputClass} min-h-24`} value={form.opis || ''} onChange={(e) => setForm({ ...form, opis: e.target.value })} /></Field>
+        </Card>
+
+        <Card className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-lg font-black text-slate-600">{initials(currentManager)}</div>
+            <div>
+              <p className="font-black text-slate-900">{currentManager ? `${currentManager.imie || ''} ${currentManager.nazwisko || ''}`.trim() : 'Brak managera'}</p>
+              <p className="text-sm font-bold text-slate-400">EventManager</p>
+            </div>
+          </div>
+          <Field label="Manager"><select className={inputClass} value={form.id_managera || ''} onChange={(e) => setForm({ ...form, id_managera: e.target.value })}><option value="">Brak</option>{dict.uzytkownicy.map((u: any) => <option key={u.id} value={u.id}>{u.imie} {u.nazwisko}</option>)}</select></Field>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Info label="Waga sprzętu" value="0 kg" />
+            <Info label="Objętość" value="0.0 m³" />
+            <Info label="Pobór prądu" value="0 W" />
+            <Info label="Status" value="OK" />
+          </div>
+          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <p className="mb-3 text-sm font-black text-slate-700">Statusy poboczne</p>
+            <div className="grid gap-3">
+              <Field label="Magazyn"><select className={inputClass} value={form.id_statusu_magazynowego || ''} onChange={(e) => setForm({ ...form, id_statusu_magazynowego: e.target.value })}><option value="">Brak</option>{dict.statusyMagazynowe.map((s: any) => <option key={s.id} value={s.id}>{s.ikona || '📦'} {s.nazwa}</option>)}</select></Field>
+              <Field label="Księgowość"><select className={inputClass} value={form.id_statusu_ksiegowego || ''} onChange={(e) => setForm({ ...form, id_statusu_ksiegowego: e.target.value })}><option value="">Brak</option>{dict.statusyKsiegowe.map((s: any) => <option key={s.id} value={s.id}>{s.ikona || '💰'} {s.nazwa}</option>)}</select></Field>
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.25em] text-cyan-600">Harmonogram</p>
+              <h2 className="text-xl font-black text-slate-900">Etapy wydarzenia</h2>
+            </div>
+            <Button variant="secondary"><Plus size={16} className="inline" /> Dodaj etap</Button>
+          </div>
+          <div className="space-y-2">
+            {(eventData?.etapy || []).map((etap: any) => <div key={etap.id} className="rounded-2xl border border-slate-100 p-3"><p className="font-black text-slate-900">{etap.nazwa}</p><p className="text-sm font-bold text-slate-400">{dateTime(etap.data_start)} → {dateTime(etap.data_koniec)}</p></div>)}
+            {!eventData?.etapy?.length && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-bold text-slate-400">Brak etapów. Dodamy pełny CRUD etapów w kolejnym kroku.</p>}
+          </div>
+        </Card>
+      </form>
+
+      <Card className="!p-0">
+        <div className="flex overflow-x-auto border-b border-slate-100">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex min-w-[110px] flex-col items-center justify-center gap-1.5 border-b-2 px-4 py-3 text-xs font-black transition ${active ? 'border-cyan-600 bg-cyan-50/70 text-cyan-700' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}><Icon size={18} />{tab.label}</button>;
+          })}
+        </div>
+        <div className="p-5">
+          {activeTab === 'szczegoly' && <p className="rounded-2xl bg-slate-50 p-6 text-sm font-bold text-slate-500">Szczegóły podstawowe edytujesz w górnym panelu. Zapis zostaje na tej stronie i odświeża dane wydarzenia.</p>}
+          {activeTab === 'oferty' && <OffersPanel offers={offers} mainOfferId={form.id_oferty_glownej} setMainOfferId={(id: any) => setForm({ ...form, id_oferty_glownej: id })} offerName={offerName} setOfferName={setOfferName} createOffer={createOffer} duplicateOffer={duplicateOffer} />}
+          {duplicateTarget && <OfferDuplicateTargetModal offer={duplicateTarget} defaultEventId={params.id as any} onClose={() => setDuplicateTarget(null)} onDone={(o) => router.push(`/dashboard/offers/${o.id}`)} />}
+          {activeTab === 'sprzet' && !isNew && <EquipmentPanel eventId={Number(params.id)} eventName={form.nazwa || eventData?.nazwa} />}
+          {activeTab === 'ekipa' && <PeoplePanel people={eventData?.ekipa || []} />}
+          {activeTab === 'flota' && <FleetPanel vehicles={eventData?.pojazdy || []} />}
+          {activeTab === 'historia' && <HistoryPanel history={eventData?.historia || []} />}
+          {!['szczegoly','sprzet','oferty','ekipa','flota','historia'].includes(activeTab) && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-bold text-slate-400">Zakładka „{TABS.find((t) => t.id === activeTab)?.label}” jest przygotowana w układzie panelu. Logikę podłączymy etapami, bez usuwania istniejącego kodu.</p>}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-[11px] font-black uppercase tracking-wider text-slate-400">{label}</p><p className="mt-1 truncate text-lg font-black text-slate-900">{value}</p></div>;
+}
+function Info({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-2xl bg-slate-50 p-3"><p className="text-[11px] font-black uppercase tracking-wider text-slate-400">{label}</p><p className="font-black text-slate-800">{value}</p></div>;
+}
+function OffersPanel({ offers, mainOfferId, setMainOfferId, offerName, setOfferName, createOffer, duplicateOffer }: any) {
+  return <div className="space-y-4">
+    <div className="grid gap-3 rounded-2xl border border-cyan-100 bg-cyan-50 p-4 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
+      <Field label="Oferta główna / zaakceptowana">
+        <select className={inputClass} value={mainOfferId || ''} onChange={(e) => setMainOfferId(e.target.value)}>
+          <option value="">Brak</option>
+          {offers.map((o: any) => <option key={o.id} value={o.id}>{o.numer || `#${o.id}`} · {o.nazwa}</option>)}
+        </select>
+        <p className="mt-1 text-xs font-bold text-slate-400">Lista pokazuje wyłącznie oferty przypisane do tego wydarzenia.</p>
+      </Field>
+      <Field label="Nazwa nowej oferty"><input className={inputClass} value={offerName} onChange={(e) => setOfferName(e.target.value)} /></Field>
+      <Button onClick={createOffer}><Plus size={16} className="inline" /> Dodaj ofertę do wydarzenia</Button>
+    </div>
+    <div className="grid gap-3 lg:grid-cols-2">
+      {offers.map((o: any) => <div key={o.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wider text-slate-400">{o.numer || `Oferta #${o.id}`}</p><h3 className="mt-1 text-lg font-black text-slate-900">{o.nazwa}</h3><p className="text-sm font-bold text-slate-400">{o.status?.nazwa || 'Bez statusu'} · wersji: {o.wersje?.length || 0}</p></div><p className="text-right text-lg font-black text-cyan-700">{money(o.suma_netto)}</p></div><div className="mt-4 flex flex-wrap gap-2"><Link className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-black text-white" href={`/dashboard/offers/${o.id}`}>Otwórz</Link><Link className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-700" href={`/dashboard/offers/${o.id}/pdf`} target="_blank">PDF</Link><button onClick={() => duplicateOffer(o)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-700"><Copy size={15} className="inline" /> Duplikuj</button></div></div>)}
+      {offers.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-bold text-slate-400">Do tego wydarzenia nie ma jeszcze ofert. Możesz dodać jedną, dwie albo dziesięć ofert.</p>}
+    </div>
+  </div>;
+}
+
+
+function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: string }) {
+  const [data, setData] = useState<any>({ planowane: [], pozycje_dokumentow: [], kategorie: [], dokumenty: [], podsumowanie: {} });
+  const [items, setItems] = useState<any[]>([]);
+  const [models, setModels] = useState<any[]>([]);
+  const [equipmentCategories, setEquipmentCategories] = useState<any[]>([]);
+  const [mode, setMode] = useState<'plan' | 'wydanie' | 'przyjecie'>('plan');
+  const [showEditor, setShowEditor] = useState(false);
+  const [activeRoot, setActiveRoot] = useState<string>('all');
+  const [activeSub, setActiveSub] = useState<string>('');
+  const [query, setQuery] = useState('');
+  const [planQty, setPlanQty] = useState<Record<string, string>>({});
+  const [scanCode, setScanCode] = useState('');
+  const scanInputRef = useRef<HTMLInputElement | null>(null);
+  const [docItems, setDocItems] = useState<any[]>([]);
+  const [docForm, setDocForm] = useState<any>({ osoba_odbierajaca: '', podpis_odbierajacego: '', uwagi: '' });
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+
+  async function load() {
+    const [gear, i, m, k] = await Promise.all([
+      api.get(`/api/magazyn/wydarzenia/${eventId}/sprzet`).catch(() => ({ data: { planowane: [], pozycje_dokumentow: [], kategorie: [], dokumenty: [], podsumowanie: {} } })),
+      api.get('/api/magazyn/wszystkie-egzemplarze').catch(() => ({ data: [] })),
+      api.get('/api/magazyn/modele').catch(() => ({ data: [] })),
+      api.get('/api/magazyn/kategorie').catch(() => ({ data: [] })),
+    ]);
+
+    const gearData = gear.data || { planowane: [], pozycje_dokumentow: [], kategorie: [], dokumenty: [], podsumowanie: {} };
+    setData(gearData);
+    setItems(i.data || []);
+    setModels(m.data || []);
+    setEquipmentCategories(k.data || gearData.kategorie || []);
+
+    const nextQty: Record<string, string> = {};
+    (gearData.planowane || []).forEach((p: any) => {
+      const id = p.id_modelu || p.model?.id;
+      if (!id) return;
+      nextQty[String(id)] = String(Number(nextQty[String(id)] || 0) + Number(p.ilosc || p.planowana_ilosc || 0));
+    });
+    setPlanQty(nextQty);
+  }
+
+  useEffect(() => { load(); }, [eventId]);
+
+  const { roots: equipmentCategoryRoots, byId: equipmentCategoryById } = useMemo(() => buildCategoryTree(equipmentCategories), [equipmentCategories]);
+  // EVENTFLOW_PATCH_11_RACK_QTY_FIX
+  function efPatch11NormalizeCode(value: any) {
+    return value === null || value === undefined ? '' : String(value).trim();
+  }
+  function efPatch11RowCodes(row: any) {
+    const egz = row?.egzemplarz || row;
+    return [
+      row?.kod,
+      row?.kod_kreskowy,
+      row?.zewnetrzny_kod_kreskowy,
+      row?.zewnetrzny_qr_kod,
+      row?.qr_kod,
+      row?.sn,
+      row?.numer_egzemplarza,
+      row?.numer_urzadzenia,
+      egz?.kod,
+      egz?.kod_kreskowy,
+      egz?.zewnetrzny_kod_kreskowy,
+      egz?.zewnetrzny_qr_kod,
+      egz?.qr_kod,
+      egz?.sn,
+      egz?.numer_egzemplarza,
+      egz?.numer_urzadzenia,
+    ].map(efPatch11NormalizeCode).filter(Boolean);
+  }
+  function efPatch11IsCaseCode(value: any) {
+    const code = efPatch11NormalizeCode(value);
+    return /^01\d+/.test(code) || /^CASE[-_]/i.test(code);
+  }
+  function efPatch11ModelText(row: any) {
+    const model = row?.model || row?.egzemplarz?.model || row;
+    return [
+      model?.typ_sprzetu,
+      model?.tryb_ewidencji,
+      model?.nazwa,
+      model?.kategoria?.nazwa,
+      row?.typ_sprzetu,
+      row?.nazwa,
+      row?.nazwa_modelu,
+      row?.kategoria,
+      row?.kategoria_nazwa,
+      row?.egzemplarz?.nazwa,
+    ].filter(Boolean).join(' ').toLowerCase();
+  }
+  function efPatch11IsRack(row: any) {
+    const model = row?.model || row?.egzemplarz?.model || row;
+    const text = efPatch11ModelText(row);
+    return model?.typ_sprzetu === 'rack' || /(^|\s)rack(i|u|iem|ów)?($|\s)/i.test(text) || text.includes('szafa rack');
+  }
+  function efPatch11HasCaseCode(row: any) {
+    return !efPatch11IsRack(row) && efPatch11RowCodes(row).some(efPatch11IsCaseCode);
+  }
+
+
+  
+function normalizeScanCodeValue(value: any) {
+  return String(value || '').trim().replace(/s+/g, '');
+}
+function scanCodeCandidates(row: any) {
+  const egz = row?.egzemplarz || row;
+  const model = row?.model || row?.egzemplarz?.model || {};
+  return [
+    row?.kod,
+    row?.kod_kreskowy,
+    row?.zewnetrzny_kod_kreskowy,
+    row?.zewnetrzny_qr_kod,
+    row?.qr_kod,
+    row?.sn,
+    egz?.kod,
+    egz?.kod_kreskowy,
+    egz?.zewnetrzny_kod_kreskowy,
+    egz?.zewnetrzny_qr_kod,
+    egz?.qr_kod,
+    egz?.sn,
+    model?.kod,
+    model?.kod_kreskowy,
+  ].filter(Boolean).map(normalizeScanCodeValue).filter(Boolean);
+}
+function hasCaseBarcodePrefix(row: any) {
+  return scanCodeCandidates(row).some((code: string) => /^01d+/.test(code));
+}
+function isRackLike(row: any) {
+  const model = row?.model || row?.egzemplarz?.model || row || {};
+  const text = [
+    row?.rowType,
+    row?.typ_sprzetu,
+    row?.typ,
+    row?.rodzaj,
+    row?.nazwa,
+    row?.nazwa_modelu,
+    row?.kategoria,
+    row?.kategoria_nazwa,
+    model?.typ_sprzetu,
+    model?.typ,
+    model?.rodzaj,
+    model?.nazwa,
+    model?.kategoria?.nazwa,
+  ].filter(Boolean).join(' ').toLowerCase();
+  return /(^|[^a-ząćęłńóśźż])rack([^a-ząćęłńóśźż]|$)/i.test(text) || text.includes('racki') || text.includes('szafa rack');
+}
+function normScanCode(value: any) { return String(value ?? '').trim(); }
+  function allCodesOf(row: any): string[] {
+    const egz = row?.egzemplarz || row;
+    const model = row?.model || row?.egzemplarz?.model || row;
+    return [
+      row?.kod,
+      row?.kod_kreskowy,
+      row?.barcode,
+      row?.qr_kod,
+      row?.sn,
+      row?.numer_egzemplarza,
+      row?.numer_urzadzenia,
+      egz?.kod_kreskowy,
+      egz?.zewnetrzny_kod_kreskowy,
+      egz?.zewnetrzny_qr_kod,
+      egz?.qr_kod,
+      egz?.sn,
+      egz?.numer_egzemplarza,
+      egz?.numer_urzadzenia,
+      model?.kod_kreskowy,
+      model?.kod,
+    ].filter(Boolean).map(normScanCode);
+  }
+  function hasCodeStartingWith01(row: any) {
+    return allCodesOf(row).some((code) => /^01\d+/.test(code));
+  }
+  function isRackLike(row: any) {
+    const model = row?.model || row?.egzemplarz?.model || row;
+    const values = [
+      row?.typ_sprzetu,
+      row?.typ,
+      row?.rodzaj,
+      row?.nazwa,
+      row?.nazwa_modelu,
+      row?.kategoria,
+      row?.kategoria_nazwa,
+      model?.typ_sprzetu,
+      model?.typ,
+      model?.rodzaj,
+      model?.nazwa,
+      model?.kategoria?.nazwa,
+      model?.kategoria?.sciezka,
+      model?.kategoria?.ścieżka,
+    ].filter(Boolean).map((v) => String(v).toLowerCase());
+    return values.some((v) => v === 'rack' || v.includes('rack') || v.includes('raki') || v.includes('szafa rack'));
+  }
+  function isCase(row: any) {
+    if (!row) return false;
+    if (isRackLike(row)) return false;
+    const modelType = row?.model?.typ_sprzetu || row?.egzemplarz?.model?.typ_sprzetu || row?.typ_sprzetu;
+    return row?.isCase || row?.rowType === 'case' || modelType === 'opakowanie' || row?.czy_case === true || hasCodeStartingWith01(row);
+  }
+  function isQuantityOnly(row: any) {
+    const model = row?.model || row;
+    return Boolean(
+      row?.rowType === 'ilosciowy_model' ||
+      row?.quantityOnly === true ||
+      row?.sprzet_ilosciowy === true ||
+      row?.czy_ilosciowy === true ||
+      row?.tryb_ewidencji === 'ilosciowe' ||
+      row?.typ_ewidencji === 'ilosciowe' ||
+      row?.rodzaj_ewidencji === 'ilosciowe' ||
+      model?.sprzet_ilosciowy === true ||
+      model?.czy_ilosciowy === true ||
+      model?.tryb_ewidencji === 'ilosciowe' ||
+      model?.typ_ewidencji === 'ilosciowe' ||
+      model?.rodzaj_ewidencji === 'ilosciowe' ||
+      model?.typ_sprzetu === 'ilosciowe'
+    );
+  }
+  function isEquipmentInstance(row: any) {
+    const modelType = row?.model?.typ_sprzetu || row?.egzemplarz?.model?.typ_sprzetu || row?.typ_sprzetu;
+    const hasInstance = Boolean(row?.id_egzemplarza || row?.egzemplarz || row?.id);
+    return hasInstance && !isQuantityOnly(row) && (isRackLike(row) || (modelType !== 'opakowanie' && !isCase(row)));
+  }
+  function modelIdOf(row: any) { return row?.id_modelu || row?.model?.id || row?.egzemplarz?.id_modelu || row?.egzemplarz?.model?.id || null; }
+  function modelNameOf(row: any) { return row?.nazwa_modelu || row?.model?.nazwa || row?.egzemplarz?.model?.nazwa || row?.nazwa || row?.egzemplarz?.nazwa || 'Sprzęt'; }
+  function modelCategoryIdOf(row: any) { return row?.id_kategorii || row?.model?.id_kategorii || row?.model?.kategoria?.id || row?.egzemplarz?.model?.id_kategorii || row?.egzemplarz?.model?.kategoria?.id || modelCategoryId(row?.model || row); }
+  function categoryOf(row: any) {
+    const id = modelCategoryIdOf(row);
+    if (id && equipmentCategoryById.has(String(id))) return categoryPath(String(id), equipmentCategoryById);
+    return row?.kategoria || row?.kategoria_nazwa || row?.model?.kategoria?.nazwa || row?.egzemplarz?.model?.kategoria?.nazwa || 'Bez kategorii';
+  }
+  function numberOf(row: any) { const egz = row?.egzemplarz || row; return egz?.numer_egzemplarza || egz?.numer_urzadzenia || egz?.sn || egz?.kod_kreskowy || ''; }
+  const modelCountByCategoryconst modelCountByCategory = useMemo(() => {
+    const map = new Map<string, number>();
+    models.filter((m: any) => ef10PlanningModelVisible(m)).forEach((m: any) => {
+      const id = modelCategoryId(m);
+      if (!id) return;
+      map.set(id, (map.get(id) || 0) + 1);
+    });
+    return map;
+  }, [models]);
+
+  function totalForEquipmentCategory(categoryId: string) {
+    const ids = descendantsOf(categoryId, equipmentCategoryById);
+    let total = 0;
+    ids.forEach((id) => { total += modelCountByCategory.get(id) || 0; });
+    return total;
+  }
+
+  const modelById = useMemo(() => {
+    const map = new Map<string, any>();
+    (models || []).forEach((model: any) => {
+      if (model?.id) map.set(String(model.id), model);
+    });
+    return map;
+  }, [models]);
+
+  function isQuantityOnlyModel(model: any) {
+    return Boolean(
+      model?.sprzet_ilosciowy === true ||
+      model?.czy_ilosciowy === true ||
+      model?.quantityOnly === true ||
+      model?.tryb_ewidencji === 'ilosciowe' ||
+      model?.typ_ewidencji === 'ilosciowe' ||
+      model?.rodzaj_ewidencji === 'ilosciowe'
+    );
+  }
+
+  const plannedRows = useMemo(() => {
+    const map = new Map<string, any>();
+
+    (data.planowane || []).forEach((p: any) => {
+      const id = modelIdOf(p);
+      if (!id) return;
+      const key = String(id);
+      if (!map.has(key)) {
+        map.set(key, {
+          id_modelu: id,
+          nazwa: modelNameOf(p),
+          kategoria: categoryOf(p),
+          kategoria_id: modelCategoryIdOf(p),
+          quantityOnly: false,
+          kod: '',
+          jednostka: 'szt.',
+          plan: 0,
+          wydane: 0,
+          przyjete: 0,
+          scanned: 0,
+          egzemplarze_wydane: [],
+          egzemplarze_przyjete: [],
+        });
+      }
+      const row = map.get(key);
+      row.plan += Number(p.ilosc || p.planowana_ilosc || 0);
+      const sourceModel = p.model || modelById.get(String(id)) || p;
+      if (isQuantityOnly(p) || isQuantityOnlyModel(sourceModel)) {
+        row.quantityOnly = true;
+        row.kod = p.kod || p.kod_kreskowy || sourceModel?.kod_kreskowy || sourceModel?.kod || row.kod || '';
+        row.jednostka = p.jednostka || sourceModel?.jednostka || row.jednostka || 'szt.';
+      }
+    });
+
+    (data.pozycje_dokumentow || []).forEach((p: any) => {
+      const id = modelIdOf(p);
+      if (!id) return;
+      const key = String(id);
+      if (!map.has(key)) {
+        map.set(key, {
+          id_modelu: id,
+          nazwa: modelNameOf(p),
+          kategoria: categoryOf(p),
+          kategoria_id: modelCategoryIdOf(p),
+          quantityOnly: false,
+          kod: '',
+          jednostka: 'szt.',
+          plan: 0,
+          wydane: 0,
+          przyjete: 0,
+          scanned: 0,
+          egzemplarze_wydane: [],
+          egzemplarze_przyjete: [],
+        });
+      }
+      const row = map.get(key);
+      const label = numberOf(p) || p.kod || p.nazwa || `#${p.id_egzemplarza || ''}`;
+      if (p.zrodlo === 'wydanie') {
+        row.wydane += Number(p.ilosc || 1);
+        if (label) row.egzemplarze_wydane.push(label);
+      }
+      if (p.zrodlo === 'przyjecie') {
+        row.przyjete += Number(p.ilosc || 1);
+        if (label) row.egzemplarze_przyjete.push(label);
+      }
+    });
+
+    docItems.forEach((p: any) => {
+      const id = modelIdOf(p);
+      if (!id) return;
+      const key = String(id);
+      if (!map.has(key)) {
+        map.set(key, {
+          id_modelu: id,
+          nazwa: modelNameOf(p),
+          kategoria: categoryOf(p),
+          kategoria_id: modelCategoryIdOf(p),
+          quantityOnly: false,
+          kod: '',
+          jednostka: 'szt.',
+          plan: 0,
+          wydane: 0,
+          przyjete: 0,
+          scanned: 0,
+          egzemplarze_wydane: [],
+          egzemplarze_przyjete: [],
+        });
+      }
+      map.get(key).scanned += Number(p.ilosc || 1);
+    });
+
+    return Array.from(map.values()).map((row: any) => {
+      const model = modelById.get(String(row.id_modelu));
+      const quantityOnly = row.quantityOnly || isQuantityOnlyModel(model);
+      return {
+        ...row,
+        quantityOnly,
+        kod: row.kod || model?.kod_kreskowy || model?.kod || '',
+        jednostka: row.jednostka || model?.jednostka || 'szt.',
+      };
+    }).sort((a, b) => String(a.kategoria).localeCompare(String(b.kategoria), 'pl') || String(a.nazwa).localeCompare(String(b.nazwa), 'pl'));
+  }, [data, docItems, equipmentCategoryById, modelById]);
+
+  const plannedGroups = useMemo(() => {
+    const groups = new Map<string, any>();
+    plannedRows.forEach((row: any) => {
+      if (!groups.has(row.kategoria)) groups.set(row.kategoria, { nazwa: row.kategoria, rows: [], plan: 0, wydane: 0, przyjete: 0, scanned: 0 });
+      const group = groups.get(row.kategoria);
+      group.rows.push(row);
+      group.plan += row.plan;
+      group.wydane += row.wydane;
+      group.przyjete += row.przyjete;
+      group.scanned += row.scanned;
+    });
+    return Array.from(groups.values());
+  }, [plannedRows]);
+
+  const activeCategoryIds = useMemo(() => {
+    if (activeSub) return descendantsOf(activeSub, equipmentCategoryById);
+    if (activeRoot && activeRoot !== 'all') return descendantsOf(activeRoot, equipmentCategoryById);
+    return new Set<string>();
+  }, [activeRoot, activeSub, equipmentCategoryById]);
+
+  const activeRootObj = useMemo(() => activeRoot && activeRoot !== 'all' ? equipmentCategoryById.get(String(activeRoot)) : null, [activeRoot, equipmentCategoryById]);
+
+  const visibleModels = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return models
+      .filter((m: any) => ef10PlanningModelVisible(m))
+      .map((m: any) => {
+        const catId = modelCategoryId(m);
+        const path = catId ? categoryPath(catId, equipmentCategoryById) : '';
+        return { ...m, kategoria_id: catId, kategoria_nazwa: path || m.kategoria_nazwa || m.kategoria?.nazwa || 'Bez kategorii' };
+      })
+      .filter((m: any) => activeRoot === 'all' || activeCategoryIds.has(String(m.kategoria_id)))
+      .filter((m: any) => !q || `${m.nazwa || ''} ${m.kategoria_nazwa || ''}`.toLowerCase().includes(q))
+      .sort((a: any, b: any) => String(a.kategoria_nazwa || '').localeCompare(String(b.kategoria_nazwa || ''), 'pl') || String(a.nazwa || '').localeCompare(String(b.nazwa || ''), 'pl'));
+  }, [models, activeRoot, activeCategoryIds, query, equipmentCategoryById]);
+
+  const visibleInstances = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items
+      .filter((x: any) => ef10IssueInstanceVisible(x))
+      .map((x: any) => ({
+        ...x,
+        rowType: 'egzemplarz',
+        nazwa_wiersza: x.nazwa || x.model?.nazwa,
+        kategoria_nazwa: x.model?.kategoria?.nazwa || 'Bez kategorii',
+        kod: x.kod_kreskowy || x.zewnetrzny_kod_kreskowy || x.zewnetrzny_qr_kod || x.qr_kod || x.sn || '',
+      }))
+      .filter((x: any) => !q || `${x.nazwa_wiersza || ''} ${x.model?.nazwa || ''} ${x.kategoria_nazwa || ''} ${x.kod || ''} ${x.sn || ''}`.toLowerCase().includes(q))
+      .slice(0, 120);
+  }, [items, query]);
+
+  function changeQty(model: any, value: string) {
+    const qty = Math.max(0, Number(value || 0) || 0);
+    setPlanQty((prev) => ({ ...prev, [String(model.id)]: String(qty) }));
+  }
+
+  function stepQty(model: any, delta: number) {
+    const current = Number(planQty[String(model.id)] || 0) || 0;
+    changeQty(model, String(Math.max(0, current + delta)));
+  }
+
+  async function savePlan() {
+    setError('');
+    setNotice('');
+    try {
+      const pozycje = Object.entries(planQty)
+        .map(([id, qty]) => ({ id_modelu: Number(id), ilosc: Number(qty || 0) }))
+        .filter((p) => p.id_modelu && p.ilosc > 0);
+      await api.post(`/api/magazyn/wydarzenia/${eventId}/sprzet`, { replace: true, pozycje });
+      setShowEditor(false);
+      setNotice('Zapisano plan sprzętu wydarzenia. Wydanie robisz później przez skanowanie egzemplarzy/case albo kodu sprzętu ilościowego.');
+      await load();
+    } catch (e: any) {
+      setError(e?.response?.data?.message || e?.message || 'Nie udało się zapisać planu sprzętu.');
+    }
+  }
+
+
+  function caseScanMeta(row: any) {
+    if (!row) return null;
+    return { id: row.id || row.id_egzemplarza, nazwa: row.nazwa || row.nazwa_modelu || 'Case', kod: allCodesOf(row)[0] || '' };
+  }
+  function normalizeDocumentItem(row: any, source: 'scan' | 'manual' = 'manual') {
+    if (isQuantityOnly(row)) {
+      return {
+        source,
+        rowType: 'ilosciowy_model',
+        quantityOnly: true,
+        id_modelu: row.id_modelu || row.model?.id || row.id,
+        id_egzemplarza: null,
+        nazwa: row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy',
+        nazwa_modelu: row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy',
+        numer_egzemplarza: '',
+        kategoria: categoryOf(row),
+        kod: row.kod || row.kod_kreskowy || row.model?.kod_kreskowy || row.model?.kod || '',
+        ilosc: Number(row.ilosc || 1),
+        jednostka: row.jednostka || row.model?.jednostka || 'szt.',
+        uwagi: row.uwagi || 'Sprzęt ilościowy bez egzemplarzy',
+      };
+    }
+    const egz = row.egzemplarz || row;
+    const model = row.model || row.egzemplarz?.model;
+    const instanceNo = numberOf(row);
+    const baseName = model?.nazwa || row.nazwa_modelu || egz.model?.nazwa || row.nazwa || 'Sprzęt';
+    return {
+      source,
+      rowType: isRackLike(row) ? 'rack' : 'egzemplarz',
+      rack: isRackLike(row),
+      id_modelu: row.id_modelu || model?.id || egz.id_modelu,
+      id_egzemplarza: row.id_egzemplarza || egz.id,
+      nazwa: [isRackLike(row) ? `[RACK] ${baseName}` : baseName, egz.nazwa && egz.nazwa !== model?.nazwa ? egz.nazwa : null, instanceNo ? `nr ${instanceNo}` : null].filter(Boolean).join(' · '),
+      nazwa_modelu: baseName,
+      numer_egzemplarza: instanceNo,
+      kategoria: categoryOf(row),
+      kod: row.kod || egz.kod_kreskowy || egz.zewnetrzny_kod_kreskowy || egz.zewnetrzny_qr_kod || egz.qr_kod || egz.sn || '',
+      ilosc: 1,
+      uwagi: row.uwagi || (isRackLike(row) ? 'Rack wydany jako jedna pozycja bez rozwijania zawartości.' : ''),
+    };
+  }
+  function addDocumentItemsBulk(rows: any[], source: 'scan' | 'manual' = 'manual', sourceLabel = '', scannedCase: any = null) {
+    const normalized = rows
+      .filter((row: any) => isEquipmentInstance(row) && !isCase(row) && !isQuantityOnly(row))
+      .map((row: any) => {
+        const item = normalizeDocumentItem(row, source);
+        const meta = scannedCase || row.system_case_scan || row.case_scan || null;
+        return meta ? { ...item, system_case_scan: meta, id_zeskanowanego_case: meta.id, nazwa_zeskanowanego_case: meta.nazwa } : item;
+      })
+      .filter((item: any) => item.id_egzemplarza && item.id_modelu);
+    if (!normalized.length) {
+      setError('Nie znaleziono aktywnych egzemplarzy sprzętu do dodania na dokument.');
+      return;
+    }
+    setDocItems((prev) => {
+      const existingIds = new Set(prev.map((p: any) => Number(p.id_egzemplarza)).filter(Boolean));
+      const toAdd: any[] = [];
+      for (const item of normalized) {
+        const id = Number(item.id_egzemplarza);
+        if (!id || existingIds.has(id)) continue;
+        existingIds.add(id);
+        toAdd.push(item);
+      }
+      const skipped = normalized.length - toAdd.length;
+      if (!toAdd.length) {
+        setNotice(sourceLabel ? `${sourceLabel}: wszystkie pozycje z tego skanu są już na aktualnym dokumencie.` : 'Ten sprzęt jest już zeskanowany na aktualnym dokumencie.');
+        return prev;
+      }
+      const rackCount = toAdd.filter((x: any) => x.rack || x.rowType === 'rack').length;
+      setNotice(sourceLabel ? `${sourceLabel}: dodano ${toAdd.length} poz.${rackCount ? ' Rack jako jedna pozycja.' : ' Case nie trafia na dokument.'}` : `Dodano ${toAdd.length} poz.${skipped ? `, pominięto duplikaty: ${skipped}` : ''}.`);
+      return [...prev, ...toAdd];
+    });
+  }
+  function addQuantityDocumentItem(row: any, source: 'scan' | 'manual' = 'scan') {
+    const modelId = Number(row.id_modelu || row.model?.id || row.id);
+    if (!modelId) {
+      setError('Nie udało się rozpoznać modelu ilościowego.');
+      return;
+    }
+    const name = row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy';
+    const available = Number(row.ilosc_dostepna || row.ilosc_magazynowa || row.model?.ilosc_magazynowa || 0);
+    const unit = row.jednostka || row.model?.jednostka || 'szt.';
+    const answer = window.prompt(`Ile sztuk wydać/przyjąć?\n${name}${available ? `\nDostępnie w magazynie: ${available} ${unit}` : ''}`, '1');
+    if (answer === null) {
+      setNotice('Anulowano dodawanie sprzętu ilościowego.');
+      return;
+    }
+    const requested = Number(String(answer).replace(',', '.'));
+    const suggested = Math.max(0, available ? Math.min(available, requested) : requested);
+    if (!Number.isFinite(suggested) || suggested <= 0) {
+      setError('Podaj ilość większą od 0.');
+      return;
+    }
+    const item = normalizeDocumentItem({ ...row, rowType: 'ilosciowy_model', quantityOnly: true, id_modelu: modelId, id: modelId, ilosc: suggested, jednostka: unit }, source);
+    setDocItems((prev) => {
+      const idx = prev.findIndex((p: any) => isQuantityOnly(p) && Number(p.id_modelu) === modelId);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...next[idx], ilosc: Number(next[idx].ilosc || 0) + suggested };
+        return next;
+      }
+      return [...prev, item];
+    });
+    setNotice(`Dodano ${suggested} ${unit} · ${name}.`);
+  }
+  function quantityRowSelected(row: any) { const modelId = Number(row?.id_modelu); if (!modelId) return false; return docItems.some((p: any) => isQuantityOnly(p) && Number(p.id_modelu) === modelId); }
+  function toggleQuantityRowWithoutScan(row: any, checked: boolean) {
+    setError('');
+    setNotice('');
+    const modelId = Number(row?.id_modelu);
+    if (!modelId) { setError('Nie udało się rozpoznać modelu ilościowego.'); return; }
+    if (!checked) {
+      setDocItems((prev) => prev.filter((p: any) => !(isQuantityOnly(p) && Number(p.id_modelu) === modelId)));
+      setNotice(`Usunięto ${row.nazwa || 'sprzęt ilościowy'} z aktualnego dokumentu.`);
+      return;
+    }
+    const amount = missingAfterScan(row);
+    if (!Number.isFinite(amount) || amount <= 0) { setNotice(`${row.nazwa || 'Ten model'} nie ma już brakujących sztuk do ${mode === 'wydanie' ? 'wydania' : 'przyjęcia'}.`); return; }
+    const model = modelById.get(String(modelId)) || {};
+    const unit = row.jednostka || model.jednostka || 'szt.';
+    const item = normalizeDocumentItem({ ...model, rowType: 'ilosciowy_model', quantityOnly: true, id: modelId, id_modelu: modelId, nazwa: row.nazwa || model.nazwa, nazwa_modelu: row.nazwa || model.nazwa, kategoria: row.kategoria, kod: row.kod || model.kod_kreskowy || model.kod || '', ilosc: amount, jednostka: unit, uwagi: `${mode === 'wydanie' ? 'Wydanie' : 'Przyjęcie'} sprzętu ilościowego bez skanowania`, }, 'manual');
+    setDocItems((prev) => {
+      const withoutThisModel = prev.filter((p: any) => !(isQuantityOnly(p) && Number(p.id_modelu) === modelId));
+      return [...withoutThisModel, { ...item, source: 'checkbox' }];
+    });
+    setNotice(`${mode === 'wydanie' ? 'Dodano do wydania' : 'Dodano do przyjęcia'} ${amount} ${unit} · ${row.nazwa || model.nazwa || 'sprzęt ilościowy'}.`);
+  }
+  function findQuantityModelByScannedCode(code: string) {
+    const normalized = normScanCode(code);
+    if (!normalized) return null;
+    return (models || []).find((model: any) => isQuantityOnlyModel(model) && allCodesOf(model).some((c) => normScanCode(c) === normalized));
+  }
+  function addDocumentItem(row: any, source: 'scan' | 'manual' = 'manual') {
+    setError('');
+    setNotice('');
+    if (isQuantityOnly(row)) { addQuantityDocumentItem(row, source); return; }
+    if (isRackLike(row)) { addDocumentItemsBulk([row], source, 'Zeskanowano rack'); return; }
+    if (isCase(row)) {
+      const contents = (row.contents || row.zawartosc_case || [])
+        .filter((child: any) => !isCase(child) && !isQuantityOnly(child) && isEquipmentInstance(child));
+      if (!contents.length) { setError('Ten case jest pusty albo nie ma aktywnych egzemplarzy sprzętu w środku. Case nie trafia na dokument.'); return; }
+      const label = row.nazwa || row.nazwa_modelu || row.kod || allCodesOf(row)[0] || `case #${row.id || row.id_egzemplarza || ''}`;
+      addDocumentItemsBulk(contents, 'scan', `Zeskanowano case ${label}`, caseScanMeta(row));
+      return;
+    }
+    if (!isEquipmentInstance(row)) { setError('Wydanie/przyjęcie działa na egzemplarzach, rack jest jedną pozycją, case rozwija zawartość, a sprzęt ilościowy zapisujemy jako model + ilość.'); return; }
+    addDocumentItemsBulk([row], source);
+  }
+  function focusScanInput()function focusScanInput() {
+    scanInputRef.current?.focus();
+    scanInputRef.current?.select();
+  }
+
+  async function scan() {
+    const code = scanCode.trim();
+    if (!code) {
+      focusScanInput();
+      setNotice('Wpisz albo zeskanuj kod w polu tekstowym i naciśnij Enter.');
+      return;
+    }
+    try {
+      const response = await api.get(`/api/magazyn/skan?kod=${encodeURIComponent(code)}`);
+      addDocumentItem(response.data, 'scan', code);
+      setScanCode('');
+      setTimeout(focusScanInput, 0);
+    } catch (e: any) {
+      setError(e?.response?.data?.message || `Nie znaleziono sprzętu dla kodu: ${code}`);
+      setTimeout(focusScanInput, 0);
+    }
+  }
+
+  async function createDocument(type: 'wydanie' | 'przyjecie') {
+    const validDocItems = docItems.filter((p: any) => ef10DocumentPositionAllowed(p)); if (!validDocItems.length) return alert('WZ/PZ może zawierać konkretne egzemplarze albo sprzęt ilościowy. Dla zwykłego sprzętu zeskanuj egzemplarz albo case.');
+    setError('');
+    try {
+      const response = await api.post('/api/magazyn/dokumenty', {
+        typ: type,
+        id_wydarzenia: eventId,
+        osoba_odbierajaca: docForm.osoba_odbierajaca,
+        podpis_odbierajacego: docForm.podpis_odbierajacego,
+        uwagi: docForm.uwagi || `Dokument ${type === 'wydanie' ? 'wydania' : 'przyjęcia'} dla wydarzenia: ${eventName}`,
+        pozycje: docItems.filter((p) => !isCase(p) && (p.id_egzemplarza || p.id_modelu)).map((p) => ({ ...p, ilosc: Number(p.ilosc || 1), status: type === 'wydanie' ? 'wydany' : 'przyjety' })),
+      });
+      setDocItems([]);
+      await load();
+      router.push(`/dashboard/warehouse/documents/${response.data.id}`);
+    } catch (e: any) {
+      setError(e?.response?.data?.message || e?.message || 'Nie udało się wygenerować dokumentu.');
+    }
+  }
+
+  function countAfterScan(row: any) {
+    return mode === 'wydanie' ? row.wydane + row.scanned : row.przyjete + row.scanned;
+  }
+
+  function missingAfterScan(row: any) {
+    return mode === 'wydanie'
+      ? Math.max(0, row.plan - row.wydane - row.scanned)
+      : Math.max(0, row.wydane - row.przyjete - row.scanned);
+  }
+
+  const plannedTotal = plannedRows.reduce((s, r) => s + r.plan, 0);
+  const issuedTotal = plannedRows.reduce((s, r) => s + r.wydane, 0);
+  const returnedTotal = plannedRows.reduce((s, r) => s + r.przyjete, 0);
+
+  return <div className="space-y-5">
+    {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-black text-red-700">{error}</div>}
+    {notice && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-black text-emerald-700">{notice}</div>}
+
+    <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-slate-100 p-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.25em] text-cyan-600">Sprzęt wydarzenia</p>
+          <h3 className="mt-1 text-2xl font-black text-slate-900">Plan sprzętu, wydanie i przyjęcie</h3>
+          <p className="mt-1 max-w-3xl text-sm font-bold text-slate-500">Plan edytujesz po modelach i ilościach. Case/opakowania są ukryte. Wydanie/przyjęcie pokazuje konkretne egzemplarze, a sprzęt ilościowy dodajesz skanem kodu modelu.</p>
+        </div>
+        <div className="grid grid-cols-3 gap-2 sm:min-w-[420px]">
+          <Metric label="Plan" value={`${plannedTotal} szt.`} />
+          <Metric label="Wydano" value={`${issuedTotal} szt.`} />
+          <Metric label="Przyjęto" value={`${returnedTotal} szt.`} />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 p-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {([
+            ['plan', 'Lista sprzętu'],
+            ['wydanie', 'Wydaj WZ'],
+            ['przyjecie', 'Przyjmij PZ'],
+          ] as const).map(([m, label]) => <button key={m} type="button" onClick={() => { setMode(m); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-2xl px-5 py-3 text-sm font-black transition ${mode === m ? 'bg-cyan-600 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:bg-cyan-50'}`}>{label}</button>)}
+        </div>
+        {mode === 'plan' && <button type="button" onClick={() => setShowEditor((v) => !v)} className="rounded-2xl bg-cyan-600 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-cyan-700"><Plus size={16} className="inline" /> {showEditor ? 'Zamknij dodawanie' : 'Dodaj / zmień sprzęt'}</button>}
+      </div>
+
+      {mode === 'plan' && <div className="grid gap-0 xl:grid-cols-[1fr_520px]">
+        <div className="p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h4 className="text-lg font-black text-slate-900">Sprzęt przypisany do wydarzenia</h4>
+              <p className="text-sm font-bold text-slate-500">Podział jak w ofertach: kategoria główna / podkategoria / model.</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {plannedGroups.map((group: any) => <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
+                <div><p className="text-base font-black text-slate-900">{group.nazwa}</p><p className="text-xs font-bold text-slate-400">{group.rows.length} modeli</p></div>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-500 shadow-sm">plan {group.plan} · WZ {group.wydane} · PZ {group.przyjete}</span>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {group.rows.map((row: any) => <div key={row.id_modelu} className="grid gap-3 px-4 py-3 md:grid-cols-[1fr_280px] md:items-center">
+                  <div><p className="font-black text-slate-900">{row.nazwa}</p><p className="text-xs font-bold text-slate-400">model · {row.kategoria}</p></div>
+                  <div className="grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-2 text-center text-xs font-black"><span><b className="block text-lg text-slate-900">{row.plan}</b>plan</span><span><b className="block text-lg text-emerald-700">{row.wydane}</b>WZ</span><span><b className="block text-lg text-blue-700">{row.przyjete}</b>PZ</span></div>
+                </div>)}
+              </div>
+            </div>)}
+            {!plannedGroups.length && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-bold text-slate-400">Brak sprzętu przypisanego do wydarzenia. Kliknij „Dodaj / zmień sprzęt”.</p>}
+          </div>
+        </div>
+
+        {showEditor && <aside className="border-l border-cyan-100 bg-cyan-50/50 p-5">
+          <div className="sticky top-4 space-y-4">
+            <div className="rounded-2xl border border-cyan-100 bg-white p-4 shadow-sm">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div><h4 className="text-lg font-black text-slate-900">Dodaj / zmień sprzęt</h4><p className="text-sm font-bold text-slate-500">Wybierz kategorię główną, potem podkategorię i wpisz ilość przy modelu. Bez koszyka.</p></div>
+                <button type="button" onClick={() => setShowEditor(false)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-600">Zamknij</button>
+              </div>
+
+              <Field label="Szukaj modelu"><div className="relative"><Search className="absolute left-3 top-3 text-slate-400" size={17}/><input className={`${inputClass} pl-10`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="projektor, monitor, kabel..." /></div></Field>
+
+              <div className="mt-4 rounded-2xl bg-slate-50 p-3">
+                <p className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Kategorie główne</p>
+                <div className="flex max-h-[140px] flex-wrap gap-2 overflow-y-auto pr-1">
+                  <button type="button" onClick={() => { setActiveRoot('all'); setActiveSub(''); }} className={`rounded-xl px-3 py-2 text-xs font-black ${activeRoot === 'all' ? 'bg-cyan-600 text-white' : 'bg-white text-slate-700 hover:bg-cyan-50'}`}>Wszystkie</button>
+                  {equipmentCategoryRoots.map((root: any) => <button key={root.id} type="button" onClick={() => { setActiveRoot(String(root.id)); setActiveSub(''); }} className={`rounded-xl px-3 py-2 text-xs font-black ${activeRoot === String(root.id) ? 'bg-cyan-600 text-white' : 'bg-white text-slate-700 hover:bg-cyan-50'}`}>{root.nazwa} <span className="opacity-60">{totalForEquipmentCategory(String(root.id))}</span></button>)}
+                </div>
+              </div>
+
+              {activeRootObj?.dzieci?.length > 0 && <div className="mt-3 rounded-2xl bg-slate-50 p-3">
+                <p className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Podkategorie</p>
+                <div className="flex max-h-[160px] flex-wrap gap-2 overflow-y-auto pr-1">
+                  <button type="button" onClick={() => setActiveSub('')} className={`rounded-xl px-3 py-2 text-xs font-black ${!activeSub ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}>Wszystkie w {activeRootObj.nazwa}</button>
+                  {activeRootObj.dzieci.map((child: any) => <button key={child.id} type="button" onClick={() => setActiveSub(String(child.id))} className={`rounded-xl px-3 py-2 text-xs font-black ${activeSub === String(child.id) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}>{child.nazwa} <span className="opacity-60">{totalForEquipmentCategory(String(child.id))}</span></button>)}
+                </div>
+              </div>}
+            </div>
+
+            <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
+              {visibleModels.map((model: any) => {
+                const qty = Number(planQty[String(model.id)] || 0) || 0;
+                return <div key={model.id} className={`rounded-2xl border bg-white p-3 shadow-sm transition ${qty > 0 ? 'border-cyan-300 ring-2 ring-cyan-100' : 'border-slate-200'}`}>
+                  <div className="flex gap-3">
+                    <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-xs font-black text-slate-400">
+                      {model.zdjecie ? <img src={model.zdjecie} alt="" className="h-full w-full object-cover" /> : 'IMG'}
+                    </div>
+                    <div className="min-w-0 flex-1"><p className="truncate font-black text-slate-900">{model.nazwa}</p><p className="truncate text-xs font-bold text-slate-400">{model.kategoria_nazwa}</p><p className="mt-1 text-xs font-black text-cyan-700">Dostępne: {model.dostepne ?? model.ilosc_dostepna ?? model.na_stanie ?? 0}</p></div>
+                  </div>
+                  <div className="mt-3 grid grid-cols-[44px_1fr_44px] gap-2">
+                    <button type="button" onClick={() => stepQty(model, -1)} className="rounded-xl border border-slate-200 bg-white text-lg font-black text-slate-700">-</button>
+                    <input type="number" min={0} className={`${inputClass} text-center text-lg font-black`} value={planQty[String(model.id)] ?? '0'} onChange={(e) => changeQty(model, e.target.value)} />
+                    <button type="button" onClick={() => stepQty(model, 1)} className="rounded-xl bg-cyan-600 text-lg font-black text-white">+</button>
+                  </div>
+                </div>;
+              })}
+              {!visibleModels.length && <p className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm font-bold text-slate-400">Brak modeli w tej kategorii.</p>}
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between"><p className="font-black text-slate-900">Po zmianach</p><span className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-black text-cyan-700">{Object.values(planQty).filter((v) => Number(v) > 0).length} modeli</span></div>
+              <div className="max-h-[150px] space-y-1 overflow-y-auto pr-1">
+                {Object.entries(planQty).filter(([, qty]) => Number(qty) > 0).map(([id, qty]) => {
+                  const model = models.find((m: any) => String(m.id) === String(id));
+                  return <div key={id} className="flex justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm font-bold"><span className="truncate">{model?.nazwa || `Model #${id}`}</span><b>x{qty}</b></div>;
+                })}
+              </div>
+              <div className="mt-3 flex gap-2"><button type="button" onClick={load} className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-600">Cofnij</button><button type="button" onClick={savePlan} className="flex-1 rounded-xl bg-cyan-600 px-4 py-3 text-sm font-black text-white">Zapisz plan</button></div>
+            </div>
+          </div>
+        </aside>}
+      </div>}
+
+      {mode !== 'plan' && <div className="grid gap-0 xl:grid-cols-[1.15fr_.85fr]">
+        <div className="p-5">
+          <div className="mb-4 rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
+            <p className="text-sm font-black text-cyan-900">{mode === 'wydanie' ? 'Skanuj egzemplarze do wydania. Sprzęt ilościowy możesz zaznaczyć checkboxem bez skanowania.' : 'Skanuj zwracane egzemplarze. Sprzęt ilościowy możesz zaznaczyć checkboxem bez skanowania.'}</p>
+          </div>
+          <div className="space-y-4">
+            {plannedGroups.map((group: any) => <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="bg-slate-50 px-4 py-3"><b className="text-slate-900">{group.nazwa}</b></div>
+              <div className="divide-y divide-slate-100">
+                {group.rows.map((row: any) => {
+                  const after = countAfterScan(row);
+                  const missing = missingAfterScan(row);
+                  const base = mode === 'wydanie' ? row.plan : row.wydane;
+                  const percent = base > 0 ? Math.min(100, Math.round((after / base) * 100)) : 100;
+                  return <div key={row.id_modelu} className="px-4 py-3">
+                    <div className="grid gap-3 lg:grid-cols-[1fr_280px] lg:items-center">
+                      <div>
+                        <p className="font-black text-slate-900">{row.nazwa}</p>
+                        <p className="text-xs font-bold text-slate-400">{mode === 'wydanie' ? `Plan ${row.plan} · wydano wcześniej ${row.wydane} · skan teraz ${row.scanned}` : `Wydano ${row.wydane} · przyjęto wcześniej ${row.przyjete} · skan teraz ${row.scanned}`}</p>
+                        {row.quantityOnly && <label className="mt-3 inline-flex cursor-pointer items-center gap-3 rounded-2xl border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-black text-cyan-900 hover:bg-cyan-100">
+                          <input
+                            type="checkbox"
+                            className="h-5 w-5 rounded border-cyan-300 accent-cyan-600"
+                            checked={quantityRowSelected(row)}
+                            onChange={(e) => toggleQuantityRowWithoutScan(row, e.target.checked)}
+                          />
+                          <span>{mode === 'wydanie' ? 'Wydaj na sztuki bez skanu' : 'Przyjmij na sztuki bez skanu'}</span>
+                          <span className="rounded-full bg-white px-2 py-1 text-cyan-700">{quantityRowSelected(row) ? `${row.scanned} ${row.jednostka || 'szt.'}` : `${missing} ${row.jednostka || 'szt.'}`}</span>
+                        </label>}
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 p-3">
+                        <div className="mb-2 flex justify-between text-xs font-black"><span>{mode === 'wydanie' ? 'Wydano po skanie' : 'Przyjęto po skanie'}: {after}/{base}</span><span className={missing ? 'text-orange-600' : 'text-emerald-700'}>{missing ? `brakuje ${missing}` : 'OK'}</span></div>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-200"><div className={`h-full ${missing ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${percent}%` }} /></div>
+                      </div>
+                    </div>
+                  </div>;
+                })}
+              </div>
+            </div>)}
+          </div>
+        </div>
+        <div className="border-l border-slate-100 bg-slate-50/70 p-5">
+          <div className="sticky top-4 space-y-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <Field label="Skanuj kod kreskowy / QR / SN / case"><div className="flex gap-2"><input ref={scanInputRef} className={inputClass} autoFocus value={scanCode} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setScanCode(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); scan(); } }} placeholder="Kliknij Skanuj, zeskanuj kod i Enter"/><Button onClick={scan}>{scanCode.trim() ? 'Dodaj skan' : 'Skanuj'}</Button></div></Field>
+              <p className="mt-2 text-xs font-bold text-slate-400">Case jest skrótem skanowania — na WZ/PZ trafiają egzemplarze ze środka. Sprzęt ilościowy możesz dodać skanem albo checkboxem bez skanowania.</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between"><h4 className="text-lg font-black text-slate-900">Zeskanowane teraz</h4><span className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-black text-cyan-700">{docItems.reduce((s: number, p: any) => s + Number(p.ilosc || 1), 0)} szt.</span></div>
+              <div className="max-h-[280px] space-y-2 overflow-y-auto pr-1">
+                {docItems.map((p, idx) => <div key={`${p.id_egzemplarza || p.id_modelu}-${idx}`} className="rounded-xl border border-slate-100 bg-slate-50 p-3"><div className="flex justify-between gap-2"><b className="text-sm text-slate-900">{p.nazwa}</b><button onClick={() => setDocItems((s) => s.filter((_, i) => i !== idx))} className="font-black text-red-600">×</button></div><p className="text-xs font-bold text-slate-400">{p.kategoria} · {isQuantityOnly(p) ? `${p.ilosc || 1} ${p.jednostka || 'szt.'}${p.kod ? ` · kod ${p.kod}` : ''}` : `${isRackLike(p) ? 'rack · ' : ''}${p.kod || '-'}` }</p></div>)}
+                {!docItems.length && <p className="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-sm font-bold text-slate-400">Skanuj sprzęt albo zaznacz checkbox przy sprzęcie ilościowym — lista i liczniki zaktualizują się od razu.</p>}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <Field label="Wyszukaj egzemplarz ręcznie"><input className={inputClass} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="nazwa, numer, kod..." /></Field>
+              <div className="mt-3 max-h-[240px] space-y-2 overflow-y-auto pr-1">
+                {visibleInstances.map((r: any) => <button key={r.id} type="button" onClick={() => addDocumentItem(r, 'manual')} className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left hover:border-cyan-300 hover:bg-cyan-50"><b className="text-sm text-slate-900">{r.model?.nazwa || r.nazwa_wiersza}</b><p className="text-xs font-bold text-slate-400">{r.nazwa_wiersza} · {r.kod || '-'}</p></button>)}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="rounded-2xl border border-cyan-100 bg-cyan-50 p-3 text-xs font-bold text-cyan-900">
+                Dokument wydarzenia podpisze automatycznie zalogowany użytkownik. Na potwierdzeniu będzie widać, z czyjego konta wyszedł sprzęt.
+              </div>
+              <Field label="Uwagi"><textarea className={inputClass} value={docForm.uwagi || ''} onChange={(e) => setDocForm({ ...docForm, uwagi: e.target.value })}/></Field>
+              <button type="button" disabled={!docItems.length} onClick={() => createDocument(mode)} className={`mt-2 w-full rounded-xl px-4 py-3 text-sm font-black text-white disabled:opacity-50 ${mode === 'wydanie' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'}`}><FileText size={16} className="inline" /> {mode === 'wydanie' ? 'Wystaw WZ' : 'Wystaw PZ'}</button>
+            </div>
+          </div>
+        </div>
+      </div>}
+    </section>
+
+    <div className="rounded-2xl border border-slate-200 p-4">
+      <h3 className="mb-3 text-lg font-black">Dokumenty magazynowe wydarzenia</h3>
+      <div className="grid gap-2 md:grid-cols-2">
+        {(data.dokumenty || []).map((d: any) => <a key={d.id} href={`/dashboard/warehouse/documents/${d.id}`} className="rounded-2xl border p-3 hover:bg-slate-50"><b>{d.numer}</b><p className="text-sm font-bold text-slate-500">{d.typ} · {new Date(d.data_operacji).toLocaleString('pl-PL')} · egzemplarzy: {d.pozycje?.length || 0}</p></a>)}
+        {!data.dokumenty?.length && <p className="text-sm font-bold text-slate-400">Brak dokumentów.</p>}
+      </div>
+    </div>
+  </div>;
+}
+
+function RentalsPanel({ rentals }: { rentals: any[] }) {
+  return <div className="space-y-2">{rentals.map((r: any) => <Link key={r.id} href={`/dashboard/rentals/${r.id}`} className="block rounded-2xl border border-slate-200 p-4 hover:bg-cyan-50"><p className="font-black text-slate-900">{r.numer || `Wynajem #${r.id}`}</p><p className="text-sm font-bold text-slate-400">{dateTime(r.data_wydania)} → {dateTime(r.data_zwrotu_planowana)}</p></Link>)}{rentals.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-bold text-slate-400">Brak wypożyczeń przypisanych do wydarzenia.</p>}</div>;
+}
+function PeoplePanel({ people }: { people: any[] }) {
+  return <div className="space-y-2">{people.map((p: any) => <div key={p.id} className="rounded-2xl border border-slate-200 p-4"><p className="font-black text-slate-900">{p.uzytkownik?.imie} {p.uzytkownik?.nazwisko}</p><p className="text-sm font-bold text-slate-400">{p.rola_w_wydarzeniu || 'Obsługa'}</p></div>)}{people.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-bold text-slate-400">Brak przypisanej ekipy.</p>}</div>;
+}
+function FleetPanel({ vehicles }: { vehicles: any[] }) {
+  return <div className="space-y-2">{vehicles.map((v: any) => <div key={v.id} className="rounded-2xl border border-slate-200 p-4"><p className="font-black text-slate-900">{v.pojazd?.nazwa || 'Pojazd'}</p><p className="text-sm font-bold text-slate-400">{v.pojazd?.nr_rejestracyjny || '-'} · {v.rola_pojazdu || 'Rezerwacja'}</p></div>)}{vehicles.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-bold text-slate-400">Brak przypisanych pojazdów.</p>}</div>;
+}
+function HistoryPanel({ history }: { history: any[] }) {
+  return <div className="space-y-2">{history.map((h: any) => <div key={h.id} className="rounded-2xl border border-slate-200 p-4"><p className="font-black text-slate-900">{h.akcja}</p><p className="text-sm font-bold text-slate-400">{dateTime(h.data_utworzenia)} · {h.uzytkownik ? `${h.uzytkownik.imie} ${h.uzytkownik.nazwisko}` : 'System'}</p></div>)}{history.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-bold text-slate-400">Brak historii zmian.</p>}</div>;
+}

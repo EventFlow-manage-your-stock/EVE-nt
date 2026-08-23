@@ -1,0 +1,113 @@
+{
+  "file": "/Users/michalstrykowski/Desktop/eve-nt-local/EventFlow_v2/apps/api/import/new/NEW_USERS/NEW_uzytkownicy.xlsx",
+  "imported": 14,
+  "skipped": 0,
+  "password": "zaq1@WSX",
+  "user_roles_created_by_importer": 0,
+  "existing_user_roles_preserved": true,
+  "unsupported_profile_fields_not_in_current_db": {
+    "miejscowosc": [
+      {
+        "user_id": 12,
+        "email": "mateusz@pixelmultimedia.pl",
+        "value": "Katowice"
+      },
+      {
+        "user_id": 13,
+        "email": "krzysztof.marczak@pixelmultimedia.pl",
+        "value": "Poznań"
+      },
+      {
+        "user_id": 15,
+        "email": "tomasz@pixelmultimedia.pl",
+        "value": "Suchy Las"
+      }
+    ]
+  },
+  "users": [
+    {
+      "id": 4,
+      "email": "wojciech@pixelmultimedia.pl",
+      "imie": "Wojciech",
+      "nazwisko": "Jazurek"
+    },
+    {
+      "id": 3,
+      "email": "michal@pixelmultimedia.pl",
+      "imie": "Michał",
+      "nazwisko": "Strykowski"
+    },
+    {
+      "id": 6,
+      "email": "antoni@pixelmultimedia.pl",
+      "imie": "Antoni",
+      "nazwisko": "Pazder"
+    },
+    {
+      "id": 7,
+      "email": "jan@pixelmultimedia.pl",
+      "imie": "Jan",
+      "nazwisko": "Studencki"
+    },
+    {
+      "id": 8,
+      "email": "gabriela@pixelmultimedia.pl",
+      "imie": "Gabriela",
+      "nazwisko": "Filipek – Moneta"
+    },
+    {
+      "id": 9,
+      "email": "piotr@pixelmultimedia.pl",
+      "imie": "Piotr",
+      "nazwisko": "Piechnik"
+    },
+    {
+      "id": 10,
+      "email": "dominik@pixelmultimedia.pl",
+      "imie": "Dominik",
+      "nazwisko": "Kuźma"
+    },
+    {
+      "id": 11,
+      "email": "norbert@pixelmultimedia.pl",
+      "imie": "Norbert",
+      "nazwisko": "Gruszczyński"
+    },
+    {
+      "id": 12,
+      "email": "mateusz@pixelmultimedia.pl",
+      "imie": "Mateusz",
+      "nazwisko": "Nowak"
+    },
+    {
+      "id": 13,
+      "email": "krzysztof.marczak@pixelmultimedia.pl",
+      "imie": "Krzysztof",
+      "nazwisko": "Marczak"
+    },
+    {
+      "id": 14,
+      "email": "jakub@pixelmultimedia.pl",
+      "imie": "Jakub",
+      "nazwisko": "Studziński"
+    },
+    {
+      "id": 15,
+      "email": "tomasz@pixelmultimedia.pl",
+      "imie": "Tomasz",
+      "nazwisko": "Kowalski"
+    },
+    {
+      "id": 16,
+      "email": "it@pixelmultimedia.pl",
+      "imie": "IT",
+      "nazwisko": "PIXELMULTIMEDIA"
+    },
+    {
+      "id": 17,
+      "email": "m.strykowski7@gmail.com",
+      "imie": "M (zew)",
+      "nazwisko": "Strykowski"
+    }
+  ]
+}

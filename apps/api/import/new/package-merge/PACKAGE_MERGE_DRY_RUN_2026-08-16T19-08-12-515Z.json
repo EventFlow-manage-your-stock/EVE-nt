@@ -1,0 +1,3306 @@
+{
+  "generated_at": "2026-08-16T19:08:12.516Z",
+  "mode": "DRY_RUN",
+  "organization": {
+    "id": 1,
+    "name": "EventFlow"
+  },
+  "models_scanned": 482,
+  "groups_detected": 69,
+  "groups_applied": 0,
+  "groups_skipped": 25,
+  "groups_failed": 0,
+  "foreign_keys_to_models": [
+    {
+      "table": "ceny_modeli",
+      "column": "id_modelu"
+    },
+    {
+      "table": "ceny_sprzetu",
+      "column": "id_modelu"
+    },
+    {
+      "table": "egzemplarze",
+      "column": "id_modelu"
+    },
+    {
+      "table": "pozycje_oferty",
+      "column": "id_modelu"
+    },
+    {
+      "table": "pozycje_pakietow",
+      "column": "id_modelu"
+    },
+    {
+      "table": "pozycje_sprzetu_wydarzen",
+      "column": "id_modelu"
+    },
+    {
+      "table": "pozycje_wydan_magazynowych",
+      "column": "id_modelu"
+    },
+    {
+      "table": "pozycje_wynajmu",
+      "column": "id_modelu"
+    }
+  ],
+  "groups": [
+    {
+      "applied": false,
+      "survivor_model_id": 3,
+      "snapshot_before": {
+        "base": "10 x LedBar TRIBAR 400 IR",
+        "survivor_model_id": 3,
+        "models": [
+          {
+            "id": 3,
+            "name": "10 x LedBar TRIBAR 400 IR (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              90
+            ]
+          },
+          {
+            "id": 4,
+            "name": "10 x LedBar TRIBAR 400 IR (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              11
+            ]
+          },
+          {
+            "id": 5,
+            "name": "10 x LedBar TRIBAR 400 IR (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              158
+            ]
+          },
+          {
+            "id": 6,
+            "name": "10 x LedBar TRIBAR 400 IR (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              433
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 7,
+      "snapshot_before": {
+        "base": "2 x Aktywna kolumna DAS Audio Action-508A",
+        "survivor_model_id": 7,
+        "models": [
+          {
+            "id": 7,
+            "name": "2 x Aktywna kolumna DAS Audio Action-508A (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 28,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              148
+            ]
+          },
+          {
+            "id": 8,
+            "name": "2 x Aktywna kolumna DAS Audio Action-508A (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 28,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              220
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 9,
+      "snapshot_before": {
+        "base": "2 x Aktywna kolumna Proel WD12A",
+        "survivor_model_id": 9,
+        "models": [
+          {
+            "id": 9,
+            "name": "2 x Aktywna kolumna Proel WD12A (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 28,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              123
+            ]
+          },
+          {
+            "id": 10,
+            "name": "2 x Aktywna kolumna Proel WD12A (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 28,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              82
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 12,
+      "snapshot_before": {
+        "base": "2 x Kolumna pasywna L'Acoustics X12",
+        "survivor_model_id": 12,
+        "models": [
+          {
+            "id": 12,
+            "name": "2 x Kolumna pasywna L'Acoustics X12 (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 11,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              221
+            ]
+          },
+          {
+            "id": 13,
+            "name": "2 x Kolumna pasywna L'Acoustics X12 (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 11,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              217
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 14,
+      "snapshot_before": {
+        "base": "2 x Kolumna pasywna L'Acoustics X8",
+        "survivor_model_id": 14,
+        "models": [
+          {
+            "id": 14,
+            "name": "2 x Kolumna pasywna L'Acoustics X8 (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 11,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              107
+            ]
+          },
+          {
+            "id": 15,
+            "name": "2 x Kolumna pasywna L'Acoustics X8 (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 11,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              393
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 16,
+      "snapshot_before": {
+        "base": "2 x LAPTOP DO GŁOSOWAŃ [Lenovo T540p]",
+        "survivor_model_id": 16,
+        "models": [
+          {
+            "id": 16,
+            "name": "2 x LAPTOP DO GŁOSOWAŃ [Lenovo T540p] (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              71
+            ]
+          },
+          {
+            "id": 17,
+            "name": "2 x LAPTOP DO GŁOSOWAŃ [Lenovo T540p] (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              357
+            ]
+          },
+          {
+            "id": 18,
+            "name": "2 x LAPTOP DO GŁOSOWAŃ [Lenovo T540p] (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              137
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 19,
+      "snapshot_before": {
+        "base": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450]",
+        "survivor_model_id": 19,
+        "models": [
+          {
+            "id": 19,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              394
+            ]
+          },
+          {
+            "id": 20,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 10)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "10",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              111
+            ]
+          },
+          {
+            "id": 21,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              228
+            ]
+          },
+          {
+            "id": 22,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              34
+            ]
+          },
+          {
+            "id": 23,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              94
+            ]
+          },
+          {
+            "id": 24,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              187
+            ]
+          },
+          {
+            "id": 25,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 6)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "6",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              224
+            ]
+          },
+          {
+            "id": 26,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 7)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "7",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              178
+            ]
+          },
+          {
+            "id": 27,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 8)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "8",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              64
+            ]
+          },
+          {
+            "id": 28,
+            "name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450] (zestaw 9)",
+            "type": "opakowanie",
+            "category_id": 45,
+            "parsed_number": "9",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              169
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 29,
+      "snapshot_before": {
+        "base": "2 x LAPTOP REALIZACYJNY [DELL Latitude 5440]",
+        "survivor_model_id": 29,
+        "models": [
+          {
+            "id": 29,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL Latitude 5440] (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              168
+            ]
+          },
+          {
+            "id": 40,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              355
+            ]
+          },
+          {
+            "id": 41,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 10)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "10",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              323
+            ]
+          },
+          {
+            "id": 42,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 11)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "11",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              385
+            ]
+          },
+          {
+            "id": 43,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 12)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "12",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              427
+            ]
+          },
+          {
+            "id": 44,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 13)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "13",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              162
+            ]
+          },
+          {
+            "id": 45,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 14)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "14",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              198
+            ]
+          },
+          {
+            "id": 46,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 15)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "15",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              415
+            ]
+          },
+          {
+            "id": 47,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              210
+            ]
+          },
+          {
+            "id": 48,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              395
+            ]
+          },
+          {
+            "id": 49,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              3
+            ]
+          },
+          {
+            "id": 50,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 6)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "6",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              149
+            ]
+          },
+          {
+            "id": 51,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 7)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "7",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              468
+            ]
+          },
+          {
+            "id": 52,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 8)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "8",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              101
+            ]
+          },
+          {
+            "id": 53,
+            "name": "2 x LAPTOP REALIZACYJNY [Dell Latitude 5440] (zestaw 9)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "9",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              366
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 54,
+      "snapshot_before": {
+        "base": "2 x Laptop REALIZACYJNY [Dell Precision 3520]",
+        "survivor_model_id": 54,
+        "models": [
+          {
+            "id": 54,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              371
+            ]
+          },
+          {
+            "id": 55,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 10)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "10",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              37
+            ]
+          },
+          {
+            "id": 56,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              410
+            ]
+          },
+          {
+            "id": 57,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              183
+            ]
+          },
+          {
+            "id": 58,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              113
+            ]
+          },
+          {
+            "id": 59,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              478
+            ]
+          },
+          {
+            "id": 60,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 6)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "6",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              78
+            ]
+          },
+          {
+            "id": 61,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 7)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "7",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              102
+            ]
+          },
+          {
+            "id": 62,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 8)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "8",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              83
+            ]
+          },
+          {
+            "id": 63,
+            "name": "2 x Laptop REALIZACYJNY [Dell Precision 3520] (zestaw 9)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "9",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              91
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 30,
+      "snapshot_before": {
+        "base": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14]",
+        "survivor_model_id": 30,
+        "models": [
+          {
+            "id": 30,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              174
+            ]
+          },
+          {
+            "id": 31,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 10)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "10",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              356
+            ]
+          },
+          {
+            "id": 32,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              52
+            ]
+          },
+          {
+            "id": 33,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              179
+            ]
+          },
+          {
+            "id": 34,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              389
+            ]
+          },
+          {
+            "id": 35,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              360
+            ]
+          },
+          {
+            "id": 36,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 6)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "6",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              232
+            ]
+          },
+          {
+            "id": 37,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 7)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "7",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              46
+            ]
+          },
+          {
+            "id": 38,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 8)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "8",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              121
+            ]
+          },
+          {
+            "id": 39,
+            "name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14] (zestaw 9)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "9",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              161
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 64,
+      "snapshot_before": {
+        "base": "2 x Laptop REALIZACYJNY [MacBook Pro 14 cali M4]",
+        "survivor_model_id": 64,
+        "models": [
+          {
+            "id": 64,
+            "name": "2 x Laptop REALIZACYJNY [MacBook Pro 14 cali M4] (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              435
+            ]
+          },
+          {
+            "id": 65,
+            "name": "2 x Laptop REALIZACYJNY [MacBook Pro 14 cali M4] (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              119
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 66,
+      "snapshot_before": {
+        "base": "2 x Martin MAC Quantum Profile",
+        "survivor_model_id": 66,
+        "models": [
+          {
+            "id": 66,
+            "name": "2 x Martin MAC Quantum Profile (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              480
+            ]
+          },
+          {
+            "id": 67,
+            "name": "2 x Martin MAC Quantum Profile (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              390
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 68,
+      "snapshot_before": {
+        "base": "2 x Monitor 32\"",
+        "survivor_model_id": 68,
+        "models": [
+          {
+            "id": 68,
+            "name": "2 x Monitor 32\" (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              441
+            ]
+          },
+          {
+            "id": 69,
+            "name": "2 x Monitor 32\" (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              199
+            ]
+          },
+          {
+            "id": 70,
+            "name": "2 x Monitor 32\" (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              41
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 71,
+      "snapshot_before": {
+        "base": "2 x Monitor 43\"",
+        "survivor_model_id": 71,
+        "models": [
+          {
+            "id": 71,
+            "name": "2 x Monitor 43\" (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              405
+            ]
+          },
+          {
+            "id": 72,
+            "name": "2 x Monitor 43\" (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              133
+            ]
+          },
+          {
+            "id": 73,
+            "name": "2 x Monitor 43\" (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              391
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 74,
+      "snapshot_before": {
+        "base": "2 x Monitor 55''",
+        "survivor_model_id": 74,
+        "models": [
+          {
+            "id": 74,
+            "name": "2 x Monitor 55'' (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              103
+            ]
+          },
+          {
+            "id": 75,
+            "name": "2 x Monitor 55'' (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              66
+            ]
+          },
+          {
+            "id": 76,
+            "name": "2 x Monitor 55'' (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              417
+            ]
+          },
+          {
+            "id": 77,
+            "name": "2 x Monitor 55'' (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              408
+            ]
+          },
+          {
+            "id": 78,
+            "name": "2 x Monitor 55'' (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              443
+            ]
+          },
+          {
+            "id": 79,
+            "name": "2 x Monitor 55'' (zestaw 6)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "6",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              424
+            ]
+          },
+          {
+            "id": 80,
+            "name": "2 x Monitor 55'' (zestaw 7)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "7",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              134
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 96,
+      "snapshot_before": {
+        "base": "2 x Monitor dotykowy Iiyama 55\"",
+        "survivor_model_id": 96,
+        "models": [
+          {
+            "id": 96,
+            "name": "2 x Monitor dotykowy Iiyama 55\" (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              362
+            ]
+          },
+          {
+            "id": 97,
+            "name": "2 x Monitor dotykowy Iiyama 55\" (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              432
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 81,
+      "snapshot_before": {
+        "base": "2 x Monitor Iiyama 22\"",
+        "survivor_model_id": 81,
+        "models": [
+          {
+            "id": 81,
+            "name": "2 x Monitor Iiyama 22\" (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              115
+            ]
+          },
+          {
+            "id": 82,
+            "name": "2 x Monitor Iiyama 22\" (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              436
+            ]
+          },
+          {
+            "id": 83,
+            "name": "2 x Monitor Iiyama 22\" (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              483
+            ]
+          },
+          {
+            "id": 84,
+            "name": "2 x Monitor Iiyama 22\" (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              412
+            ]
+          },
+          {
+            "id": 85,
+            "name": "2 x Monitor Iiyama 22\" (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              98
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 86,
+      "snapshot_before": {
+        "base": "2 x Monitor Iiyama 24\"",
+        "survivor_model_id": 86,
+        "models": [
+          {
+            "id": 86,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              122
+            ]
+          },
+          {
+            "id": 87,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 10)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "10",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              5
+            ]
+          },
+          {
+            "id": 88,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              448
+            ]
+          },
+          {
+            "id": 89,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              317
+            ]
+          },
+          {
+            "id": 90,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              84
+            ]
+          },
+          {
+            "id": 91,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              451
+            ]
+          },
+          {
+            "id": 92,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 6)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "6",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              229
+            ]
+          },
+          {
+            "id": 93,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 7)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "7",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              155
+            ]
+          },
+          {
+            "id": 94,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 8)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "8",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              463
+            ]
+          },
+          {
+            "id": 95,
+            "name": "2 x Monitor Iiyama 24\" (zestaw 9)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "9",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              9
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 103,
+      "snapshot_before": {
+        "base": "2 x Statyw korbowy AdamHall 4m",
+        "survivor_model_id": 103,
+        "models": [
+          {
+            "id": 103,
+            "name": "2 x Statyw korbowy AdamHall 4m (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              445
+            ]
+          },
+          {
+            "id": 104,
+            "name": "2 x Statyw korbowy AdamHall 4m (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              455
+            ]
+          },
+          {
+            "id": 105,
+            "name": "2 x Statyw korbowy AdamHall 4m (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              176
+            ]
+          },
+          {
+            "id": 381,
+            "name": "2 x Statyw korbowy AdamHall 4m (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 382,
+            "name": "2 x Statyw korbowy AdamHall 4m (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 383,
+            "name": "2 x Statyw korbowy AdamHall 4m (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 106,
+      "snapshot_before": {
+        "base": "2 x X-Dot Brighter Wash IP",
+        "survivor_model_id": 106,
+        "models": [
+          {
+            "id": 106,
+            "name": "2 x X-Dot Brighter Wash IP (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              387
+            ]
+          },
+          {
+            "id": 107,
+            "name": "2 x X-Dot Brighter Wash IP (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              131
+            ]
+          },
+          {
+            "id": 108,
+            "name": "2 x X-Dot Brighter Wash IP (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              50
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 109,
+      "snapshot_before": {
+        "base": "2x Monitor 75\"",
+        "survivor_model_id": 109,
+        "models": [
+          {
+            "id": 109,
+            "name": "2x Monitor 75\" (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              382
+            ]
+          },
+          {
+            "id": 110,
+            "name": "2x Monitor 75\" (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              423
+            ]
+          },
+          {
+            "id": 111,
+            "name": "2x Monitor 75\" (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              28
+            ]
+          },
+          {
+            "id": 112,
+            "name": "2x Monitor 75\" (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              380
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 113,
+      "snapshot_before": {
+        "base": "4 x Aktywna kolumna DAS Audio Action-508A",
+        "survivor_model_id": 113,
+        "models": [
+          {
+            "id": 113,
+            "name": "4 x Aktywna kolumna DAS Audio Action-508A (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 28,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              202
+            ]
+          },
+          {
+            "id": 114,
+            "name": "4 x Aktywna kolumna DAS Audio Action-508A (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 28,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              379
+            ]
+          },
+          {
+            "id": 115,
+            "name": "4 x Aktywna kolumna DAS Audio Action-508A (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 28,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              206
+            ]
+          },
+          {
+            "id": 116,
+            "name": "4 x Aktywna kolumna DAS Audio Action-508A (zestaw 6)",
+            "type": "opakowanie",
+            "category_id": 28,
+            "parsed_number": "6",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              151
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 123,
+      "snapshot_before": {
+        "base": "4 x Martin MAC Aura XIP",
+        "survivor_model_id": 123,
+        "models": [
+          {
+            "id": 123,
+            "name": "4 x Martin MAC Aura XIP (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              10
+            ]
+          },
+          {
+            "id": 124,
+            "name": "4 x Martin MAC Aura XIP (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              227
+            ]
+          },
+          {
+            "id": 125,
+            "name": "4 x Martin MAC Aura XIP (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              143
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 126,
+      "snapshot_before": {
+        "base": "4 x Monitor Iiyama 22\"",
+        "survivor_model_id": 126,
+        "models": [
+          {
+            "id": 126,
+            "name": "4 x Monitor Iiyama 22\" (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              193
+            ]
+          },
+          {
+            "id": 127,
+            "name": "4 x Monitor Iiyama 22\" (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              14
+            ]
+          },
+          {
+            "id": 128,
+            "name": "4 x Monitor Iiyama 22\" (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              411
+            ]
+          },
+          {
+            "id": 129,
+            "name": "4 x Monitor Iiyama 22\" (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 5,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              194
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 130,
+      "snapshot_before": {
+        "base": "4 x Naświetlacz Brighter ATOM R+",
+        "survivor_model_id": 130,
+        "models": [
+          {
+            "id": 130,
+            "name": "4 x Naświetlacz Brighter ATOM R+ (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 36,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              156
+            ]
+          },
+          {
+            "id": 131,
+            "name": "4 x Naświetlacz Brighter ATOM R+ (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 36,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              112
+            ]
+          },
+          {
+            "id": 132,
+            "name": "4 x Naświetlacz Brighter ATOM R+ (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 36,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              324
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 133,
+      "snapshot_before": {
+        "base": "4 x Naświetlacz LIGHT GO!",
+        "survivor_model_id": 133,
+        "models": [
+          {
+            "id": 133,
+            "name": "4 x Naświetlacz LIGHT GO! (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 36,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              175
+            ]
+          },
+          {
+            "id": 134,
+            "name": "4 x Naświetlacz LIGHT GO! (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 36,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              418
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 135,
+      "snapshot_before": {
+        "base": "4 x Robe 600X",
+        "survivor_model_id": 135,
+        "models": [
+          {
+            "id": 135,
+            "name": "4 x Robe 600X (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              205
+            ]
+          },
+          {
+            "id": 136,
+            "name": "4 x Robe 600X (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              444
+            ]
+          },
+          {
+            "id": 137,
+            "name": "4 x Robe 600X (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              100
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 283,
+      "snapshot_before": {
+        "base": "4x Zestaw słuchawkowy Intercom Vokkero",
+        "survivor_model_id": 283,
+        "models": [
+          {
+            "id": 283,
+            "name": "[1] 4x Zestaw słuchawkowy Intercom Vokkero",
+            "type": "opakowanie",
+            "category_id": 13,
+            "parsed_number": "1",
+            "marker": "NUMBER_PREFIX_BRACKET",
+            "item_ids": [
+              47
+            ]
+          },
+          {
+            "id": 284,
+            "name": "[2] 4x Zestaw słuchawkowy Intercom Vokkero",
+            "type": "opakowanie",
+            "category_id": 13,
+            "parsed_number": "2",
+            "marker": "NUMBER_PREFIX_BRACKET",
+            "item_ids": [
+              54
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 139,
+      "snapshot_before": {
+        "base": "6X KABINET ABSEN PL2.5 V2 CORNER",
+        "survivor_model_id": 139,
+        "models": [
+          {
+            "id": 139,
+            "name": "6X KABINET ABSEN PL2.5 V2 CORNER (case 1)",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": "1",
+            "marker": "CASE_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 140,
+            "name": "6X KABINET ABSEN PL2.5 V2 CORNER (case 2)",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": "2",
+            "marker": "CASE_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 141,
+            "name": "6X KABINET ABSEN PL2.5 V2 CORNER (case 3)",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": "3",
+            "marker": "CASE_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 142,
+            "name": "6X KABINET ABSEN PL2.5 V2 CORNER (case 4)",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": "4",
+            "marker": "CASE_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 143,
+            "name": "6X KABINET ABSEN PL2.5 V2 CORNER (case 5)",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": "5",
+            "marker": "CASE_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 144,
+            "name": "6X KABINET ABSEN PL2.5 V2 CORNER (case 6)",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": "6",
+            "marker": "CASE_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 145,
+            "name": "6X KABINET ABSEN PL2.5 V2 CORNER (case 7)",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": "7",
+            "marker": "CASE_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 146,
+            "name": "6X KABINET ABSEN PL2.5 V2 CORNER (case 8)",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": "8",
+            "marker": "CASE_PAREN",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 148,
+      "snapshot_before": {
+        "base": "8 x LedBar",
+        "survivor_model_id": 148,
+        "models": [
+          {
+            "id": 148,
+            "name": "8 x LedBar (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              74
+            ]
+          },
+          {
+            "id": 149,
+            "name": "8 x LedBar (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              73
+            ]
+          },
+          {
+            "id": 150,
+            "name": "8 x LedBar (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              164
+            ]
+          },
+          {
+            "id": 151,
+            "name": "8 x LedBar (zestaw 4)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "4",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              425
+            ]
+          },
+          {
+            "id": 152,
+            "name": "8 x LedBar (zestaw 5)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "5",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              126
+            ]
+          },
+          {
+            "id": 153,
+            "name": "8 x LedBar (zestaw 6)",
+            "type": "opakowanie",
+            "category_id": 33,
+            "parsed_number": "6",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              4
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 154,
+      "snapshot_before": {
+        "base": "8 x LedPar Ignition",
+        "survivor_model_id": 154,
+        "models": [
+          {
+            "id": 154,
+            "name": "8 x LedPar Ignition (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 35,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              473
+            ]
+          },
+          {
+            "id": 155,
+            "name": "8 x LedPar Ignition (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 35,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              396
+            ]
+          },
+          {
+            "id": 156,
+            "name": "8 x LedPar Ignition (zestaw 3)",
+            "type": "opakowanie",
+            "category_id": 35,
+            "parsed_number": "3",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              233
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 157,
+      "snapshot_before": {
+        "base": "AYRTON Stradale Profile",
+        "survivor_model_id": 157,
+        "models": [
+          {
+            "id": 157,
+            "name": "AYRTON Stradale Profile (CASE 1)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "1",
+            "marker": "CASE_PAREN",
+            "item_ids": [
+              42
+            ]
+          },
+          {
+            "id": 158,
+            "name": "AYRTON Stradale Profile (CASE 2)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "2",
+            "marker": "CASE_PAREN",
+            "item_ids": [
+              428
+            ]
+          },
+          {
+            "id": 159,
+            "name": "AYRTON Stradale Profile (CASE 3)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "3",
+            "marker": "CASE_PAREN",
+            "item_ids": [
+              172
+            ]
+          },
+          {
+            "id": 160,
+            "name": "AYRTON Stradale Profile (CASE 4)",
+            "type": "opakowanie",
+            "category_id": 32,
+            "parsed_number": "4",
+            "marker": "CASE_PAREN",
+            "item_ids": [
+              475
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 295,
+      "snapshot_before": {
+        "base": "KABINET ABSEN NT3.9W V2 0,5 x 0,5m",
+        "survivor_model_id": 295,
+        "models": [
+          {
+            "id": 295,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 0,5m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              154
+            ]
+          },
+          {
+            "id": 297,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 0,5m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              6
+            ]
+          },
+          {
+            "id": 299,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 0,5m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              31
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 285,
+      "snapshot_before": {
+        "base": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+        "survivor_model_id": 285,
+        "models": [
+          {
+            "id": 285,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              321
+            ]
+          },
+          {
+            "id": 286,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              326
+            ]
+          },
+          {
+            "id": 287,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              189
+            ]
+          },
+          {
+            "id": 288,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              70
+            ]
+          },
+          {
+            "id": 289,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              141
+            ]
+          },
+          {
+            "id": 290,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              446
+            ]
+          },
+          {
+            "id": 291,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              160
+            ]
+          },
+          {
+            "id": 292,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              406
+            ]
+          },
+          {
+            "id": 293,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              416
+            ]
+          },
+          {
+            "id": 294,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              344
+            ]
+          },
+          {
+            "id": 296,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              60
+            ]
+          },
+          {
+            "id": 298,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              136
+            ]
+          },
+          {
+            "id": 300,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              80
+            ]
+          },
+          {
+            "id": 301,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              372
+            ]
+          },
+          {
+            "id": 302,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              413
+            ]
+          },
+          {
+            "id": 303,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              226
+            ]
+          },
+          {
+            "id": 304,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              59
+            ]
+          },
+          {
+            "id": 305,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              316
+            ]
+          },
+          {
+            "id": 306,
+            "name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+            "type": "opakowanie",
+            "category_id": 1,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": [
+              400
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 162,
+      "snapshot_before": {
+        "base": "Kablarka",
+        "survivor_model_id": 162,
+        "models": [
+          {
+            "id": 162,
+            "name": "Kablarka [10]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "10",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              438
+            ]
+          },
+          {
+            "id": 163,
+            "name": "Kablarka [11]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "11",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              184
+            ]
+          },
+          {
+            "id": 164,
+            "name": "Kablarka [12]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "12",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              159
+            ]
+          },
+          {
+            "id": 165,
+            "name": "Kablarka [13]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "13",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              231
+            ]
+          },
+          {
+            "id": 166,
+            "name": "Kablarka [14]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "14",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              213
+            ]
+          },
+          {
+            "id": 167,
+            "name": "Kablarka [15]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "15",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              365
+            ]
+          },
+          {
+            "id": 168,
+            "name": "Kablarka [16]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "16",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              368
+            ]
+          },
+          {
+            "id": 169,
+            "name": "Kablarka [17]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "17",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              449
+            ]
+          },
+          {
+            "id": 170,
+            "name": "Kablarka [18]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "18",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              352
+            ]
+          },
+          {
+            "id": 171,
+            "name": "Kablarka [19]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "19",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              218
+            ]
+          },
+          {
+            "id": 172,
+            "name": "Kablarka [1]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              211
+            ]
+          },
+          {
+            "id": 173,
+            "name": "Kablarka [20]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "20",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              419
+            ]
+          },
+          {
+            "id": 174,
+            "name": "Kablarka [21]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "21",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              146
+            ]
+          },
+          {
+            "id": 175,
+            "name": "Kablarka [22]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "22",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              327
+            ]
+          },
+          {
+            "id": 176,
+            "name": "Kablarka [23]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "23",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              472
+            ]
+          },
+          {
+            "id": 177,
+            "name": "Kablarka [24]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "24",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              409
+            ]
+          },
+          {
+            "id": 178,
+            "name": "Kablarka [25]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "25",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              454
+            ]
+          },
+          {
+            "id": 179,
+            "name": "Kablarka [26]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "26",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              140
+            ]
+          },
+          {
+            "id": 180,
+            "name": "Kablarka [27]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "27",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              414
+            ]
+          },
+          {
+            "id": 181,
+            "name": "Kablarka [28]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "28",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              153
+            ]
+          },
+          {
+            "id": 182,
+            "name": "Kablarka [29]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "29",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              354
+            ]
+          },
+          {
+            "id": 183,
+            "name": "Kablarka [2]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              116
+            ]
+          },
+          {
+            "id": 184,
+            "name": "Kablarka [3]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "3",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              325
+            ]
+          },
+          {
+            "id": 185,
+            "name": "Kablarka [4]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "4",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              398
+            ]
+          },
+          {
+            "id": 186,
+            "name": "Kablarka [5]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "5",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              45
+            ]
+          },
+          {
+            "id": 187,
+            "name": "Kablarka [6]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "6",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              465
+            ]
+          },
+          {
+            "id": 188,
+            "name": "Kablarka [7]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "7",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              230
+            ]
+          },
+          {
+            "id": 189,
+            "name": "Kablarka [8]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "8",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              182
+            ]
+          },
+          {
+            "id": 190,
+            "name": "Kablarka [9]",
+            "type": "opakowanie",
+            "category_id": null,
+            "parsed_number": "9",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              63
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 191,
+      "snapshot_before": {
+        "base": "Mediaserwer (Vmix, Resolume)",
+        "survivor_model_id": 191,
+        "models": [
+          {
+            "id": 191,
+            "name": "Mediaserwer (Vmix, Resolume) [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              130
+            ]
+          },
+          {
+            "id": 192,
+            "name": "Mediaserwer (Vmix, Resolume) [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              181
+            ]
+          },
+          {
+            "id": 193,
+            "name": "Mediaserwer (Vmix, Resolume) [3]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "3",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              208
+            ]
+          },
+          {
+            "id": 194,
+            "name": "Mediaserwer (Vmix, Resolume) [4]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "4",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              36
+            ]
+          },
+          {
+            "id": 195,
+            "name": "Mediaserwer (Vmix, Resolume) [5]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "5",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              75
+            ]
+          },
+          {
+            "id": 196,
+            "name": "Mediaserwer (Vmix, Resolume) [6]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "6",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              57
+            ]
+          },
+          {
+            "id": 197,
+            "name": "Mediaserwer (Vmix, Resolume) [7]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "7",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              135
+            ]
+          },
+          {
+            "id": 596,
+            "name": "Mediaserwer (Vmix, Resolume) [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 597,
+            "name": "Mediaserwer (Vmix, Resolume) [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 598,
+            "name": "Mediaserwer (Vmix, Resolume) [3]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "3",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 599,
+            "name": "Mediaserwer (Vmix, Resolume) [4]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "4",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 600,
+            "name": "Mediaserwer (Vmix, Resolume) [5]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "5",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 601,
+            "name": "Mediaserwer (Vmix, Resolume) [6]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "6",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 602,
+            "name": "Mediaserwer (Vmix, Resolume) [7]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "7",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 198,
+      "snapshot_before": {
+        "base": "Mikser wizyjny Barco S3",
+        "survivor_model_id": 198,
+        "models": [
+          {
+            "id": 198,
+            "name": "Mikser wizyjny Barco S3 [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              361
+            ]
+          },
+          {
+            "id": 637,
+            "name": "Mikser wizyjny Barco S3 [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 201,
+      "snapshot_before": {
+        "base": "Projektor Panasonic PT-EW640, 5800 lum., WXGA",
+        "survivor_model_id": 201,
+        "models": [
+          {
+            "id": 201,
+            "name": "Projektor Panasonic PT-EW640, 5800 lum., WXGA [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              358
+            ]
+          },
+          {
+            "id": 202,
+            "name": "Projektor Panasonic PT-EW640, 5800 lum., WXGA [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              68
+            ]
+          },
+          {
+            "id": 750,
+            "name": "Projektor Panasonic PT-EW640, 5800 lum., WXGA [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 751,
+            "name": "Projektor Panasonic PT-EW640, 5800 lum., WXGA [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 203,
+      "snapshot_before": {
+        "base": "Projektor Panasonic PT-EW730, 7000 lum., WXGA",
+        "survivor_model_id": 203,
+        "models": [
+          {
+            "id": 203,
+            "name": "Projektor Panasonic PT-EW730, 7000 lum., WXGA [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              347
+            ]
+          },
+          {
+            "id": 204,
+            "name": "Projektor Panasonic PT-EW730, 7000 lum., WXGA [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              180
+            ]
+          },
+          {
+            "id": 754,
+            "name": "Projektor Panasonic PT-EW730, 7000 lum., WXGA [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 755,
+            "name": "Projektor Panasonic PT-EW730, 7000 lum., WXGA [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 205,
+      "snapshot_before": {
+        "base": "RACK 2x Laptop MacBook Air M1",
+        "survivor_model_id": 205,
+        "models": [
+          {
+            "id": 205,
+            "name": "RACK 2x Laptop MacBook Air M1 [1]",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              461
+            ]
+          },
+          {
+            "id": 206,
+            "name": "RACK 2x Laptop MacBook Air M1 [2]",
+            "type": "opakowanie",
+            "category_id": 44,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              85
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 219,
+      "snapshot_before": {
+        "base": "RACK Kamera Sony FX6",
+        "survivor_model_id": 219,
+        "models": [
+          {
+            "id": 219,
+            "name": "RACK Kamera Sony FX6 (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              388
+            ]
+          },
+          {
+            "id": 220,
+            "name": "RACK Kamera Sony FX6 (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              144
+            ]
+          },
+          {
+            "id": 800,
+            "name": "RACK Kamera Sony FX6 (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 801,
+            "name": "RACK Kamera Sony FX6 (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 802,
+            "name": "RACK Kamera Sony FX6 (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": []
+          },
+          {
+            "id": 803,
+            "name": "RACK Kamera Sony FX6 (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 266,
+      "snapshot_before": {
+        "base": "Rack mównica BIAŁA",
+        "survivor_model_id": 266,
+        "models": [
+          {
+            "id": 266,
+            "name": "Rack mównica BIAŁA [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              114
+            ]
+          },
+          {
+            "id": 267,
+            "name": "Rack mównica BIAŁA [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              452
+            ]
+          },
+          {
+            "id": 268,
+            "name": "Rack mównica BIAŁA [3]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "3",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              351
+            ]
+          },
+          {
+            "id": 269,
+            "name": "Rack mównica BIAŁA [4]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "4",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              117
+            ]
+          },
+          {
+            "id": 270,
+            "name": "Rack mównica BIAŁA [5]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "5",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              125
+            ]
+          },
+          {
+            "id": 271,
+            "name": "Rack mównica BIAŁA [6]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "6",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              215
+            ]
+          },
+          {
+            "id": 272,
+            "name": "Rack mównica BIAŁA [7]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "7",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              118
+            ]
+          },
+          {
+            "id": 273,
+            "name": "Rack mównica BIAŁA [8]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "8",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              359
+            ]
+          },
+          {
+            "id": 853,
+            "name": "Rack mównica BIAŁA [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 854,
+            "name": "Rack mównica BIAŁA [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 855,
+            "name": "Rack mównica BIAŁA [3]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "3",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 856,
+            "name": "Rack mównica BIAŁA [4]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "4",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 857,
+            "name": "Rack mównica BIAŁA [5]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "5",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 858,
+            "name": "Rack mównica BIAŁA [6]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "6",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 859,
+            "name": "Rack mównica BIAŁA [7]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "7",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 860,
+            "name": "Rack mównica BIAŁA [8]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "8",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 815,
+      "snapshot_before": {
+        "base": "RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD",
+        "survivor_model_id": 815,
+        "models": [
+          {
+            "id": 232,
+            "name": "RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              421
+            ]
+          },
+          {
+            "id": 233,
+            "name": "RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": [
+              367
+            ]
+          },
+          {
+            "id": 815,
+            "name": "RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": null,
+            "marker": "NONE",
+            "item_ids": []
+          },
+          {
+            "id": 816,
+            "name": "RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD [1]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "1",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          },
+          {
+            "id": 817,
+            "name": "RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD [2]",
+            "type": "opakowanie",
+            "category_id": 49,
+            "parsed_number": "2",
+            "marker": "NUMBER_SUFFIX_BRACKET_CONDITIONAL",
+            "item_ids": []
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    },
+    {
+      "applied": false,
+      "survivor_model_id": 276,
+      "snapshot_before": {
+        "base": "Set stereo 2x mikrofonów pojemnościowych Austrian Audio CC8",
+        "survivor_model_id": 276,
+        "models": [
+          {
+            "id": 276,
+            "name": "Set stereo 2x mikrofonów pojemnościowych Austrian Audio CC8 (zestaw 1)",
+            "type": "opakowanie",
+            "category_id": 29,
+            "parsed_number": "1",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              467
+            ]
+          },
+          {
+            "id": 277,
+            "name": "Set stereo 2x mikrofonów pojemnościowych Austrian Audio CC8 (zestaw 2)",
+            "type": "opakowanie",
+            "category_id": 29,
+            "parsed_number": "2",
+            "marker": "ZESTAW_PAREN",
+            "item_ids": [
+              320
+            ]
+          }
+        ]
+      },
+      "notes": [],
+      "metadata_conflicts": []
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+<div class="tab-pane fade" id="tab-calendar">
+<div class="fade modal" id="schedule-modal" role="dialog">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button aria-hidden="true" class="close" data-dismiss="modal" type="button">×</button>
+Edytuj harmonogram
+</div>
+<div class="modal-body">
+</div>
+</div>
+</div>
+</div> <div class="panel-body">
+<div class="row">
+<div class="col-lg-6">
+<a class="btn btn-sm add-green" href="/admin/customer-note/create?customer_id=453&amp;contact_id=416&amp;event_id=5240"><div class="add-green-circle"></div> Dodaj notatkę</a>
+<h3>  Opis </h3>
+<div class="form-group">
+<textarea id="first-editor-note" name="description" rows="6">&lt;p&gt;Montaż w środę 5.08 6-8.08 gra, demontaż 9.08 w niedzielę&lt;/p&gt;&lt;p&gt;W hali nocnego targu (gdzie rezydujemy ze światłem i dźwiękiem) w przyszłym tygodniu odbędzie się festiwal Members Only&lt;/p&gt;&lt;p&gt;Czwartek, piątek i sobota.&lt;/p&gt;&lt;p&gt;Próby od około godz. 11.00&lt;/p&gt;&lt;p&gt;Koncerty od około 17.00&lt;/p&gt;&lt;p&gt;Harmonogram w załączeniu.&lt;/p&gt;&lt;p&gt;Do ustawienia jest dioda o wymiarach około 5x3m ZA SCENĄ na konstrukcji stojącej.&lt;/p&gt;&lt;p&gt;Częściowo diodę będą zasłaniały maski i matryca z ledrotorów,które wiszą na tylnej kresce, ale klient ma tego świadomość.&lt;/p&gt;&lt;p&gt;Scena ma wymiary 8 × 6 m i wysokość około 1 m. Kratownica znajduje się na wysokości około 6 m.&lt;/p&gt;&lt;p&gt;Dodatkowo w Waszym zakresie byłoby wypuszczanie wizualizacji przygotowanych i dostarczonych przez klienta w kolejności koncertowej każdego dnia.&lt;/p&gt;&lt;p&gt;Dostępne jest gniazdo 32A do wyłącznej dyspozycji, a montaż i demontaż może się odbyć w dowolnym momencie (jednak nie w sobotę po zakończeniu wydarzenia, ponieważ po koncertach odbywa się tam regularna impreza do godziny 5.00 )&lt;/p&gt;</textarea> </div>
+<h3>Szczegóły </h3>
+<div class="form-group">
+<textarea id="second-editor-note" name="details" rows="6"></textarea> </div>
+<div id="event-description-form">
+<form action="/admin/event/update?id=5240" class="form-vertical kv-form-bs3" id="w0" method="post" role="form">
+<input name="_csrf" type="hidden" value="nv2s5AlT4vNMsEBoWaMaJSDsjAe7Cox26CFkbU7AICvGyfmMTWPQvi7JcV0swU5_TK7BbtNCyjy6EChfGvhNRg=="/>
+<div class="form-group highlight-addon field-first-editor-note-hidden">
+<textarea class="d-none form-control" id="first-editor-note-hidden" name="Event[description]" rows="6">&lt;p&gt;Montaż w środę 5.08 6-8.08 gra, demontaż 9.08 w niedzielę&lt;/p&gt;&lt;p&gt;W hali nocnego targu (gdzie rezydujemy ze światłem i dźwiękiem) w przyszłym tygodniu odbędzie się festiwal Members Only&lt;/p&gt;&lt;p&gt;Czwartek, piątek i sobota.&lt;/p&gt;&lt;p&gt;Próby od około godz. 11.00&lt;/p&gt;&lt;p&gt;Koncerty od około 17.00&lt;/p&gt;&lt;p&gt;Harmonogram w załączeniu.&lt;/p&gt;&lt;p&gt;Do ustawienia jest dioda o wymiarach około 5x3m ZA SCENĄ na konstrukcji stojącej.&lt;/p&gt;&lt;p&gt;Częściowo diodę będą zasłaniały maski i matryca z ledrotorów,które wiszą na tylnej kresce, ale klient ma tego świadomość.&lt;/p&gt;&lt;p&gt;Scena ma wymiary 8 × 6 m i wysokość około 1 m. Kratownica znajduje się na wysokości około 6 m.&lt;/p&gt;&lt;p&gt;Dodatkowo w Waszym zakresie byłoby wypuszczanie wizualizacji przygotowanych i dostarczonych przez klienta w kolejności koncertowej każdego dnia.&lt;/p&gt;&lt;p&gt;Dostępne jest gniazdo 32A do wyłącznej dyspozycji, a montaż i demontaż może się odbyć w dowolnym momencie (jednak nie w sobotę po zakończeniu wydarzenia, ponieważ po koncertach odbywa się tam regularna impreza do godziny 5.00 )&lt;/p&gt;</textarea>
+<div class="help-block help-block-error"></div>
+</div> <div class="form-group highlight-addon field-second-editor-note-hidden">
+<textarea class="d-none form-control" id="second-editor-note-hidden" name="Event[details]" rows="6"></textarea>
+<div class="help-block help-block-error"></div>
+</div>
+<div class="form-group">
+<button class="btn btn-success submitdescription" type="submit">Zapisz</button> </div>
+</form>
+</div>
+<div class="form-group highlight-addon field-event-field-4">
+<label class="form-label has-star" for="event-field-4">Nocleg</label>
+<textarea class="event-field form-control" data-id="4" id="event-field-4" name="EventField[value_text]" rows="6"></textarea>
+<div class="help-block help-block-error"></div>
+</div>
+</div>
+<div class="col-lg-6">
+<h3>Kalendarz <a class="btn btn-xs add-green add-schedule" href="/admin/event/add-schedule?id=5240"><div class="add-green-circle" style="margin:-1px 0 0 0"></div> Dodaj etap</a></h3>
+<div class="ibox-content" id="ibox-content">
+<div class="vertical-container dark-timeline" id="vertical-timeline">
+<div class="vertical-timeline-block">
+<div class="vertical-timeline-icon navy-bg">
+<i class="fa fa-calendar"></i>
+</div>
+<div class="vertical-timeline-content">
+<h2>Montaż                                        <div class="pull-right" style="text-align:right">
+</div>
+</h2>
+<div class="team-members pull-right">
+</div>
+<span class="vertical-date">
+                                        2026-08-05                                                                                 <br/>
+<small>08:00 - 18:00</small>
+</span>
+</div>
+</div>
+<div class="vertical-timeline-block">
+<div class="vertical-timeline-icon navy-bg">
+<i class="fa fa-calendar"></i>
+</div>
+<div class="vertical-timeline-content">
+<h2>Event                                        <div class="pull-right" style="text-align:right">
+</div>
+</h2>
+<div class="team-members pull-right">
+</div>
+<span class="vertical-date">
+                                        2026-08-06                                          - 2026-08-08                                         <br/>
+<small>00:00 - 23:00</small>
+</span>
+</div>
+</div>
+<div class="vertical-timeline-block">
+<div class="vertical-timeline-icon navy-bg">
+<i class="fa fa-calendar"></i>
+</div>
+<div class="vertical-timeline-content">
+<h2>Demontaż                                        <div class="pull-right" style="text-align:right">
+</div>
+</h2>
+<div class="team-members pull-right">
+</div>
+<span class="vertical-date">
+                                        2026-08-09                                                                                 <br/>
+<small>08:00 - 14:00</small>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+</script>
+</div>

@@ -1,0 +1,1239 @@
+// =========================================================
+// EventFlow - schema.prisma
+// =========================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =========================================================
+// CORE
+// =========================================================
+
+model Organizacja {
+  id               Int       @id @default(autoincrement())
+  nazwa            String    @db.VarChar(255)
+  subdomena        String    @unique @db.VarChar(100)
+  nip              String?   @unique @db.Char(10)
+  regon            String?   @db.Char(14)
+  krs              String?   @db.Char(10)
+  email            String?   @db.VarChar(150)
+  telefon          String?   @db.VarChar(30)
+  ulica            String?   @db.VarChar(150)
+  kod_pocztowy     String?   @db.VarChar(10)
+  miasto           String?   @db.VarChar(100)
+  kraj             String    @default("Polska") @db.VarChar(100)
+  status           String    @default("aktywna") @db.VarChar(50)
+  plan_abonamentu  String?   @db.VarChar(100)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  // Relacje odwrotne
+  role                  Rola[]
+  uzytkownicy           Uzytkownik[]
+  uzytkownicy_role      UzytkownikRola[]
+  kontrahenci           Kontrahent[]
+  kontakty_kontr        KontaktKontrahenta[]
+  miejsca               Miejsce[]
+  magazyny              Magazyn[]
+  kategorie             Kategoria[]
+  modele_sprzetu        ModelSprzetu[]
+  egzemplarze           Egzemplarz[]
+  cenniki               Cennik[]
+  ceny_sprzetu          CenaSprzetu[]
+  typy_wydarzen         TypWydarzenia[]
+  statusy_wydarzen      StatusWydarzenia[]
+  wydarzenia            Wydarzenie[]
+  typy_etapow           TypEtapu[]
+  etapy_wydarzen        EtapWydarzenia[]
+  statusy_ofert         StatusOferty[]
+  oferty                Oferta[]
+  wersje_ofert          WersjaOferty[]
+  sekcje_ofert          SekcjaOferty[]
+  pozycje_ofert         PozycjaOferty[]
+  statusy_wynajmow      StatusWynajmu[]
+  wynajmy               Wynajem[]
+  pozycje_wynajmu       PozycjaWynajmu[]
+  statusy_serwisu       StatusSerwisu[]
+  serwisy_sprzetu       SerwisSprzetu[]
+  zalaczniki            Zalacznik[]
+  logi_zmian            LogZmian[]
+  wydarzenia_uzytkownicy WydarzenieUzytkownik[]
+  pojazdy               Pojazd[]
+  wydarzenia_pojazdy    WydarzeniePojazd[]
+  zadania               Zadanie[]
+  zadania_uzytkownicy   ZadanieUzytkownik[] // Dodano relację odwrotną
+  nieobecnosci          Nieobecnosc[]
+  statusy_magazynowe    StatusMagazynowy[]
+  statusy_ksiegowe      StatusKsiegowy[]
+  ceny_modeli           CenaModelu[]
+
+  @@map("organizacje")
+  serwisy_pojazdow      SerwisPojazdu[]
+  przeglady_pojazdow    PrzegladPojazdu[]
+  wydania_magazynowe     WydanieMagazynowe[]
+  pozycje_wydan_magazynowych PozycjaWydaniaMagazynowego[]
+  pozycje_sprzetu_wydarzen PozycjaSprzetuWydarzenia[]
+}
+
+model Rola {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(100)
+  opis             String?   @db.Text
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  uzytkownicy_role UzytkownikRola[]
+
+  @@unique([id_organizacji, nazwa])
+  @@map("role")
+}
+
+model Uzytkownik {
+  id                        Int       @id @default(autoincrement())
+  id_organizacji            Int
+  imie                      String    @db.VarChar(100)
+  nazwisko                  String    @db.VarChar(100)
+  email                     String    @db.VarChar(150)
+  telefon                   String?   @db.VarChar(30)
+  haslo                     String    @db.VarChar(255)
+  avatar                    String?   @db.VarChar(500)
+  aktywny                   Boolean   @default(true)
+  data_ostatniego_logowania DateTime?
+  data_utworzenia           DateTime  @default(now())
+  data_aktualizacji         DateTime  @updatedAt
+  data_usuniecia            DateTime?
+
+  organizacja               Organizacja @relation(fields: [id_organizacji], references: [id])
+  role                      UzytkownikRola[]
+  zarzadzane_wydarzenia     Wydarzenie[] @relation("ManagerWydarzenia")
+  zarzadzane_oferty         Oferta[]     @relation("ManagerOferty")
+  utworzone_wersje_ofert    WersjaOferty[]
+  zgloszone_serwisy         SerwisSprzetu[] @relation("ZglosilSerwis")
+  rozwiazane_serwisy        SerwisSprzetu[] @relation("RozwiazalSerwis")
+  dodane_zalaczniki         Zalacznik[]
+  logi_zmian                LogZmian[]
+  przypisania_do_wydarzen   WydarzenieUzytkownik[]
+  przypisane_zadania        ZadanieUzytkownik[] // Poprawiono z Zadanie[]
+  nieobecnosci              Nieobecnosc[]
+  utworzone_wydarzenia      Wydarzenie[] @relation("TworcaWydarzenia")
+  zlecone_zadania           Zadanie[] @relation("ZlecajacyZadanie")
+  wydania_magazynowe_utworzone WydanieMagazynowe[] @relation("UtworzylWydanieMagazynowe")
+
+  @@unique([id_organizacji, email])
+  @@map("uzytkownicy")
+}
+
+model UzytkownikRola {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_uzytkownika   Int
+  id_roli          Int
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  uzytkownik       Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+  rola             Rola        @relation(fields: [id_roli], references: [id])
+
+  @@unique([id_uzytkownika, id_roli])
+  @@map("uzytkownicy_role")
+}
+
+// =========================================================
+// CRM
+// =========================================================
+
+model Kontrahent {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(255)
+  nazwa_skrocona   String?   @db.VarChar(150)
+  nip              String?   @db.Char(10)
+  regon            String?   @db.Char(14)
+  krs              String?   @db.Char(10)
+  ulica            String?   @db.VarChar(150)
+  nr_budynku       String?   @db.VarChar(20)
+  nr_lokalu        String?   @db.VarChar(20)
+  kod_pocztowy     String?   @db.VarChar(10)
+  miasto           String?   @db.VarChar(100)
+  kraj             String    @default("Polska") @db.VarChar(100)
+  email            String?   @db.VarChar(150)
+  telefon          String?   @db.VarChar(30)
+  uwagi            String?   @db.Text
+  zrodlo_danych    String    @default("recznie") @db.VarChar(50)
+  data_pobrania_gus DateTime?
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+  czy_klient       Boolean   @default(true)
+  czy_dostawca     Boolean   @default(false)
+  nr_konta         String?   @db.VarChar(100)
+
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  kontakty         KontaktKontrahenta[]
+  wydarzenia       Wydarzenie[]
+  oferty           Oferta[]
+  // EVENTFLOW_PRODUCT_POLISH_V28: wynajem jest osobnym bytem; wydanie sprzętu do wydarzenia nie tworzy wynajmu.
+  zadania          Zadanie[]
+
+  @@index([nip])
+  @@index([nazwa])
+  @@map("kontrahenci")
+}
+
+model KontaktKontrahenta {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_kontrahenta   Int
+  imie             String?   @db.VarChar(100)
+  nazwisko         String?   @db.VarChar(100)
+  stanowisko       String?   @db.VarChar(100)
+  email            String?   @db.VarChar(150)
+  telefon          String?   @db.VarChar(30)
+  telefon_2        String?   @db.VarChar(30)
+  notatki_wewnetrzne String? @db.Text
+  glowny           Boolean   @default(false)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  kontrahent       Kontrahent  @relation(fields: [id_kontrahenta], references: [id])
+  wydarzenia       Wydarzenie[]
+  oferty           Oferta[]
+
+  @@index([id_kontrahenta])
+  @@map("kontakty_kontrahentow")
+}
+
+model Miejsce {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(255)
+  ulica            String?   @db.VarChar(150)
+  kod_pocztowy     String?   @db.VarChar(10)
+  miasto           String?   @db.VarChar(100)
+  kraj             String    @default("Polska") @db.VarChar(100)
+  opis             String?   @db.Text
+  notatki_wewnetrzne String? @db.Text
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenia       Wydarzenie[]
+
+  @@map("miejsca")
+}
+
+// =========================================================
+// MAGAZYN
+// =========================================================
+
+model Magazyn {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(100)
+  opis             String?   @db.Text
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  egzemplarze      Egzemplarz[]
+
+  @@unique([id_organizacji, nazwa])
+  @@map("magazyny")
+}
+
+model Kategoria {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_rodzica       Int?
+  nazwa            String    @db.VarChar(150)
+  opis             String?   @db.Text
+  kolor            String?   @db.VarChar(20)
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  rodzic           Kategoria?  @relation("KategoriaToKategoria", fields: [id_rodzica], references: [id])
+  dzieci           Kategoria[] @relation("KategoriaToKategoria")
+  modele_sprzetu   ModelSprzetu[]
+  pozycje_ofert    PozycjaOferty[]
+
+  @@index([id_rodzica])
+  @@map("kategorie")
+}
+
+model ModelSprzetu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_kategorii     Int?
+  nazwa            String    @db.VarChar(200)
+  producent        String?   @db.VarChar(100)
+  miejsce_w_mag    String?   @db.VarChar(200)
+  opis             String?   @db.Text
+  notatki_wewnetrzne String? @db.Text
+  widoczny_w_ofercie Boolean @default(true)
+  widoczny_w_mag   Boolean   @default(true)
+  szerokosc        Decimal?  @db.Decimal(10, 2)
+  wysokosc         Decimal?  @db.Decimal(10, 2)
+  glebokosc        Decimal?  @db.Decimal(10, 2)
+  objetosc         Decimal?  @db.Decimal(10, 2)
+  waga             Decimal?  @db.Decimal(10, 2)
+  wartosc          Decimal?  @db.Decimal(12, 2)
+  wartosc_domyslna_egzemplarza Decimal? @db.Decimal(12, 2) // EVENTFLOW_PRODUCT_POLISH_V4: domyślna wartość dla nowych egzemplarzy
+  zdjecie          String?   @db.Text // EVENTFLOW_PRODUCT_POLISH_V25: zdjęcie modelu jako URL/base64
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  kategoria        Kategoria?  @relation(fields: [id_kategorii], references: [id])
+  egzemplarze      Egzemplarz[]
+  ceny             CenaSprzetu[]
+  pozycje_ofert    PozycjaOferty[]
+  pozycje_wynajmu  PozycjaWynajmu[]
+  pozycje_wydan     PozycjaWydaniaMagazynowego[]
+  pozycje_sprzetu_wydarzen PozycjaSprzetuWydarzenia[]
+  typ_sprzetu        String    @default("sprzet") @db.VarChar(50) // np. sprzet, opakowanie, zestaw
+  tryb_ewidencji     String    @default("egzemplarze") @db.VarChar(50) // EVENTFLOW_PRODUCT_POLISH_V34: egzemplarze albo ilosciowe
+  ilosc_magazynowa  Decimal   @default(0.00) @db.Decimal(10, 2) // EVENTFLOW_PRODUCT_POLISH_V34: stan dla sprzętu ilościowego bez egzemplarzy
+  jednostka          String    @default("szt.") @db.VarChar(20)
+  ulubiony           Boolean   @default(false)
+  udostepniony_crn   Boolean   @default(false) // Udostępnienie w Cross Rental Network
+  kod_kreskowy       String?   @db.VarChar(100) // Domyślny SKU modelu
+  pobor_pradu        Decimal?  @db.Decimal(10, 2)
+  stawki             CenaModelu[] @relation("ModelStawki")
+
+  @@index([id_kategorii])
+  @@index([nazwa])
+  @@map("modele")
+}
+
+model Egzemplarz {
+  id                     Int       @id @default(autoincrement())
+  id_organizacji         Int
+  id_modelu              Int
+  id_magazynu            Int?
+  nazwa                  String?   @db.VarChar(200)
+  sn                     String?   @db.VarChar(200)
+  qr_kod                 String?   @db.VarChar(255)
+  kod_kreskowy           String?   @db.VarChar(100)
+  miejsce_w_mag          String?   @db.VarChar(200)
+  id_case                Int?
+  id_statusu_egzemplarza Int?
+  szerokosc              Decimal?  @db.Decimal(10, 2)
+  wysokosc               Decimal?  @db.Decimal(10, 2)
+  glebokosc              Decimal?  @db.Decimal(10, 2)
+  objetosc               Decimal?  @db.Decimal(10, 2)
+  waga                   Decimal?  @db.Decimal(10, 2)
+  wartosc                Decimal?  @db.Decimal(12, 2)
+  notatki_wewnetrzne     String?   @db.Text
+  zdjecie                String?   @db.VarChar(500)
+  aktywny                Boolean   @default(true)
+  data_utworzenia        DateTime  @default(now())
+  data_aktualizacji      DateTime  @updatedAt
+  data_usuniecia         DateTime?
+
+  numer_urzadzenia       String?   @db.VarChar(100) // historycznie; UI używa nazwy numer_egzemplarza
+  numer_egzemplarza      String?   @db.VarChar(100)
+  zewnetrzny_kod_kreskowy String?  @db.VarChar(150)
+  zewnetrzny_qr_kod      String?   @db.VarChar(150)
+  rozroznij_kod_qr       Boolean   @default(false)
+  data_produkcji         DateTime? @db.Date
+  cena_zakupu            Decimal?  @db.Decimal(12, 2)
+  pakowany_pojedynczo    Boolean   @default(false)
+  opis                   String?   @db.Text
+  status_serwisowy       String    @default("Działa") @db.VarChar(50) 
+
+  organizacja      Organizacja   @relation(fields: [id_organizacji], references: [id])
+  model            ModelSprzetu  @relation(fields: [id_modelu], references: [id])
+  magazyn          Magazyn?      @relation(fields: [id_magazynu], references: [id])
+  case             Egzemplarz?   @relation("CaseToEgzemplarz", fields: [id_case], references: [id])
+  zawartosc_case   Egzemplarz[]  @relation("CaseToEgzemplarz")
+  pozycje_wynajmu  PozycjaWynajmu[]
+  serwisy          SerwisSprzetu[]
+  zadania          Zadanie[] // Dodano relację odwrotną
+  pozycje_wydan    PozycjaWydaniaMagazynowego[]
+
+  @@index([id_modelu])
+  @@index([sn])
+  @@index([qr_kod])
+  @@index([kod_kreskowy])
+  @@map("egzemplarze")
+}
+
+model CenaModelu {
+  id                 Int          @id @default(autoincrement())
+  id_organizacji     Int
+  id_modelu          Int
+  nazwa_stawki       String       @default("Podstawowa (PLN)") @db.VarChar(100)
+  cena_netto         Decimal?     @db.Decimal(10, 2)
+  koszt              Decimal?     @db.Decimal(10, 2)
+  nazwa_kosztu       String?      @db.VarChar(100)
+  mnoz_koszt         Boolean      @default(false)
+  aktywny            Boolean      @default(true)
+  data_utworzenia    DateTime     @default(now())
+  data_aktualizacji  DateTime     @updatedAt
+
+  organizacja        Organizacja  @relation(fields: [id_organizacji], references: [id])
+  model              ModelSprzetu @relation("ModelStawki", fields: [id_modelu], references: [id], onDelete: Cascade)
+
+  @@index([id_modelu])
+  @@map("ceny_modeli")
+}
+
+model Cennik {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  domyslny         Boolean   @default(false)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  ceny_sprzetu     CenaSprzetu[]
+  oferty           Oferta[]
+
+  @@unique([id_organizacji, nazwa])
+  @@map("cenniki")
+}
+
+model CenaSprzetu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_cennika       Int
+  id_modelu        Int
+  cena_netto       Decimal   @default(0.00) @db.Decimal(12, 2)
+  vat              Decimal   @default(23.00) @db.Decimal(5, 2)
+  procent_pierwszego_dnia Decimal @default(100.00) @db.Decimal(6, 2)
+  przelicznik_kolejnych_dni Decimal @default(1.00) @db.Decimal(8, 2)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja  @relation(fields: [id_organizacji], references: [id])
+  cennik           Cennik       @relation(fields: [id_cennika], references: [id])
+  model            ModelSprzetu @relation(fields: [id_modelu], references: [id])
+  pozycje_ofert    PozycjaOferty[]
+
+  @@unique([id_cennika, id_modelu])
+  @@map("ceny_sprzetu")
+}
+
+// =========================================================
+// WYDARZENIA
+// =========================================================
+
+model TypWydarzenia {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  kolor            String?   @db.VarChar(20)
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenia       Wydarzenie[]
+
+  @@map("typy_wydarzen")
+}
+
+model StatusWydarzenia {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  kolor            String?   @db.VarChar(20)
+  ikona            String?   @db.VarChar(20) // EVENTFLOW_PRODUCT_POLISH_V3: ikona statusu przed nazwą wydarzenia w kalendarzu
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenia       Wydarzenie[]
+
+  @@map("statusy_wydarzen")
+}
+
+model Wydarzenie {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_typu_wydarzenia Int?
+  id_statusu_wydarzenia Int?
+  id_kontrahenta   Int?
+  id_kontaktu      Int?
+  id_miejsca       Int?
+  id_managera      Int?
+  nazwa            String    @db.VarChar(255)
+  numer            String?   @db.VarChar(100)
+  opis             String?   @db.Text
+  data_start       DateTime?
+  data_koniec      DateTime?
+  budzet_netto     Decimal?  @db.Decimal(12, 2)
+  budzet_brutto    Decimal?  @db.Decimal(12, 2)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+  miesiac_ksiegowania     String?  @db.VarChar(20)
+  uwagi                   String?  @db.Text
+  id_tworcy               Int?
+  id_statusu_magazynowego Int?
+  id_statusu_ksiegowego   Int?
+  id_oferty_glownej      Int?      // EVENTFLOW_PRODUCT_POLISH_V17: oferta główna / zaakceptowana wydarzenia
+  miejsce_reczne          String?  @db.VarChar(255) // EVENTFLOW_PRODUCT_POLISH_V3: jednorazowe miejsce bez dodawania do bazy miejsc
+  adres_reczny            String?  @db.VarChar(255)
+  link_google_maps        String?  @db.VarChar(500)
+  szacowany_czas_dojazdu_min Int?
+
+  organizacja      Organizacja       @relation(fields: [id_organizacji], references: [id])
+  typ              TypWydarzenia?    @relation(fields: [id_typu_wydarzenia], references: [id])
+  status           StatusWydarzenia? @relation(fields: [id_statusu_wydarzenia], references: [id])
+  kontrahent       Kontrahent?       @relation(fields: [id_kontrahenta], references: [id])
+  kontakt          KontaktKontrahenta? @relation(fields: [id_kontaktu], references: [id])
+  miejsce          Miejsce?          @relation(fields: [id_miejsca], references: [id])
+  manager          Uzytkownik?       @relation("ManagerWydarzenia", fields: [id_managera], references: [id])
+  
+  etapy            EtapWydarzenia[]
+  oferty           Oferta[]
+  // EVENTFLOW_PRODUCT_POLISH_V28: wynajem jest osobnym bytem; wydanie sprzętu do wydarzenia nie tworzy wynajmu.
+  zadania          Zadanie[]
+  ekipa            WydarzenieUzytkownik[] // Nowa relacja
+  pojazdy          WydarzeniePojazd[]     // Nowa relacja
+  wydania_magazynowe WydanieMagazynowe[]
+  sprzet_planowany      PozycjaSprzetuWydarzenia[] // EVENTFLOW_PRODUCT_POLISH_V32: plan sprzętu wydarzenia bez tworzenia wynajmu
+  tworca                  Uzytkownik?       @relation("TworcaWydarzenia", fields: [id_tworcy], references: [id])
+  status_magazynowy       StatusMagazynowy? @relation(fields: [id_statusu_magazynowego], references: [id])
+  status_ksiegowy         StatusKsiegowy?   @relation(fields: [id_statusu_ksiegowego], references: [id])
+  oferta_glowna          Oferta?           @relation("OfertaGlownaWydarzenia", fields: [id_oferty_glownej], references: [id])
+
+  @@index([data_start, data_koniec])
+  @@map("wydarzenia")
+}
+
+model StatusMagazynowy {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  kolor            String?   @db.VarChar(20)
+  ikona            String?   @db.VarChar(20) // EVENTFLOW_PRODUCT_POLISH_V11: ikona statusu magazynowego w panelu wydarzenia
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenia       Wydarzenie[]
+
+  @@map("statusy_magazynowe")
+}
+
+model StatusKsiegowy {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  kolor            String?   @db.VarChar(20)
+  ikona            String?   @db.VarChar(20) // EVENTFLOW_PRODUCT_POLISH_V11: ikona statusu księgowego w panelu wydarzenia
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenia       Wydarzenie[]
+
+  @@map("statusy_ksiegowe")
+}
+
+model TypEtapu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  skrot            String?   @db.VarChar(20)
+  kolor            String?   @db.VarChar(20)
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  etapy            EtapWydarzenia[]
+
+  @@map("typy_etapow")
+}
+
+model EtapWydarzenia {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_wydarzenia    Int
+  id_typu_etapu    Int?
+  nazwa            String    @db.VarChar(150)
+  data_start       DateTime
+  data_koniec      DateTime
+  opis             String?   @db.Text
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenie       Wydarzenie  @relation(fields: [id_wydarzenia], references: [id])
+  typ              TypEtapu?   @relation(fields: [id_typu_etapu], references: [id])
+
+  @@index([id_wydarzenia])
+  @@map("etapy_wydarzen")
+}
+
+// =========================================================
+// OFERTY
+// =========================================================
+
+model StatusOferty {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  kolor            String?   @db.VarChar(20)
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  oferty           Oferta[]
+
+  @@map("statusy_ofert")
+}
+
+model Oferta {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_wydarzenia    Int?
+  id_wynajmu        Int?     // EVENTFLOW_PRODUCT_POLISH_V8: jedna oferta może być przypisana bezpośrednio do wynajmu; wynajem może mieć wiele ofert.
+  id_kontrahenta   Int?
+  id_kontaktu      Int?
+  id_managera      Int?
+  id_cennika       Int?
+  id_statusu_oferty Int?
+  numer            String?   @db.VarChar(100)
+  nazwa            String    @db.VarChar(255)
+  data_sporzadzenia DateTime? @db.Date
+  termin_platnosci_dni Int   @default(14)
+  budzet_netto     Decimal?  @db.Decimal(12, 2)
+  budzet_brutto    Decimal?  @db.Decimal(12, 2)
+  aktualna_wersja  Int       @default(1)
+  suma_przed_budzetem_netto Decimal @default(0.00) @db.Decimal(12, 2)
+  rabat_budzetowy_netto Decimal @default(0.00) @db.Decimal(12, 2)
+  rabat_budzetowy_proc Decimal @default(0.0000) @db.Decimal(8, 4)
+  suma_sprzet_netto Decimal  @default(0.00) @db.Decimal(12, 2)
+  suma_transport_netto Decimal @default(0.00) @db.Decimal(12, 2)
+  suma_obsluga_netto Decimal @default(0.00) @db.Decimal(12, 2)
+  suma_nocleg_netto Decimal  @default(0.00) @db.Decimal(12, 2)
+  suma_inne_netto  Decimal   @default(0.00) @db.Decimal(12, 2)
+  suma_netto       Decimal   @default(0.00) @db.Decimal(12, 2)
+  suma_vat         Decimal   @default(0.00) @db.Decimal(12, 2)
+  suma_brutto      Decimal   @default(0.00) @db.Decimal(12, 2)
+  algorytm_budzetu String    @default("brak") @db.VarChar(50)
+  blokada_cen      Boolean   @default(false)
+  warunki_zamowienia String? @db.Text
+  notatki_wewnetrzne String? @db.Text
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenie       Wydarzenie? @relation(fields: [id_wydarzenia], references: [id])
+  wynajem          Wynajem?    @relation("OfertyWynajmu", fields: [id_wynajmu], references: [id])
+  kontrahent       Kontrahent? @relation(fields: [id_kontrahenta], references: [id])
+  kontakt          KontaktKontrahenta? @relation(fields: [id_kontaktu], references: [id])
+  manager          Uzytkownik? @relation("ManagerOferty", fields: [id_managera], references: [id])
+  cennik           Cennik?     @relation(fields: [id_cennika], references: [id])
+  status           StatusOferty? @relation(fields: [id_statusu_oferty], references: [id])
+  wersje           WersjaOferty[]
+  wynajmy_realizacyjne Wynajem[] @relation("OfertaGlownaWynajmu")
+  wydarzenia_glowne  Wydarzenie[] @relation("OfertaGlownaWydarzenia")
+
+  @@index([id_wydarzenia])
+  @@index([id_wynajmu])
+  @@index([numer])
+  @@map("oferty")
+}
+
+model WersjaOferty {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_oferty        Int
+  numer_wersji     Int
+  nazwa            String    @db.VarChar(255)
+  powod_zmiany     String?   @db.Text
+  suma_netto       Decimal   @default(0.00) @db.Decimal(12, 2)
+  suma_vat         Decimal   @default(0.00) @db.Decimal(12, 2)
+  suma_brutto      Decimal   @default(0.00) @db.Decimal(12, 2)
+  id_uzytkownika_utworzyl Int?
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  oferta           Oferta      @relation(fields: [id_oferty], references: [id])
+  utworzyl         Uzytkownik? @relation(fields: [id_uzytkownika_utworzyl], references: [id])
+  sekcje           SekcjaOferty[]
+  pozycje          PozycjaOferty[]
+
+  @@unique([id_oferty, numer_wersji])
+  @@map("wersje_ofert")
+}
+
+model SekcjaOferty {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_wersji_oferty Int
+  nazwa            String    @db.VarChar(255)
+  opis             String?   @db.Text
+  kolor            String?   @db.VarChar(20)
+  kolejnosc        Int       @default(0)
+  budzet_netto     Decimal?  @db.Decimal(12, 2)
+  suma_netto       Decimal   @default(0.00) @db.Decimal(12, 2)
+  widoczna_w_pdf   Boolean   @default(true)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja  @relation(fields: [id_organizacji], references: [id])
+  wersja           WersjaOferty @relation(fields: [id_wersji_oferty], references: [id])
+  pozycje          PozycjaOferty[]
+
+  @@index([id_wersji_oferty])
+  @@map("sekcje_oferty")
+}
+
+model PozycjaOferty {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_wersji_oferty Int
+  id_sekcji        Int?
+  id_kategorii     Int?
+  id_modelu        Int?
+  id_ceny_sprzetu  Int?
+  typ_pozycji      String    @default("sprzet") @db.VarChar(50)
+  nazwa            String    @db.VarChar(255)
+  opis             String?   @db.Text
+  uwagi            String?   @db.Text
+  cena_netto       Decimal   @default(0.00) @db.Decimal(12, 2)
+  ilosc            Decimal   @default(1.00) @db.Decimal(10, 2)
+  dni_pracy        Decimal   @default(1.00) @db.Decimal(10, 2)
+  procent_pierwszego_dnia Decimal @default(100.00) @db.Decimal(6, 2)
+  przelicznik      Decimal   @default(1.00) @db.Decimal(8, 2)
+  rabat_proc       Decimal   @default(0.00) @db.Decimal(6, 2)
+  rabat_netto      Decimal   @default(0.00) @db.Decimal(12, 2)
+  cena_przed_budzetem_netto Decimal @default(0.00) @db.Decimal(12, 2)
+  rabat_budzetowy_netto Decimal @default(0.00) @db.Decimal(12, 2)
+  vat              Decimal   @default(23.00) @db.Decimal(5, 2)
+  razem_netto      Decimal   @default(0.00) @db.Decimal(12, 2)
+  razem_vat        Decimal   @default(0.00) @db.Decimal(12, 2)
+  razem_brutto     Decimal   @default(0.00) @db.Decimal(12, 2)
+  kolejnosc        Int       @default(0)
+  widoczna_w_pdf   Boolean   @default(true)
+  zablokowana_przed_budzetem Boolean @default(false)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja   @relation(fields: [id_organizacji], references: [id])
+  wersja           WersjaOferty  @relation(fields: [id_wersji_oferty], references: [id])
+  sekcja           SekcjaOferty? @relation(fields: [id_sekcji], references: [id])
+  kategoria        Kategoria?    @relation(fields: [id_kategorii], references: [id])
+  model            ModelSprzetu? @relation(fields: [id_modelu], references: [id])
+  cena             CenaSprzetu?  @relation(fields: [id_ceny_sprzetu], references: [id])
+
+  @@index([id_wersji_oferty])
+  @@index([id_sekcji])
+  @@map("pozycje_oferty")
+}
+
+// =========================================================
+// PLAN SPRZĘTU WYDARZENIA
+// =========================================================
+
+model PozycjaSprzetuWydarzenia {
+  id                 Int       @id @default(autoincrement())
+  id_organizacji     Int
+  id_wydarzenia      Int
+  id_modelu          Int
+  ilosc_planowana    Decimal   @default(1.00) @db.Decimal(10, 2)
+  uwagi              String?   @db.Text
+  kolejnosc          Int       @default(0)
+  aktywny            Boolean   @default(true)
+  data_utworzenia    DateTime  @default(now())
+  data_aktualizacji  DateTime  @updatedAt
+  data_usuniecia     DateTime?
+
+  organizacja        Organizacja  @relation(fields: [id_organizacji], references: [id])
+  wydarzenie         Wydarzenie   @relation(fields: [id_wydarzenia], references: [id])
+  model              ModelSprzetu @relation(fields: [id_modelu], references: [id])
+
+  @@unique([id_wydarzenia, id_modelu])
+  @@index([id_organizacji, id_wydarzenia])
+  @@index([id_modelu])
+  @@map("pozycje_sprzetu_wydarzen")
+}
+
+// =========================================================
+// WYNAJMY
+// =========================================================
+
+model StatusWynajmu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  kolor            String?   @db.VarChar(20)
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wynajmy          Wynajem[]
+
+  @@map("statusy_wynajmow")
+}
+
+model Wynajem {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_wydarzenia    Int?      // DEPRECATED EVENTFLOW_PRODUCT_POLISH_V28: zostawione tylko do bezpiecznej migracji starych danych; system już tego nie używa.
+  id_oferty        Int?
+  id_kontrahenta   Int?
+  id_statusu_wynajmu Int?
+  numer            String?   @db.VarChar(100)
+  data_wydania     DateTime?
+  data_zwrotu_planowana DateTime?
+  data_zwrotu_rzeczywista DateTime?
+  notatki_wewnetrzne String? @db.Text
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja   @relation(fields: [id_organizacji], references: [id])
+  oferta           Oferta?       @relation("OfertaGlownaWynajmu", fields: [id_oferty], references: [id])
+  oferty           Oferta[]      @relation("OfertyWynajmu")
+  kontrahent       Kontrahent?   @relation(fields: [id_kontrahenta], references: [id])
+  status           StatusWynajmu? @relation(fields: [id_statusu_wynajmu], references: [id])
+  pozycje          PozycjaWynajmu[]
+  wydania_magazynowe WydanieMagazynowe[]
+  sprzet_planowany      PozycjaSprzetuWydarzenia[] // EVENTFLOW_PRODUCT_POLISH_V32: plan sprzętu wydarzenia bez tworzenia wynajmu
+
+  @@map("wynajmy")
+}
+
+model PozycjaWynajmu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_wynajmu       Int
+  id_modelu        Int
+  id_egzemplarza   Int?
+  ilosc            Decimal   @default(1.00) @db.Decimal(10, 2)
+  notatki_wewnetrzne String? @db.Text
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja  @relation(fields: [id_organizacji], references: [id])
+  wynajem          Wynajem      @relation(fields: [id_wynajmu], references: [id])
+  model            ModelSprzetu @relation(fields: [id_modelu], references: [id])
+  egzemplarz       Egzemplarz?  @relation(fields: [id_egzemplarza], references: [id])
+
+  @@map("pozycje_wynajmu")
+}
+
+
+
+// =========================================================
+// WYDANIA I PRZYJĘCIA MAGAZYNOWE
+// =========================================================
+
+model WydanieMagazynowe {
+  id                     Int       @id @default(autoincrement())
+  id_organizacji          Int
+  id_wydarzenia           Int?
+  id_wynajmu              Int?
+  id_uzytkownika_utworzyl Int?
+  typ                    String    @default("wydanie") @db.VarChar(30) // wydanie, przyjecie, plan
+  numer                  String    @db.VarChar(100)
+  data_operacji          DateTime  @default(now())
+  osoba_odbierajaca      String?   @db.VarChar(200)
+  podpis_odbierajacego   String?   @db.Text
+  uwagi                  String?   @db.Text
+  aktywny                Boolean   @default(true)
+  data_utworzenia        DateTime  @default(now())
+  data_aktualizacji      DateTime  @updatedAt
+  data_usuniecia         DateTime?
+
+  organizacja            Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenie             Wydarzenie? @relation(fields: [id_wydarzenia], references: [id])
+  wynajem                Wynajem?    @relation(fields: [id_wynajmu], references: [id])
+  utworzyl               Uzytkownik? @relation("UtworzylWydanieMagazynowe", fields: [id_uzytkownika_utworzyl], references: [id])
+  pozycje                PozycjaWydaniaMagazynowego[]
+
+  @@index([id_wydarzenia])
+  @@index([id_wynajmu])
+  @@index([typ])
+  @@map("wydania_magazynowe")
+}
+
+model PozycjaWydaniaMagazynowego {
+  id                Int       @id @default(autoincrement())
+  id_organizacji     Int
+  id_wydania         Int
+  id_modelu          Int?
+  id_egzemplarza     Int?
+  nazwa              String    @db.VarChar(255)
+  ilosc              Decimal   @default(1.00) @db.Decimal(10, 2)
+  status             String    @default("wydany") @db.VarChar(30) // wydany, przyjety, dodatkowy, plan
+  uwagi              String?   @db.Text
+  aktywny            Boolean   @default(true)
+  data_utworzenia    DateTime  @default(now())
+  data_aktualizacji  DateTime  @updatedAt
+
+  organizacja        Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydanie            WydanieMagazynowe @relation(fields: [id_wydania], references: [id], onDelete: Cascade)
+  model              ModelSprzetu? @relation(fields: [id_modelu], references: [id])
+  egzemplarz         Egzemplarz? @relation(fields: [id_egzemplarza], references: [id])
+
+  @@index([id_wydania])
+  @@index([id_modelu])
+  @@index([id_egzemplarza])
+  @@map("pozycje_wydan_magazynowych")
+}
+
+// =========================================================
+// SERWIS
+// =========================================================
+
+model StatusSerwisu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  kolor            String?   @db.VarChar(20)
+  kolejnosc        Int       @default(0)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  serwisy          SerwisSprzetu[]
+
+  @@map("statusy_serwisu")
+}
+
+model SerwisSprzetu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_egzemplarza   Int
+  id_statusu_serwisu Int
+  id_uzytkownika_zglosil Int
+  id_uzytkownika_rozwiazal Int?
+  tytul            String    @db.VarChar(150)
+  opis             String?   @db.Text
+  rozwiazanie      String?   @db.Text
+  data_zgloszenia  DateTime  @default(now())
+  data_rozwiazania DateTime?
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja   @relation(fields: [id_organizacji], references: [id])
+  egzemplarz       Egzemplarz    @relation(fields: [id_egzemplarza], references: [id])
+  status           StatusSerwisu @relation(fields: [id_statusu_serwisu], references: [id])
+  zglosil          Uzytkownik    @relation("ZglosilSerwis", fields: [id_uzytkownika_zglosil], references: [id])
+  rozwiazal        Uzytkownik?   @relation("RozwiazalSerwis", fields: [id_uzytkownika_rozwiazal], references: [id])
+
+  @@map("serwisy_sprzetu")
+}
+
+// =========================================================
+// SYSTEM
+// =========================================================
+
+model Zalacznik {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  typ_obiektu      String    @db.VarChar(100)
+  id_obiektu       Int
+  nazwa            String    @db.VarChar(255)
+  nazwa_pliku      String    @db.VarChar(255)
+  sciezka          String?   @db.VarChar(500)
+  mime             String?   @db.VarChar(100)
+  rozmiar_bajtow   Int?
+  id_uzytkownika_dodal Int?
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  dodal            Uzytkownik? @relation(fields: [id_uzytkownika_dodal], references: [id])
+
+  @@index([typ_obiektu, id_obiektu])
+  @@map("zalaczniki")
+}
+
+model LogZmian {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_uzytkownika   Int?
+  typ_obiektu      String    @db.VarChar(100)
+  id_obiektu       Int?
+  akcja            String    @db.VarChar(50)
+  pole             String?   @db.VarChar(100)
+  stara_wartosc    String?   @db.Text
+  nowa_wartosc     String?   @db.Text
+  ip               String?   @db.VarChar(45)
+  user_agent       String?   @db.Text
+  data_utworzenia  DateTime  @default(now())
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  uzytkownik       Uzytkownik? @relation(fields: [id_uzytkownika], references: [id])
+
+  @@index([typ_obiektu, id_obiektu])
+  @@index([data_utworzenia])
+  @@map("logi_zmian")
+}
+
+// =========================================================
+// NOWE MODUŁY (DODANE NA BAZIE INTERFEJSU WMS)
+// =========================================================
+
+model WydarzenieUzytkownik {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_wydarzenia    Int
+  id_uzytkownika   Int
+  rola_w_wydarzeniu String?  @db.VarChar(100) // np. technik, realizator
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenie       Wydarzenie  @relation(fields: [id_wydarzenia], references: [id])
+  uzytkownik       Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+
+  @@unique([id_wydarzenia, id_uzytkownika])
+  @@map("wydarzenia_uzytkownicy")
+}
+
+model Pojazd {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  nazwa            String    @db.VarChar(150)
+  nr_rejestracyjny String    @db.VarChar(50)
+  marka            String?   @db.VarChar(100)
+  model            String?   @db.VarChar(100)
+  rok_produkcji    Int?
+  vin              String?   @db.VarChar(50)
+  przebieg_km      Int?
+  data_przegladu   DateTime? @db.Date
+  data_oc          DateTime? @db.Date
+  numer_polisy_oc  String?   @db.VarChar(100)
+  ubezpieczyciel   String?   @db.VarChar(150)
+  ladownosc_kg     Decimal?  @db.Decimal(10, 2)
+  objetosc_m3      Decimal?  @db.Decimal(10, 2)
+  notatki          String?   @db.Text
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenia       WydarzeniePojazd[]
+  zadania          Zadanie[]
+  serwisy_pojazdu  SerwisPojazdu[]
+  przeglady_pojazdu PrzegladPojazdu[]
+
+  @@unique([id_organizacji, nr_rejestracyjny])
+  @@index([vin])
+  @@map("pojazdy")
+}
+
+model SerwisPojazdu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_pojazdu       Int
+  data_serwisu     DateTime  @db.Date
+  przebieg_km      Int?
+  opis             String?   @db.Text
+  koszt_netto      Decimal?  @db.Decimal(12, 2)
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  pojazd           Pojazd      @relation(fields: [id_pojazdu], references: [id])
+
+  @@index([id_pojazdu])
+  @@map("serwisy_pojazdow")
+}
+
+model PrzegladPojazdu {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_pojazdu       Int
+  typ              String    @default("techniczny") @db.VarChar(50)
+  data_przegladu   DateTime  @db.Date
+  data_nastepna    DateTime? @db.Date
+  przebieg_km      Int?
+  opis             String?   @db.Text
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  pojazd           Pojazd      @relation(fields: [id_pojazdu], references: [id])
+
+  @@index([id_pojazdu])
+  @@map("przeglady_pojazdow")
+}
+
+model WydarzeniePojazd {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_wydarzenia    Int
+  id_pojazdu       Int
+  rola_pojazdu     String?   @db.VarChar(100) // np. transport glowny
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenie       Wydarzenie  @relation(fields: [id_wydarzenia], references: [id])
+  pojazd           Pojazd      @relation(fields: [id_pojazdu], references: [id])
+
+  @@unique([id_wydarzenia, id_pojazdu])
+  @@map("wydarzenia_pojazdy")
+}
+
+model Zadanie {
+  id                      Int       @id @default(autoincrement())
+  id_organizacji          Int
+  id_tworcy               Int?      // Kto zlecił zadanie
+  tytul                   String    @db.VarChar(200)
+  opis                    String?   @db.Text
+  typ_zadania             String?   @db.VarChar(100)
+  status                  String    @default("nowe") @db.VarChar(50)
+  
+  data_start              DateTime?
+  data_koniec             DateTime?
+  
+  szacowany_czas_h        Decimal?  @db.Decimal(10, 2)
+  szacowana_liczba_osob   Int?
+  cykl                    String?   @db.VarChar(100) // np. jednorazowe, codzienne
+
+  // Konkretne powiązania z modułami
+  id_wydarzenia           Int?
+  id_kontrahenta          Int?
+  id_egzemplarza          Int?
+  id_pojazdu              Int?
+
+  aktywny                 Boolean   @default(true)
+  data_utworzenia         DateTime  @default(now())
+  data_aktualizacji       DateTime  @updatedAt
+  data_usuniecia          DateTime?
+
+  organizacja             Organizacja  @relation(fields: [id_organizacji], references: [id])
+  tworca                  Uzytkownik?  @relation("ZlecajacyZadanie", fields: [id_tworcy], references: [id])
+  
+  // Relacje
+  wydarzenie              Wydarzenie?  @relation(fields: [id_wydarzenia], references: [id])
+  kontrahent              Kontrahent?  @relation(fields: [id_kontrahenta], references: [id])
+  pojazd                  Pojazd?      @relation(fields: [id_pojazdu], references: [id])
+  egzemplarz              Egzemplarz?  @relation(fields: [id_egzemplarza], references: [id]) // Dodano poprawną relację sprzętu
+  
+  przypisani_uzytkownicy  ZadanieUzytkownik[]
+
+  @@map("zadania")
+}
+model ZadanieUzytkownik {
+  id              Int       @id @default(autoincrement())
+  id_organizacji  Int
+  id_zadania      Int
+  id_uzytkownika  Int
+  aktywny         Boolean   @default(true)
+  data_utworzenia DateTime  @default(now())
+
+  organizacja     Organizacja @relation(fields: [id_organizacji], references: [id])
+  zadanie         Zadanie     @relation(fields: [id_zadania], references: [id], onDelete: Cascade)
+  uzytkownik      Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+
+  @@unique([id_zadania, id_uzytkownika])
+  @@map("zadania_uzytkownicy")
+}
+
+model Nieobecnosc {
+  id               Int       @id @default(autoincrement())
+  id_organizacji   Int
+  id_uzytkownika   Int
+  typ              String    @db.VarChar(50) // np. urlop, L4
+  data_od          DateTime
+  data_do          DateTime
+  opis             String?   @db.Text
+  aktywny          Boolean   @default(true)
+  data_utworzenia  DateTime  @default(now())
+  data_aktualizacji DateTime @updatedAt
+  data_usuniecia   DateTime?
+
+  organizacja      Organizacja @relation(fields: [id_organizacji], references: [id])
+  uzytkownik       Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+
+  @@map("nieobecnosci")
+}

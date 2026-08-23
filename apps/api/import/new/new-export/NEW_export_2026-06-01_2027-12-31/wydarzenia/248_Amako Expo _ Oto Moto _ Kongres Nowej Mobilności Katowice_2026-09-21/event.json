@@ -1,0 +1,4693 @@
+{
+  "complete": true,
+  "exporter_version": "4.0-FINAL",
+  "scraped_at": "2026-08-15 21:46:43",
+  "source": {
+    "base_url": "https://pixel.newsystems.pl",
+    "event_url": "https://pixel.newsystems.pl/admin/event/view?id=248",
+    "internal_id": "248"
+  },
+  "list": {
+    "internal_id": "248",
+    "list_no": "MCK Katowice",
+    "event_name_list": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice [E2026/06/104]",
+    "event_name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice",
+    "event_code": "E2026/06/104",
+    "accounting": "",
+    "status": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice [E2026/06/104]",
+    "client": "10",
+    "customer_id": "412",
+    "event_manager": "Notatka Duplikuj",
+    "start": "",
+    "end": "",
+    "accounting_date": "Jan Studencki",
+    "created_at": "21.09.2026, 00:00 26.09.2026, 23:59",
+    "detail_url": "https://pixel.newsystems.pl/admin/event/view?id=248"
+  },
+  "summary": {
+    "internal_id": "248",
+    "name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice",
+    "event_code": "E2026/06/104",
+    "type": "Targi/Wystawy",
+    "location": "Katowice, Plac Sławika i Antalla 1",
+    "accounting": "Nie zafakturowane",
+    "status": "Nowe",
+    "client": "AMAKO MEDIA SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ",
+    "client_nip": "9452087487",
+    "event_manager": "Jan Studencki",
+    "start": "2026-09-21 00:00:00",
+    "end": "2026-09-26 23:59:00",
+    "description": "",
+    "details": "",
+    "custom_fields": {
+      "Nocleg": ""
+    },
+    "schedule": [
+      {
+        "id": "446",
+        "name": "Event",
+        "start": "2026-09-21 00:00:00",
+        "end": "2026-09-26 23:59:00"
+      }
+    ],
+    "location_id": "",
+    "location_venue": "",
+    "location_city": "",
+    "location_address": "",
+    "type_source_field": "Event[type]"
+  },
+  "schedule": [
+    {
+      "id": "446",
+      "name": "Event",
+      "start": "2026-09-21 00:00:00",
+      "end": "2026-09-26 23:59:00"
+    }
+  ],
+  "details": {
+    "found": true,
+    "text": "× Edytuj harmonogram Dodaj notatkę Opis Szczegóły Zapisz Nocleg Kalendarz Dodaj etap Event 2026-09-21 - 2026-09-26 00:00 - 23:59",
+    "tables": [],
+    "links": [
+      {
+        "text": "Dodaj notatkę",
+        "href": "/admin/customer-note/create?customer_id=412&event_id=248",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap",
+        "href": "/admin/event/add-schedule?id=248",
+        "data": {}
+      }
+    ]
+  },
+  "gear": {
+    "found": true,
+    "text": "× Przyjmij sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Przyjmij sprzęt × Wydaj sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Magazyn, z którego wydajemy: MAGAZYN POZNAŃ MAGAZYN KATOWICE Wydaj sprzęt × Kopiuj sprzęt z innego wydarzenia × Przenieś sprzęt × Brak sprzętu × Konflikty do rozwiązania × × Edycja × Notatki + Dodaj + Dodaj grupę sprzętową Skopiuj sprzęt z innego wydarzenia Zarezerwuj sprzęt z oferty na wydarzenie Packlisty Cały sprzęt Cały sprzęt ze zdjęciami Cały sprzęt - XLSX Wydania / przyjęcia Wydaj Przyjmij Przenieś Przenieś z tego wydarzenia Przenieś na to wydarzenie Niezwrócony sprzęt: Numery: Zarządzaj grupami Zarządzaj grupami",
+    "tables": [
+      {
+        "id": "not-returned-table",
+        "class": [
+          "table",
+          "table-stripped",
+          "btn-danger"
+        ],
+        "headers": [],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Przyjmij sprzęt",
+        "href": "/admin/incomes-warehouse/create?event=248&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Wydaj sprzęt",
+        "href": "/admin/outcomes-warehouse/create?event=248&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj grupę sprzętową",
+        "href": "/admin/event/add-packlist?id=248",
+        "data": {
+          "data-add": "1"
+        }
+      },
+      {
+        "text": "Skopiuj sprzęt z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=248&type=gear",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=248&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Packlisty",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt",
+        "href": "/admin/event/packing-list?id=248&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt ze zdjęciami",
+        "href": "/admin/event/packing-list?id=248&sort=cat&photo=1",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt - XLSX",
+        "href": "/admin/event/packing-list-xls?id=248&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Wydania / przyjęcia",
+        "href": "/admin/event/info?id=248",
+        "data": {}
+      },
+      {
+        "text": "Wydaj",
+        "href": "/admin/outcomes-warehouse/create?event=248&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przyjmij",
+        "href": "/admin/incomes-warehouse/create?event=248&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przenieś",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Przenieś z tego wydarzenia",
+        "href": "/admin/event-movement/create-start?event_from=248",
+        "data": {}
+      },
+      {
+        "text": "Przenieś na to wydarzenie",
+        "href": "/admin/event-movement/create-start?event_to=248",
+        "data": {}
+      },
+      {
+        "text": "Zarządzaj grupami",
+        "href": "#tabs-248-tab0",
+        "data": {
+          "data-toggle": "tab"
+        }
+      }
+    ]
+  },
+  "gear_items": [],
+  "external_gear": {
+    "need": {
+      "found": true,
+      "text": "Zapotrzebowanie na sprzęt zewnętrzny Magazyn dostawców Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy # Zdjęcie Nazwa Sztuk Grupa sprzętowa Zarezerwowane Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-condensed",
+            "kv-table-wrap",
+            "table-bordered",
+            "table-striped"
+          ],
+          "headers": [
+            "#",
+            "Zdjęcie",
+            "Nazwa",
+            "Sztuk",
+            "Grupa sprzętowa",
+            "Zarezerwowane",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Magazyn dostawców",
+          "href": "/admin/outer-warehouse/assign?id=248&type=event",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=248&_togb047f92b=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "reserved_at_supplier": {
+      "found": true,
+      "text": "× Zarządzaj sprzętem zewn. Sprzęt zarezerwowany u wypożyczającego Stwórz zamówienie Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Nazwa Sekcja Firma Zarezerwowane Data odbioru Data zwrotu Packlisty Uwagi Odpowiedzialny Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-bordered",
+            "table-striped",
+            "kv-table-wrap"
+          ],
+          "headers": [
+            "",
+            "Nazwa",
+            "Sekcja",
+            "Firma",
+            "Zarezerwowane",
+            "Data odbioru",
+            "Data zwrotu",
+            "Packlisty",
+            "Uwagi",
+            "Odpowiedzialny",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Stwórz zamówienie",
+          "href": "#",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=248&_tog67e4b9e4=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "text": {
+      "need": "",
+      "reserved_at_supplier": ""
+    }
+  },
+  "attachments_section": {
+    "found": true,
+    "text": "Dodaj Usuń zaznaczone Dodaj plany techniczne do Event Network Dodaj zdjęcia obiektu do Event Network Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa pliku Typ Dodał Komentarz pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf Plik Michał Strykowski 2026-07-07 15:11:23 Edytuj pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf Plik Michał Strykowski 2026-07-07 15:11:23 Edytuj pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf Plik Michał Strykowski 2026-07-07 15:11:23 Edytuj otomoto_v3_r03.png Plik Jan Studencki 2026-07-27 17:42:31 Edytuj otomoto_v3_r04.png Plik Jan Studencki 2026-07-27 17:42:31 Edytuj otomoto_v3_r05.png Plik Jan Studencki 2026-07-27 17:42:32 Edytuj otomoto_v3_wiz05.png Plik Jan Studencki 2026-07-27 17:42:32 Edytuj otomoto_v3_wiz14.png Plik Jan Studencki 2026-07-27 17:42:33 Edytuj otomoto_v3_r01.png Plik Jan Studencki 2026-07-27 17:42:33 Edytuj otomoto_v3_wiz06.png Plik Jan Studencki 2026-07-27 17:42:33 Edytuj otomoto_v3_r02.png Plik Jan Studencki 2026-07-27 17:42:33 Edytuj otomoto_v3_wiz07.png Plik Jan Studencki 2026-07-27 17:42:34 Edytuj otomoto_v3_r06.png Plik Jan Studencki 2026-07-27 17:42:34 Edytuj otomoto_v3_p01_r03.png Plik Jan Studencki 2026-07-28 12:49:52 Edytuj otomoto_v3_p01_r05.png Plik Jan Studencki 2026-07-28 12:49:53 Edytuj otomoto_v3_p01_r04.png Plik Jan Studencki 2026-07-28 12:49:53 Edytuj otomoto_v3_p01_wiz04.png Plik Jan Studencki 2026-07-28 12:49:53 Edytuj otomoto_v3_p01_wiz03.png Plik Jan Studencki 2026-07-28 12:49:53 Edytuj Pliki z czatu Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Podgląd Nazwa pliku Użytkownik Data Brak wyników. ‹ › ×",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa pliku",
+          "Typ",
+          "Dodał",
+          "Komentarz",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "35",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "35",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+                "links": [
+                  {
+                    "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+                    "data": {
+                      "data-model": "35"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-07 15:11:23",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=35",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=35",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=35",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=35",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "36",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "36",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+                "links": [
+                  {
+                    "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+                    "data": {
+                      "data-model": "36"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-07 15:11:23",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=36",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=36",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=36",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=36",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "37",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "37",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+                "links": [
+                  {
+                    "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+                    "data": {
+                      "data-model": "37"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-07 15:11:23",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=37",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=37",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=37",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=37",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "108",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "108",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r03.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r03.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "108"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_r03.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_r03.png",
+                    "href": "/uploads/attachment/otomoto_v3_r03.png",
+                    "data": {
+                      "data-model": "108"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:31",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=108",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r03.png",
+                    "data": {
+                      "data-model": "108"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=108",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=108",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=108",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "109",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "109",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r04.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r04.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "109"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_r04.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_r04.png",
+                    "href": "/uploads/attachment/otomoto_v3_r04.png",
+                    "data": {
+                      "data-model": "109"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:31",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=109",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r04.png",
+                    "data": {
+                      "data-model": "109"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=109",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=109",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=109",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "110",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "110",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r05.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r05.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "110"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_r05.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_r05.png",
+                    "href": "/uploads/attachment/otomoto_v3_r05.png",
+                    "data": {
+                      "data-model": "110"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:32",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=110",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r05.png",
+                    "data": {
+                      "data-model": "110"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=110",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=110",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=110",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "111",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "111",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz05.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz05.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "111"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_wiz05.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_wiz05.png",
+                    "href": "/uploads/attachment/otomoto_v3_wiz05.png",
+                    "data": {
+                      "data-model": "111"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:32",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=111",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz05.png",
+                    "data": {
+                      "data-model": "111"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=111",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=111",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=111",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "112",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "112",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz14.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz14.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "112"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_wiz14.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_wiz14.png",
+                    "href": "/uploads/attachment/otomoto_v3_wiz14.png",
+                    "data": {
+                      "data-model": "112"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:33",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=112",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz14.png",
+                    "data": {
+                      "data-model": "112"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=112",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=112",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=112",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "113",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "113",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r01.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r01.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "113"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_r01.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_r01.png",
+                    "href": "/uploads/attachment/otomoto_v3_r01.png",
+                    "data": {
+                      "data-model": "113"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:33",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=113",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r01.png",
+                    "data": {
+                      "data-model": "113"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=113",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=113",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=113",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "114",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "114",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz06.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz06.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "114"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_wiz06.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_wiz06.png",
+                    "href": "/uploads/attachment/otomoto_v3_wiz06.png",
+                    "data": {
+                      "data-model": "114"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:33",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=114",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz06.png",
+                    "data": {
+                      "data-model": "114"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=114",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=114",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=114",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "115",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "115",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r02.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r02.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "115"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_r02.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_r02.png",
+                    "href": "/uploads/attachment/otomoto_v3_r02.png",
+                    "data": {
+                      "data-model": "115"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:33",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=115",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r02.png",
+                    "data": {
+                      "data-model": "115"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=115",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=115",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=115",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "116",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "116",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz07.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz07.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "116"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_wiz07.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_wiz07.png",
+                    "href": "/uploads/attachment/otomoto_v3_wiz07.png",
+                    "data": {
+                      "data-model": "116"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:34",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=116",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_wiz07.png",
+                    "data": {
+                      "data-model": "116"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=116",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=116",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=116",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "117",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "117",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r06.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r06.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "117"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_r06.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_r06.png",
+                    "href": "/uploads/attachment/otomoto_v3_r06.png",
+                    "data": {
+                      "data-model": "117"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-27 17:42:34",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=117",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_r06.png",
+                    "data": {
+                      "data-model": "117"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=117",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=117",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=117",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "118",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "118",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r03.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r03.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "118"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_p01_r03.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_p01_r03.png",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r03.png",
+                    "data": {
+                      "data-model": "118"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-28 12:49:52",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=118",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r03.png",
+                    "data": {
+                      "data-model": "118"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=118",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=118",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=118",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "119",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "119",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r05.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r05.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "119"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_p01_r05.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_p01_r05.png",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r05.png",
+                    "data": {
+                      "data-model": "119"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-28 12:49:53",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=119",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r05.png",
+                    "data": {
+                      "data-model": "119"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=119",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=119",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=119",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "120",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "120",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r04.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r04.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "120"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_p01_r04.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_p01_r04.png",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r04.png",
+                    "data": {
+                      "data-model": "120"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-28 12:49:53",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=120",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_r04.png",
+                    "data": {
+                      "data-model": "120"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=120",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=120",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=120",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "121",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "121",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_wiz04.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_wiz04.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "121"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_p01_wiz04.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_p01_wiz04.png",
+                    "href": "/uploads/attachment/otomoto_v3_p01_wiz04.png",
+                    "data": {
+                      "data-model": "121"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-28 12:49:53",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=121",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_wiz04.png",
+                    "data": {
+                      "data-model": "121"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=121",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=121",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=121",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "122",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "122",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_wiz03.png",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_wiz03.png",
+                    "data": {
+                      "data-gallery": "",
+                      "data-model": "122"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "otomoto_v3_p01_wiz03.png",
+                "links": [
+                  {
+                    "text": "otomoto_v3_p01_wiz03.png",
+                    "href": "/uploads/attachment/otomoto_v3_p01_wiz03.png",
+                    "data": {
+                      "data-model": "122"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Jan Studencki 2026-07-28 12:49:53",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=122",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/otomoto_v3_p01_wiz03.png",
+                    "data": {
+                      "data-model": "122"
+                    }
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=122",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=122",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=122",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Podgląd",
+          "Nazwa pliku",
+          "Użytkownik",
+          "Data"
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj",
+        "href": "/admin/attachment/create?eventId=248",
+        "data": {}
+      },
+      {
+        "text": "Usuń zaznaczone",
+        "href": "/admin/attachment/delete-more?eventId=248",
+        "data": {}
+      },
+      {
+        "text": "Dodaj plany techniczne do Event Network",
+        "href": "/admin/location-plan/create?locationId=12317",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zdjęcia obiektu do Event Network",
+        "href": "/admin/location-panorama/create?locationId=12317",
+        "data": {}
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=248&_tog3e047f3f=page&_toga05895fd=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+        "data": {}
+      },
+      {
+        "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+        "data": {
+          "data-model": "35"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=35",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=35",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=35",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=35",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+        "data": {}
+      },
+      {
+        "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+        "data": {
+          "data-model": "36"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=36",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=36",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=36",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=36",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+        "data": {}
+      },
+      {
+        "text": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+        "data": {
+          "data-model": "37"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=37",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=37",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=37",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=37",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r03.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r03.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "108"
+        }
+      },
+      {
+        "text": "otomoto_v3_r03.png",
+        "href": "/uploads/attachment/otomoto_v3_r03.png",
+        "data": {
+          "data-model": "108"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=108",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r03.png",
+        "data": {
+          "data-model": "108"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=108",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=108",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=108",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r04.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r04.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "109"
+        }
+      },
+      {
+        "text": "otomoto_v3_r04.png",
+        "href": "/uploads/attachment/otomoto_v3_r04.png",
+        "data": {
+          "data-model": "109"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=109",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r04.png",
+        "data": {
+          "data-model": "109"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=109",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=109",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=109",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r05.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r05.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "110"
+        }
+      },
+      {
+        "text": "otomoto_v3_r05.png",
+        "href": "/uploads/attachment/otomoto_v3_r05.png",
+        "data": {
+          "data-model": "110"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=110",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r05.png",
+        "data": {
+          "data-model": "110"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=110",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=110",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=110",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz05.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz05.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "111"
+        }
+      },
+      {
+        "text": "otomoto_v3_wiz05.png",
+        "href": "/uploads/attachment/otomoto_v3_wiz05.png",
+        "data": {
+          "data-model": "111"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=111",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz05.png",
+        "data": {
+          "data-model": "111"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=111",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=111",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=111",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz14.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz14.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "112"
+        }
+      },
+      {
+        "text": "otomoto_v3_wiz14.png",
+        "href": "/uploads/attachment/otomoto_v3_wiz14.png",
+        "data": {
+          "data-model": "112"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=112",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz14.png",
+        "data": {
+          "data-model": "112"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=112",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=112",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=112",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r01.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r01.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "113"
+        }
+      },
+      {
+        "text": "otomoto_v3_r01.png",
+        "href": "/uploads/attachment/otomoto_v3_r01.png",
+        "data": {
+          "data-model": "113"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=113",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r01.png",
+        "data": {
+          "data-model": "113"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=113",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=113",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=113",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz06.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz06.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "114"
+        }
+      },
+      {
+        "text": "otomoto_v3_wiz06.png",
+        "href": "/uploads/attachment/otomoto_v3_wiz06.png",
+        "data": {
+          "data-model": "114"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=114",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz06.png",
+        "data": {
+          "data-model": "114"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=114",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=114",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=114",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r02.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r02.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "115"
+        }
+      },
+      {
+        "text": "otomoto_v3_r02.png",
+        "href": "/uploads/attachment/otomoto_v3_r02.png",
+        "data": {
+          "data-model": "115"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=115",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r02.png",
+        "data": {
+          "data-model": "115"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=115",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=115",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=115",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz07.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz07.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "116"
+        }
+      },
+      {
+        "text": "otomoto_v3_wiz07.png",
+        "href": "/uploads/attachment/otomoto_v3_wiz07.png",
+        "data": {
+          "data-model": "116"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=116",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_wiz07.png",
+        "data": {
+          "data-model": "116"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=116",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=116",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=116",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r06.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r06.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "117"
+        }
+      },
+      {
+        "text": "otomoto_v3_r06.png",
+        "href": "/uploads/attachment/otomoto_v3_r06.png",
+        "data": {
+          "data-model": "117"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=117",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_r06.png",
+        "data": {
+          "data-model": "117"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=117",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=117",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=117",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r03.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r03.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "118"
+        }
+      },
+      {
+        "text": "otomoto_v3_p01_r03.png",
+        "href": "/uploads/attachment/otomoto_v3_p01_r03.png",
+        "data": {
+          "data-model": "118"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=118",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r03.png",
+        "data": {
+          "data-model": "118"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=118",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=118",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=118",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r05.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r05.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "119"
+        }
+      },
+      {
+        "text": "otomoto_v3_p01_r05.png",
+        "href": "/uploads/attachment/otomoto_v3_p01_r05.png",
+        "data": {
+          "data-model": "119"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=119",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r05.png",
+        "data": {
+          "data-model": "119"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=119",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=119",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=119",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r04.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r04.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "120"
+        }
+      },
+      {
+        "text": "otomoto_v3_p01_r04.png",
+        "href": "/uploads/attachment/otomoto_v3_p01_r04.png",
+        "data": {
+          "data-model": "120"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=120",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_r04.png",
+        "data": {
+          "data-model": "120"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=120",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=120",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=120",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_wiz04.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_wiz04.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "121"
+        }
+      },
+      {
+        "text": "otomoto_v3_p01_wiz04.png",
+        "href": "/uploads/attachment/otomoto_v3_p01_wiz04.png",
+        "data": {
+          "data-model": "121"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=121",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_wiz04.png",
+        "data": {
+          "data-model": "121"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=121",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=121",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=121",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_wiz03.png",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_wiz03.png",
+        "data": {
+          "data-gallery": "",
+          "data-model": "122"
+        }
+      },
+      {
+        "text": "otomoto_v3_p01_wiz03.png",
+        "href": "/uploads/attachment/otomoto_v3_p01_wiz03.png",
+        "data": {
+          "data-model": "122"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=122",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/otomoto_v3_p01_wiz03.png",
+        "data": {
+          "data-model": "122"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=122",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=122",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=122",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=248&_tog3e047f3f=all&_toga05895fd=page",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "Data",
+        "href": "/admin/event/view?id=248&_tog3e047f3f=all&_toga05895fd=all&dp-5-sort=create_time",
+        "data": {
+          "data-sort": "create_time"
+        }
+      }
+    ]
+  },
+  "attachments": [
+    {
+      "attachment_id": "35",
+      "filename": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=35",
+      "source": "attachment_download",
+      "saved_as": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice.pdf",
+      "bytes": 894915,
+      "ok": true
+    },
+    {
+      "attachment_id": "36",
+      "filename": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=36",
+      "source": "attachment_download",
+      "saved_as": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v2.pdf",
+      "bytes": 892229,
+      "ok": true
+    },
+    {
+      "attachment_id": "37",
+      "filename": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=37",
+      "source": "attachment_download",
+      "saved_as": "pixel_multimedia_oferta_na_ekrany_led_stoisko_oto_moto_kongres_nowej_mobilnosci_katowice_v3_dodatkowy_ekran_led_3x35.pdf",
+      "bytes": 890884,
+      "ok": true
+    },
+    {
+      "attachment_id": "108",
+      "filename": "otomoto_v3_r03.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=108",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_r03.png",
+      "bytes": 639679,
+      "ok": true
+    },
+    {
+      "attachment_id": "109",
+      "filename": "otomoto_v3_r04.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=109",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_r04.png",
+      "bytes": 1200674,
+      "ok": true
+    },
+    {
+      "attachment_id": "110",
+      "filename": "otomoto_v3_r05.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=110",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_r05.png",
+      "bytes": 620721,
+      "ok": true
+    },
+    {
+      "attachment_id": "111",
+      "filename": "otomoto_v3_wiz05.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=111",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_wiz05.png",
+      "bytes": 1294305,
+      "ok": true
+    },
+    {
+      "attachment_id": "112",
+      "filename": "otomoto_v3_wiz14.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=112",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_wiz14.png",
+      "bytes": 1232074,
+      "ok": true
+    },
+    {
+      "attachment_id": "113",
+      "filename": "otomoto_v3_r01.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=113",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_r01.png",
+      "bytes": 1229140,
+      "ok": true
+    },
+    {
+      "attachment_id": "114",
+      "filename": "otomoto_v3_wiz06.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=114",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_wiz06.png",
+      "bytes": 1225158,
+      "ok": true
+    },
+    {
+      "attachment_id": "115",
+      "filename": "otomoto_v3_r02.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=115",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_r02.png",
+      "bytes": 1014511,
+      "ok": true
+    },
+    {
+      "attachment_id": "116",
+      "filename": "otomoto_v3_wiz07.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=116",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_wiz07.png",
+      "bytes": 1264925,
+      "ok": true
+    },
+    {
+      "attachment_id": "117",
+      "filename": "otomoto_v3_r06.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=117",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_r06.png",
+      "bytes": 1093835,
+      "ok": true
+    },
+    {
+      "attachment_id": "118",
+      "filename": "otomoto_v3_p01_r03.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=118",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_p01_r03.png",
+      "bytes": 590584,
+      "ok": true
+    },
+    {
+      "attachment_id": "119",
+      "filename": "otomoto_v3_p01_r05.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=119",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_p01_r05.png",
+      "bytes": 592182,
+      "ok": true
+    },
+    {
+      "attachment_id": "120",
+      "filename": "otomoto_v3_p01_r04.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=120",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_p01_r04.png",
+      "bytes": 1170452,
+      "ok": true
+    },
+    {
+      "attachment_id": "121",
+      "filename": "otomoto_v3_p01_wiz04.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=121",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_p01_wiz04.png",
+      "bytes": 1251139,
+      "ok": true
+    },
+    {
+      "attachment_id": "122",
+      "filename": "otomoto_v3_p01_wiz03.png",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=122",
+      "source": "attachment_download",
+      "saved_as": "otomoto_v3_p01_wiz03.png",
+      "bytes": 1439054,
+      "ok": true
+    }
+  ],
+  "offers": {
+    "found": true,
+    "text": "Stwórz nową Stwórz ofertę na podstawie wydarzenia Importuj z ofert Zarezerwuj sprzęt z oferty na wydarzenie Duplikuj Nazwa Projektu Data sporządzenia ofery Przygotował Status Multimedia Kratownice / Podesty / Elementy montażowe Transport Obsługa Inne Suma Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice 2026-08-07 09:40:35 Studencki Jan Nowa 26 520,00 zł 1 189,50 zł 0,00 zł 5 600,00 zł 0,00 zł 33 309,50 zł Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v6 2026-07-28 10:50:28 Studencki Jan Nowa 57 135,00 zł 955,50 zł 0,00 zł 5 600,00 zł 0,00 zł 63 690,50 zł Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v5 2026-07-27 Studencki Jan Nowa 44 265,00 zł 955,50 zł 0,00 zł 5 600,00 zł 0,00 zł 50 820,50 zł Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v4 2026-07-23 Studencki Jan Nowa 25 155,00 zł 817,50 zł 0,00 zł 5 600,00 zł 0,00 zł 31 572,50 zł",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Duplikuj",
+          "Nazwa Projektu",
+          "Data sporządzenia ofery",
+          "Przygotował",
+          "Status",
+          "Multimedia",
+          "Kratownice / Podesty / Elementy montażowe",
+          "Transport",
+          "Obsługa",
+          "Inne",
+          "Suma",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "159",
+            "cells": [
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/duplicate?id=159",
+                    "data": {
+                      "data-offer-id": "159",
+                      "data-offer-event-id": "248",
+                      "data-offer-event-name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "0"
+                }
+              },
+              {
+                "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice",
+                "links": [
+                  {
+                    "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice",
+                    "href": "/admin/offer/default/view?id=159",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "2026-08-07 09:40:35",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Studencki Jan",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Nowa",
+                "links": [
+                  {
+                    "text": "Nowa",
+                    "href": "#",
+                    "data": {
+                      "data-offerid": "159",
+                      "data-status": "8"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "26 520,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "1 189,50 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "6"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "7"
+                }
+              },
+              {
+                "text": "5 600,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "8"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "9"
+                }
+              },
+              {
+                "text": "33 309,50 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "10"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/offer-event?event_id=248",
+                    "data": {
+                      "data-id": "159"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "11"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "142",
+            "cells": [
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/duplicate?id=142",
+                    "data": {
+                      "data-offer-id": "142",
+                      "data-offer-event-id": "248",
+                      "data-offer-event-name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "0"
+                }
+              },
+              {
+                "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v6",
+                "links": [
+                  {
+                    "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v6",
+                    "href": "/admin/offer/default/view?id=142",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "2026-07-28 10:50:28",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Studencki Jan",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Nowa",
+                "links": [
+                  {
+                    "text": "Nowa",
+                    "href": "#",
+                    "data": {
+                      "data-offerid": "142",
+                      "data-status": "8"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "57 135,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "955,50 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "6"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "7"
+                }
+              },
+              {
+                "text": "5 600,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "8"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "9"
+                }
+              },
+              {
+                "text": "63 690,50 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "10"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/offer-event?event_id=248",
+                    "data": {
+                      "data-id": "142"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "11"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "137",
+            "cells": [
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/duplicate?id=137",
+                    "data": {
+                      "data-offer-id": "137",
+                      "data-offer-event-id": "248",
+                      "data-offer-event-name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "0"
+                }
+              },
+              {
+                "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v5",
+                "links": [
+                  {
+                    "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v5",
+                    "href": "/admin/offer/default/view?id=137",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "2026-07-27",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Studencki Jan",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Nowa",
+                "links": [
+                  {
+                    "text": "Nowa",
+                    "href": "#",
+                    "data": {
+                      "data-offerid": "137",
+                      "data-status": "8"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "44 265,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "955,50 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "6"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "7"
+                }
+              },
+              {
+                "text": "5 600,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "8"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "9"
+                }
+              },
+              {
+                "text": "50 820,50 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "10"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/offer-event?event_id=248",
+                    "data": {
+                      "data-id": "137"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "11"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "130",
+            "cells": [
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/duplicate?id=130",
+                    "data": {
+                      "data-offer-id": "130",
+                      "data-offer-event-id": "248",
+                      "data-offer-event-name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "0"
+                }
+              },
+              {
+                "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v4",
+                "links": [
+                  {
+                    "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v4",
+                    "href": "/admin/offer/default/view?id=130",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "2026-07-23",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Studencki Jan",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Nowa",
+                "links": [
+                  {
+                    "text": "Nowa",
+                    "href": "#",
+                    "data": {
+                      "data-offerid": "130",
+                      "data-status": "8"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "25 155,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "817,50 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "6"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "7"
+                }
+              },
+              {
+                "text": "5 600,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "8"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "9"
+                }
+              },
+              {
+                "text": "31 572,50 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "10"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/offer-event?event_id=248",
+                    "data": {
+                      "data-id": "130"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "11"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Stwórz nową",
+        "href": "/admin/offer/default/create?event_id=248",
+        "data": {}
+      },
+      {
+        "text": "Stwórz ofertę na podstawie wydarzenia",
+        "href": "/admin/offer/default/create-from-event?event_id=248",
+        "data": {}
+      },
+      {
+        "text": "Importuj z ofert",
+        "href": "/admin/offer/default/assign-to-event?event_id=248",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=248",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/duplicate?id=159",
+        "data": {
+          "data-offer-id": "159",
+          "data-offer-event-id": "248",
+          "data-offer-event-name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice"
+        }
+      },
+      {
+        "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice",
+        "href": "/admin/offer/default/view?id=159",
+        "data": {}
+      },
+      {
+        "text": "Nowa",
+        "href": "#",
+        "data": {
+          "data-offerid": "159",
+          "data-status": "8"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/offer-event?event_id=248",
+        "data": {
+          "data-id": "159"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/duplicate?id=142",
+        "data": {
+          "data-offer-id": "142",
+          "data-offer-event-id": "248",
+          "data-offer-event-name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice"
+        }
+      },
+      {
+        "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v6",
+        "href": "/admin/offer/default/view?id=142",
+        "data": {}
+      },
+      {
+        "text": "Nowa",
+        "href": "#",
+        "data": {
+          "data-offerid": "142",
+          "data-status": "8"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/offer-event?event_id=248",
+        "data": {
+          "data-id": "142"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/duplicate?id=137",
+        "data": {
+          "data-offer-id": "137",
+          "data-offer-event-id": "248",
+          "data-offer-event-name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice"
+        }
+      },
+      {
+        "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v5",
+        "href": "/admin/offer/default/view?id=137",
+        "data": {}
+      },
+      {
+        "text": "Nowa",
+        "href": "#",
+        "data": {
+          "data-offerid": "137",
+          "data-status": "8"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/offer-event?event_id=248",
+        "data": {
+          "data-id": "137"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/duplicate?id=130",
+        "data": {
+          "data-offer-id": "130",
+          "data-offer-event-id": "248",
+          "data-offer-event-name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice"
+        }
+      },
+      {
+        "text": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v4",
+        "href": "/admin/offer/default/view?id=130",
+        "data": {}
+      },
+      {
+        "text": "Nowa",
+        "href": "#",
+        "data": {
+          "data-offerid": "130",
+          "data-status": "8"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/offer-event?event_id=248",
+        "data": {
+          "data-id": "130"
+        }
+      }
+    ]
+  },
+  "offer_pdfs": [
+    {
+      "offer_id": "159",
+      "name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice",
+      "date": "2026-08-07 09:40:35",
+      "prepared_by": "Studencki Jan",
+      "status": "Nowa",
+      "total": "",
+      "view_url": "https://pixel.newsystems.pl/admin/offer/default/view?id=159",
+      "saved_as": "offer_159_Amako Expo _ Oto Moto _ Kongres Nowej Mobilności Katowice.pdf",
+      "bytes": 62077,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "offer_id": "142",
+      "name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v6",
+      "date": "2026-07-28 10:50:28",
+      "prepared_by": "Studencki Jan",
+      "status": "Nowa",
+      "total": "",
+      "view_url": "https://pixel.newsystems.pl/admin/offer/default/view?id=142",
+      "saved_as": "offer_142_Amako Expo _ Oto Moto _ Kongres Nowej Mobilności Katowice v6.pdf",
+      "bytes": 62739,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "offer_id": "137",
+      "name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v5",
+      "date": "2026-07-27",
+      "prepared_by": "Studencki Jan",
+      "status": "Nowa",
+      "total": "",
+      "view_url": "https://pixel.newsystems.pl/admin/offer/default/view?id=137",
+      "saved_as": "offer_137_Amako Expo _ Oto Moto _ Kongres Nowej Mobilności Katowice v5.pdf",
+      "bytes": 62736,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "offer_id": "130",
+      "name": "Amako Expo / Oto Moto / Kongres Nowej Mobilności Katowice v4",
+      "date": "2026-07-23",
+      "prepared_by": "Studencki Jan",
+      "status": "Nowa",
+      "total": "",
+      "view_url": "https://pixel.newsystems.pl/admin/offer/default/view?id=130",
+      "saved_as": "offer_130_Amako Expo _ Oto Moto _ Kongres Nowej Mobilności Katowice v4.pdf",
+      "bytes": 63739,
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "crew": {
+    "found": true,
+    "text": "Dodaj ekipę Dodaj zapotrzebowanie Wyślij powiadomienia do ekipy teraz Automatyczne powiadomienia Skopiuj ekipę z innego wydarzenia Dodaj etap harmonogramu Szybkie dodawanie: wybierz pracownika Zaznacz wszystkie Odznacz wszystkie Zobacz jak działa planowanie Video × Dodaj komentarz Dodaj komentarz Zapisz Event Od: 2026.09.21 00:00 Do: 2026-09-26 - 23:59 Zapotrzebowanie: 0 os. Dodanych: 0 os. Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Chat Wiadomość Zaznacz wszystkie Odznacz wszystkie Widok bez podziału na etapy Widok z podziałem na etapy Dodaj komentarz Dodaj komentarz Zapisz Exportuj Dodaj/Edytuj pracowników spoza systemu # Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy × Dodaj komentarz komentarz Zamknij Zapisz Zaznaczonych: 0 X Zapisz Rozpocznij chat Wyślij wiadomość Exportuj Kal. dostępności Planuj Usuń zaznaczone",
+    "tables": [
+      {
+        "id": "tablehistories",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "#",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj ekipę",
+        "href": "/admin/crew/manage-ajax?id=248",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=248",
+        "data": {}
+      },
+      {
+        "text": "Wyślij powiadomienia do ekipy teraz",
+        "href": "/admin/site/send-reminders-event?id=248",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj ekipę z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=248&type=crew",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap harmonogramu",
+        "href": "/admin/event/add-schedule?id=248",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=248",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/crew/copy-event-role?id=248&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/manage-ajax?id=248&role_id=&schedule=Event",
+        "data": {
+          "data-role-id": "",
+          "data-time_type": "1"
+        }
+      }
+    ]
+  },
+  "fleet": {
+    "found": true,
+    "text": "Dodaj flotę Dodaj zapotrzebowanie Dodaj zgłoszenie serwisowe do floty Szybkie dodawanie: wybierz pojazd Ford Transit/VisualRent PO 3CR29 Ford Transit/VisualRent PY 8597G Kia Ceed MAN TGE CZERWONY MAN TGE NIEBIESKI Peugeot Expert PO 9HJ93 Renault Master Najnowszy Renault Master Nowy Renault Master Stary Renault Master/Visual Rent WE 2AY13 Renault Trafic III Volkswagen Caddy Zobacz jak zgłosić usterkę Zobacz jak planować flotę Video × Dodaj komentarz Dodaj komentarz Zapisz Event OD: 2026.09.21, 00:00 DO: 2026.09.26, 23:59 Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Transport osobowy: Zapotrzebowanie 0 os. Dodanych 0 os. Dodaj komentarz Dodaj komentarz Zapisz Exportuj Usuń Wyświetl wszystko Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa Numer rejestracyjny Ładowność Pojemność Data przeglądu OC ważne do Czas pracy Brak wyników.",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa",
+          "Numer rejestracyjny",
+          "Ładowność",
+          "Pojemność",
+          "Data przeglądu",
+          "OC ważne do",
+          "Czas pracy",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj flotę",
+        "href": "/admin/vehicle/manage-ajax?id=248",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=248",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zgłoszenie serwisowe do floty",
+        "href": "/admin/vehicle/notes",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=248",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/vehicle/copy-event-vehicle?id=248&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/vehicle/manage-ajax?id=248&vehicle_id=&schedule=Event",
+        "data": {
+          "data-vehicle-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Exportuj",
+        "href": "/admin/vehicle/excel?id=248",
+        "data": {}
+      },
+      {
+        "text": "Wyświetl wszystko",
+        "href": "/admin/event/vehicle-tab?id=248&_tog5be4c740=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      }
+    ]
+  }
+}

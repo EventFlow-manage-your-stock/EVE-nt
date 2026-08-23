@@ -1,0 +1,10 @@
+{
+  "file": "/Users/michalstrykowski/Desktop/eve-nt-local/EventFlow_v2/apps/api/import/new/NEW_GEAR_PRISMA/NEW_sprzet_do_EVE_NT_PRISMA.xlsx",
+  "existing_categories_preserved": 73,
+  "category_mappings": 71,
+  "category_unmatched": [],
+  "warehouses": 5,
+  "models": 987,
+  "items": 2998,
+  "case_relations": 1343
+}

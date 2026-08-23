@@ -1,0 +1,1159 @@
+{
+  "complete": true,
+  "exporter_version": "4.0-FINAL",
+  "scraped_at": "2026-08-15 21:46:05",
+  "source": {
+    "base_url": "https://pixel.newsystems.pl",
+    "event_url": "https://pixel.newsystems.pl/admin/event/view?id=245",
+    "internal_id": "245"
+  },
+  "list": {
+    "internal_id": "245",
+    "list_no": "Radisson Hotel & Suites Ul. Chmielna 10, 80-748 Gdańsk, Polska",
+    "event_name_list": "Inspire/ V Baltic Eye Meeting/ Gdańsk [E2026/06/101]",
+    "event_name": "Inspire/ V Baltic Eye Meeting/ Gdańsk",
+    "event_code": "E2026/06/101",
+    "accounting": "",
+    "status": "Inspire/ V Baltic Eye Meeting/ Gdańsk [E2026/06/101]",
+    "client": "17",
+    "customer_id": "182",
+    "event_manager": "Notatka Duplikuj",
+    "start": "",
+    "end": "",
+    "accounting_date": "Antoni Pazder",
+    "created_at": "17.09.2026, 00:00 19.09.2026, 23:59",
+    "detail_url": "https://pixel.newsystems.pl/admin/event/view?id=245"
+  },
+  "summary": {
+    "internal_id": "245",
+    "name": "Inspire/ V Baltic Eye Meeting/ Gdańsk",
+    "event_code": "E2026/06/101",
+    "type": "Konferencja/event do 3 techników",
+    "location": "Radisson Hotel & Suites Ul. Chmielna 10, 80-748 Gdańsk, Polska",
+    "accounting": "Nie zafakturowane",
+    "status": "Nowe",
+    "client": "INSPIRECONGRESS SPOŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ",
+    "client_nip": "8982122587",
+    "event_manager": "Antoni Pazder",
+    "start": "2026-09-17 00:00:00",
+    "end": "2026-09-19 23:59:00",
+    "description": "",
+    "details": "",
+    "custom_fields": {
+      "Nocleg": ""
+    },
+    "schedule": [
+      {
+        "id": "443",
+        "name": "Event",
+        "start": "2026-09-17 00:00:00",
+        "end": "2026-09-19 23:59:00"
+      }
+    ],
+    "location_id": "",
+    "location_venue": "",
+    "location_city": "",
+    "location_address": "",
+    "type_source_field": "Event[type]"
+  },
+  "schedule": [
+    {
+      "id": "443",
+      "name": "Event",
+      "start": "2026-09-17 00:00:00",
+      "end": "2026-09-19 23:59:00"
+    }
+  ],
+  "details": {
+    "found": true,
+    "text": "× Edytuj harmonogram Dodaj notatkę Opis Szczegóły Zapisz Nocleg Kalendarz Dodaj etap Event 2026-09-17 - 2026-09-19 00:00 - 23:59",
+    "tables": [],
+    "links": [
+      {
+        "text": "Dodaj notatkę",
+        "href": "/admin/customer-note/create?customer_id=182&event_id=245",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap",
+        "href": "/admin/event/add-schedule?id=245",
+        "data": {}
+      }
+    ]
+  },
+  "gear": {
+    "found": true,
+    "text": "× Przyjmij sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Przyjmij sprzęt × Wydaj sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Magazyn, z którego wydajemy: MAGAZYN POZNAŃ MAGAZYN KATOWICE Wydaj sprzęt × Kopiuj sprzęt z innego wydarzenia × Przenieś sprzęt × Brak sprzętu × Konflikty do rozwiązania × × Edycja × Notatki + Dodaj + Dodaj grupę sprzętową Skopiuj sprzęt z innego wydarzenia Zarezerwuj sprzęt z oferty na wydarzenie Packlisty Cały sprzęt Cały sprzęt ze zdjęciami Cały sprzęt - XLSX Wydania / przyjęcia Wydaj Przyjmij Przenieś Przenieś z tego wydarzenia Przenieś na to wydarzenie Niezwrócony sprzęt: Numery: Zarządzaj grupami Zarządzaj grupami",
+    "tables": [
+      {
+        "id": "not-returned-table",
+        "class": [
+          "table",
+          "table-stripped",
+          "btn-danger"
+        ],
+        "headers": [],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Przyjmij sprzęt",
+        "href": "/admin/incomes-warehouse/create?event=245&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Wydaj sprzęt",
+        "href": "/admin/outcomes-warehouse/create?event=245&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj grupę sprzętową",
+        "href": "/admin/event/add-packlist?id=245",
+        "data": {
+          "data-add": "1"
+        }
+      },
+      {
+        "text": "Skopiuj sprzęt z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=245&type=gear",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=245&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Packlisty",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt",
+        "href": "/admin/event/packing-list?id=245&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt ze zdjęciami",
+        "href": "/admin/event/packing-list?id=245&sort=cat&photo=1",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt - XLSX",
+        "href": "/admin/event/packing-list-xls?id=245&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Wydania / przyjęcia",
+        "href": "/admin/event/info?id=245",
+        "data": {}
+      },
+      {
+        "text": "Wydaj",
+        "href": "/admin/outcomes-warehouse/create?event=245&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przyjmij",
+        "href": "/admin/incomes-warehouse/create?event=245&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przenieś",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Przenieś z tego wydarzenia",
+        "href": "/admin/event-movement/create-start?event_from=245",
+        "data": {}
+      },
+      {
+        "text": "Przenieś na to wydarzenie",
+        "href": "/admin/event-movement/create-start?event_to=245",
+        "data": {}
+      },
+      {
+        "text": "Zarządzaj grupami",
+        "href": "#tabs-245-tab0",
+        "data": {
+          "data-toggle": "tab"
+        }
+      }
+    ]
+  },
+  "gear_items": [],
+  "external_gear": {
+    "need": {
+      "found": true,
+      "text": "Zapotrzebowanie na sprzęt zewnętrzny Magazyn dostawców Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy # Zdjęcie Nazwa Sztuk Grupa sprzętowa Zarezerwowane Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-condensed",
+            "kv-table-wrap",
+            "table-bordered",
+            "table-striped"
+          ],
+          "headers": [
+            "#",
+            "Zdjęcie",
+            "Nazwa",
+            "Sztuk",
+            "Grupa sprzętowa",
+            "Zarezerwowane",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Magazyn dostawców",
+          "href": "/admin/outer-warehouse/assign?id=245&type=event",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=245&_togb047f92b=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "reserved_at_supplier": {
+      "found": true,
+      "text": "× Zarządzaj sprzętem zewn. Sprzęt zarezerwowany u wypożyczającego Stwórz zamówienie Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Nazwa Sekcja Firma Zarezerwowane Data odbioru Data zwrotu Packlisty Uwagi Odpowiedzialny Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-bordered",
+            "table-striped",
+            "kv-table-wrap"
+          ],
+          "headers": [
+            "",
+            "Nazwa",
+            "Sekcja",
+            "Firma",
+            "Zarezerwowane",
+            "Data odbioru",
+            "Data zwrotu",
+            "Packlisty",
+            "Uwagi",
+            "Odpowiedzialny",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Stwórz zamówienie",
+          "href": "#",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=245&_tog67e4b9e4=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "text": {
+      "need": "",
+      "reserved_at_supplier": ""
+    }
+  },
+  "attachments_section": {
+    "found": true,
+    "text": "Dodaj Usuń zaznaczone Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa pliku Typ Dodał Komentarz oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf Plik Michał Strykowski 2026-07-07 15:05:36 Edytuj oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf Plik Michał Strykowski 2026-07-07 15:05:36 Edytuj Pliki z czatu Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Podgląd Nazwa pliku Użytkownik Data Brak wyników. ‹ › ×",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa pliku",
+          "Typ",
+          "Dodał",
+          "Komentarz",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "33",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "33",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+                "links": [
+                  {
+                    "text": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+                    "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+                    "data": {
+                      "data-model": "33"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-07 15:05:36",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=33",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=33",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=33",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=33",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "34",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "34",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+                "links": [
+                  {
+                    "text": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+                    "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+                    "data": {
+                      "data-model": "34"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-07 15:05:36",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=34",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=34",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=34",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=34",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Podgląd",
+          "Nazwa pliku",
+          "Użytkownik",
+          "Data"
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj",
+        "href": "/admin/attachment/create?eventId=245",
+        "data": {}
+      },
+      {
+        "text": "Usuń zaznaczone",
+        "href": "/admin/attachment/delete-more?eventId=245",
+        "data": {}
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=245&_tog3e047f3f=page&_toga05895fd=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+        "data": {}
+      },
+      {
+        "text": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+        "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+        "data": {
+          "data-model": "33"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=33",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=33",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=33",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=33",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+        "data": {}
+      },
+      {
+        "text": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+        "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+        "data": {
+          "data-model": "34"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=34",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=34",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=34",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=34",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=245&_tog3e047f3f=all&_toga05895fd=page",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "Data",
+        "href": "/admin/event/view?id=245&_tog3e047f3f=all&_toga05895fd=all&dp-5-sort=create_time",
+        "data": {
+          "data-sort": "create_time"
+        }
+      }
+    ]
+  },
+  "attachments": [
+    {
+      "attachment_id": "33",
+      "filename": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=33",
+      "source": "attachment_download",
+      "saved_as": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led_tlumaczenia.pdf",
+      "bytes": 901640,
+      "ok": true
+    },
+    {
+      "attachment_id": "34",
+      "filename": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=34",
+      "source": "attachment_download",
+      "saved_as": "oferta_obslugi_audiowizualnej_konferencji_v_baltic_eye_meeting_w_dniach_18_19_wrzesnia_2026r_w_gdansku_ekran_led.pdf",
+      "bytes": 899998,
+      "ok": true
+    }
+  ],
+  "offers": {
+    "found": true,
+    "text": "Stwórz nową Stwórz ofertę na podstawie wydarzenia Importuj z ofert Zarezerwuj sprzęt z oferty na wydarzenie Duplikuj Nazwa Projektu Data sporządzenia ofery Przygotował Status Transport Obsługa Inne Suma Brak wyników.",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Duplikuj",
+          "Nazwa Projektu",
+          "Data sporządzenia ofery",
+          "Przygotował",
+          "Status",
+          "Transport",
+          "Obsługa",
+          "Inne",
+          "Suma",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Stwórz nową",
+        "href": "/admin/offer/default/create?event_id=245",
+        "data": {}
+      },
+      {
+        "text": "Stwórz ofertę na podstawie wydarzenia",
+        "href": "/admin/offer/default/create-from-event?event_id=245",
+        "data": {}
+      },
+      {
+        "text": "Importuj z ofert",
+        "href": "/admin/offer/default/assign-to-event?event_id=245",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=245",
+        "data": {}
+      }
+    ]
+  },
+  "offer_pdfs": [],
+  "crew": {
+    "found": true,
+    "text": "Dodaj ekipę Dodaj zapotrzebowanie Wyślij powiadomienia do ekipy teraz Automatyczne powiadomienia Skopiuj ekipę z innego wydarzenia Dodaj etap harmonogramu Szybkie dodawanie: wybierz pracownika Zaznacz wszystkie Odznacz wszystkie Zobacz jak działa planowanie Video × Dodaj komentarz Dodaj komentarz Zapisz Event Od: 2026.09.17 00:00 Do: 2026-09-19 - 23:59 Zapotrzebowanie: 0 os. Dodanych: 0 os. Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Chat Wiadomość Zaznacz wszystkie Odznacz wszystkie Widok bez podziału na etapy Widok z podziałem na etapy Dodaj komentarz Dodaj komentarz Zapisz Exportuj Dodaj/Edytuj pracowników spoza systemu # Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy × Dodaj komentarz komentarz Zamknij Zapisz Zaznaczonych: 0 X Zapisz Rozpocznij chat Wyślij wiadomość Exportuj Kal. dostępności Planuj Usuń zaznaczone",
+    "tables": [
+      {
+        "id": "tablehistories",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "#",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj ekipę",
+        "href": "/admin/crew/manage-ajax?id=245",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=245",
+        "data": {}
+      },
+      {
+        "text": "Wyślij powiadomienia do ekipy teraz",
+        "href": "/admin/site/send-reminders-event?id=245",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj ekipę z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=245&type=crew",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap harmonogramu",
+        "href": "/admin/event/add-schedule?id=245",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=245",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/crew/copy-event-role?id=245&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/manage-ajax?id=245&role_id=&schedule=Event",
+        "data": {
+          "data-role-id": "",
+          "data-time_type": "1"
+        }
+      }
+    ]
+  },
+  "fleet": {
+    "found": true,
+    "text": "Dodaj flotę Dodaj zapotrzebowanie Dodaj zgłoszenie serwisowe do floty Szybkie dodawanie: wybierz pojazd Ford Transit/VisualRent PO 3CR29 Ford Transit/VisualRent PY 8597G Kia Ceed MAN TGE CZERWONY MAN TGE NIEBIESKI Peugeot Expert PO 9HJ93 Renault Master Najnowszy Renault Master Nowy Renault Master Stary Renault Master/Visual Rent WE 2AY13 Renault Trafic III Volkswagen Caddy Zobacz jak zgłosić usterkę Zobacz jak planować flotę Video × Dodaj komentarz Dodaj komentarz Zapisz Event OD: 2026.09.17, 00:00 DO: 2026.09.19, 23:59 Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Transport osobowy: Zapotrzebowanie 0 os. Dodanych 0 os. Dodaj komentarz Dodaj komentarz Zapisz Exportuj Usuń Wyświetl wszystko Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa Numer rejestracyjny Ładowność Pojemność Data przeglądu OC ważne do Czas pracy Brak wyników.",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa",
+          "Numer rejestracyjny",
+          "Ładowność",
+          "Pojemność",
+          "Data przeglądu",
+          "OC ważne do",
+          "Czas pracy",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj flotę",
+        "href": "/admin/vehicle/manage-ajax?id=245",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=245",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zgłoszenie serwisowe do floty",
+        "href": "/admin/vehicle/notes",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=245",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/vehicle/copy-event-vehicle?id=245&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/vehicle/manage-ajax?id=245&vehicle_id=&schedule=Event",
+        "data": {
+          "data-vehicle-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Exportuj",
+        "href": "/admin/vehicle/excel?id=245",
+        "data": {}
+      },
+      {
+        "text": "Wyświetl wszystko",
+        "href": "/admin/event/vehicle-tab?id=245&_tog5be4c740=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      }
+    ]
+  }
+}

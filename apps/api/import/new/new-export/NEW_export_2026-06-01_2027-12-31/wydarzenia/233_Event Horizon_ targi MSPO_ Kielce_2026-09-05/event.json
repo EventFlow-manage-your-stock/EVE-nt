@@ -1,0 +1,1001 @@
+{
+  "complete": true,
+  "exporter_version": "4.0-FINAL",
+  "scraped_at": "2026-08-15 21:44:33",
+  "source": {
+    "base_url": "https://pixel.newsystems.pl",
+    "event_url": "https://pixel.newsystems.pl/admin/event/view?id=233",
+    "internal_id": "233"
+  },
+  "list": {
+    "internal_id": "233",
+    "list_no": "",
+    "event_name_list": "Event Horizon/ targi MSPO/ Kielce [E2026/06/89]",
+    "event_name": "Event Horizon/ targi MSPO/ Kielce",
+    "event_code": "E2026/06/89",
+    "accounting": "",
+    "status": "Event Horizon/ targi MSPO/ Kielce [E2026/06/89]",
+    "client": "38",
+    "customer_id": "109",
+    "event_manager": "Notatka Duplikuj",
+    "start": "",
+    "end": "",
+    "accounting_date": "Antoni Pazder",
+    "created_at": "05.09.2026, 00:00 11.09.2026, 23:59",
+    "detail_url": "https://pixel.newsystems.pl/admin/event/view?id=233"
+  },
+  "summary": {
+    "internal_id": "233",
+    "name": "Event Horizon/ targi MSPO/ Kielce",
+    "event_code": "E2026/06/89",
+    "type": "Targi/Wystawy",
+    "location": "",
+    "accounting": "Nie zafakturowane",
+    "status": "Anulowane",
+    "client": "EVEHO SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ",
+    "client_nip": "7773410749",
+    "event_manager": "Antoni Pazder",
+    "start": "2026-09-05 00:00:00",
+    "end": "2026-09-11 23:59:00",
+    "description": "",
+    "details": "",
+    "custom_fields": {
+      "Nocleg": ""
+    },
+    "schedule": [
+      {
+        "id": "431",
+        "name": "Event",
+        "start": "2026-09-05 00:00:00",
+        "end": "2026-09-11 23:59:00"
+      }
+    ],
+    "location_id": "",
+    "location_venue": "",
+    "location_city": "",
+    "location_address": "",
+    "type_source_field": "Event[type]"
+  },
+  "schedule": [
+    {
+      "id": "431",
+      "name": "Event",
+      "start": "2026-09-05 00:00:00",
+      "end": "2026-09-11 23:59:00"
+    }
+  ],
+  "details": {
+    "found": true,
+    "text": "× Edytuj harmonogram Dodaj notatkę Opis Szczegóły Zapisz Nocleg Kalendarz Dodaj etap Event 2026-09-05 - 2026-09-11 00:00 - 23:59",
+    "tables": [],
+    "links": [
+      {
+        "text": "Dodaj notatkę",
+        "href": "/admin/customer-note/create?customer_id=109&event_id=233",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap",
+        "href": "/admin/event/add-schedule?id=233",
+        "data": {}
+      }
+    ]
+  },
+  "gear": {
+    "found": true,
+    "text": "× Przyjmij sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Przyjmij sprzęt × Wydaj sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Magazyn, z którego wydajemy: MAGAZYN POZNAŃ MAGAZYN KATOWICE Wydaj sprzęt × Kopiuj sprzęt z innego wydarzenia × Przenieś sprzęt × Brak sprzętu × Konflikty do rozwiązania × × Edycja × Notatki + Dodaj + Dodaj grupę sprzętową Skopiuj sprzęt z innego wydarzenia Zarezerwuj sprzęt z oferty na wydarzenie Packlisty Cały sprzęt Cały sprzęt ze zdjęciami Cały sprzęt - XLSX Wydania / przyjęcia Wydaj Przyjmij Przenieś Przenieś z tego wydarzenia Przenieś na to wydarzenie Niezwrócony sprzęt: Numery: Zarządzaj grupami Zarządzaj grupami",
+    "tables": [
+      {
+        "id": "not-returned-table",
+        "class": [
+          "table",
+          "table-stripped",
+          "btn-danger"
+        ],
+        "headers": [],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Przyjmij sprzęt",
+        "href": "/admin/incomes-warehouse/create?event=233&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Wydaj sprzęt",
+        "href": "/admin/outcomes-warehouse/create?event=233&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj grupę sprzętową",
+        "href": "/admin/event/add-packlist?id=233",
+        "data": {
+          "data-add": "1"
+        }
+      },
+      {
+        "text": "Skopiuj sprzęt z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=233&type=gear",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=233&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Packlisty",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt",
+        "href": "/admin/event/packing-list?id=233&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt ze zdjęciami",
+        "href": "/admin/event/packing-list?id=233&sort=cat&photo=1",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt - XLSX",
+        "href": "/admin/event/packing-list-xls?id=233&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Wydania / przyjęcia",
+        "href": "/admin/event/info?id=233",
+        "data": {}
+      },
+      {
+        "text": "Wydaj",
+        "href": "/admin/outcomes-warehouse/create?event=233&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przyjmij",
+        "href": "/admin/incomes-warehouse/create?event=233&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przenieś",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Przenieś z tego wydarzenia",
+        "href": "/admin/event-movement/create-start?event_from=233",
+        "data": {}
+      },
+      {
+        "text": "Przenieś na to wydarzenie",
+        "href": "/admin/event-movement/create-start?event_to=233",
+        "data": {}
+      },
+      {
+        "text": "Zarządzaj grupami",
+        "href": "#tabs-233-tab0",
+        "data": {
+          "data-toggle": "tab"
+        }
+      }
+    ]
+  },
+  "gear_items": [],
+  "external_gear": {
+    "need": {
+      "found": true,
+      "text": "Zapotrzebowanie na sprzęt zewnętrzny Magazyn dostawców Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy # Zdjęcie Nazwa Sztuk Grupa sprzętowa Zarezerwowane Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-condensed",
+            "kv-table-wrap",
+            "table-bordered",
+            "table-striped"
+          ],
+          "headers": [
+            "#",
+            "Zdjęcie",
+            "Nazwa",
+            "Sztuk",
+            "Grupa sprzętowa",
+            "Zarezerwowane",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Magazyn dostawców",
+          "href": "/admin/outer-warehouse/assign?id=233&type=event",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=233&_togb047f92b=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "reserved_at_supplier": {
+      "found": true,
+      "text": "× Zarządzaj sprzętem zewn. Sprzęt zarezerwowany u wypożyczającego Stwórz zamówienie Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Nazwa Sekcja Firma Zarezerwowane Data odbioru Data zwrotu Packlisty Uwagi Odpowiedzialny Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-bordered",
+            "table-striped",
+            "kv-table-wrap"
+          ],
+          "headers": [
+            "",
+            "Nazwa",
+            "Sekcja",
+            "Firma",
+            "Zarezerwowane",
+            "Data odbioru",
+            "Data zwrotu",
+            "Packlisty",
+            "Uwagi",
+            "Odpowiedzialny",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Stwórz zamówienie",
+          "href": "#",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=233&_tog67e4b9e4=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "text": {
+      "need": "",
+      "reserved_at_supplier": ""
+    }
+  },
+  "attachments_section": {
+    "found": true,
+    "text": "Dodaj Usuń zaznaczone Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa pliku Typ Dodał Komentarz obsluga_mspo_kielce_2026r.pdf Plik Michał Strykowski 2026-07-06 15:34:48 Edytuj Pliki z czatu Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Podgląd Nazwa pliku Użytkownik Data Brak wyników. ‹ › ×",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa pliku",
+          "Typ",
+          "Dodał",
+          "Komentarz",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "23",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "23",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/obsluga_mspo_kielce_2026r.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "obsluga_mspo_kielce_2026r.pdf",
+                "links": [
+                  {
+                    "text": "obsluga_mspo_kielce_2026r.pdf",
+                    "href": "/uploads/attachment/obsluga_mspo_kielce_2026r.pdf",
+                    "data": {
+                      "data-model": "23"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-06 15:34:48",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=23",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/obsluga_mspo_kielce_2026r.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=23",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=23",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=23",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Podgląd",
+          "Nazwa pliku",
+          "Użytkownik",
+          "Data"
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj",
+        "href": "/admin/attachment/create?eventId=233",
+        "data": {}
+      },
+      {
+        "text": "Usuń zaznaczone",
+        "href": "/admin/attachment/delete-more?eventId=233",
+        "data": {}
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=233&_tog3e047f3f=page&_toga05895fd=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/obsluga_mspo_kielce_2026r.pdf",
+        "data": {}
+      },
+      {
+        "text": "obsluga_mspo_kielce_2026r.pdf",
+        "href": "/uploads/attachment/obsluga_mspo_kielce_2026r.pdf",
+        "data": {
+          "data-model": "23"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=23",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/obsluga_mspo_kielce_2026r.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=23",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=23",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=23",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=233&_tog3e047f3f=all&_toga05895fd=page",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "Data",
+        "href": "/admin/event/view?id=233&_tog3e047f3f=all&_toga05895fd=all&dp-5-sort=create_time",
+        "data": {
+          "data-sort": "create_time"
+        }
+      }
+    ]
+  },
+  "attachments": [
+    {
+      "attachment_id": "23",
+      "filename": "obsluga_mspo_kielce_2026r.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=23",
+      "source": "attachment_download",
+      "saved_as": "obsluga_mspo_kielce_2026r.pdf",
+      "bytes": 892581,
+      "ok": true
+    }
+  ],
+  "offers": {
+    "found": true,
+    "text": "Stwórz nową Stwórz ofertę na podstawie wydarzenia Importuj z ofert Zarezerwuj sprzęt z oferty na wydarzenie Duplikuj Nazwa Projektu Data sporządzenia ofery Przygotował Status Transport Obsługa Inne Suma Brak wyników.",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Duplikuj",
+          "Nazwa Projektu",
+          "Data sporządzenia ofery",
+          "Przygotował",
+          "Status",
+          "Transport",
+          "Obsługa",
+          "Inne",
+          "Suma",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Stwórz nową",
+        "href": "/admin/offer/default/create?event_id=233",
+        "data": {}
+      },
+      {
+        "text": "Stwórz ofertę na podstawie wydarzenia",
+        "href": "/admin/offer/default/create-from-event?event_id=233",
+        "data": {}
+      },
+      {
+        "text": "Importuj z ofert",
+        "href": "/admin/offer/default/assign-to-event?event_id=233",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=233",
+        "data": {}
+      }
+    ]
+  },
+  "offer_pdfs": [],
+  "crew": {
+    "found": true,
+    "text": "Dodaj ekipę Dodaj zapotrzebowanie Wyślij powiadomienia do ekipy teraz Automatyczne powiadomienia Skopiuj ekipę z innego wydarzenia Dodaj etap harmonogramu Szybkie dodawanie: wybierz pracownika Zaznacz wszystkie Odznacz wszystkie Zobacz jak działa planowanie Video × Dodaj komentarz Dodaj komentarz Zapisz Event Od: 2026.09.05 00:00 Do: 2026-09-11 - 23:59 Zapotrzebowanie: 0 os. Dodanych: 0 os. Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Chat Wiadomość Zaznacz wszystkie Odznacz wszystkie Widok bez podziału na etapy Widok z podziałem na etapy Dodaj komentarz Dodaj komentarz Zapisz Exportuj Dodaj/Edytuj pracowników spoza systemu # Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy × Dodaj komentarz komentarz Zamknij Zapisz Zaznaczonych: 0 X Zapisz Rozpocznij chat Wyślij wiadomość Exportuj Kal. dostępności Planuj Usuń zaznaczone",
+    "tables": [
+      {
+        "id": "tablehistories",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "#",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj ekipę",
+        "href": "/admin/crew/manage-ajax?id=233",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=233",
+        "data": {}
+      },
+      {
+        "text": "Wyślij powiadomienia do ekipy teraz",
+        "href": "/admin/site/send-reminders-event?id=233",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj ekipę z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=233&type=crew",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap harmonogramu",
+        "href": "/admin/event/add-schedule?id=233",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=233",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/crew/copy-event-role?id=233&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/manage-ajax?id=233&role_id=&schedule=Event",
+        "data": {
+          "data-role-id": "",
+          "data-time_type": "1"
+        }
+      }
+    ]
+  },
+  "fleet": {
+    "found": true,
+    "text": "Dodaj flotę Dodaj zapotrzebowanie Dodaj zgłoszenie serwisowe do floty Szybkie dodawanie: wybierz pojazd Ford Transit/VisualRent PO 3CR29 Ford Transit/VisualRent PY 8597G Kia Ceed MAN TGE CZERWONY MAN TGE NIEBIESKI Peugeot Expert PO 9HJ93 Renault Master Najnowszy Renault Master Nowy Renault Master Stary Renault Master/Visual Rent WE 2AY13 Renault Trafic III Volkswagen Caddy Zobacz jak zgłosić usterkę Zobacz jak planować flotę Video × Dodaj komentarz Dodaj komentarz Zapisz Event OD: 2026.09.05, 00:00 DO: 2026.09.11, 23:59 Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Transport osobowy: Zapotrzebowanie 0 os. Dodanych 0 os. Dodaj komentarz Dodaj komentarz Zapisz Exportuj Usuń Wyświetl wszystko Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa Numer rejestracyjny Ładowność Pojemność Data przeglądu OC ważne do Czas pracy Brak wyników.",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa",
+          "Numer rejestracyjny",
+          "Ładowność",
+          "Pojemność",
+          "Data przeglądu",
+          "OC ważne do",
+          "Czas pracy",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj flotę",
+        "href": "/admin/vehicle/manage-ajax?id=233",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=233",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zgłoszenie serwisowe do floty",
+        "href": "/admin/vehicle/notes",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=233",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/vehicle/copy-event-vehicle?id=233&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/vehicle/manage-ajax?id=233&vehicle_id=&schedule=Event",
+        "data": {
+          "data-vehicle-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Exportuj",
+        "href": "/admin/vehicle/excel?id=233",
+        "data": {}
+      },
+      {
+        "text": "Wyświetl wszystko",
+        "href": "/admin/event/vehicle-tab?id=233&_tog5be4c740=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      }
+    ]
+  }
+}

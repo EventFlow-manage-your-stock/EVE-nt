@@ -1,0 +1,145 @@
+{
+  "generated_at": "2026-08-16T20:41:09.126Z",
+  "organization": {
+    "id": 1,
+    "name": "EventFlow"
+  },
+  "plan_file": "/Users/michalstrykowski/Desktop/eve-nt-local/EventFlow_v2/apps/api/import/new/package-merge/PACKAGE_MERGE_PLAN_V3_4_REMAINING.xlsx",
+  "results": [
+    {
+      "group": "G0001_2",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 2,
+      "target_name": "1 x Pulpit dla tłumaczy Bosch Integrus LBB3222/04",
+      "target_category_id": 10,
+      "source_model_ids": [
+        2
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0002_11",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 11,
+      "target_name": "2 x Aktywna kolumna Turbosound iQ12",
+      "target_category_id": 28,
+      "source_model_ids": [
+        11
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0003_98",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 98,
+      "target_name": "2 x Monitory Iiyama 65\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        98
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0004_99",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 99,
+      "target_name": "2 x Monitory Panasonic 65\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        99
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0005_100",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 100,
+      "target_name": "2 x Naświetlacz Brighter ATOM R+",
+      "target_category_id": 36,
+      "source_model_ids": [
+        100
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0006_101",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 101,
+      "target_name": "2 x Naświetlacz LIGHT GO!",
+      "target_category_id": 36,
+      "source_model_ids": [
+        101
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0007_102",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 102,
+      "target_name": "2 x Pulpit dla tłumaczy Bosch Integrus LBB3222/04",
+      "target_category_id": 10,
+      "source_model_ids": [
+        102
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0008_117-118-119-120-121-122",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 117,
+      "target_name": "4 x Biały reflektor teatralny Cameo CL200",
+      "target_category_id": 35,
+      "source_model_ids": [
+        117,
+        118,
+        119,
+        120,
+        121,
+        122
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 6
+    },
+    {
+      "group": "G0009_138",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 138,
+      "target_name": "5 x LedPar Cameo CLPST64TRI3W",
+      "target_category_id": 35,
+      "source_model_ids": [
+        138
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0010_147",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 147,
+      "target_name": "7 x LedPar Cameo CLPST64Q8W",
+      "target_category_id": 35,
+      "source_model_ids": [
+        147
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    }
+  ]
+}

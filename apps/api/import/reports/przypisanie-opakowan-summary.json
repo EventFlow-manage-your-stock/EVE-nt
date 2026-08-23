@@ -1,0 +1,18 @@
+{
+  "casesFound": 474,
+  "casesCreated": 7,
+  "casesMissing": 0,
+  "casesUnpackedFromCase": 0,
+  "barcodeLines": 1548,
+  "barcodeAssigned": 1315,
+  "barcodeAssignedByNameAndCodeAdded": 42,
+  "barcodeCreatedAndAssigned": 191,
+  "barcodeMissing": 0,
+  "quantityLines": 329,
+  "quantityAssignedPhysical": 0,
+  "quantityPseudoCreated": 319,
+  "quantityPseudoUpdated": 10,
+  "quantityModelMissing": 0,
+  "ignoredLines": 0,
+  "rowsProcessed": 481
+}

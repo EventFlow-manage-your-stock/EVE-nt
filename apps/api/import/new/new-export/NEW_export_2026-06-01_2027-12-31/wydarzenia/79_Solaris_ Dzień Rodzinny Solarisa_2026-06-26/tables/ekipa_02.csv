@@ -1,0 +1,13 @@
+﻿;;;Nazwisko;Imię;Telefon;Adres e-mail;Rola na evencie;Czas pracy;
+;załadunek;;;;;;;;
+;1;;Jazurek;Wojciech;790 608 345;wojciech@pixelmultimedia.pl;;26.06.2026 13:00 - 26.06.2026 16:00;
+;2;;Kowalski;Tomasz;730608345;tomasz@pixelmultimedia.pl;;26.06.2026 13:00 - 26.06.2026 16:00;
+;3;;;Janusz Pokora;;janusz.multimedia@gmail.com;Technik;26.06.2026 13:00 - 26.06.2026 16:00;
+;Montaż;;;;;;;;
+;4;;Jazurek;Wojciech;790 608 345;wojciech@pixelmultimedia.pl;;27.06.2026 08:00 - 27.06.2026 23:00;
+;5;;Kowalski;Tomasz;730608345;tomasz@pixelmultimedia.pl;;27.06.2026 08:00 - 27.06.2026 23:00;
+;Event;;;;;;;;
+;6;;Kowalski;Tomasz;730608345;tomasz@pixelmultimedia.pl;;28.06.2026 08:00 - 28.06.2026 16:00;
+;Demontaż;;;;;;;;
+;7;;Kowalski;Tomasz;730608345;tomasz@pixelmultimedia.pl;;28.06.2026 16:00 - 28.06.2026 23:00;
+;8;;;Janusz Pokora;;janusz.multimedia@gmail.com;Technik;28.06.2026 16:00 - 28.06.2026 23:00;

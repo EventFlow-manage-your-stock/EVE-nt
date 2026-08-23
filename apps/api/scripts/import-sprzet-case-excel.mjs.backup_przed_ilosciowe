@@ -1,0 +1,592 @@
+#!/usr/bin/env node
+/**
+ * EVENTFLOW_IMPORT_SPRZET_CASE_V19
+ * Import sprzętu, egzemplarzy ilościowych i case/opakowań z Excela.
+ *
+ * Format kolumn:
+ * Nazwa modelu | Nazwa | Typ | ilość | Nr | Kod kreskowy | Miejsce | Szerokość | Wysokość | Głębokość | Objętość | Waga | Kategoria | Numer seryjny | Wartość
+ *
+ * Obsługiwane Typ:
+ * - Egzemplarz  -> model sprzętu + jeden egzemplarz
+ * - Ilościowe   -> model sprzętu + egzemplarze/pseudo-egzemplarz wg --ilosciowe-mode
+ * - Case        -> model opakowania + egzemplarz case; opcjonalnie egzemplarze ze środka case
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import { PrismaClient } from '@prisma/client';
+
+const require = createRequire(import.meta.url);
+const XLSX = require('xlsx');
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Ładujemy .env bez dokładania zależności dotenv, żeby skrypt działał nawet gdy uruchamiasz go z root albo apps/api.
+loadEnvIfExists(path.resolve(process.cwd(), '.env'));
+loadEnvIfExists(path.resolve(process.cwd(), 'apps/api/.env'));
+loadEnvIfExists(path.resolve(__dirname, '../.env'));
+
+const prisma = new PrismaClient();
+
+const HEADER_ALIASES = {
+  nazwa_modelu: ['nazwa modelu', 'model', 'model sprzetu', 'nazwa_modelu'],
+  nazwa: ['nazwa', 'nazwa egzemplarza', 'nazwa wlasna'],
+  typ: ['typ', 'rodzaj'],
+  ilosc: ['ilosc', 'ilość', 'liczba', 'qty'],
+  nr: ['nr', 'numer', 'numer egzemplarza', 'numer_egzemplarza'],
+  kod_kreskowy: ['kod kreskowy', 'barcode', 'kod', 'kod_kreskowy'],
+  miejsce: ['miejsce', 'miejsce w magazynie', 'lokalizacja'],
+  szerokosc: ['szerokosc', 'szerokość'],
+  wysokosc: ['wysokosc', 'wysokość'],
+  glebokosc: ['glebokosc', 'głębokość', 'glebokość'],
+  objetosc: ['objetosc', 'objętość'],
+  waga: ['waga'],
+  kategoria: ['kategoria', 'category'],
+  numer_seryjny: ['numer seryjny', 'sn', 'serial', 'numer_seryjny'],
+  wartosc: ['wartosc', 'wartość', 'wartosc netto', 'wartość netto'],
+};
+
+const DEFAULT_CASE_CONTENT_MODE = 'create'; // create | skip
+const DEFAULT_ILOSCIOWE_MODE = 'egzemplarze'; // egzemplarze | pseudo
+
+function parseArgs(argv) {
+  const out = { _: [] };
+  for (let i = 2; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg.startsWith('--')) {
+      const key = arg.slice(2);
+      const next = argv[i + 1];
+      if (!next || next.startsWith('--')) {
+        out[key] = true;
+      } else {
+        out[key] = next;
+        i += 1;
+      }
+    } else {
+      out._.push(arg);
+    }
+  }
+  return out;
+}
+
+function loadEnvIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  const content = fs.readFileSync(filePath, 'utf8');
+  for (const line of content.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!match) continue;
+    const key = match[1];
+    let value = match[2].trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (process.env[key] === undefined) process.env[key] = value;
+  }
+}
+
+function normalizeHeader(value) {
+  return String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_\-]+/g, ' ')
+    .replace(/\s+/g, ' ');
+}
+
+function normalizeText(value) {
+  const text = String(value ?? '').trim();
+  return text.length ? text : null;
+}
+
+function normalizeSerial(value) {
+  const text = normalizeText(value);
+  if (!text) return null;
+  if (['brak', 'b/d', 'bd', '-', '---'].includes(text.toLowerCase())) return null;
+  return text;
+}
+
+function parseDecimal(value) {
+  if (value === null || value === undefined) return null;
+  let text = String(value).trim();
+  if (!text) return null;
+  text = text
+    .replace(/PLN/gi, '')
+    .replace(/zł/gi, '')
+    .replace(/\s/g, '')
+    .replace(',', '.');
+  if (!text || text === '-' || text === '---') return null;
+  const num = Number(text);
+  if (!Number.isFinite(num)) return null;
+  return Number(num.toFixed(2));
+}
+
+function parseIntSafe(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const text = String(value).trim().replace(',', '.');
+  const num = Number(text);
+  if (!Number.isFinite(num)) return null;
+  return Math.max(0, Math.floor(num));
+}
+
+function normalizeBarcode(value) {
+  let text = String(value ?? '').trim();
+  if (!text || text === '-' || text === '---') return null;
+  text = text.replace(/^'/, '').replace(/\s/g, '');
+  // Excel czasem zamienia 0000000001250 na 1250. Dla samych cyfr dobijamy do 13 znaków.
+  if (/^\d+$/.test(text) && text.length > 0 && text.length < 13) {
+    text = text.padStart(13, '0');
+  }
+  return text;
+}
+
+function normalizeTyp(value) {
+  const typ = normalizeHeader(value);
+  if (typ.includes('case') || typ.includes('skrzyn') || typ.includes('opak')) return 'case';
+  if (typ.includes('ilosc') || typ.includes('ilo')) return 'ilosciowe';
+  return 'egzemplarz';
+}
+
+function rowToImportRow(row, rowNumber) {
+  return {
+    rowNumber,
+    nazwa_modelu: normalizeText(row.nazwa_modelu),
+    nazwa: normalizeText(row.nazwa),
+    typ: normalizeTyp(row.typ),
+    ilosc: parseIntSafe(row.ilosc),
+    nr: normalizeText(row.nr),
+    kod_kreskowy: normalizeBarcode(row.kod_kreskowy),
+    miejsce: normalizeText(row.miejsce),
+    szerokosc: parseDecimal(row.szerokosc),
+    wysokosc: parseDecimal(row.wysokosc),
+    glebokosc: parseDecimal(row.glebokosc),
+    objetosc: parseDecimal(row.objetosc),
+    waga: parseDecimal(row.waga),
+    kategoria: normalizeText(row.kategoria),
+    numer_seryjny: normalizeSerial(row.numer_seryjny),
+    wartosc: parseDecimal(row.wartosc),
+  };
+}
+
+function readRows(filePath, sheetName) {
+  const workbook = XLSX.readFile(filePath, { cellDates: false, cellText: true });
+  const selectedSheet = sheetName || workbook.SheetNames[0];
+  if (!selectedSheet || !workbook.Sheets[selectedSheet]) {
+    throw new Error(`Nie znaleziono arkusza: ${sheetName || '(pierwszy arkusz)'}`);
+  }
+
+  const rawRows = XLSX.utils.sheet_to_json(workbook.Sheets[selectedSheet], {
+    defval: '',
+    raw: false,
+  });
+
+  const headerMap = new Map();
+  for (const [target, aliases] of Object.entries(HEADER_ALIASES)) {
+    for (const alias of aliases) headerMap.set(normalizeHeader(alias), target);
+  }
+
+  const mappedRows = rawRows.map((raw, index) => {
+    const mapped = {};
+    for (const [key, value] of Object.entries(raw)) {
+      const normalized = normalizeHeader(key);
+      const target = headerMap.get(normalized);
+      if (target) mapped[target] = value;
+    }
+    return rowToImportRow(mapped, index + 2);
+  }).filter((row) => row.nazwa_modelu || row.nazwa || row.kod_kreskowy);
+
+  return { rows: mappedRows, sheetName: selectedSheet };
+}
+
+function validateRows(rows) {
+  const errors = [];
+  for (const row of rows) {
+    if (!row.nazwa_modelu && row.typ !== 'case') {
+      errors.push(`Wiersz ${row.rowNumber}: brak "Nazwa modelu".`);
+    }
+    if (!row.nazwa && row.typ === 'case') {
+      errors.push(`Wiersz ${row.rowNumber}: case musi mieć "Nazwa" jako nazwę case/opakowania.`);
+    }
+    if (!row.kategoria) {
+      // nie blokujemy importu, ale zapisujemy ostrzeżenie jako błąd miękki w raporcie
+    }
+  }
+  return errors;
+}
+
+function printSummary(rows) {
+  const counts = rows.reduce((acc, row) => {
+    acc[row.typ] = (acc[row.typ] || 0) + 1;
+    return acc;
+  }, {});
+  console.log('Podsumowanie pliku:');
+  console.log(`- Egzemplarze: ${counts.egzemplarz || 0}`);
+  console.log(`- Ilościowe:   ${counts.ilosciowe || 0}`);
+  console.log(`- Case:        ${counts.case || 0}`);
+  console.log(`- Razem rows:  ${rows.length}`);
+}
+
+function definedData(data) {
+  return Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined && value !== null));
+}
+
+async function getOrganization({ orgId, subdomena }) {
+  if (orgId) {
+    const org = await prisma.organizacja.findUnique({ where: { id: orgId } });
+    if (!org) throw new Error(`Nie znaleziono organizacji id=${orgId}.`);
+    return org;
+  }
+  if (subdomena) {
+    const org = await prisma.organizacja.findFirst({ where: { subdomena } });
+    if (!org) throw new Error(`Nie znaleziono organizacji subdomena=${subdomena}.`);
+    return org;
+  }
+  const first = await prisma.organizacja.findFirst({ where: { aktywny: true }, orderBy: { id: 'asc' } });
+  if (!first) throw new Error('Nie znaleziono żadnej aktywnej organizacji. Podaj --org ID albo --subdomena NAZWA.');
+  return first;
+}
+
+async function getOrCreateCategory(orgId, name, cache, updateExisting) {
+  const clean = name || 'Bez kategorii';
+  const cacheKey = clean.toLowerCase();
+  if (cache.categories.has(cacheKey)) return cache.categories.get(cacheKey);
+
+  let category = await prisma.kategoria.findFirst({
+    where: { id_organizacji: orgId, nazwa: clean },
+  });
+
+  if (!category) {
+    category = await prisma.kategoria.create({
+      data: {
+        id_organizacji: orgId,
+        nazwa: clean,
+        opis: 'Utworzono automatycznie podczas importu sprzętu z Excela.',
+        aktywny: true,
+      },
+    });
+    cache.stats.categoriesCreated += 1;
+  } else if (updateExisting && !category.aktywny) {
+    category = await prisma.kategoria.update({
+      where: { id: category.id },
+      data: { aktywny: true, data_usuniecia: null },
+    });
+  }
+
+  cache.categories.set(cacheKey, category);
+  return category;
+}
+
+async function getOrCreateModel(orgId, row, category, typSprzetu, cache, updateExisting, overrides = {}) {
+  const name = overrides.nazwa || row.nazwa_modelu || row.nazwa;
+  if (!name) throw new Error(`Wiersz ${row.rowNumber}: nie da się utworzyć modelu bez nazwy.`);
+
+  const cacheKey = `${typSprzetu}:${name.toLowerCase()}`;
+  if (cache.models.has(cacheKey)) return cache.models.get(cacheKey);
+
+  let model = await prisma.modelSprzetu.findFirst({
+    where: {
+      id_organizacji: orgId,
+      nazwa: name,
+      typ_sprzetu: typSprzetu,
+    },
+  });
+
+  const modelData = definedData({
+    id_organizacji: orgId,
+    id_kategorii: category?.id,
+    nazwa: name,
+    miejsce_w_mag: row.miejsce,
+    szerokosc: overrides.useDimensions === false ? undefined : row.szerokosc,
+    wysokosc: overrides.useDimensions === false ? undefined : row.wysokosc,
+    glebokosc: overrides.useDimensions === false ? undefined : row.glebokosc,
+    objetosc: overrides.useDimensions === false ? undefined : row.objetosc,
+    waga: overrides.useDimensions === false ? undefined : row.waga,
+    wartosc: row.wartosc,
+    wartosc_domyslna_egzemplarza: row.wartosc,
+    typ_sprzetu: typSprzetu,
+    tryb_ewidencji: overrides.tryb_ewidencji,
+    ilosc_magazynowa: overrides.ilosc_magazynowa,
+    jednostka: overrides.jednostka,
+    widoczny_w_ofercie: typSprzetu !== 'opakowanie',
+    widoczny_w_mag: true,
+    kod_kreskowy: overrides.modelBarcode || undefined,
+    aktywny: true,
+    data_usuniecia: null,
+  });
+
+  if (!model) {
+    model = await prisma.modelSprzetu.create({ data: modelData });
+    cache.stats.modelsCreated += 1;
+  } else if (updateExisting) {
+    model = await prisma.modelSprzetu.update({
+      where: { id: model.id },
+      data: modelData,
+    });
+    cache.stats.modelsUpdated += 1;
+  }
+
+  cache.models.set(cacheKey, model);
+  return model;
+}
+
+async function findExistingExemplar(orgId, modelId, payload) {
+  const ors = [];
+  for (const code of [payload.kod_kreskowy, payload.zewnetrzny_kod_kreskowy, payload.qr_kod, payload.zewnetrzny_qr_kod]) {
+    if (code) {
+      ors.push({ kod_kreskowy: code });
+      ors.push({ zewnetrzny_kod_kreskowy: code });
+      ors.push({ qr_kod: code });
+      ors.push({ zewnetrzny_qr_kod: code });
+    }
+  }
+  if (payload.sn) ors.push({ sn: payload.sn });
+
+  if (ors.length) {
+    const existingByCode = await prisma.egzemplarz.findFirst({
+      where: { id_organizacji: orgId, OR: ors },
+    });
+    if (existingByCode) return existingByCode;
+  }
+
+  if (payload.numer_egzemplarza || payload.nazwa) {
+    return prisma.egzemplarz.findFirst({
+      where: {
+        id_organizacji: orgId,
+        id_modelu: modelId,
+        ...(payload.numer_egzemplarza ? { numer_egzemplarza: payload.numer_egzemplarza } : {}),
+        ...(payload.nazwa ? { nazwa: payload.nazwa } : {}),
+      },
+    });
+  }
+
+  return null;
+}
+
+async function upsertExemplar(orgId, model, row, cache, updateExisting, overrides = {}) {
+  const barcode = overrides.kod_kreskowy === undefined ? row.kod_kreskowy : overrides.kod_kreskowy;
+  const sn = overrides.sn === undefined ? row.numer_seryjny : overrides.sn;
+  const nazwa = overrides.nazwa === undefined ? (row.nazwa || row.nazwa_modelu || model.nazwa) : overrides.nazwa;
+  const numer = overrides.numer_egzemplarza === undefined ? row.nr : overrides.numer_egzemplarza;
+
+  const payload = definedData({
+    id_organizacji: orgId,
+    id_modelu: model.id,
+    nazwa,
+    sn,
+    qr_kod: overrides.qr_kod === undefined ? barcode : overrides.qr_kod,
+    kod_kreskowy: barcode,
+    zewnetrzny_kod_kreskowy: overrides.zewnetrzny_kod_kreskowy === undefined ? barcode : overrides.zewnetrzny_kod_kreskowy,
+    zewnetrzny_qr_kod: overrides.zewnetrzny_qr_kod === undefined ? barcode : overrides.zewnetrzny_qr_kod,
+    rozroznij_kod_qr: false,
+    miejsce_w_mag: row.miejsce,
+    id_case: overrides.id_case,
+    szerokosc: overrides.useDimensions === false ? undefined : row.szerokosc,
+    wysokosc: overrides.useDimensions === false ? undefined : row.wysokosc,
+    glebokosc: overrides.useDimensions === false ? undefined : row.glebokosc,
+    objetosc: overrides.useDimensions === false ? undefined : row.objetosc,
+    waga: overrides.useDimensions === false ? undefined : row.waga,
+    wartosc: row.wartosc ?? model.wartosc_domyslna_egzemplarza ?? model.wartosc,
+    cena_zakupu: row.wartosc,
+    numer_urzadzenia: numer,
+    numer_egzemplarza: numer,
+    status_serwisowy: 'Działa',
+    opis: overrides.opis,
+    notatki_wewnetrzne: overrides.notatki_wewnetrzne,
+    aktywny: true,
+    data_usuniecia: null,
+  });
+
+  const existing = await findExistingExemplar(orgId, model.id, payload);
+
+  if (!existing) {
+    const created = await prisma.egzemplarz.create({ data: payload });
+    cache.stats.exemplarsCreated += 1;
+    return created;
+  }
+
+  if (updateExisting) {
+    const updated = await prisma.egzemplarz.update({
+      where: { id: existing.id },
+      data: payload,
+    });
+    cache.stats.exemplarsUpdated += 1;
+    return updated;
+  }
+
+  cache.stats.exemplarsSkipped += 1;
+  return existing;
+}
+
+function generatedQuantityBarcode(base, index) {
+  if (!base) return null;
+  return `${base}-${String(index).padStart(3, '0')}`;
+}
+
+async function importRegularExemplar(orgId, row, cache, updateExisting) {
+  const category = await getOrCreateCategory(orgId, row.kategoria, cache, updateExisting);
+  const model = await getOrCreateModel(orgId, row, category, 'sprzet', cache, updateExisting);
+  await upsertExemplar(orgId, model, row, cache, updateExisting);
+}
+
+async function importQuantityRow(orgId, row, cache, updateExisting, iloscioweMode) {
+  const category = await getOrCreateCategory(orgId, row.kategoria, cache, updateExisting);
+  const count = row.ilosc && row.ilosc > 0 ? row.ilosc : 1;
+
+  // EVENTFLOW_PRODUCT_POLISH_V34:
+  // Sprzęt ilościowy zapisujemy jako jeden model z ilością magazynową, bez tworzenia egzemplarzy.
+  // Przykład: balast 25 kg x 90 szt. Skan kodu modelu pyta o liczbę sztuk do wydania/przyjęcia.
+  await getOrCreateModel(orgId, row, category, 'sprzet', cache, updateExisting, {
+    modelBarcode: row.kod_kreskowy,
+    tryb_ewidencji: 'ilosciowe',
+    ilosc_magazynowa: count,
+    jednostka: 'szt.',
+  });
+
+  cache.stats.quantityModels = (cache.stats.quantityModels || 0) + 1;
+}
+
+async function importCaseRow(orgId, row, cache, updateExisting, caseContentMode) {
+  const category = await getOrCreateCategory(orgId, row.kategoria, cache, updateExisting);
+
+  // Case/opakowanie jest modelem typu opakowanie, a konkretny case jest egzemplarzem opakowania.
+  const caseModelName = row.nazwa || `Case ${row.kod_kreskowy || row.rowNumber}`;
+  const caseModel = await getOrCreateModel(orgId, row, category, 'opakowanie', cache, updateExisting, {
+    nazwa: caseModelName,
+    modelBarcode: row.kod_kreskowy,
+    useDimensions: true,
+  });
+
+  const caseExemplar = await upsertExemplar(orgId, caseModel, row, cache, updateExisting, {
+    nazwa: row.nazwa || caseModelName,
+    numer_egzemplarza: row.nr || row.kod_kreskowy || String(row.rowNumber),
+    kod_kreskowy: row.kod_kreskowy,
+    qr_kod: row.kod_kreskowy,
+    zewnetrzny_kod_kreskowy: row.kod_kreskowy,
+    zewnetrzny_qr_kod: row.kod_kreskowy,
+    opis: 'Case/opakowanie zaimportowane z Excela.',
+    notatki_wewnetrzne: 'EVENTFLOW_IMPORT_SPRZET_CASE_V19: egzemplarz typu case/opakowanie.',
+    useDimensions: true,
+  });
+
+  if (caseContentMode === 'skip') return;
+
+  // Jeśli w kolumnie "Nazwa modelu" jest inna nazwa niż case, traktujemy ją jako zawartość case.
+  const contentModelName = row.nazwa_modelu;
+  if (!contentModelName || contentModelName === caseModelName) return;
+
+  const contentModel = await getOrCreateModel(orgId, row, category, 'sprzet', cache, updateExisting, {
+    nazwa: contentModelName,
+    useDimensions: false,
+  });
+
+  const count = row.ilosc && row.ilosc > 0 ? row.ilosc : 1;
+  for (let i = 1; i <= count; i += 1) {
+    await upsertExemplar(orgId, contentModel, row, cache, updateExisting, {
+      nazwa: contentModelName,
+      numer_egzemplarza: count > 1 ? `${caseExemplar.numer_egzemplarza || caseExemplar.id}-${i}` : (row.nr || `${caseExemplar.numer_egzemplarza || caseExemplar.id}`),
+      kod_kreskowy: null,
+      qr_kod: null,
+      zewnetrzny_kod_kreskowy: null,
+      zewnetrzny_qr_kod: null,
+      sn: row.numer_seryjny,
+      id_case: caseExemplar.id,
+      useDimensions: false,
+      opis: `Zawartość case: ${caseExemplar.nazwa || caseModel.nazwa}.`,
+      notatki_wewnetrzne: `EVENTFLOW_IMPORT_SPRZET_CASE_V19: utworzono jako zawartość case id=${caseExemplar.id}, kod=${caseExemplar.kod_kreskowy || '-'}.`,
+    });
+  }
+}
+
+async function main() {
+  const args = parseArgs(process.argv);
+  const file = args.file || args._[0];
+  const sheet = args.sheet || args.arkusz;
+  const orgId = args.org ? Number(args.org) : (process.env.IMPORT_ORG_ID ? Number(process.env.IMPORT_ORG_ID) : null);
+  const subdomena = args.subdomena || process.env.IMPORT_ORG_SUBDOMENA || null;
+  const dryRun = Boolean(args['dry-run']);
+  const updateExisting = !Boolean(args['no-update']);
+  const iloscioweMode = args['ilosciowe-mode'] || DEFAULT_ILOSCIOWE_MODE;
+  const caseContentMode = args['case-content'] || DEFAULT_CASE_CONTENT_MODE;
+
+  if (!file) {
+    console.error('Brak pliku. Użycie:');
+    console.error('  pnpm import:sprzet -- --file ~/Desktop/sprzet.xlsx --org 1');
+    console.error('Opcje: --dry-run --sheet NAZWA --subdomena pixel --ilosciowe-mode legacy-egzemplarze|pseudo (V34 domyślnie importuje ilościowe jako model bez egzemplarzy) --case-content create|skip --no-update');
+    process.exit(1);
+  }
+
+  const filePath = path.resolve(file.replace(/^~(?=$|\/|\\)/, process.env.HOME || '~'));
+  if (!fs.existsSync(filePath)) throw new Error(`Nie znaleziono pliku: ${filePath}`);
+
+  const { rows, sheetName } = readRows(filePath, sheet);
+  console.log(`Plik: ${filePath}`);
+  console.log(`Arkusz: ${sheetName}`);
+  printSummary(rows);
+
+  const errors = validateRows(rows);
+  if (errors.length) {
+    console.error('\nBłędy walidacji:');
+    for (const error of errors) console.error(`- ${error}`);
+    process.exit(1);
+  }
+
+  if (dryRun) {
+    console.log('\nDRY RUN: nie zapisuję nic do bazy. Plik wygląda poprawnie.');
+    return;
+  }
+
+  const org = await getOrganization({ orgId, subdomena });
+  console.log(`\nImport do organizacji: #${org.id} ${org.nazwa} (${org.subdomena})`);
+  console.log(`Tryb ilościowy: ${iloscioweMode}`);
+  console.log(`Zawartość case: ${caseContentMode}`);
+  console.log(`Aktualizacja istniejących: ${updateExisting ? 'tak' : 'nie'}`);
+
+  const cache = {
+    categories: new Map(),
+    models: new Map(),
+    stats: {
+      categoriesCreated: 0,
+      modelsCreated: 0,
+      modelsUpdated: 0,
+      exemplarsCreated: 0,
+      exemplarsUpdated: 0,
+      exemplarsSkipped: 0,
+    },
+  };
+
+  for (const row of rows) {
+    try {
+      if (row.typ === 'case') {
+        await importCaseRow(org.id, row, cache, updateExisting, caseContentMode);
+      } else if (row.typ === 'ilosciowe') {
+        await importQuantityRow(org.id, row, cache, updateExisting, iloscioweMode);
+      } else {
+        await importRegularExemplar(org.id, row, cache, updateExisting);
+      }
+      cache.stats.rowsImported = (cache.stats.rowsImported || 0) + 1;
+    } catch (error) {
+      console.error(`\nBłąd w wierszu ${row.rowNumber}: ${error.message}`);
+      console.error(row);
+      throw error;
+    }
+  }
+
+  console.log('\nImport zakończony:');
+  console.table(cache.stats);
+}
+
+main()
+  .catch((error) => {
+    console.error('\nIMPORT PRZERWANY:');
+    console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

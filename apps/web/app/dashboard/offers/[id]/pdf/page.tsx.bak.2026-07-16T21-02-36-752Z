@@ -1,0 +1,650 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { api } from '../../../../../lib/api';
+import { Button } from '../../../../../components/ProductUI';
+
+function money(value: any) {
+  return `${Number(value || 0).toLocaleString('pl-PL', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} zł`;
+}
+
+function date(value: any, withTime = false) {
+  if (!value) return '-';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '-';
+  return d.toLocaleString('pl-PL', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: withTime ? '2-digit' : undefined,
+    minute: withTime ? '2-digit' : undefined,
+  });
+}
+
+function text(value: any, fallback = '-') {
+  const v = value === null || value === undefined ? '' : String(value).trim();
+  return v || fallback;
+}
+
+function asNumber(value: any, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function calcNetto(p: any) {
+  const cena = asNumber(p.cena_netto, 0);
+  const ilosc = asNumber(p.ilosc, 1);
+  const dni = asNumber(p.dni_pracy, 1);
+  const rabat = asNumber(p.rabat_proc, 0);
+  return cena * ilosc * dni * (1 - rabat / 100);
+}
+
+function lineNetto(p: any) {
+  const saved = asNumber(p.razem_netto, 0);
+  return saved > 0 ? saved : calcNetto(p);
+}
+
+function lineVat(p: any) {
+  const saved = asNumber(p.razem_vat, 0);
+  if (saved > 0) return saved;
+  return lineNetto(p) * (asNumber(p.vat, 23) / 100);
+}
+
+function lineBrutto(p: any) {
+  const saved = asNumber(p.razem_brutto, 0);
+  if (saved > 0) return saved;
+  return lineNetto(p) + lineVat(p);
+}
+
+function visiblePositions(section: any) {
+  return (section?.pozycje || [])
+    .filter((p: any) => p?.aktywny !== false)
+    .filter((p: any) => p?.widoczna_w_pdf !== false);
+}
+
+function sectionTotal(section: any) {
+  return visiblePositions(section).reduce((sum: number, p: any) => sum + lineNetto(p), 0);
+}
+
+export default function OfferPdfPage() {
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const [offer, setOffer] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    setError('');
+    api
+      .get(`/api/oferty/${id}`)
+      .then((response) => setOffer(response.data))
+      .catch((err) => setError(err?.response?.data?.message || err.message || 'Nie udało się pobrać oferty.'))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  const sections = useMemo(() => {
+    const raw = offer?.wersje?.[0]?.sekcje || [];
+    return raw
+      .filter((section: any) => section?.aktywny !== false)
+      .filter((section: any) => section?.widoczna_w_pdf !== false)
+      .map((section: any) => ({ ...section, pozycje: visiblePositions(section) }))
+      .filter((section: any) => section.pozycje.length > 0 || section.opis);
+  }, [offer]);
+
+  const summary = useMemo(() => {
+    const positions = sections.flatMap((section: any) => section.pozycje || []);
+    const netto = positions.reduce((sum: number, p: any) => sum + lineNetto(p), 0);
+    const vat = positions.reduce((sum: number, p: any) => sum + lineVat(p), 0);
+    const brutto = positions.reduce((sum: number, p: any) => sum + lineBrutto(p), 0);
+    return { netto, vat, brutto };
+  }, [sections]);
+
+  if (loading) {
+    return <div className="pdf-loading">Ładowanie oferty...</div>;
+  }
+
+  if (error) {
+    return <div className="pdf-loading text-red-700">{error}</div>;
+  }
+
+  if (!offer) {
+    return <div className="pdf-loading">Nie znaleziono oferty.</div>;
+  }
+
+  const version = offer.wersje?.[0];
+  const issueDate = offer.data_sporzadzenia || offer.data_utworzenia || new Date();
+  const event = offer.wydarzenie;
+  const client = offer.kontrahent;
+
+  return (
+    <>
+      <style jsx global>{`
+        :root {
+          --ef-cyan: #0891b2;
+          --ef-dark: #082429;
+          --ef-ink: #0f172a;
+          --ef-muted: #64748b;
+          --ef-border: #dbe4ea;
+          --ef-soft: #f5f9fb;
+        }
+
+        body {
+          margin: 0;
+          background: #e5edf2;
+          color: var(--ef-ink);
+          font-family: Arial, Helvetica, sans-serif;
+        }
+
+        @page {
+          size: A4;
+          margin: 12mm;
+        }
+
+        .pdf-toolbar {
+          position: sticky;
+          top: 0;
+          z-index: 20;
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+          padding: 14px;
+          background: rgba(8, 36, 41, 0.94);
+          backdrop-filter: blur(14px);
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        }
+
+        .pdf-page {
+          width: 210mm;
+          min-height: 297mm;
+          margin: 18px auto;
+          background: white;
+          box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
+        }
+
+        .pdf-sheet {
+          padding: 15mm 14mm 13mm;
+        }
+
+        .pdf-hero {
+          display: grid;
+          grid-template-columns: 1.4fr 0.8fr;
+          gap: 18px;
+          border-radius: 22px;
+          background: linear-gradient(135deg, #082429 0%, #0e4b56 55%, #0891b2 100%);
+          color: white;
+          padding: 26px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .pdf-hero:after {
+          content: '';
+          position: absolute;
+          right: -40px;
+          top: -70px;
+          width: 210px;
+          height: 210px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.11);
+        }
+
+        .pdf-logo {
+          height: 46px;
+          width: auto;
+          max-width: 220px;
+          display: block;
+          object-fit: contain;
+          margin-bottom: 24px;
+          filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.18));
+        }
+
+        .pdf-kicker {
+          margin: 0 0 8px;
+          color: #a7f3ff;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+        }
+
+        h1 {
+          margin: 0;
+          font-size: 30px;
+          line-height: 1.05;
+          letter-spacing: -0.04em;
+        }
+
+        .pdf-subtitle {
+          margin: 12px 0 0;
+          color: rgba(255, 255, 255, 0.78);
+          font-size: 12px;
+          font-weight: 700;
+          line-height: 1.55;
+        }
+
+        .pdf-number-box {
+          align-self: end;
+          border: 1px solid rgba(255, 255, 255, 0.24);
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.1);
+          padding: 16px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .pdf-number-box dt {
+          color: rgba(255, 255, 255, 0.62);
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        .pdf-number-box dd {
+          margin: 4px 0 13px;
+          font-size: 13px;
+          font-weight: 900;
+        }
+
+        .pdf-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 12px;
+          margin-top: 16px;
+        }
+
+        .pdf-card {
+          border: 1px solid var(--ef-border);
+          border-radius: 18px;
+          background: white;
+          padding: 15px;
+          break-inside: avoid;
+        }
+
+        .pdf-card h2,
+        .pdf-section h2 {
+          margin: 0 0 10px;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--ef-cyan);
+        }
+
+        .pdf-card p {
+          margin: 4px 0;
+          font-size: 12px;
+          line-height: 1.45;
+        }
+
+        .pdf-card strong {
+          color: var(--ef-dark);
+        }
+
+        .pdf-section {
+          margin-top: 18px;
+          border: 1px solid var(--ef-border);
+          border-radius: 20px;
+          overflow: hidden;
+          break-inside: avoid;
+          background: white;
+        }
+
+        .pdf-section-header {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          align-items: flex-start;
+          padding: 15px 17px;
+          background: linear-gradient(90deg, var(--ef-dark), #0e7490);
+          color: white;
+        }
+
+        .pdf-section-header h2 {
+          color: white;
+          margin: 0;
+          font-size: 15px;
+          letter-spacing: -0.01em;
+          text-transform: none;
+        }
+
+        .pdf-section-header p {
+          margin: 5px 0 0;
+          color: rgba(255, 255, 255, 0.76);
+          font-size: 11px;
+          line-height: 1.4;
+        }
+
+        .pdf-section-total {
+          white-space: nowrap;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.15);
+          padding: 7px 11px;
+          font-size: 12px;
+          font-weight: 900;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        th {
+          padding: 9px 8px;
+          background: #f8fafc;
+          border-bottom: 1px solid var(--ef-border);
+          color: #475569;
+          font-size: 9px;
+          font-weight: 900;
+          text-align: left;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        td {
+          padding: 10px 8px;
+          border-bottom: 1px solid #edf2f7;
+          vertical-align: top;
+          font-size: 10.5px;
+          line-height: 1.35;
+        }
+
+        tr:last-child td {
+          border-bottom: 0;
+        }
+
+        .pdf-item-name {
+          font-weight: 900;
+          color: var(--ef-ink);
+        }
+
+        .pdf-item-meta {
+          margin-top: 3px;
+          color: var(--ef-muted);
+          font-size: 9.5px;
+        }
+
+        .pdf-text-right {
+          text-align: right;
+        }
+
+        .pdf-summary {
+          display: grid;
+          grid-template-columns: 1.25fr 0.75fr;
+          gap: 16px;
+          margin-top: 20px;
+          align-items: start;
+          break-inside: avoid;
+        }
+
+        .pdf-terms {
+          border-radius: 18px;
+          background: var(--ef-soft);
+          border: 1px solid var(--ef-border);
+          padding: 16px;
+          font-size: 11px;
+          line-height: 1.55;
+          color: #334155;
+          white-space: pre-wrap;
+        }
+
+        .pdf-totals {
+          border-radius: 20px;
+          background: #0f172a;
+          color: white;
+          padding: 17px;
+        }
+
+        .pdf-total-row {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+          font-size: 12px;
+        }
+
+        .pdf-total-row:last-child {
+          border-bottom: 0;
+        }
+
+        .pdf-grand {
+          margin-top: 8px;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #0891b2, #22c55e);
+          padding: 14px;
+        }
+
+        .pdf-grand span:first-child {
+          display: block;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          opacity: 0.82;
+        }
+
+        .pdf-grand span:last-child {
+          display: block;
+          margin-top: 4px;
+          font-size: 24px;
+          font-weight: 900;
+          letter-spacing: -0.04em;
+        }
+
+        .pdf-signatures {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 26px;
+          margin-top: 30px;
+          break-inside: avoid;
+        }
+
+        .pdf-signature {
+          padding-top: 42px;
+          border-top: 1px solid #94a3b8;
+          color: #64748b;
+          font-size: 10px;
+          font-weight: 800;
+          text-align: center;
+        }
+
+        .pdf-footer {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          margin-top: 22px;
+          padding-top: 12px;
+          border-top: 1px solid var(--ef-border);
+          color: #94a3b8;
+          font-size: 9px;
+          font-weight: 700;
+        }
+
+        .pdf-loading {
+          max-width: 720px;
+          margin: 60px auto;
+          border-radius: 24px;
+          background: white;
+          padding: 30px;
+          font-weight: 900;
+          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.14);
+        }
+
+        @media print {
+          body {
+            background: white !important;
+          }
+
+          .pdf-toolbar {
+            display: none !important;
+          }
+
+          .pdf-page {
+            width: auto;
+            min-height: auto;
+            margin: 0;
+            box-shadow: none;
+          }
+
+          .pdf-sheet {
+            padding: 0;
+          }
+
+          .pdf-section,
+          .pdf-card,
+          .pdf-summary,
+          .pdf-signatures {
+            break-inside: avoid;
+          }
+        }
+      `}</style>
+
+      <div className="pdf-toolbar">
+        <Button onClick={() => window.print()}>Drukuj / zapisz jako PDF</Button>
+        <Button variant="secondary" onClick={() => window.close()}>Zamknij</Button>
+      </div>
+
+      <article className="pdf-page">
+        <div className="pdf-sheet">
+          <header className="pdf-hero">
+            <div>
+              <img className="pdf-logo" src="/eventflow-logo-sidebar.svg" alt="EventFlow" />
+              <p className="pdf-kicker">Oferta dla klienta</p>
+              <h1>{text(offer.nazwa, 'Oferta')}</h1>
+              <p className="pdf-subtitle">
+                Profesjonalna obsługa techniczna, sprzęt AV, multimedia, transport i wsparcie realizacyjne wydarzenia.
+              </p>
+            </div>
+
+            <dl className="pdf-number-box">
+              <dt>Numer oferty</dt>
+              <dd>{text(offer.numer)}</dd>
+              <dt>Data wystawienia</dt>
+              <dd>{date(issueDate)}</dd>
+              <dt>Wersja</dt>
+              <dd>{version?.numer_wersji ? `v${version.numer_wersji}` : 'v1'}</dd>
+              <dt>Termin płatności</dt>
+              <dd>{offer.termin_platnosci_dni || 14} dni</dd>
+            </dl>
+          </header>
+
+          <section className="pdf-grid">
+            <div className="pdf-card">
+              <h2>Klient</h2>
+              <p><strong>{text(client?.nazwa)}</strong></p>
+              {client?.nip && <p>NIP: {client.nip}</p>}
+              {client?.adres && <p>{client.adres}</p>}
+              {client?.email && <p>{client.email}</p>}
+            </div>
+
+            <div className="pdf-card">
+              <h2>Wydarzenie</h2>
+              <p><strong>{text(event?.nazwa)}</strong></p>
+              <p>Start: {date(event?.data_start, true)}</p>
+              <p>Koniec: {date(event?.data_koniec, true)}</p>
+              <p>Miejsce: {text(event?.miejsce?.nazwa || event?.miejsce_reczne)}</p>
+            </div>
+
+            <div className="pdf-card">
+              <h2>Podsumowanie</h2>
+              <p>Netto: <strong>{money(summary.netto)}</strong></p>
+              <p>VAT: <strong>{money(summary.vat)}</strong></p>
+              <p>Brutto: <strong>{money(summary.brutto)}</strong></p>
+              {asNumber(offer.rabat_budzetowy_netto) > 0 && (
+                <p>Rabat budżetowy: <strong>{money(offer.rabat_budzetowy_netto)}</strong></p>
+              )}
+            </div>
+          </section>
+
+          {sections.map((section: any) => (
+            <section className="pdf-section" key={section.id || section.nazwa}>
+              <div className="pdf-section-header">
+                <div>
+                  <h2>{text(section.nazwa, 'Sekcja')}</h2>
+                  {section.opis && <p>{section.opis}</p>}
+                </div>
+                <div className="pdf-section-total">{money(sectionTotal(section))}</div>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: '36%' }}>Pozycja</th>
+                    <th>Opis</th>
+                    <th className="pdf-text-right">Cena</th>
+                    <th className="pdf-text-right">Ilość</th>
+                    <th className="pdf-text-right">Dni</th>
+                    <th className="pdf-text-right">Rabat</th>
+                    <th className="pdf-text-right">Netto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {section.pozycje.map((p: any) => (
+                    <tr key={p.id || `${section.id}-${p.nazwa}`}>
+                      <td>
+                        <div className="pdf-item-name">{text(p.nazwa)}</div>
+                        <div className="pdf-item-meta">
+                          {text(p.typ_pozycji, 'pozycja')} {p.model?.nazwa ? `· ${p.model.nazwa}` : ''} {p.kategoria?.nazwa ? `· ${p.kategoria.nazwa}` : ''}
+                        </div>
+                      </td>
+                      <td>{text(p.opis || p.uwagi, '')}</td>
+                      <td className="pdf-text-right">{money(p.cena_netto)}</td>
+                      <td className="pdf-text-right">{asNumber(p.ilosc, 1)}</td>
+                      <td className="pdf-text-right">{asNumber(p.dni_pracy, 1)}</td>
+                      <td className="pdf-text-right">{asNumber(p.rabat_proc, 0)}%</td>
+                      <td className="pdf-text-right"><strong>{money(lineNetto(p))}</strong></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ))}
+
+          {sections.length === 0 && (
+            <section className="pdf-section">
+              <div className="pdf-section-header">
+                <h2>Brak widocznych pozycji</h2>
+              </div>
+              <div style={{ padding: 18, fontSize: 12, color: '#64748b' }}>
+                Oferta nie ma pozycji oznaczonych jako widoczne w PDF.
+              </div>
+            </section>
+          )}
+
+          <section className="pdf-summary">
+            <div className="pdf-terms">
+              <h2>Warunki i uwagi</h2>
+              {text(
+                offer.warunki_zamowienia,
+                'Oferta ważna zgodnie z ustaleniami handlowymi. Zakres, terminy i dostępność sprzętu wymagają potwierdzenia przed realizacją.'
+              )}
+            </div>
+
+            <div className="pdf-totals">
+              <div className="pdf-total-row"><span>Razem netto</span><strong>{money(summary.netto)}</strong></div>
+              <div className="pdf-total-row"><span>VAT</span><strong>{money(summary.vat)}</strong></div>
+              <div className="pdf-grand"><span>Razem brutto</span><span>{money(summary.brutto)}</span></div>
+            </div>
+          </section>
+
+          <section className="pdf-signatures">
+            <div className="pdf-signature">Podpis osoby przygotowującej ofertę</div>
+            <div className="pdf-signature">Akceptacja klienta</div>
+          </section>
+
+          <footer className="pdf-footer">
+            <span>EventFlow · oferta wygenerowana automatycznie</span>
+            <span>{text(offer.numer)} · {date(new Date())}</span>
+          </footer>
+        </div>
+      </article>
+    </>
+  );
+}

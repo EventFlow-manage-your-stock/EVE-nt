@@ -1,0 +1,70 @@
+<div class="tab-pane fade" id="tab-calendar">
+<div class="fade modal" id="schedule-modal" role="dialog">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button aria-hidden="true" class="close" data-dismiss="modal" type="button">×</button>
+Edytuj harmonogram
+</div>
+<div class="modal-body">
+</div>
+</div>
+</div>
+</div> <div class="panel-body">
+<div class="row">
+<div class="col-lg-6">
+<a class="btn btn-sm add-green" href="/admin/customer-note/create?customer_id=413&amp;event_id=236"><div class="add-green-circle"></div> Dodaj notatkę</a>
+<h3>  Opis </h3>
+<div class="form-group">
+<textarea id="first-editor-note" name="description" rows="6"></textarea> </div>
+<h3>Szczegóły </h3>
+<div class="form-group">
+<textarea id="second-editor-note" name="details" rows="6"></textarea> </div>
+<div id="event-description-form">
+<form action="/admin/event/update?id=236" class="form-vertical kv-form-bs3" id="w0" method="post" role="form">
+<input name="_csrf" type="hidden" value="DLs9dEwmv_chNaoz6AaanBJ7u9rQJigqvJcfTckEfFhUj2gcCBaNukNMmwadZM7Gfjn2s7hubmDuplN_nTwRNQ=="/>
+<div class="form-group highlight-addon field-first-editor-note-hidden">
+<textarea class="d-none form-control" id="first-editor-note-hidden" name="Event[description]" rows="6"></textarea>
+<div class="help-block help-block-error"></div>
+</div> <div class="form-group highlight-addon field-second-editor-note-hidden">
+<textarea class="d-none form-control" id="second-editor-note-hidden" name="Event[details]" rows="6"></textarea>
+<div class="help-block help-block-error"></div>
+</div>
+<div class="form-group">
+<button class="btn btn-success submitdescription" type="submit">Zapisz</button> </div>
+</form>
+</div>
+<div class="form-group highlight-addon field-event-field-4">
+<label class="form-label has-star" for="event-field-4">Nocleg</label>
+<textarea class="event-field form-control" data-id="4" id="event-field-4" name="EventField[value_text]" rows="6"></textarea>
+<div class="help-block help-block-error"></div>
+</div>
+</div>
+<div class="col-lg-6">
+<h3>Kalendarz <a class="btn btn-xs add-green add-schedule" href="/admin/event/add-schedule?id=236"><div class="add-green-circle" style="margin:-1px 0 0 0"></div> Dodaj etap</a></h3>
+<div class="ibox-content" id="ibox-content">
+<div class="vertical-container dark-timeline" id="vertical-timeline">
+<div class="vertical-timeline-block">
+<div class="vertical-timeline-icon navy-bg">
+<i class="fa fa-calendar"></i>
+</div>
+<div class="vertical-timeline-content">
+<h2>Event                                        <div class="pull-right" style="text-align:right">
+</div>
+</h2>
+<div class="team-members pull-right">
+</div>
+<span class="vertical-date">
+                                        2026-09-06                                          - 2026-09-08                                         <br/>
+<small>00:00 - 23:59</small>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+</script>
+</div>

@@ -1,0 +1,3117 @@
+{
+  "complete": true,
+  "exporter_version": "4.0-FINAL",
+  "scraped_at": "2026-08-15 21:52:56",
+  "source": {
+    "base_url": "https://pixel.newsystems.pl",
+    "event_url": "https://pixel.newsystems.pl/admin/event/view?id=301",
+    "internal_id": "301"
+  },
+  "list": {
+    "internal_id": "301",
+    "list_no": "",
+    "event_name_list": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026 [E2026/07/157]",
+    "event_name": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026",
+    "event_code": "E2026/07/157",
+    "accounting": "",
+    "status": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026 [E2026/07/157]",
+    "client": "5",
+    "customer_id": "404",
+    "event_manager": "Notatka Duplikuj",
+    "start": "",
+    "end": "",
+    "accounting_date": "Piotr Piechnik",
+    "created_at": "24.11.2026, 08:00 26.11.2026, 23:00",
+    "detail_url": "https://pixel.newsystems.pl/admin/event/view?id=301"
+  },
+  "summary": {
+    "internal_id": "301",
+    "name": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026",
+    "event_code": "E2026/07/157",
+    "type": "Konferencja/event do 3 techników",
+    "location": "",
+    "accounting": "Nie zafakturowane",
+    "status": "Nowe",
+    "client": "PIXEL MULTIMEDIA SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ",
+    "client_nip": "7792441171",
+    "event_manager": "Piotr Piechnik",
+    "start": "2026-11-24 08:00:00",
+    "end": "2026-11-26 23:00:00",
+    "description": "",
+    "details": "",
+    "custom_fields": {
+      "Nocleg": ""
+    },
+    "schedule": [
+      {
+        "id": "519",
+        "name": "Montaż",
+        "start": "2026-11-24 08:00:00",
+        "end": "2026-11-24 23:00:00"
+      },
+      {
+        "id": "520",
+        "name": "Event",
+        "start": "2026-11-25 08:00:00",
+        "end": "2026-11-26 23:00:00"
+      },
+      {
+        "id": "521",
+        "name": "Demontaż",
+        "start": "2026-11-26 08:00:00",
+        "end": "2026-11-26 23:00:00"
+      }
+    ],
+    "location_id": "",
+    "location_venue": "",
+    "location_city": "",
+    "location_address": "",
+    "type_source_field": "Event[type]"
+  },
+  "schedule": [
+    {
+      "id": "519",
+      "name": "Montaż",
+      "start": "2026-11-24 08:00:00",
+      "end": "2026-11-24 23:00:00"
+    },
+    {
+      "id": "520",
+      "name": "Event",
+      "start": "2026-11-25 08:00:00",
+      "end": "2026-11-26 23:00:00"
+    },
+    {
+      "id": "521",
+      "name": "Demontaż",
+      "start": "2026-11-26 08:00:00",
+      "end": "2026-11-26 23:00:00"
+    }
+  ],
+  "details": {
+    "found": true,
+    "text": "× Edytuj harmonogram Dodaj notatkę Opis Szczegóły Zapisz Nocleg Kalendarz Dodaj etap Montaż 2026-11-24 08:00 - 23:00 Event 2026-11-25 - 2026-11-26 08:00 - 23:00 Demontaż 2026-11-26 08:00 - 23:00",
+    "tables": [],
+    "links": [
+      {
+        "text": "Dodaj notatkę",
+        "href": "/admin/customer-note/create?customer_id=404&event_id=301",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap",
+        "href": "/admin/event/add-schedule?id=301",
+        "data": {}
+      }
+    ]
+  },
+  "gear": {
+    "found": true,
+    "text": "× Przyjmij sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Sprzęt Przyjmij sprzęt × Wydaj sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Sprzęt Magazyn, z którego wydajemy: MAGAZYN POZNAŃ MAGAZYN KATOWICE Wydaj sprzęt × Kopiuj sprzęt z innego wydarzenia × Przenieś sprzęt × Brak sprzętu × Konflikty do rozwiązania × × Edycja × Notatki + Dodaj + Dodaj grupę sprzętową Skopiuj sprzęt z innego wydarzenia Zarezerwuj sprzęt z oferty na wydarzenie Packlisty Cały sprzęt Cały sprzęt ze zdjęciami Cały sprzęt - XLSX Wydania / przyjęcia Wydaj Przyjmij Przenieś Przenieś z tego wydarzenia Przenieś na to wydarzenie Niezwrócony sprzęt: Numery: [1] Sprzęt Zarządzaj grupami [1] Sprzęt Edycja Zablokuj Usuń X Zaznaczonych elementów: Zmień status Przygotowany Sprawdzony Zmień czas rezerwacji Zapisz Przenieś do innej grupy sprzętowej Sprzęt Usuń zaznaczone Pokaż listę Czas rezerwacji grupy sprzętowej: 24-11-2026 08:00 - 26-11-2026 23:00 Statusy Znajdź sprzęt w event network + Dodaj sprzęt + Magazyn dostawców Szybkie dodawanie: wybierz sprzęt 2 x Statyw korbowy AdamHall 4m (zestaw 1) 2 x Statyw korbowy AdamHall 4m (zestaw 2) 2 x Statyw korbowy AdamHall 4m (zestaw 3) 2x Media konwerter światłowodowy 2x Media konwerter światłowodowy M-023 10/100 Mb/s Absen Beam/ curve bar 0,25 m Absen Beam/ curve bar 0,5 m Absen Beam/ curve bar 1 m Absen Beam/ curve bar 90st. Absen Narzędzie do konserwacji przedniego wyświetlacza LED Absen NT3.9W V2 0,5 x 0,5m corner Acces Point Mikrotik Groove A-52ac Acces Point Mikrotik Groove GA-52HPacn Acces Point WiFi TP Link TL-WR902AC V3 AdamHall najazd Defender Mini 3 kanały AdamHall najazd Defender OFFICE Adapter do kraty Adam Hall TRA36 Adapter do statywu kolumnowego Atheltic GBOX-2 35mm Admiral Wysłona podestu 20 cm czarna Admiral Wysłona podestu 40 cm czarna Admiral Wysłona podestu 60 cm czarna Aktywna kolumna DAS Audio Action-508A Aktywna kolumna ElectroVoice ELX 112P Aktywna kolumna ElectroVoice ETX 12P Aktywna kolumna ElectroVoice ETX 15SP Aktywna kolumna ElectroVoice ZLX 12P Aktywna kolumna JBL EON 515 Aktywna kolumna Proel WD12A Aktywna kolumna Turbosound iQ12 Aktywny system modułowy Turbosound iP1000 Akumulator Eneloope Pro Ni-Mh 2500mAh Akumulator Motorola PMNN4251B Allen & Heath Karta SQ SLink Alustage aliskaf Alustage aliskaf czarny z półbeczką duży Alustage aliskaf czarny z półbeczką mały Alustage aliskaf duży Alustage Corner Box czarny Alustage kajdanki duże Alustage kajdanki małe Alustage kajdanki średnie Alustage kratownica Quadro 0,21m czarna Alustage kratownica Quadro 0,5m czarna Alustage kratownica Quadro 1m czarna Alustage kratownica Quadro 2m czarna Alustage kratownica Quadro 3m czarna Alustage Noga teleskopowa 100-180cm Alustage Noga teleskopowa 40-60cm Alustage Noga teleskopowa 80-140cm Alutruss Rura aluminiowa 50x2mm 1,5m czarna z aliskafem i adapterem na rurą 35mm Antena dookólna Antena dookólna RF Venue Diversity Fin Antena dookólna Sennheiser A1031-U Antena dookólna UA400B Antena dookólna UA8 Antena dookólna UA860SWB Antena WiFi do Asus Jupiter H610B Apple Mac Studio M1 Max Art Uchwyt ścienny do tv/monitor Athletic Belka do statywu oświetleniowego Athletic statyw oświetleniowy Atme MDG Wytwornica Mgły AverMedia GC311 AYRTON Stradale Profile B-Tech statyw do TV BT-8503 43\"- 60\" B-Tech statyw do TV BT-8504 75\" Balast 25kg Bateria 98Wh BP-U DV SWIT LB-SU98 Biały reflektor teatralny Cameo CL200 Blackmagic Design Focus Demand Blackmagic Uchwyt do Design Focus Demand Blackmagic Zasilacz do Studio Camera 4K Pro Botex UP-2-1 Channel Dimmer Bramka ArtNet Obsidian Netron EN12 Butla CO2 10L ChamSys MagicQ DMX FULL USB Interface ChamSys MQ250M Chamsys USB + Stairville RJ45 DMX Conen Systems Statyw elektryczny Czytnik kart Lexar Professional Workflow USB4 Reader Dell P2314Ht Deska na kratownice 50x50cm Di-Box Mono Di-Box Stereo Dolpas Zawiesie pasowe 1T 1,5 m Dolpas Zawiesie pasowe 1T 2 m Double Hanging Bar Absen NT3.9W V2 Drabina Drabest 0,6 m Drabina Krause 1m Drabina Krause 1m 2,52 - 3,90 - 5,30m DYNAWID Statyw mikrofonowy stołowy Dysk przenośny SSD Samsung T7 1TB USB 3.2 Gen. 2 Dysk Sieciowy NAS Dźwig Block&Block Beta-70 EDBAK Uchwyt do projektora PM2W biały (do 15kg) Ekran projekcyjny 2,4x1,4m 16:9 Ekran projekcyjny 2,4x1,8m 4:3 Ekran projekcyjny 2x1,5m 4:3 Ekran projekcyjny 3x1,7m 16:9 Ekran projekcyjny 3x2,3m 4:3 Ekran projekcyjny 4x2,25m 16:9 Ekran projekcyjny 4x3m 4:3 Ekran projekcyjny 5,6x3,3m 16:9 Ekran projekcyjny 5x3,8m 4:3 Ekran projekcyjny 7x3,94 m 16:9 Ekran projekcyjny Adeo 10x5,6m 16:9 (przód) Ekran projekcyjny Adeo 12x4m (tył) Ekran projekcyjny Adeo 7x4m 16:9 (przód) Ekran projekcyjny Adeo 8x3m 16:9 (przód) Ekran projekcyjny Adeo 8x4,5m 16:9 (przód) Ekran projekcyjny Adeo 8x4,5m 16:9 (tył) Ekran projekcyjny Adeo 8x6m (przód) Elgato Stream Deck XL Eurolite statyw oświetleniowy 3,4m EUROMET Uchwyt do projektora Arakno Standard czarny (do 45kg) Extender DVI Extender HDMI FIBER 4K Extender HDMI Fiber FullHD Extender HDMI RJ45 Extender LightWare HDMI 20-OPTJ Extender Unitek USB - RJ-45 FiberSmith Światłowód hybrydowy HDMI 100m Gefen Spliter HDMI EXT-UHD600-18 Gravity przedłużka do sztycy SP2332 EXTB Gravity Statyw mikrofonowy z okrągłą podstawą i obsługiwanym jedną ręką mechanizmem regulacji wysokości Gravity statyw z podstawą ICYBOX Interfejs audio iPad (9th) Ipad 10,9 10gen 64 Gb Ipad AIR 2 64Gb JBL powered studio monitor 306P MkII Jednostka centralna Integrus Digital Bosch INT-TX04 K&M 29375 podstawa mikrofonu na gęsiej szyi z włącznikiem K&M Statyw korbowy 4m Kabel antenowy Kabel Ethercon 10m Kabel Ethercon 15m Kabel Ethercon 1m Kabel Ethercon 5m Kabel HDMI - mini DP 3,0m Kabel HDMI - USB-C 1,8m Kabel Truecon 10m Kabel Truecon 1m Kabel Truecon 5m Kabel USB - micro USB 1,5m Kabel USB - USB C 0,4m Kabel USB - USB C 1,0m Kabel USB B 1,5m Kabel USB C - USB C (FX6) Kabel USB C 0,4m Kabel USB C 1,0m KABINET ABSEN FL2.5 FLEX KABINET ABSEN NT3.9W V2 0,5 x 0,5m KABINET ABSEN NT3.9W V2 0,5 x 1m KABINET ABSEN PL2.5 KABINET ABSEN PL2.5 V2 CORNER Kamera Blackmagic Studio Camera 4K Pro Kamera internetowa Logitech C 920 Kamera Sony PXW-FX6 Kamera Sony PXW-X70 Karta Lexar CFexpress 4.0 Pro Gold, VPG400, R1800/W1650 (Type A) 1TB Karta przechwytująca HDMI KCa Dwuosobowa kabina do tłumaczeń symultanicznych KeyDigital KD-1x4CSK splitter HDMI 1:4 4K KeyDigital KD-DA1x4X splitter HDMI 1:4 4K KeyDigital KD-HD1x4ProK splitter HDMI 1:4 4K KeyDigital KD-HDDA1x8 Splitter HDMI 1:8 Kierunkowy mikrofon nagłowy DPA 4288-DP-F-F90-LH CORE+, kolor beżowy Klamra spinająca podesty Alustage SCD-47 Klamra łącząca 2 nogi podestu Alustage SCD-20 Klapka prądowa 6 gniazdowa LANBERG Klatka Tilta ES-T20-A Klawiatura + mysz bezprzewodowa Tracer BARTIX II RF NANO Klawiatura Dell KB216 Klawiatura Logitech K120 Klawiatura USB-C Slim W3 Klucz imbusowy 6mm Rickmann Klucz nasadowy Top Tools Klucz płaski 19mm Klucz płaski 29mm Klucz Torx Waart CR-V T25 Kolumna pasywna L'Acoustics KS 21 Kolumna pasywna L'Acoustics X12 Kolumna pasywna L'Acoustics X8 Komputer PCS Jupiter H610B Komputer stacjonarny SFF Dell Precision 3440 Koncowka mocy L'Acoustics LA4X Konwerter HDMI -> SDI Konwerter HDMI <-> SDI Konwerter SDI -> HDMI konwerter światłowodowy Novastar CVT10-M konwerter światłowodowy Novastar CVT4K-M Kostka dziennikarska Drawmer Kickbox 4x4 Kostka samopoziomująca Alustage SCD-03 Kotara 3x6m Koumna Pasywna L'Acoustics Syva Koumna Pasywna L'Acoustics Syva Low Krause Drabina 3x10 L'Acoustics Syva Bar L'Acoustics Syva Base Laptop DELL Latitude 5440 Laptop Dell Latitude E5450 Laptop DELL Precision 3520 Laptop DELL PRO PLUS 14 Laptop Lenovo T540p Laptop MacBook Air M1 Laptop MacBook Pro 14 cali M4 LedBar Flash Professional L1810 25 RGBW LedBar TRIBAR 400 IR LedPar Cameo CLPST64 LedPar Ignition 2bright Par 7 IP LEDWash Robe 600X Maltec Wiatrak Czarny Manfrotto Rączka do statywu kamerowego Martin MAC Aura XIP Martin MAC Quantum Profile Matryca 4x4 Gefen EXT-UHD600A-44 HDMI 2.0 4K 4:4:4 60 Hz Mediaserwer (Vmix, Resolume) [1] Mediaserwer (Vmix, Resolume) [2] Mediaserwer (Vmix, Resolume) [3] Mediaserwer (Vmix, Resolume) [4] Mediaserwer (Vmix, Resolume) [5] Mediaserwer (Vmix, Resolume) [6] Mediaserwer (Vmix, Resolume) [7] Mediaserwer (Vmix, Resoulume) Mikrofon do bębna basowego Shure BETA52A Mikrofon do perkusji Sennheiser e604 Mikrofon gesia szyja AUDIO TECHNICA ES925H24/XLR Mikrofon gesia szyja AUDIO TECHNICA U859QL Mikrofon krawatowy Shure WL185 Mikrofon nauszny Audac CMX 826 Mikrofon nauszny Shure MX 153T/O-TQG Mikrofon nauszny Shure MX143T/O-TQG mikrofon pojemnościowy Austrian Audio CC8 Mikrofon przewodowy Audiotechnika MB 3K Mikrofon przewodowy IMGSTAGELINE DMS-1 Mikrofon przewodowy instrumentalny Shure SM57 Mikrofon przewodowy Shure C 606 Mikrofon przewodowy Shure C 608 Mikrofon przewodowy Studiomaster KM 52 Mikrofon przewodowy wokalowy Shure SM58 Mikrofonogłośnik Motorola PMMN4029A Mikrokomputer Intel NUC Mikser audio Allen & Heath ZED60-14FX Mikser audio Mumu VP4 Mikser audio Soundcraft EPM8 Mikser audio Studiomaster C2-2 Mikser audio Yamaha MG-16 Mikser cyfrowy audio Allen & Heath CQ-18 Mikser cyfrowy audio Allen & Heath QU-16 Mikser cyfrowy audio Allen & Heath SQ5 Mikser cyfrowy audio Allen & Heath SQ6 Mikser cyfrowy audio Midas M32R Mikser kamerowy Black Magic Design ATEM Television Studio Pro 4K Mikser video Roland V-1HD Plus Mikser wizyjny AnalogWay Pulse 4K Mikser wizyjny AnalogWay Pulse2-3G Mikser wizyjny Barco S3 Junior Mikser wizyjny Barco S3 Tricombo MAX Mikser wizyjny Barco S3 [1] Mikser wizyjny PixelHue P20 Mikser wizyjny RGBLink Venus X1 Monitor 22\" Monitor 24\" Monitor 27\" Monitor 32\" Monitor 43\" Monitor 55\" Monitor 65\" Monitor 75\" Monitor 86\" Monitor dotykowy 55\" Monitor dotykowy 55\" + statyw Monitor dotykowy 98\" Monitor dotykowy Iiyama 22\" ProLite T2236MSC Monitor Iiyama ProLite T2234MC dotykowy 22\" Monitor referencyjny Black Magic Design SmartView 4K 2 Monitor Samsung QM55C (INFOKIOSK) Mównica biała Mównica czarna Mównica plexi Mównica z plexi Pleximade ŁUK szron Myszka Dell MS116P Myszka Esperanza Myszka Logitech M90 Myszka Modecom MC-M4.1 Nadajnik Bodypack BLX1 Nadajnik Bodypack QLXD1 nadajnik DMX Nadajnik PSM 300 P3T H8E Nadajnik ręczny Sennheiser SKM100 Nadajnik ręczny Sennheiser SKM35 Nadajnik ręczny Sennheiser SL handheld DW Nadajnik ręczny Shure Beta 58A Nadajnik ręczny Shure QLXD2 BETA 58A Nadajnik ręczny Shure SLXD2 Nadajnik ręczny Shure SM58 Nadajnik USB do głosowania Qwizdom Nagrywarka audio Nagrywarka Video Black Magic Design Video Assist 5\" 3G Nagrzewnica elektryczna Nasadka 19mm Dexter Naświetlacz Noga 30 cm Noga 60cm z profilu MX80 konstrukcja do ekranu LED Noga aluminiowa 40 cm Noga drewniana 20 cm Obiektyw Panasonic ET-DLE030, 0.4:1.0, ultra-szerokokątny Obiektyw Panasonic ET-ELS20, 1.7-2.8 Obiektyw Panasonic ET-ELT20, 2.8-4.6 Obiektyw Panasonic ET-ELT21, 4.6-7.2 Obiektyw Panasonic ET-ELW20, 1.3-1.7 Obiektyw Panasonic ET-ELW22, 0.8-1.0 Obiektyw Panasonic Obiektyw ET-DLE170 1.4-2.0 Obiektyw Sony FE 200-600mm f/5.6-6.3 G OSS SEL200600G Obiektyw Sony FE PZ 28-135mm f/4.0 G OSS SELP28135G Obiektyw Sony GM2 OSS 70-200mm f/2.8 SEL70200GM2 Odbiornik Bosch Integrus 8-kanałowy odbiornik DMX Odbiornik PSM 300 PRA H8E Odbiornik Sennheiser EM10 Odbiornik Sennheiser EM100 Odbiornik Sennheiser SL receiver DW Odbiornik Shure BLX4R Odbiornik Shure QLXD4E Odbiornik Shure SLXD4D Odsłuch douszny Shure PSM 300 Odsłuch douszny Shure PSM 300 Odsłuch douszny Shure PSM 300 Odsłuch douszny Shure PSM 300 Odsłuch douszny Shure PSM 300 [zestaw 1] OM System M.Zuiko Digital 2x Teleconverter MC‑20 OM System M.Zuiko Digital ED 100‑400mm f5.0‑6.3 IS OM System M.Zuiko Digital ED 12-40 mm f/2.8 PRO II OM System M.Zuiko Digital ED 40-150mm f/2.8 PRO Osłona na kratownice 2 m czarna Osłona na statyw TV czarna Par żarowy 38 PD Movie Kabel LEMO 1,0m PD Movie Zasilacz do motor air PDMOVIE Live PRO PDMOVIE Motor Air Pendrive Sandisk 32GB Pilot do głosowania bezprzewodowego Pinówka 64x pin Platforma jezdna (deska) Player Brightsign HD 110 Player REALFICTION Podest sceniczny Alustage 1x0,5m Podest sceniczny Alustage 1x1m Podest sceniczny Alustage 2x1m Podkładka pod mysz Roccat Kanga Mini podpórka obiektywu SmallRig BSL2681 Podstawa do kratownicy Alustage 100x100 cm czarna Podstawa do kratownicy Alustage 31x31 cm czarna Podstawa do kratownicy Alustage 60x60 cm czarna Podstawa do kratownicy Alustage 80x80 cm czarna Poduszka pompowana Werckmann Poziomica Neo Tools 60cm Prezenter Interspace Industries MicroCue2 Prezenter Interspace Industries MicroCue3 Prezenter Logitech Spotlight Procesor DAS Audio DSP INTEGRAL-M26X Procesor łączenia wielu ekranów Magnimage 4K Video Mosaic Box Profil MX80 0,5m konstrukcja do ekranu LED Profil MX80 1,0m konstrukcja do ekranu LED Profil MX80 2,0m konstrukcja do ekranu LED Profil pod diodę 0,5m Profil pod diodę 1m Profil pod diodę 2m Projektor Epson EB-410W H330B, 2000 lum., WXGA Projektor Nec NP 600 SG, 2600 lum., XGA, szerokokątny Projektor Panasonic PT-EW540, 5000 lum., WXGA Projektor Panasonic PT-EW640, 5800 lum., WXGA Projektor Panasonic PT-EW640, 5800 lum., WXGA Projektor Panasonic PT-EW640, 5800 lum., WXGA [1] Projektor Panasonic PT-EW640, 5800 lum., WXGA [2] Projektor Panasonic PT-EW730, 7000 lum., WXGA Projektor Panasonic PT-EW730, 7000 lum., WXGA Projektor Panasonic PT-EW730, 7000 lum., WXGA [1] Projektor Panasonic PT-EW730, 7000 lum., WXGA [2] Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD Projektor Panasonic PT-MZ882B, 8200 lum., WUXGA, laserowy, LCD Projektor Panasonic PT-RZ970, 9400 lum., WUXGA, laserowy, DLP Projektor Panasonic PT-VW340, 3700 lum., WXGA Projektor Panasonic PT-VX410, 4200 lum., XGA Promiennik podczerwieni Bosch LBB4512/00 Przedłużka 1/2 Yato Przedłużka Jack 3,5mm 3m Przedłużka USB 3.0 3m Przedłużka USB 3m Przejsciówka 16A - 32A Przejściówka 16A na 3x 230V Przejsciówka 32A -> 12x 230v z przelotem Przejsciówka 32A -> 9x 230v Przejściówka 63A - 2x 32A przejściówka DP - HDMI Przejściówka DP-mini DP Przejściówka USB-C - HDMI Przelotka DisplayPort na HDMI Przepinka Ethercon 1,5m NT3.9W V2 Przepinka Ethercon 1m NT3.9W V2 Przepinka Truecon 1,5m NT3.9W V2 Przepinka Truecon 1m NT3.9W V2 Przepinka Truecon 5m Przewod DP-DP 8k 3m Przewód HDMI - DP 1,8 m Przewód sieciowy RJ45 1,5m Przewód sieciowy RJ45 3m Przewód USB C - DP 1,8 m Pulpit dla tłumaczy Bosch Integrus LBB3222/04 Pyta 4x Fiber 50m Qilive Uchwyt do minitorów 22\" rozmiar M Qilive Uchwyt do minitorów 32-55\" rozmiar L Rack 2x Mikrofon bezprzewodowy Shure SLXD Rack 2x Mikrofon bezprzewodowy Shure SLXD [1] Rack 2x Mikrofon bezprzewodowy Shure SLXD [2] Rack 2x Mikrofon bezprzewodowy Shure SLXD [3] Rack 2x Mikrofon bezprzewodowy Shure SLXD [5] Rack 2x Mikrofon bezprzewodowy Shure SLXD [6] Rack 3x Radiotelefon Motorola Rack 3x Radiotelefon Motorola [1] Rack 3x Radiotelefon Motorola [2] Rack 3x Radiotelefon Motorola [4] Rack 4x Mikrofon bezprzewodowy Sennheiser G3 EW100 Rack 4x Mikrofon bezprzewodowy Sennheiser SL Rack 4x Mikrofon bezprzewodowy Sennheiser SL [1] Rack 4x Mikrofon bezprzewodowy Sennheiser XS Rack 4x Mikrofon bezprzewodowy Sennheiser XS [2] Rack 4x Mikrofon bezprzewodowy Shure BLX Rack 4x Mikrofon bezprzewodowy Shure BLX [1] Rack 4x Mikrofon bezprzewodowy Shure BLX [1] Rack 4x Mikrofon bezprzewodowy Shure BLX [2] Rack 4x Mikrofon bezprzewodowy Shure QLXD Rack 4x Mikrofon bezprzewodowy Shure QLXD [1] Rack 4x Mikrofon bezprzewodowy Shure QLXD [2] Rack 4x Mikrofon bezprzewodowy Shure QLXD [4] Rack 4x Mikrofon bezprzewodowy Shure QLXD [5] Rack 4x Mikrofon bezprzewodowy Shure QLXD [6] RACK Infokiosk 55\" RACK Infokiosk 55\" [01] RACK Infokiosk 55\" [02] RACK Infokiosk 55\" [03] RACK Ipad + AP Mikrotik RACK Ipad + AP Mikrotik [1] RACK Ipad + AP Mikrotik [2] RACK Kamera Black Magic PRO 4K RACK Kamera Black Magic PRO 4K [01] RACK Kamera Black Magic PRO 4K [02] RACK Kamera Black Magic PRO 4K [03] RACK Kamera Black Magic PRO 4K [04] RACK Kamera Sony FX6 (zestaw 1) RACK Kamera Sony FX6 (zestaw 1) RACK Kamera Sony FX6 (zestaw 2) RACK Kamera Sony FX6 (zestaw 2) RACK Komputer produkcyjny DELL Precision 3440 SFF RACK Komputer produkcyjny DELL Precision 3440 SFF [01] RACK Komputer produkcyjny DELL Precision 3440 SFF [02] RACK Komputer produkcyjny DELL Precision 3440 SFF [03] RACK Mac Studio M1 Max RACK Mac Studio M1 Max [01] RACK Mac Studio M1 Max [02] RACK Mac Studio M1 Max [03] Rack MDG Atme RACK mikser kamerowy + monitor Rack Monitor dotykowy 98\" + statyw Rack Monitor dotykowy 98\" + statyw [01] Rack mównica BIAŁA [1] Rack mównica BIAŁA [2] Rack mównica BIAŁA [3] Rack mównica BIAŁA [4] Rack mównica BIAŁA [5] Rack mównica BIAŁA [6] Rack mównica BIAŁA [7] Rack mównica BIAŁA [8] Rack mównica CZARNA [9] Rack mównica multimedialna RACK Projektor Panasonic PT-EW540, 5000 lum., WXGA RACK Projektor Panasonic PT-EW640, 5800 lum., WXGA RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD [1] RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD [2] RACK Projektor Panasonic PT-RZ970, 9400 lum., WUXGA, laserowy, DLP RACK Projektor PT-MZ882B, 8200 lum., WUXGA, laserowy, LCD [1] RACK spliter DMX + bramka artnet Rack SYVA RACK SYVA (kable) RACK SYVA LOW+BASE Radiotelefon Motorola DP1400AD RDUCH Statyw mikrofonowy do gęsiej szyi roadwork sztyca kolumnowa Router Router 4G Rozdzielnia 63A -> 4x32A Rozdzielnia Elektryczna 32A Rozdzielnia Elektryczna 63A PIXEL Rura 0,5m Rurka SmallRig (1054) 15mm Black Aluminum Alloy Rod(M12-40cm) Schody modułowe do podestu SDI 50m SDI 75m Sender Novastar MCTRL4K Sender Novastar MCTRL660 PRO Sender Novastar VX1000 Separator Sieciowy odtwarzacz dysków LG BD 550 BLU-RAY/DVD Silnik servo Chrosziel CDM-UNI-Z2 Single Hanging Bar Absen NT3.9W V2 Single Hanging Bar Corner Absen NT3.9W V2 Skaler Video Skaler/sender Novastar VX4S Skrętka RJ 45 100m Skrętka RJ 45 39m Skrętka RJ 45 45m Skrętka RJ 45 50m Skrętka RJ 45 50m Ethercon Skrętka RJ 45 60m Skrętka RJ 45 70m Skrętka RJ 45 75m Ethercon Skrzynka niebieska Skrzynka z przejściówkami i akcesoriami Smallrig Rura 15cm Smallrig Rura 30cm SmallRig Wspornik Obiektywu BSL2681 Solix Infokiosk Energo Slim55 Spliter HDMI 1:4 Splitter Antenowy RF Venue DISTRO4 Splitter Antenowy Sennheiser ASA 214 Splitter Antenowy Shure 844 + SWB Splitter Antenowy Shure UA844 Splitter Antenowy Shure UA844 + SWB Splitter DMX Showtec DB-1-4/RDM Splitter HDMI 1:2 Splitter SDI Splitter VGA Splittery DMX Stagebox Allen & Heath AB168 Stagebox Allen & Heath AR2412 Stagebox Behringer S16 Stagebox Midas DL16 Stagebox Midas DL16 + Stagebox Behringer S16 Stairville RJ45 DMX Statyw do kamery Statyw głośnikowy Statyw korbowy AdamHall 4m Statyw Manfrotto Magic Arm 143 Statyw mikrofonowy niski Statyw mikrofonowy stołowy Statyw mikrofonowy wysoki Statyw na monitorek BM Gravity Statyw podłogowy do monitora 43-55\" Stereo Tbar K&M Sterowanie Lanc Zoom Varizoom VZRL100 Sterownik DMX 192 CH Sterownik DMX 6 CH Stim statyw oświetleniowy Stół biały Światłowód 150m Światłowód MPO 12 100m na bębnie Światłowód MPO 12 200m na bębnie Switch 16 portów Switch 24 porty Switch 8 portów SZEPTANKA (Nadajnik) ATS-20T SZEPTANKA (Odbiornik) ATS-20R Słuchawki nauszne Słuchawki nauszne Sennheiser HD 300 Słuchawki nauszne Sony MDR-ZX310 TP-Link Karta sieciowa Wi-Fi USB TL-WN722N Turbosound iQ18B TV BOX Allwinner X96Q Uchwyt L'Acoustics X-US1215 do głośników X12 Uchwyt mikrofonowy UPS BlueWalker 1.2kW UPS EAST 2.7kW W-DMX (zestaw 1) W-DMX (zestaw 2) Walizka z mikrofonami [1] Warmel Steelflex 1T 2 m Wciągarka TOR Industries 1T 6m Wciągarka TOR Industries 1T 9m Western Cases Deska na kratownicę 30x30cm Wiertarko-wkrętarka Parkside z zestawem akcesoriów Wkrętak akumulatorowy Bosch GO 2.0 Wkrętarka Makita DDF453 Wkrętarka Milwaukee M12 Wkładka zaciskająca Alustage SCD-24 Worek na łańcuch do wciągarek Wzmacniacz słuchawkowy LD SYSTEMS HPA 4 + 4x słuchawki nauszne Wzmacniacz słuchawkowy SM Pro Audio XPH 4 X-Dot Brighter Wash IP xiaomi TV BOX S Yellobrik LYNX SPG 1708 generator genlock Zasilacz kamery fx6 Zastawki komplet (3szt) Zastrzał nóg Alustage 1,0m z klamrami Zastrzał nóg Alustage 2,0m z klamrami Zawiesie pasowe 2T 6 m Zawiesie stalowe 1T 2 m ZESTAW MIKROFONÓW INSTRUMENTALNYCH [2] Zestaw słuchawkowy Intercom Vokkero Ładowarka Everactive NC1600 Ładowarka Motorola WPLN4137br Ładowarka na dwie baterie SWIT S-3602U Ładowarka Sennheiser CHG-2 Ławka biała wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Dodaj z: Wybierz magazyn Magazyn Wew Magazyn Dostawców Akcja grupowa Zmień status Zmień czas rezerwacji Dodaj komentarz Przenieś do innej grupy sprzętowej Usuń zaznaczone Przygotuj opakowania Zobacz jak planować sprzęt Video × Filtry Sortuj wg kategorii i kolejności w magazynie Sortuj wg kategorii i kolejności w magazynie Sortuj wg kategorii, podkategorii i kolejności w magazynie Sortuj po nazwach Sortuj po miejscu Sortuj po komentarzach Packlista Grupa sprzętowa Grupa sprzętowa ze zdjęciami Grupa sprzętowa - XLS Status Przygotowany Sprawdzony Wydania Zwrócony Wydany Do zwrócenia Komentarz Z komentarzem Bez komentarza Kategoria Konflikt Z Konfliktami Bez Konfliktów Waga sprzętu: 0 kg Objętość sprzętu: 0,0 m 3 Pobór prądu sprzętu: 0 W Zdjęcie Nazwa Ilość B Pakowany Czas pracy Grupy sprzętowe Komentarz Notatka Objętość Waga Status Wydania Miejsce Id Multimedia Multimedia Akcesoria multimedia Ekrany LED Ekrany projekcyjne Głosowanie Kamery, statywy, akcesoria Miksery wizyjne Monitory Mównice Projektory Okablowanie multimedialne Obiektywy Laptopy realizacyjne Laptopy pomocnicze Media serwery do streamow Media serwery multimedialne IPADY Kratownice / Podesty / Elementy montażowe Kratownice / Podesty / Elementy montażowe Akcesoria montażowe Drabiny Kotary Kratownice Obciążenie Podesty Statywy Zastawki Meble cateringowe Nagłośnienie Nagłośnienie Akcesoria nagłośnienie Kolumny aktywne Kolumny pasywne Końcówki mocy Mikrofony przewodowe Mikrofony bezprzewodowe Miksery audio Symultana Łączność Okablowanie nagłośnienie Statywy mikrofonowe Oświetlenie Oświetlenie Akcesoria oświetlenie Ruchome głowy Led Bary Sterowniki/Konsole Led Pary Naświetlacze Okablowanie oświetleniowe Prąd Prąd Kable 230 V Kable Siłowe Przejściówki siłowe Rozdzielnie elektryczne UPS-y Klapki prądowe IT/ SIEĆ IT/ SIEĆ Serwery plików Acces Pointy Routery Switche Okablowanie sieciowe Mikrokomputery Akcesoria IT Inne Inne Narzędzia Narzędzia Wkrętarki Piły Wieratarki Szlifierki Wyrzynarki Poziomnice Nagrzewnice Przygotowane opakowania + Przygotuj opakowania # Nazwa opakowania Numer opakowania Magazyn Wydania Lista sprzętu zewnętrznego + Magazyn dostawców Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy # Zdjęcie Nazwa Sztuk Zamówienie Firma Data odbioru Data zwrotu Komentarz Odpowiedzialny Grupy sprzętowe Status Brak wyników. Lista sprzętu dodatkowego + Dodaj Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy # Nazwa Ilość Sekcja Waga Objętość Komentarz Grupy sprzętowe Status Brak wyników. Zarządzaj grupami",
+    "tables": [
+      {
+        "id": "not-returned-table",
+        "class": [
+          "table",
+          "table-stripped",
+          "btn-danger"
+        ],
+        "headers": [],
+        "rows": []
+      },
+      {
+        "id": "all-equipment",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "all-equipment"
+        ],
+        "headers": [
+          "",
+          "",
+          "Zdjęcie",
+          "Nazwa",
+          "Ilość",
+          "B",
+          "Pakowany",
+          "Czas pracy",
+          "Grupy sprzętowe",
+          "Komentarz",
+          "Notatka",
+          "Objętość",
+          "Waga",
+          "Status",
+          "Wydania",
+          "Miejsce",
+          "Id",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Multimedia",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "16"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Multimedia",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Akcesoria multimedia",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Ekrany LED",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Ekrany projekcyjne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Głosowanie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kamery, statywy, akcesoria",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Miksery wizyjne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Monitory",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Mównice",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Projektory",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Okablowanie multimedialne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Obiektywy",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Laptopy realizacyjne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Laptopy pomocnicze",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Media serwery do streamow",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Media serwery multimedialne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "IPADY",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kratownice / Podesty / Elementy montażowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "16"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kratownice / Podesty / Elementy montażowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Akcesoria montażowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Drabiny",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kotary",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kratownice",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Obciążenie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Podesty",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Statywy",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Zastawki",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Meble cateringowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Nagłośnienie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "16"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Nagłośnienie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Akcesoria nagłośnienie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kolumny aktywne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kolumny pasywne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Końcówki mocy",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Mikrofony przewodowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Mikrofony bezprzewodowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Miksery audio",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Symultana",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Łączność",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Okablowanie nagłośnienie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Statywy mikrofonowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Oświetlenie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "16"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Oświetlenie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Akcesoria oświetlenie",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Ruchome głowy",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Led Bary",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Sterowniki/Konsole",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Led Pary",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Naświetlacze",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Okablowanie oświetleniowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Prąd",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "16"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Prąd",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kable 230 V",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Kable Siłowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Przejściówki siłowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Rozdzielnie elektryczne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "UPS-y",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Klapki prądowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "IT/ SIEĆ",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "16"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "IT/ SIEĆ",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Serwery plików",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Acces Pointy",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Routery",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Switche",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Okablowanie sieciowe",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Mikrokomputery",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Akcesoria IT",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Inne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "16"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Inne",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Narzędzia",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "16"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Narzędzia",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Wkrętarki",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Piły",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Wieratarki",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Szlifierki",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Wyrzynarki",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Poziomnice",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Nagrzewnice",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "",
+                    "id": "",
+                    "value": "",
+                    "checked": false
+                  }
+                ],
+                "data": {
+                  "data-col-seq": "17"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed"
+        ],
+        "headers": [
+          "#",
+          "",
+          "Nazwa opakowania",
+          "Numer opakowania",
+          "Magazyn",
+          "Wydania",
+          ""
+        ],
+        "rows": []
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "outer-gear-table",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "#",
+          "Zdjęcie",
+          "Nazwa",
+          "Sztuk",
+          "Zamówienie",
+          "Firma",
+          "Data odbioru",
+          "Data zwrotu",
+          "Komentarz",
+          "Odpowiedzialny",
+          "Grupy sprzętowe",
+          "Status",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "outer-gear-table",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "#",
+          "Nazwa",
+          "Ilość",
+          "Sekcja",
+          "Waga",
+          "Objętość",
+          "Komentarz",
+          "Grupy sprzętowe",
+          "Status",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Przyjmij sprzęt",
+        "href": "/admin/incomes-warehouse/create?event=301&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Wydaj sprzęt",
+        "href": "/admin/outcomes-warehouse/create?event=301&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj grupę sprzętową",
+        "href": "/admin/event/add-packlist?id=301",
+        "data": {
+          "data-add": "1"
+        }
+      },
+      {
+        "text": "Skopiuj sprzęt z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=301&type=gear",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=301&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Packlisty",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt",
+        "href": "/admin/event/packing-list?id=301&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt ze zdjęciami",
+        "href": "/admin/event/packing-list?id=301&sort=cat&photo=1",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt - XLSX",
+        "href": "/admin/event/packing-list-xls?id=301&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Wydania / przyjęcia",
+        "href": "/admin/event/info?id=301",
+        "data": {}
+      },
+      {
+        "text": "Wydaj",
+        "href": "/admin/outcomes-warehouse/create?event=301&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przyjmij",
+        "href": "/admin/incomes-warehouse/create?event=301&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przenieś",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Przenieś z tego wydarzenia",
+        "href": "/admin/event-movement/create-start?event_from=301",
+        "data": {}
+      },
+      {
+        "text": "Przenieś na to wydarzenie",
+        "href": "/admin/event-movement/create-start?event_to=301",
+        "data": {}
+      },
+      {
+        "text": "[1] Sprzęt",
+        "href": "#gear-packlist-pane-127",
+        "data": {
+          "data-toggle": "tab"
+        }
+      },
+      {
+        "text": "Zarządzaj grupami",
+        "href": "#tabs-301-tab1",
+        "data": {
+          "data-toggle": "tab"
+        }
+      },
+      {
+        "text": "Edycja",
+        "href": "/admin/event/add-packlist?id=301&packlist_id=127",
+        "data": {
+          "data-add": "0"
+        }
+      },
+      {
+        "text": "Zablokuj",
+        "href": "/admin/event/block-packlist?id=301&packlist_id=127&type=1&scope=all",
+        "data": {}
+      },
+      {
+        "text": "Usuń",
+        "href": "/admin/event/packlist-delete?id=301&packlist_id=127",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "Znajdź sprzęt w event network",
+        "href": "/admin/cross-rental",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj sprzęt",
+        "href": "/admin/warehouse/assign?id=301&type=event&packlist=127",
+        "data": {}
+      },
+      {
+        "text": "+ Magazyn dostawców",
+        "href": "/admin/outer-warehouse/assign?id=301&type=event&packlist=127",
+        "data": {}
+      },
+      {
+        "text": "Przygotuj opakowania",
+        "href": "/admin/event/prepare-case?event=301&packlist_id=127",
+        "data": {}
+      },
+      {
+        "text": "Sortuj wg kategorii i kolejności w magazynie",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Sortuj wg kategorii i kolejności w magazynie",
+        "href": "#",
+        "data": {
+          "data-sort": "cat2"
+        }
+      },
+      {
+        "text": "Sortuj wg kategorii, podkategorii i kolejności w magazynie",
+        "href": "#",
+        "data": {
+          "data-sort": "cat"
+        }
+      },
+      {
+        "text": "Sortuj po nazwach",
+        "href": "#",
+        "data": {
+          "data-sort": "name"
+        }
+      },
+      {
+        "text": "Sortuj po miejscu",
+        "href": "#",
+        "data": {
+          "data-sort": "warehouse"
+        }
+      },
+      {
+        "text": "Sortuj po komentarzach",
+        "href": "#",
+        "data": {
+          "data-sort": "comment"
+        }
+      },
+      {
+        "text": "Packlista",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Grupa sprzętowa",
+        "href": "/admin/event/packlist-pdf?id=301&packlist_id=127&sort=cat&quantity=1",
+        "data": {}
+      },
+      {
+        "text": "Grupa sprzętowa ze zdjęciami",
+        "href": "/admin/event/packlist-pdf?id=301&packlist_id=127&sort=cat&photo=1&quantity=1",
+        "data": {}
+      },
+      {
+        "text": "Grupa sprzętowa - XLS",
+        "href": "/admin/event/packing-list-xls?id=301&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "+ Przygotuj opakowania",
+        "href": "/admin/event/prepare-case?event=301&packlist_id=127",
+        "data": {}
+      },
+      {
+        "text": "+ Magazyn dostawców",
+        "href": "/admin/outer-warehouse/assign?id=301&type=event&packlist=127",
+        "data": {}
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/gear-tab?id=301&_tog7d9f21c8=page&_togba7bd636=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "+ Dodaj",
+        "href": "/admin/event-extra-item/create?event_id=301&packlist_id=127",
+        "data": {}
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/gear-tab?id=301&_tog7d9f21c8=all&_togba7bd636=page",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      }
+    ]
+  },
+  "gear_items": [],
+  "external_gear": {
+    "need": {
+      "found": true,
+      "text": "Zapotrzebowanie na sprzęt zewnętrzny Magazyn dostawców Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy # Zdjęcie Nazwa Sztuk Grupa sprzętowa Zarezerwowane Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-condensed",
+            "kv-table-wrap",
+            "table-bordered",
+            "table-striped"
+          ],
+          "headers": [
+            "#",
+            "Zdjęcie",
+            "Nazwa",
+            "Sztuk",
+            "Grupa sprzętowa",
+            "Zarezerwowane",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Magazyn dostawców",
+          "href": "/admin/outer-warehouse/assign?id=301&type=event",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=301&_togb047f92b=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "reserved_at_supplier": {
+      "found": true,
+      "text": "× Zarządzaj sprzętem zewn. Sprzęt zarezerwowany u wypożyczającego Stwórz zamówienie Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Nazwa Sekcja Firma Zarezerwowane Data odbioru Data zwrotu Packlisty Uwagi Odpowiedzialny Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-bordered",
+            "table-striped",
+            "kv-table-wrap"
+          ],
+          "headers": [
+            "",
+            "Nazwa",
+            "Sekcja",
+            "Firma",
+            "Zarezerwowane",
+            "Data odbioru",
+            "Data zwrotu",
+            "Packlisty",
+            "Uwagi",
+            "Odpowiedzialny",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Stwórz zamówienie",
+          "href": "#",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=301&_tog67e4b9e4=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "text": {
+      "need": "",
+      "reserved_at_supplier": ""
+    }
+  },
+  "attachments_section": {
+    "found": true,
+    "text": "Dodaj Usuń zaznaczone Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa pliku Typ Dodał Komentarz Brak wyników. Pliki z czatu Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Podgląd Nazwa pliku Użytkownik Data Brak wyników. ‹ › ×",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa pliku",
+          "Typ",
+          "Dodał",
+          "Komentarz",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Podgląd",
+          "Nazwa pliku",
+          "Użytkownik",
+          "Data"
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj",
+        "href": "/admin/attachment/create?eventId=301",
+        "data": {}
+      },
+      {
+        "text": "Usuń zaznaczone",
+        "href": "/admin/attachment/delete-more?eventId=301",
+        "data": {}
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=301&_tog3e047f3f=page&_toga05895fd=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=301&_tog3e047f3f=all&_toga05895fd=page",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "Data",
+        "href": "/admin/event/view?id=301&_tog3e047f3f=all&_toga05895fd=all&dp-5-sort=create_time",
+        "data": {
+          "data-sort": "create_time"
+        }
+      }
+    ]
+  },
+  "attachments": [],
+  "offers": {
+    "found": true,
+    "text": "Stwórz nową Stwórz ofertę na podstawie wydarzenia Importuj z ofert Zarezerwuj sprzęt z oferty na wydarzenie Duplikuj Nazwa Projektu Data sporządzenia ofery Przygotował Status Multimedia Nagłośnienie Transport Obsługa Inne Suma EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026 2026-08-14 Piechnik Piotr Nowa 3 804,00 zł 720,00 zł 250,00 zł 5 200,00 zł 0,00 zł 9 974,00 zł",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Duplikuj",
+          "Nazwa Projektu",
+          "Data sporządzenia ofery",
+          "Przygotował",
+          "Status",
+          "Multimedia",
+          "Nagłośnienie",
+          "Transport",
+          "Obsługa",
+          "Inne",
+          "Suma",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "174",
+            "cells": [
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/duplicate?id=174",
+                    "data": {
+                      "data-offer-id": "174",
+                      "data-offer-event-id": "301",
+                      "data-offer-event-name": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "0"
+                }
+              },
+              {
+                "text": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026",
+                "links": [
+                  {
+                    "text": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026",
+                    "href": "/admin/offer/default/view?id=174",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "2026-08-14",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Piechnik Piotr",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Nowa",
+                "links": [
+                  {
+                    "text": "Nowa",
+                    "href": "#",
+                    "data": {
+                      "data-offerid": "174",
+                      "data-status": "8"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "3 804,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "720,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "6"
+                }
+              },
+              {
+                "text": "250,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "7"
+                }
+              },
+              {
+                "text": "5 200,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "8"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "9"
+                }
+              },
+              {
+                "text": "9 974,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "10"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/offer-event?event_id=301",
+                    "data": {
+                      "data-id": "174"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "11"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Stwórz nową",
+        "href": "/admin/offer/default/create?event_id=301",
+        "data": {}
+      },
+      {
+        "text": "Stwórz ofertę na podstawie wydarzenia",
+        "href": "/admin/offer/default/create-from-event?event_id=301",
+        "data": {}
+      },
+      {
+        "text": "Importuj z ofert",
+        "href": "/admin/offer/default/assign-to-event?event_id=301",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=301",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/duplicate?id=174",
+        "data": {
+          "data-offer-id": "174",
+          "data-offer-event-id": "301",
+          "data-offer-event-name": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026"
+        }
+      },
+      {
+        "text": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026",
+        "href": "/admin/offer/default/view?id=174",
+        "data": {}
+      },
+      {
+        "text": "Nowa",
+        "href": "#",
+        "data": {
+          "data-offerid": "174",
+          "data-status": "8"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/offer-event?event_id=301",
+        "data": {
+          "data-id": "174"
+        }
+      }
+    ]
+  },
+  "offer_pdfs": [
+    {
+      "offer_id": "174",
+      "name": "EQSM/VI Spotkania z RODO/Hotel Lechicka Poznań/2026",
+      "date": "2026-08-14",
+      "prepared_by": "Piechnik Piotr",
+      "status": "Nowa",
+      "total": "",
+      "view_url": "https://pixel.newsystems.pl/admin/offer/default/view?id=174",
+      "saved_as": "offer_174_EQSM_VI Spotkania z RODO_Hotel Lechicka Poznań_2026.pdf",
+      "bytes": 62481,
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "crew": {
+    "found": true,
+    "text": "Dodaj ekipę Dodaj zapotrzebowanie Wyślij powiadomienia do ekipy teraz Automatyczne powiadomienia Skopiuj ekipę z innego wydarzenia Dodaj etap harmonogramu Szybkie dodawanie: wybierz pracownika Zaznacz wszystkie Odznacz wszystkie Zobacz jak działa planowanie Video × Dodaj komentarz Dodaj komentarz Zapisz Montaż Od: 2026.11.24 08:00 Do: 2026-11-24 - 23:00 Zapotrzebowanie: 0 os. Dodanych: 0 os. Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Chat Wiadomość Event Od: 2026.11.25 08:00 Do: 2026-11-26 - 23:00 Zapotrzebowanie: 0 os. Dodanych: 0 os. Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Chat Wiadomość Demontaż Od: 2026.11.26 08:00 Do: 2026-11-26 - 23:00 Zapotrzebowanie: 0 os. Dodanych: 0 os. Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Chat Wiadomość Zaznacz wszystkie Odznacz wszystkie Widok bez podziału na etapy Widok z podziałem na etapy Dodaj komentarz Dodaj komentarz Zapisz Exportuj Dodaj/Edytuj pracowników spoza systemu # Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy × Dodaj komentarz komentarz Zamknij Zapisz Zaznaczonych: 0 X Zapisz Rozpocznij chat Wyślij wiadomość Exportuj Kal. dostępności Planuj Usuń zaznaczone",
+    "tables": [
+      {
+        "id": "tablehistories",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "#",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj ekipę",
+        "href": "/admin/crew/manage-ajax?id=301",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=301",
+        "data": {}
+      },
+      {
+        "text": "Wyślij powiadomienia do ekipy teraz",
+        "href": "/admin/site/send-reminders-event?id=301",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj ekipę z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=301&type=crew",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap harmonogramu",
+        "href": "/admin/event/add-schedule?id=301",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=301",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/crew/copy-event-role?id=301&schedule=Monta%C5%BC",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/manage-ajax?id=301&role_id=&schedule=Monta%C5%BC",
+        "data": {
+          "data-role-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=301",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/crew/copy-event-role?id=301&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/manage-ajax?id=301&role_id=&schedule=Event",
+        "data": {
+          "data-role-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=301",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/crew/copy-event-role?id=301&schedule=Demonta%C5%BC",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/manage-ajax?id=301&role_id=&schedule=Demonta%C5%BC",
+        "data": {
+          "data-role-id": "",
+          "data-time_type": "1"
+        }
+      }
+    ]
+  },
+  "fleet": {
+    "found": true,
+    "text": "Dodaj flotę Dodaj zapotrzebowanie Dodaj zgłoszenie serwisowe do floty Szybkie dodawanie: wybierz pojazd Ford Transit/VisualRent PO 3CR29 Ford Transit/VisualRent PY 8597G Kia Ceed MAN TGE CZERWONY MAN TGE NIEBIESKI Peugeot Expert PO 9HJ93 Renault Master Najnowszy Renault Master Nowy Renault Master Stary Renault Master/Visual Rent WE 2AY13 Renault Trafic III Volkswagen Caddy Zobacz jak zgłosić usterkę Zobacz jak planować flotę Video × Dodaj komentarz Dodaj komentarz Zapisz Montaż OD: 2026.11.24, 08:00 DO: 2026.11.24, 23:00 Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Transport osobowy: Zapotrzebowanie 0 os. Dodanych 0 os. Event OD: 2026.11.25, 08:00 DO: 2026.11.26, 23:00 Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Transport osobowy: Zapotrzebowanie 0 os. Dodanych 0 os. Demontaż OD: 2026.11.26, 08:00 DO: 2026.11.26, 23:00 Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Transport osobowy: Zapotrzebowanie 0 os. Dodanych 0 os. Dodaj komentarz Dodaj komentarz Zapisz Exportuj Usuń Wyświetl wszystko Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa Numer rejestracyjny Ładowność Pojemność Data przeglądu OC ważne do Czas pracy Brak wyników.",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa",
+          "Numer rejestracyjny",
+          "Ładowność",
+          "Pojemność",
+          "Data przeglądu",
+          "OC ważne do",
+          "Czas pracy",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj flotę",
+        "href": "/admin/vehicle/manage-ajax?id=301",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=301",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zgłoszenie serwisowe do floty",
+        "href": "/admin/vehicle/notes",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=301",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/vehicle/copy-event-vehicle?id=301&schedule=Monta%C5%BC",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/vehicle/manage-ajax?id=301&vehicle_id=&schedule=Monta%C5%BC",
+        "data": {
+          "data-vehicle-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=301",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/vehicle/copy-event-vehicle?id=301&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/vehicle/manage-ajax?id=301&vehicle_id=&schedule=Event",
+        "data": {
+          "data-vehicle-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=301",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/vehicle/copy-event-vehicle?id=301&schedule=Demonta%C5%BC",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/vehicle/manage-ajax?id=301&vehicle_id=&schedule=Demonta%C5%BC",
+        "data": {
+          "data-vehicle-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Exportuj",
+        "href": "/admin/vehicle/excel?id=301",
+        "data": {}
+      },
+      {
+        "text": "Wyświetl wszystko",
+        "href": "/admin/event/vehicle-tab?id=301&_tog5be4c740=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      }
+    ]
+  }
+}

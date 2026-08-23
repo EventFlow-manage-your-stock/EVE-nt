@@ -1,0 +1,51 @@
+{
+  "schema_source": "https://github.com/EventFlow-manage-your-stock/EventFlow_v2/blob/main/apps/api/prisma/schema.prisma",
+  "exporter_version": "2.0-PRISMA",
+  "import_order": [
+    "Kategoria",
+    "Magazyn",
+    "ModelSprzetu",
+    "Egzemplarz",
+    "CaseToEgzemplarz"
+  ],
+  "sheets": {
+    "01_Kategorie": {
+      "target": "Kategoria",
+      "key": "__import_key",
+      "parent_key": "__id_rodzica_import_key"
+    },
+    "02_Magazyny": {
+      "target": "Magazyn",
+      "key": "__import_key"
+    },
+    "03_Modele": {
+      "target": "ModelSprzetu",
+      "key": "__import_key",
+      "category_key": "__id_kategorii_import_key"
+    },
+    "04_Egzemplarze": {
+      "target": "Egzemplarz",
+      "key": "__import_key",
+      "model_key": "__id_modelu_import_key",
+      "warehouse_key": "__id_magazynu_import_key",
+      "case_key": "__id_case_import_key"
+    },
+    "05_Relacje_Case": {
+      "target": "Egzemplarz.id_case",
+      "item_key": "egzemplarz_import_key",
+      "case_key": "case_import_key"
+    },
+    "06_Mapowanie_NEW": {
+      "target": "techniczne"
+    },
+    "07_Zdjecia": {
+      "target": "ModelSprzetu.zdjecie"
+    }
+  },
+  "notes": {
+    "id_organizacji": "Puste w XLSX; importer ma wstawić ID organizacji docelowej.",
+    "foreign_keys": "Kolumny id_* pozostają puste. Importer rozwiązuje je przez kolumny __*_import_key po utworzeniu rekordów nadrzędnych.",
+    "quantity_models": "Dla tryb_ewidencji=ilosciowe stan trafia do ModelSprzetu.ilosc_magazynowa i nie tworzymy fikcyjnych egzemplarzy.",
+    "cases": "CASE/RACK z NEW są mapowane na ModelSprzetu.typ_sprzetu=opakowanie oraz fizyczne Egzemplarze; zawartość używa Egzemplarz.id_case."
+  }
+}

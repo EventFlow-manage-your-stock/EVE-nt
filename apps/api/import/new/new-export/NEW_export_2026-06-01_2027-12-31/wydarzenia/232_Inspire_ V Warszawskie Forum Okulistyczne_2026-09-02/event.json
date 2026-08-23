@@ -1,0 +1,1953 @@
+{
+  "complete": true,
+  "exporter_version": "4.0-FINAL",
+  "scraped_at": "2026-08-15 21:44:27",
+  "source": {
+    "base_url": "https://pixel.newsystems.pl",
+    "event_url": "https://pixel.newsystems.pl/admin/event/view?id=232",
+    "internal_id": "232"
+  },
+  "list": {
+    "internal_id": "232",
+    "list_no": "",
+    "event_name_list": "Inspire/ V Warszawskie Forum Okulistyczne [E2026/06/88]",
+    "event_name": "Inspire/ V Warszawskie Forum Okulistyczne",
+    "event_code": "E2026/06/88",
+    "accounting": "",
+    "status": "Inspire/ V Warszawskie Forum Okulistyczne [E2026/06/88]",
+    "client": "43",
+    "customer_id": "182",
+    "event_manager": "Notatka Duplikuj",
+    "start": "",
+    "end": "",
+    "accounting_date": "Antoni Pazder",
+    "created_at": "02.09.2026, 17:00 05.09.2026, 23:59",
+    "detail_url": "https://pixel.newsystems.pl/admin/event/view?id=232"
+  },
+  "summary": {
+    "internal_id": "232",
+    "name": "Inspire/ V Warszawskie Forum Okulistyczne",
+    "event_code": "E2026/06/88",
+    "type": "Konferencja/event do 3 techników",
+    "location": "",
+    "accounting": "Nie zafakturowane",
+    "status": "Potwierdzone",
+    "client": "INSPIRECONGRESS SPOŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ",
+    "client_nip": "8982122587",
+    "event_manager": "Antoni Pazder",
+    "start": "2026-09-02 17:00:00",
+    "end": "2026-09-05 23:59:00",
+    "description": "",
+    "details": "",
+    "custom_fields": {
+      "Nocleg": ""
+    },
+    "schedule": [
+      {
+        "id": "5232",
+        "name": "Montaż",
+        "start": "2026-09-02 17:00:00",
+        "end": "2026-09-02 17:00:00"
+      },
+      {
+        "id": "430",
+        "name": "Event",
+        "start": "2026-09-03 00:00:00",
+        "end": "2026-09-05 23:59:00"
+      }
+    ],
+    "location_id": "",
+    "location_venue": "",
+    "location_city": "",
+    "location_address": "",
+    "type_source_field": "Event[type]"
+  },
+  "schedule": [
+    {
+      "id": "5232",
+      "name": "Montaż",
+      "start": "2026-09-02 17:00:00",
+      "end": "2026-09-02 17:00:00"
+    },
+    {
+      "id": "430",
+      "name": "Event",
+      "start": "2026-09-03 00:00:00",
+      "end": "2026-09-05 23:59:00"
+    }
+  ],
+  "details": {
+    "found": true,
+    "text": "× Edytuj harmonogram Dodaj notatkę Opis Szczegóły Zapisz Nocleg Kalendarz Dodaj etap Montaż 2026-09-02 17:00 - 17:00 Event 2026-09-03 - 2026-09-05 00:00 - 23:59",
+    "tables": [],
+    "links": [
+      {
+        "text": "Dodaj notatkę",
+        "href": "/admin/customer-note/create?customer_id=182&event_id=232",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap",
+        "href": "/admin/event/add-schedule?id=232",
+        "data": {}
+      }
+    ]
+  },
+  "gear": {
+    "found": true,
+    "text": "× Przyjmij sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Przyjmij sprzęt × Wydaj sprzęt Wybierz grupy sprzętowe, z których chcesz przyjąć sprzęt: Magazyn, z którego wydajemy: MAGAZYN POZNAŃ MAGAZYN KATOWICE Wydaj sprzęt × Kopiuj sprzęt z innego wydarzenia × Przenieś sprzęt × Brak sprzętu × Konflikty do rozwiązania × × Edycja × Notatki + Dodaj + Dodaj grupę sprzętową Skopiuj sprzęt z innego wydarzenia Zarezerwuj sprzęt z oferty na wydarzenie Packlisty Cały sprzęt Cały sprzęt ze zdjęciami Cały sprzęt - XLSX Wydania / przyjęcia Wydaj Przyjmij Przenieś Przenieś z tego wydarzenia Przenieś na to wydarzenie Niezwrócony sprzęt: Numery: Zarządzaj grupami Zarządzaj grupami",
+    "tables": [
+      {
+        "id": "not-returned-table",
+        "class": [
+          "table",
+          "table-stripped",
+          "btn-danger"
+        ],
+        "headers": [],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Przyjmij sprzęt",
+        "href": "/admin/incomes-warehouse/create?event=232&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Wydaj sprzęt",
+        "href": "/admin/outcomes-warehouse/create?event=232&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "+ Dodaj grupę sprzętową",
+        "href": "/admin/event/add-packlist?id=232",
+        "data": {
+          "data-add": "1"
+        }
+      },
+      {
+        "text": "Skopiuj sprzęt z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=232&type=gear",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=232&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Packlisty",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt",
+        "href": "/admin/event/packing-list?id=232&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt ze zdjęciami",
+        "href": "/admin/event/packing-list?id=232&sort=cat&photo=1",
+        "data": {}
+      },
+      {
+        "text": "Cały sprzęt - XLSX",
+        "href": "/admin/event/packing-list-xls?id=232&sort=cat",
+        "data": {}
+      },
+      {
+        "text": "Wydania / przyjęcia",
+        "href": "/admin/event/info?id=232",
+        "data": {}
+      },
+      {
+        "text": "Wydaj",
+        "href": "/admin/outcomes-warehouse/create?event=232&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przyjmij",
+        "href": "/admin/incomes-warehouse/create?event=232&onlyEvent=1",
+        "data": {}
+      },
+      {
+        "text": "Przenieś",
+        "href": "#",
+        "data": {}
+      },
+      {
+        "text": "Przenieś z tego wydarzenia",
+        "href": "/admin/event-movement/create-start?event_from=232",
+        "data": {}
+      },
+      {
+        "text": "Przenieś na to wydarzenie",
+        "href": "/admin/event-movement/create-start?event_to=232",
+        "data": {}
+      },
+      {
+        "text": "Zarządzaj grupami",
+        "href": "#tabs-232-tab0",
+        "data": {
+          "data-toggle": "tab"
+        }
+      }
+    ]
+  },
+  "gear_items": [],
+  "external_gear": {
+    "need": {
+      "found": true,
+      "text": "Zapotrzebowanie na sprzęt zewnętrzny Magazyn dostawców Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy # Zdjęcie Nazwa Sztuk Grupa sprzętowa Zarezerwowane Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-condensed",
+            "kv-table-wrap",
+            "table-bordered",
+            "table-striped"
+          ],
+          "headers": [
+            "#",
+            "Zdjęcie",
+            "Nazwa",
+            "Sztuk",
+            "Grupa sprzętowa",
+            "Zarezerwowane",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Magazyn dostawców",
+          "href": "/admin/outer-warehouse/assign?id=232&type=event",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=232&_togb047f92b=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "reserved_at_supplier": {
+      "found": true,
+      "text": "× Zarządzaj sprzętem zewn. Sprzęt zarezerwowany u wypożyczającego Stwórz zamówienie Szybkie dodawanie: wybierz sprzęt dd Przedłużacz na bębnie 50m Ekran LED Absen NT 1.9 V2 Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Nazwa Sekcja Firma Zarezerwowane Data odbioru Data zwrotu Packlisty Uwagi Odpowiedzialny Brak wyników.",
+      "tables": [
+        {
+          "id": "",
+          "class": [
+            "kv-grid-table",
+            "table",
+            "table-bordered",
+            "table-striped",
+            "kv-table-wrap"
+          ],
+          "headers": [
+            "",
+            "Nazwa",
+            "Sekcja",
+            "Firma",
+            "Zarezerwowane",
+            "Data odbioru",
+            "Data zwrotu",
+            "Packlisty",
+            "Uwagi",
+            "Odpowiedzialny",
+            ""
+          ],
+          "rows": [
+            {
+              "data_key": "",
+              "cells": [
+                {
+                  "text": "Brak wyników.",
+                  "links": [],
+                  "controls": [],
+                  "data": {}
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "text": "Stwórz zamówienie",
+          "href": "#",
+          "data": {}
+        },
+        {
+          "text": "Z podziałem na strony",
+          "href": "/admin/event/view?id=232&_tog67e4b9e4=page",
+          "data": {}
+        },
+        {
+          "text": "Excel",
+          "href": "#",
+          "data": {
+            "data-mime": "application/vnd.ms-excel",
+            "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "CSV",
+          "href": "#",
+          "data": {
+            "data-mime": "application/csv",
+            "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        },
+        {
+          "text": "HTML",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+          }
+        },
+        {
+          "text": "Plik tekstowy",
+          "href": "#",
+          "data": {
+            "data-mime": "text/plain",
+            "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+            "data-hash-export-config": "1",
+            "data-css-styles": "[]"
+          }
+        }
+      ]
+    },
+    "text": {
+      "need": "",
+      "reserved_at_supplier": ""
+    }
+  },
+  "attachments_section": {
+    "found": true,
+    "text": "Dodaj Usuń zaznaczone Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa pliku Typ Dodał Komentarz kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf Plik Michał Strykowski 2026-07-06 14:56:32 Edytuj kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf Plik Michał Strykowski 2026-07-06 14:56:37 Edytuj kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf Plik Michał Strykowski 2026-07-06 14:56:37 Edytuj wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf Plik Michał Strykowski 2026-07-06 14:56:37 Edytuj Pliki z czatu Z podziałem na strony Eksport widocznych danych Excel CSV HTML Plik tekstowy Podgląd Nazwa pliku Użytkownik Data Brak wyników. ‹ › ×",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa pliku",
+          "Typ",
+          "Dodał",
+          "Komentarz",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "18",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "18",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+                "links": [
+                  {
+                    "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+                    "data": {
+                      "data-model": "18"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-06 14:56:32",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=18",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=18",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=18",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=18",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "19",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "19",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+                "links": [
+                  {
+                    "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+                    "data": {
+                      "data-model": "19"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-06 14:56:37",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=19",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=19",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=19",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=19",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "20",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "20",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+                "links": [
+                  {
+                    "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+                    "data": {
+                      "data-model": "20"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-06 14:56:37",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=20",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=20",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=20",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=20",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "21",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "",
+                    "value": "21",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+                "links": [
+                  {
+                    "text": "wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+                    "href": "/uploads/attachment/wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+                    "data": {
+                      "data-model": "21"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Plik",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Michał Strykowski 2026-07-06 14:56:37",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "Edytuj",
+                "links": [
+                  {
+                    "text": "Edytuj",
+                    "href": "/admin/attachment/save-info?id=21",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/uploads/attachment/wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/download?id=21",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/update?id=21",
+                    "data": {}
+                  },
+                  {
+                    "text": "",
+                    "href": "/admin/attachment/delete?id=21",
+                    "data": {
+                      "data-confirm": "Na pewno chcesz usunąć?",
+                      "data-method": "post"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Podgląd",
+          "Nazwa pliku",
+          "Użytkownik",
+          "Data"
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj",
+        "href": "/admin/attachment/create?eventId=232",
+        "data": {}
+      },
+      {
+        "text": "Usuń zaznaczone",
+        "href": "/admin/attachment/delete-more?eventId=232",
+        "data": {}
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=232&_tog3e047f3f=page&_toga05895fd=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+        "data": {}
+      },
+      {
+        "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+        "data": {
+          "data-model": "18"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=18",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=18",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=18",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=18",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+        "data": {}
+      },
+      {
+        "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+        "data": {
+          "data-model": "19"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=19",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=19",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=19",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=19",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+        "data": {}
+      },
+      {
+        "text": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+        "data": {
+          "data-model": "20"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=20",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=20",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=20",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=20",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+        "data": {}
+      },
+      {
+        "text": "wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+        "href": "/uploads/attachment/wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+        "data": {
+          "data-model": "21"
+        }
+      },
+      {
+        "text": "Edytuj",
+        "href": "/admin/attachment/save-info?id=21",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/uploads/attachment/wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/download?id=21",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/update?id=21",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/attachment/delete?id=21",
+        "data": {
+          "data-confirm": "Na pewno chcesz usunąć?",
+          "data-method": "post"
+        }
+      },
+      {
+        "text": "Z podziałem na strony",
+        "href": "/admin/event/view?id=232&_tog3e047f3f=all&_toga05895fd=page",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "Data",
+        "href": "/admin/event/view?id=232&_tog3e047f3f=all&_toga05895fd=all&dp-5-sort=create_time",
+        "data": {
+          "data-sort": "create_time"
+        }
+      }
+    ]
+  },
+  "attachments": [
+    {
+      "attachment_id": "18",
+      "filename": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=18",
+      "source": "attachment_download",
+      "saved_as": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led.pdf",
+      "bytes": 902025,
+      "ok": true
+    },
+    {
+      "attachment_id": "19",
+      "filename": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=19",
+      "source": "attachment_download",
+      "saved_as": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r_ekran_led-1.pdf",
+      "bytes": 902028,
+      "ok": true
+    },
+    {
+      "attachment_id": "20",
+      "filename": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=20",
+      "source": "attachment_download",
+      "saved_as": "kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_3_5_wrzesnia_2026r.pdf",
+      "bytes": 899964,
+      "ok": true
+    },
+    {
+      "attachment_id": "21",
+      "filename": "wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+      "url": "https://pixel.newsystems.pl/admin/attachment/download?id=21",
+      "source": "attachment_download",
+      "saved_as": "wstepny_kosztorys_obslugi_technicznej_v_warszawskie_forum_okulistyczne_4_5_wrzesnia_2026r.pdf",
+      "bytes": 903284,
+      "ok": true
+    }
+  ],
+  "offers": {
+    "found": true,
+    "text": "Stwórz nową Stwórz ofertę na podstawie wydarzenia Importuj z ofert Zarezerwuj sprzęt z oferty na wydarzenie Duplikuj Nazwa Projektu Data sporządzenia ofery Przygotował Status Kratownice / Podesty / Elementy montażowe Transport Obsługa Inne Suma Inspire/ V Warszawskie Forum Okulistyczne 2026-07-15 06:45:32 Pazder Antoni Nowa 6 150,00 zł 1 200,00 zł 3 200,00 zł 0,00 zł 10 550,00 zł",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "Duplikuj",
+          "Nazwa Projektu",
+          "Data sporządzenia ofery",
+          "Przygotował",
+          "Status",
+          "Kratownice / Podesty / Elementy montażowe",
+          "Transport",
+          "Obsługa",
+          "Inne",
+          "Suma",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "93",
+            "cells": [
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/duplicate?id=93",
+                    "data": {
+                      "data-offer-id": "93",
+                      "data-offer-event-id": "232",
+                      "data-offer-event-name": "Inspire/ V Warszawskie Forum Okulistyczne"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "0"
+                }
+              },
+              {
+                "text": "Inspire/ V Warszawskie Forum Okulistyczne",
+                "links": [
+                  {
+                    "text": "Inspire/ V Warszawskie Forum Okulistyczne",
+                    "href": "/admin/offer/default/view?id=93",
+                    "data": {}
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "1"
+                }
+              },
+              {
+                "text": "2026-07-15 06:45:32",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "2"
+                }
+              },
+              {
+                "text": "Pazder Antoni",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "3"
+                }
+              },
+              {
+                "text": "Nowa",
+                "links": [
+                  {
+                    "text": "Nowa",
+                    "href": "#",
+                    "data": {
+                      "data-offerid": "93",
+                      "data-status": "8"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "4"
+                }
+              },
+              {
+                "text": "6 150,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "5"
+                }
+              },
+              {
+                "text": "1 200,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "6"
+                }
+              },
+              {
+                "text": "3 200,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "7"
+                }
+              },
+              {
+                "text": "0,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "8"
+                }
+              },
+              {
+                "text": "10 550,00 zł",
+                "links": [],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "9"
+                }
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/offer/default/offer-event?event_id=232",
+                    "data": {
+                      "data-id": "93"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {
+                  "data-col-seq": "10"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Stwórz nową",
+        "href": "/admin/offer/default/create?event_id=232",
+        "data": {}
+      },
+      {
+        "text": "Stwórz ofertę na podstawie wydarzenia",
+        "href": "/admin/offer/default/create-from-event?event_id=232",
+        "data": {}
+      },
+      {
+        "text": "Importuj z ofert",
+        "href": "/admin/offer/default/assign-to-event?event_id=232",
+        "data": {}
+      },
+      {
+        "text": "Zarezerwuj sprzęt z oferty na wydarzenie",
+        "href": "/admin/warehouse/assign-gear-item-to-offer?event_id=232",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/duplicate?id=93",
+        "data": {
+          "data-offer-id": "93",
+          "data-offer-event-id": "232",
+          "data-offer-event-name": "Inspire/ V Warszawskie Forum Okulistyczne"
+        }
+      },
+      {
+        "text": "Inspire/ V Warszawskie Forum Okulistyczne",
+        "href": "/admin/offer/default/view?id=93",
+        "data": {}
+      },
+      {
+        "text": "Nowa",
+        "href": "#",
+        "data": {
+          "data-offerid": "93",
+          "data-status": "8"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/offer/default/offer-event?event_id=232",
+        "data": {
+          "data-id": "93"
+        }
+      }
+    ]
+  },
+  "offer_pdfs": [
+    {
+      "offer_id": "93",
+      "name": "Inspire/ V Warszawskie Forum Okulistyczne",
+      "date": "2026-07-15 06:45:32",
+      "prepared_by": "Pazder Antoni",
+      "status": "Nowa",
+      "total": "",
+      "view_url": "https://pixel.newsystems.pl/admin/offer/default/view?id=93",
+      "saved_as": "offer_93_Inspire_ V Warszawskie Forum Okulistyczne.pdf",
+      "bytes": 61570,
+      "ok": true,
+      "error": ""
+    }
+  ],
+  "crew": {
+    "found": true,
+    "text": "Dodaj ekipę Dodaj zapotrzebowanie Wyślij powiadomienia do ekipy teraz Automatyczne powiadomienia Skopiuj ekipę z innego wydarzenia Dodaj etap harmonogramu Szybkie dodawanie: wybierz pracownika Zaznacz wszystkie Odznacz wszystkie Tomasz Kowalski Krzysztof Marczak Jakub Studziński Zobacz jak działa planowanie Video × Dodaj komentarz Dodaj komentarz Zaznacz wszystkie Odznacz wszystkie Tomasz Kowalski Krzysztof Marczak Jakub Studziński Zapisz Montaż Od: 2026.09.02 17:00 Do: 2026-09-02 - 17:00 Zapotrzebowanie: 0 os. Dodanych: 0 os. Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Chat Wiadomość Event Od: 2026.09.03 00:00 Do: 2026-09-05 - 23:59 Zapotrzebowanie: 0 os. Dodanych: 0 os. Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Chat Wiadomość Zaznacz wszystkie Odznacz wszystkie Tomasz Kowalski Krzysztof Marczak Jakub Studziński Widok bez podziału na etapy Widok z podziałem na etapy Dodaj komentarz Dodaj komentarz Zapisz Exportuj Dodaj/Edytuj pracowników spoza systemu # Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy 1 Kowalski Tomasz 730608345 tomasz@pixelmultimedia.pl 2 Marczak Krzysztof ‭+48 609 251 600‬ krzysztof.marczak@pixelmultimedia.pl 3 Studziński Jakub 733608345 jakub@pixelmultimedia.pl Nazwisko Imię Telefon Adres e-mail Rola na evencie Czas pracy × Dodaj komentarz komentarz Zamknij Zapisz Zaznaczonych: 0 X Zapisz Rozpocznij chat Wyślij wiadomość Exportuj Kal. dostępności Planuj Usuń zaznaczone",
+    "tables": [
+      {
+        "id": "tablehistories",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "#",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "user-id-22",
+                    "value": "22",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "1",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "Kowalski",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "Tomasz",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "730608345",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "tomasz@pixelmultimedia.pl",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/crew/assign-user?id=232",
+                    "data": {
+                      "data-itemid": "22",
+                      "data-add": "0"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "user-id-20",
+                    "value": "20",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "2",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "Marczak",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "Krzysztof",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "‭+48 609 251 600‬",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "krzysztof.marczak@pixelmultimedia.pl",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/crew/assign-user?id=232",
+                    "data": {
+                      "data-itemid": "20",
+                      "data-add": "0"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "",
+                "links": [],
+                "controls": [
+                  {
+                    "tag": "input",
+                    "name": "selection[]",
+                    "id": "user-id-21",
+                    "value": "21",
+                    "checked": false
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "text": "3",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "Studziński",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "Jakub",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "733608345",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "jakub@pixelmultimedia.pl",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [],
+                "controls": [],
+                "data": {}
+              },
+              {
+                "text": "",
+                "links": [
+                  {
+                    "text": "",
+                    "href": "/admin/crew/assign-user?id=232",
+                    "data": {
+                      "data-itemid": "21",
+                      "data-add": "0"
+                    }
+                  }
+                ],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-striped",
+          "sort-user"
+        ],
+        "headers": [
+          "",
+          "",
+          "",
+          "Nazwisko",
+          "Imię",
+          "Telefon",
+          "Adres e-mail",
+          "Rola na evencie",
+          "Czas pracy",
+          ""
+        ],
+        "rows": []
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj ekipę",
+        "href": "/admin/crew/manage-ajax?id=232",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=232",
+        "data": {}
+      },
+      {
+        "text": "Wyślij powiadomienia do ekipy teraz",
+        "href": "/admin/site/send-reminders-event?id=232",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj ekipę z innego wydarzenia",
+        "href": "/admin/event/copy-from?id=232&type=crew",
+        "data": {}
+      },
+      {
+        "text": "Dodaj etap harmonogramu",
+        "href": "/admin/event/add-schedule?id=232",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=232",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/crew/copy-event-role?id=232&schedule=Monta%C5%BC",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/manage-ajax?id=232&role_id=&schedule=Monta%C5%BC",
+        "data": {
+          "data-role-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-crew-offer-modal?id=232",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/crew/copy-event-role?id=232&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/manage-ajax?id=232&role_id=&schedule=Event",
+        "data": {
+          "data-role-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/assign-user?id=232",
+        "data": {
+          "data-itemid": "22",
+          "data-add": "0"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/assign-user?id=232",
+        "data": {
+          "data-itemid": "20",
+          "data-add": "0"
+        }
+      },
+      {
+        "text": "",
+        "href": "/admin/crew/assign-user?id=232",
+        "data": {
+          "data-itemid": "21",
+          "data-add": "0"
+        }
+      }
+    ]
+  },
+  "fleet": {
+    "found": true,
+    "text": "Dodaj flotę Dodaj zapotrzebowanie Dodaj zgłoszenie serwisowe do floty Szybkie dodawanie: wybierz pojazd Ford Transit/VisualRent PO 3CR29 Ford Transit/VisualRent PY 8597G Kia Ceed MAN TGE CZERWONY MAN TGE NIEBIESKI Peugeot Expert PO 9HJ93 Renault Master Najnowszy Renault Master Nowy Renault Master Stary Renault Master/Visual Rent WE 2AY13 Renault Trafic III Volkswagen Caddy Zobacz jak zgłosić usterkę Zobacz jak planować flotę Video × Dodaj komentarz Dodaj komentarz Zapisz Montaż OD: 2026.09.02, 17:00 DO: 2026.09.02, 17:00 Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Transport osobowy: Zapotrzebowanie 0 os. Dodanych 0 os. Event OD: 2026.09.03, 00:00 DO: 2026.09.05, 23:59 Dodaj zapotrzebowanie Skopiuj zapotrzebowanie Transport osobowy: Zapotrzebowanie 0 os. Dodanych 0 os. Dodaj komentarz Dodaj komentarz Zapisz Exportuj Usuń Wyświetl wszystko Eksport widocznych danych Excel CSV HTML Plik tekstowy Zdjęcie Nazwa Numer rejestracyjny Ładowność Pojemność Data przeglądu OC ważne do Czas pracy Brak wyników.",
+    "tables": [
+      {
+        "id": "",
+        "class": [
+          "kv-grid-table",
+          "table",
+          "table-condensed",
+          "kv-table-wrap",
+          "table-bordered",
+          "table-striped"
+        ],
+        "headers": [
+          "",
+          "Zdjęcie",
+          "Nazwa",
+          "Numer rejestracyjny",
+          "Ładowność",
+          "Pojemność",
+          "Data przeglądu",
+          "OC ważne do",
+          "Czas pracy",
+          ""
+        ],
+        "rows": [
+          {
+            "data_key": "",
+            "cells": [
+              {
+                "text": "Brak wyników.",
+                "links": [],
+                "controls": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      {
+        "text": "Dodaj flotę",
+        "href": "/admin/vehicle/manage-ajax?id=232",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=232",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zgłoszenie serwisowe do floty",
+        "href": "/admin/vehicle/notes",
+        "data": {}
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=232",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/vehicle/copy-event-vehicle?id=232&schedule=Monta%C5%BC",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/vehicle/manage-ajax?id=232&vehicle_id=&schedule=Monta%C5%BC",
+        "data": {
+          "data-vehicle-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Dodaj zapotrzebowanie",
+        "href": "/admin/event/add-vehicle-offer-modal?id=232",
+        "data": {}
+      },
+      {
+        "text": "Skopiuj zapotrzebowanie",
+        "href": "/admin/vehicle/copy-event-vehicle?id=232&schedule=Event",
+        "data": {}
+      },
+      {
+        "text": "",
+        "href": "/admin/vehicle/manage-ajax?id=232&vehicle_id=&schedule=Event",
+        "data": {
+          "data-vehicle-id": "",
+          "data-time_type": "1"
+        }
+      },
+      {
+        "text": "Exportuj",
+        "href": "/admin/vehicle/excel?id=232",
+        "data": {}
+      },
+      {
+        "text": "Wyświetl wszystko",
+        "href": "/admin/event/vehicle-tab?id=232&_tog5be4c740=all",
+        "data": {}
+      },
+      {
+        "text": "Excel",
+        "href": "#",
+        "data": {
+          "data-mime": "application/vnd.ms-excel",
+          "data-hash": "0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{\"worksheet\":\"Dane\",\"cssFile\":\"\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "CSV",
+        "href": "#",
+        "data": {
+          "data-mime": "application/csv",
+          "data-hash": "5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{\"colDelimiter\":\",\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      },
+      {
+        "text": "HTML",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{\"cssFile\":[\"https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css\"]}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "{\".kv-group-even\":{\"background-color\":\"#f0f1ff\"},\".kv-group-odd\":{\"background-color\":\"#f9fcff\"},\".kv-grouped-row\":{\"background-color\":\"#fff0f5\",\"font-size\":\"1.3em\",\"padding\":\"10px\"},\".kv-table-caption\":{\"border\":\"1px solid #ddd\",\"border-bottom\":\"none\",\"font-size\":\"1.5em\",\"padding\":\"8px\"},\".kv-table-footer\":{\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-page-summary td\":{\"background-color\":\"#ffeeba\",\"border-top\":\"4px double #ddd\",\"font-weight\":\"bold\"},\".kv-align-center\":{\"text-align\":\"center\"},\".kv-align-left\":{\"text-align\":\"left\"},\".kv-align-right\":{\"text-align\":\"right\"},\".kv-align-top\":{\"vertical-align\":\"top\"},\".kv-align-bottom\":{\"vertical-align\":\"bottom\"},\".kv-align-middle\":{\"vertical-align\":\"middle\"},\".kv-editable-link\":{\"color\":\"#428bca\",\"text-decoration\":\"none\",\"background\":\"none\",\"border\":\"none\",\"border-bottom\":\"1px dashed\",\"margin\":\"0\",\"padding\":\"2px 1px\"}}"
+        }
+      },
+      {
+        "text": "Plik tekstowy",
+        "href": "#",
+        "data": {
+          "data-mime": "text/plain",
+          "data-hash": "e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{\"colDelimiter\":\"\\t\",\"rowDelimiter\":\"\\r\\n\"}",
+          "data-hash-export-config": "1",
+          "data-css-styles": "[]"
+        }
+      }
+    ]
+  }
+}

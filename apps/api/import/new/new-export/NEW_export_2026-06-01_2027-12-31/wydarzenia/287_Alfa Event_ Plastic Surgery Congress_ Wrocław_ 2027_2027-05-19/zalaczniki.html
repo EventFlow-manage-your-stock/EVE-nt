@@ -1,0 +1,75 @@
+<div class="tab-pane fade" id="tab-attachment"> <div class="panel-body">
+<div class="row">
+<div class="col-md-12">
+<div class="ibox d-flex no-border">
+<a class="btn add-green small-btn" href="/admin/attachment/create?eventId=287"><div class="add-green-circle"></div>Dodaj</a> <a class="btn btn-red small-btn delete-more-button" href="/admin/attachment/delete-more?eventId=287"><div class="icon-trash"></div>Usuń zaznaczone</a> </div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+<div class="panel_mid_blocks">
+<div class="panel_block">
+<div class="grid-view is-bs3 kv-grid-bs3 kv-grid-panel hide-resize" data-krajee-grid="kvGridInit_202d3c40" data-krajee-ps="ps_attachmenttable_container" id="attachmentTable"><div class="panel panel-default">
+<div class="kv-panel-before"> <div class="btn-toolbar kv-grid-toolbar toolbar-container pull-right">
+<div class="btn-group"><a class="btn btn-default" href="/admin/event/view?id=287&amp;_tog3e047f3f=page&amp;_toga05895fd=all" id="attachmentTable-togdata-all" title="Wyświetl ze stronicowaniem"><i class="glyphicon glyphicon-resize-small"></i> Z podziałem na strony</a></div>
+<div class="btn-group btn-group">
+<button class="btn btn-default btn dropdown-toggle btn" data-toggle="dropdown" id="w11" title="Eksportuj"><i class="glyphicon glyphicon-export"></i> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right dropdown-menu" id="w12"><li class="dropdown-header" role="presentation">Eksport widocznych danych</li>
+<li title="Microsoft Excel 95+"><a class="export-xls" data-css-styles='{".kv-group-even":{"background-color":"#f0f1ff"},".kv-group-odd":{"background-color":"#f9fcff"},".kv-grouped-row":{"background-color":"#fff0f5","font-size":"1.3em","padding":"10px"},".kv-table-caption":{"border":"1px solid #ddd","border-bottom":"none","font-size":"1.5em","padding":"8px"},".kv-table-footer":{"border-top":"4px double #ddd","font-weight":"bold"},".kv-page-summary td":{"background-color":"#ffeeba","border-top":"4px double #ddd","font-weight":"bold"},".kv-align-center":{"text-align":"center"},".kv-align-left":{"text-align":"left"},".kv-align-right":{"text-align":"right"},".kv-align-top":{"vertical-align":"top"},".kv-align-bottom":{"vertical-align":"bottom"},".kv-align-middle":{"vertical-align":"middle"},".kv-editable-link":{"color":"#428bca","text-decoration":"none","background":"none","border":"none","border-bottom":"1px dashed","margin":"0","padding":"2px 1px"}}' data-hash='0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{"worksheet":"Dane","cssFile":""}' data-hash-export-config="1" data-mime="application/vnd.ms-excel" href="#" tabindex="-1"><i class="text-success glyphicon glyphicon-floppy-remove"></i> Excel</a></li>
+<li title="Pola oddzielone przecinkiem"><a class="export-csv" data-css-styles="[]" data-hash='5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{"colDelimiter":",","rowDelimiter":"\r\n"}' data-hash-export-config="1" data-mime="application/csv" href="#" tabindex="-1"><i class="text-primary glyphicon glyphicon-floppy-open"></i> CSV</a></li>
+<li title="Hyper Text Markup Language"><a class="export-html" data-css-styles='{".kv-group-even":{"background-color":"#f0f1ff"},".kv-group-odd":{"background-color":"#f9fcff"},".kv-grouped-row":{"background-color":"#fff0f5","font-size":"1.3em","padding":"10px"},".kv-table-caption":{"border":"1px solid #ddd","border-bottom":"none","font-size":"1.5em","padding":"8px"},".kv-table-footer":{"border-top":"4px double #ddd","font-weight":"bold"},".kv-page-summary td":{"background-color":"#ffeeba","border-top":"4px double #ddd","font-weight":"bold"},".kv-align-center":{"text-align":"center"},".kv-align-left":{"text-align":"left"},".kv-align-right":{"text-align":"right"},".kv-align-top":{"vertical-align":"top"},".kv-align-bottom":{"vertical-align":"bottom"},".kv-align-middle":{"vertical-align":"middle"},".kv-editable-link":{"color":"#428bca","text-decoration":"none","background":"none","border":"none","border-bottom":"1px dashed","margin":"0","padding":"2px 1px"}}' data-hash='688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{"cssFile":["https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"]}' data-hash-export-config="1" data-mime="text/plain" href="#" tabindex="-1"><i class="text-info glyphicon glyphicon-save"></i> HTML</a></li>
+<li title="Tabulator oddzielający tekst"><a class="export-txt" data-css-styles="[]" data-hash='e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{"colDelimiter":"\t","rowDelimiter":"\r\n"}' data-hash-export-config="1" data-mime="text/plain" href="#" tabindex="-1"><i class="text-muted glyphicon glyphicon-floppy-save"></i> Plik tekstowy</a></li></ul>
+</div></div>
+<div class="clearfix"></div></div>
+<div class="table-responsive kv-grid-container" id="attachmentTable-container"><table class="kv-grid-table table table-condensed kv-table-wrap table-bordered table-striped"><thead class="kv-table-header attachmentTable">
+<tr><th><input class="select-on-check-all" name="selection_all" type="checkbox" value="1"/></th><th data-col-seq="1">Zdjęcie</th><th data-col-seq="2">Nazwa pliku</th><th data-col-seq="3">Typ</th><th data-col-seq="4">Dodał</th><th data-col-seq="5">Komentarz</th><th class="action-column"> </th></tr>
+</thead>
+<tbody>
+<tr class="attachmentTable" data-key="66"><td><input name="selection[]" type="checkbox" value="66"/></td><td class="attachmentTable" data-col-seq="1"><a href="/uploads/attachment/wstepny_koszotrys_obslugi_konferencji_plastic_surgery_congress_2027_we_wroclawiu.pdf" target="_blank"><i class="fa fa-file-pdf-o"></i></a></td><td class="attachmentTable" data-col-seq="2"><a data-model="66" href="/uploads/attachment/wstepny_koszotrys_obslugi_konferencji_plastic_surgery_congress_2027_we_wroclawiu.pdf" target="_blank">wstepny_koszotrys_obslugi_konferencji_plastic_surgery_congress_2027_we_wroclawiu.pdf</a></td><td class="attachmentTable" data-col-seq="3">Plik</td><td class="attachmentTable" data-col-seq="4"><span style="display: block; margin-bottom: 5px;">Michał Strykowski</span><span class="time" style="display: block;">2026-07-07 17:13:16</span></td><td class="attachmentTable" data-col-seq="5"><a class="comment-edit-file table-font-link" href="/admin/attachment/save-info?id=66">Edytuj</a></td><td><div class="d-flex"><a href="/uploads/attachment/wstepny_koszotrys_obslugi_konferencji_plastic_surgery_congress_2027_we_wroclawiu.pdf" target="_blank"><div class="oko np-nm" style="height: 18px;"></div></a> <a href="/admin/attachment/download?id=66"><div class="download m-0-15"></div></a> <a href="/admin/attachment/update?id=66"><div class="edit-symbol np-nm"></div></a> <a data-confirm="Na pewno chcesz usunąć?" data-method="post" href="/admin/attachment/delete?id=66"><div class="remove-symbol m-0-15"></div></a></div></td></tr>
+</tbody></table></div>
+<div class="kv-panel-after"></div>
+<div class="panel-footer"> <div class="kv-panel-pager">
+</div>
+<div class="clearfix"></div></div></div></div> </div>
+</div>
+<h3>Pliki z czatu</h3>
+<div class="panel_mid_blocks">
+<div class="panel_block">
+<div class="grid-view is-bs3 kv-grid-bs3 kv-grid-panel hide-resize" data-krajee-grid="kvGridInit_84c99a61" data-krajee-ps="ps_chatfilestable_container" id="chatFilesTable"><div class="panel panel-default">
+<div class="kv-panel-before"> <div class="btn-toolbar kv-grid-toolbar toolbar-container pull-right">
+<div class="btn-group"><a class="btn btn-default" href="/admin/event/view?id=287&amp;_tog3e047f3f=all&amp;_toga05895fd=page" id="chatFilesTable-togdata-all" title="Wyświetl ze stronicowaniem"><i class="glyphicon glyphicon-resize-small"></i> Z podziałem na strony</a></div>
+<div class="btn-group btn-group">
+<button class="btn btn-default btn dropdown-toggle btn" data-toggle="dropdown" id="w14" title="Eksportuj"><i class="glyphicon glyphicon-export"></i> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right dropdown-menu" id="w15"><li class="dropdown-header" role="presentation">Eksport widocznych danych</li>
+<li title="Microsoft Excel 95+"><a class="export-xls" data-css-styles='{".kv-group-even":{"background-color":"#f0f1ff"},".kv-group-odd":{"background-color":"#f9fcff"},".kv-grouped-row":{"background-color":"#fff0f5","font-size":"1.3em","padding":"10px"},".kv-table-caption":{"border":"1px solid #ddd","border-bottom":"none","font-size":"1.5em","padding":"8px"},".kv-table-footer":{"border-top":"4px double #ddd","font-weight":"bold"},".kv-page-summary td":{"background-color":"#ffeeba","border-top":"4px double #ddd","font-weight":"bold"},".kv-align-center":{"text-align":"center"},".kv-align-left":{"text-align":"left"},".kv-align-right":{"text-align":"right"},".kv-align-top":{"vertical-align":"top"},".kv-align-bottom":{"vertical-align":"bottom"},".kv-align-middle":{"vertical-align":"middle"},".kv-editable-link":{"color":"#428bca","text-decoration":"none","background":"none","border":"none","border-bottom":"1px dashed","margin":"0","padding":"2px 1px"}}' data-hash='0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{"worksheet":"Dane","cssFile":""}' data-hash-export-config="1" data-mime="application/vnd.ms-excel" href="#" tabindex="-1"><i class="text-success glyphicon glyphicon-floppy-remove"></i> Excel</a></li>
+<li title="Pola oddzielone przecinkiem"><a class="export-csv" data-css-styles="[]" data-hash='5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{"colDelimiter":",","rowDelimiter":"\r\n"}' data-hash-export-config="1" data-mime="application/csv" href="#" tabindex="-1"><i class="text-primary glyphicon glyphicon-floppy-open"></i> CSV</a></li>
+<li title="Hyper Text Markup Language"><a class="export-html" data-css-styles='{".kv-group-even":{"background-color":"#f0f1ff"},".kv-group-odd":{"background-color":"#f9fcff"},".kv-grouped-row":{"background-color":"#fff0f5","font-size":"1.3em","padding":"10px"},".kv-table-caption":{"border":"1px solid #ddd","border-bottom":"none","font-size":"1.5em","padding":"8px"},".kv-table-footer":{"border-top":"4px double #ddd","font-weight":"bold"},".kv-page-summary td":{"background-color":"#ffeeba","border-top":"4px double #ddd","font-weight":"bold"},".kv-align-center":{"text-align":"center"},".kv-align-left":{"text-align":"left"},".kv-align-right":{"text-align":"right"},".kv-align-top":{"vertical-align":"top"},".kv-align-bottom":{"vertical-align":"bottom"},".kv-align-middle":{"vertical-align":"middle"},".kv-editable-link":{"color":"#428bca","text-decoration":"none","background":"none","border":"none","border-bottom":"1px dashed","margin":"0","padding":"2px 1px"}}' data-hash='688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{"cssFile":["https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"]}' data-hash-export-config="1" data-mime="text/plain" href="#" tabindex="-1"><i class="text-info glyphicon glyphicon-save"></i> HTML</a></li>
+<li title="Tabulator oddzielający tekst"><a class="export-txt" data-css-styles="[]" data-hash='e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{"colDelimiter":"\t","rowDelimiter":"\r\n"}' data-hash-export-config="1" data-mime="text/plain" href="#" tabindex="-1"><i class="text-muted glyphicon glyphicon-floppy-save"></i> Plik tekstowy</a></li></ul>
+</div></div>
+<div class="clearfix"></div></div>
+<div class="table-responsive kv-grid-container" id="chatFilesTable-container"><table class="kv-grid-table table table-condensed kv-table-wrap table-bordered table-striped"><thead class="kv-table-header chatFilesTable">
+<tr><th data-col-seq="0">Podgląd</th><th data-col-seq="1">Nazwa pliku</th><th data-col-seq="2">Użytkownik</th><th data-col-seq="3"><a data-sort="create_time" href="/admin/event/view?id=287&amp;_tog3e047f3f=all&amp;_toga05895fd=all&amp;dp-5-sort=create_time">Data</a></th></tr>
+</thead>
+<tbody>
+<tr><td colspan="4"><div class="empty">Brak wyników.</div></td></tr>
+</tbody></table></div>
+<div class="kv-panel-after"></div>
+<div class="panel-footer"> <div class="kv-panel-pager">
+</div>
+<div class="clearfix"></div></div></div></div> </div>
+</div>
+</div>
+</div>
+</div>
+<div class="blueimp-gallery blueimp-gallery-controls" data-filter=":even" id="blueimp-gallery">
+<div class="slides"></div>
+<h3 class="title"></h3>
+<a class="prev">‹</a>
+<a class="next">›</a>
+<a class="close">×</a>
+<a class="play-pause"></a>
+<ol class="indicator"></ol>
+</div>
+<script>
+</script>
+</div>

@@ -1,0 +1,43 @@
+{
+  "file": "/Users/michalstrykowski/Desktop/eve-nt-local/EventFlow_v2/apps/api/import/new/new-export/NEW_export_2026-06-01_2027-12-31/NEW_wydarzenia.xlsx",
+  "events": 210,
+  "schedule": 468,
+  "event_gear": 320,
+  "unmatched": {
+    "types": [
+      "1"
+    ],
+    "statuses": [],
+    "accounting": [
+      "Zafakturowane",
+      "Nie zafakturowane"
+    ],
+    "managers": [
+      "Notatka Duplikuj",
+      "Support Newsystems"
+    ],
+    "models": [],
+    "stages": [
+      "Montaż",
+      "Event",
+      "Demontaż",
+      "Montaż dzień 2",
+      "Event 2",
+      "zaladunek",
+      "impreza",
+      "Data",
+      "Nocleg",
+      "Pakowanie sprzętu",
+      "Załadunek",
+      "załadunek"
+    ]
+  },
+  "not_imported_in_this_test_pass": [
+    "PDF ofert",
+    "rekordy ofert do tabel Oferta/WersjaOferty",
+    "załączniki wydarzeń",
+    "ekipa z surowego arkusza Ekipa",
+    "flota z surowego arkusza Flota",
+    "sprzęt zewnętrzny"
+  ]
+}

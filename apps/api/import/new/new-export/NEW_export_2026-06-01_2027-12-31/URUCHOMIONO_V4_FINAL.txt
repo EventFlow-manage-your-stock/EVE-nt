@@ -1,0 +1,3 @@
+NEW Systems exporter 4.0-FINAL
+Katalog eksportu: /Users/michalstrykowski/Desktop/new-export/NEW_export_2026-06-01_2027-12-31
+Excel: /Users/michalstrykowski/Desktop/new-export/NEW_export_2026-06-01_2027-12-31/NEW_wydarzenia.xlsx

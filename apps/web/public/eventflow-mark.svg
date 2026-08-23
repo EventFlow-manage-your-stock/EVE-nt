@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 220 220">
+        
+    <defs>
+      <linearGradient id="ef_grad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#67E8F9"/>
+        <stop offset="52%" stop-color="#06B6D4"/>
+        <stop offset="100%" stop-color="#14B8A6"/>
+      </linearGradient>
+    </defs>
+        <g transform="translate(10 0)">
+      <path d="M32 38 L198 38 C198 57 183 72 164 72 L22 72 Z" fill="url(#ef_grad)"/>
+      <path d="M26 92 L159 92 C159 110 145 124 127 124 L16 124 Z" fill="url(#ef_grad)"/>
+      <path d="M67 145 L146 145 C146 163 132 177 114 177 L56 177 Z" fill="url(#ef_grad)"/>
+      <path d="M16 124 L52 124 L35 177 L0 177 Z" fill="url(#ef_grad)" opacity="0.98"/>
+    </g>
+        </svg>

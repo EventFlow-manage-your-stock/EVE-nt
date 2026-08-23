@@ -1,0 +1,34 @@
+{
+  "started_from_counts": {
+    "kategorie": 73,
+    "modele": 0,
+    "egzemplarze": 0,
+    "wydarzenia": 0,
+    "users": 3,
+    "userRoles": 2,
+    "typyWydarzen": 14,
+    "statusyWydarzen": 3
+  },
+  "finished_counts": {
+    "kategorie": 73,
+    "magazyny": 5,
+    "modele": 987,
+    "egzemplarze": 2998,
+    "wydarzenia": 210,
+    "etapy": 468,
+    "sprzetWydarzen": 320,
+    "users": 16,
+    "userRoles": 2,
+    "typyWydarzen": 14,
+    "statusyWydarzen": 3
+  },
+  "organization": {
+    "id": 1,
+    "name": "EventFlow"
+  },
+  "password_for_imported_users": "zaq1@WSX",
+  "user_roles_after_import": 2,
+  "user_roles_created_by_importer": 0,
+  "existing_user_roles_preserved": true,
+  "completed_at": "2026-08-15T21:13:58.475Z"
+}

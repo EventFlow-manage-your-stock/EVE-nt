@@ -1,0 +1,1367 @@
+{
+  "generated_at": "2026-08-16T20:21:01.348Z",
+  "organization": {
+    "id": 1,
+    "name": "EventFlow"
+  },
+  "plan_file": "/Users/michalstrykowski/Desktop/eve-nt-local/EventFlow_v2/apps/api/import/new/package-merge/PACKAGE_MERGE_PLAN_V3.xlsx",
+  "results": [
+    {
+      "group": "G0001_3-4-5-6",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 3,
+      "target_name": "10 x LedBar TRIBAR 400 IR",
+      "target_category_id": 33,
+      "source_model_ids": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "already_removed_model_ids": [
+        4,
+        5,
+        6
+      ],
+      "item_count": 4
+    },
+    {
+      "group": "G0002_7-8",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 7,
+      "target_name": "2 x Aktywna kolumna DAS Audio Action-508A",
+      "target_category_id": 28,
+      "source_model_ids": [
+        7,
+        8
+      ],
+      "already_removed_model_ids": [
+        8
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0003_9-10",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 9,
+      "target_name": "2 x Aktywna kolumna Proel WD12A",
+      "target_category_id": 28,
+      "source_model_ids": [
+        9,
+        10
+      ],
+      "already_removed_model_ids": [
+        10
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0004_12-13",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 12,
+      "target_name": "2 x Kolumna pasywna L'Acoustics X12",
+      "target_category_id": 11,
+      "source_model_ids": [
+        12,
+        13
+      ],
+      "already_removed_model_ids": [
+        13
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0005_14-15",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 14,
+      "target_name": "2 x Kolumna pasywna L'Acoustics X8",
+      "target_category_id": 11,
+      "source_model_ids": [
+        14,
+        15
+      ],
+      "already_removed_model_ids": [
+        15
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0006_16-17-18",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 16,
+      "target_name": "2 x LAPTOP DO GŁOSOWAŃ [Lenovo T540p]",
+      "target_category_id": 44,
+      "source_model_ids": [
+        16,
+        17,
+        18
+      ],
+      "already_removed_model_ids": [
+        17,
+        18
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0007_19-20-21-22-23-24-25-26-27-28",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 19,
+      "target_name": "2 x LAPTOP POMOCNICZNY [Dell Latitude E5450]",
+      "target_category_id": 45,
+      "source_model_ids": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28
+      ],
+      "already_removed_model_ids": [
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28
+      ],
+      "item_count": 10
+    },
+    {
+      "group": "G0008_29-40-41-42-43-44-45-46-47-48-49-50-51-52-53",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 29,
+      "target_name": "2 x LAPTOP REALIZACYJNY [DELL Latitude 5440]",
+      "target_category_id": 44,
+      "source_model_ids": [
+        29,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "already_removed_model_ids": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "item_count": 15
+    },
+    {
+      "group": "G0009_54-55-56-57-58-59-60-61-62-63",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 54,
+      "target_name": "2 x Laptop REALIZACYJNY [Dell Precision 3520]",
+      "target_category_id": 44,
+      "source_model_ids": [
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "already_removed_model_ids": [
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "item_count": 10
+    },
+    {
+      "group": "G0010_30-31-32-33-34-35-36-37-38-39",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 30,
+      "target_name": "2 x LAPTOP REALIZACYJNY [DELL PRO PLUS 14]",
+      "target_category_id": 44,
+      "source_model_ids": [
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "already_removed_model_ids": [
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "item_count": 10
+    },
+    {
+      "group": "G0011_64-65",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 64,
+      "target_name": "2 x Laptop REALIZACYJNY [MacBook Pro 14 cali M4]",
+      "target_category_id": 44,
+      "source_model_ids": [
+        64,
+        65
+      ],
+      "already_removed_model_ids": [
+        65
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0012_66-67",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 66,
+      "target_name": "2 x Martin MAC Quantum Profile",
+      "target_category_id": 32,
+      "source_model_ids": [
+        66,
+        67
+      ],
+      "already_removed_model_ids": [
+        67
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0013_68-69-70",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 68,
+      "target_name": "2 x Monitor 32\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        68,
+        69,
+        70
+      ],
+      "already_removed_model_ids": [
+        69,
+        70
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0014_71-72-73",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 71,
+      "target_name": "2 x Monitor 43\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        71,
+        72,
+        73
+      ],
+      "already_removed_model_ids": [
+        72,
+        73
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0015_74-75-76-77-78-79-80",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 74,
+      "target_name": "2 x Monitor 55''",
+      "target_category_id": 5,
+      "source_model_ids": [
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80
+      ],
+      "already_removed_model_ids": [
+        75,
+        76,
+        77,
+        78,
+        79,
+        80
+      ],
+      "item_count": 7
+    },
+    {
+      "group": "G0016_96-97",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 96,
+      "target_name": "2 x Monitor dotykowy Iiyama 55\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        96,
+        97
+      ],
+      "already_removed_model_ids": [
+        97
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0017_81-82-83-84-85",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 81,
+      "target_name": "2 x Monitor Iiyama 22\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        81,
+        82,
+        83,
+        84,
+        85
+      ],
+      "already_removed_model_ids": [
+        82,
+        83,
+        84,
+        85
+      ],
+      "item_count": 5
+    },
+    {
+      "group": "G0018_86-87-88-89-90-91-92-93-94-95",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 86,
+      "target_name": "2 x Monitor Iiyama 24\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95
+      ],
+      "already_removed_model_ids": [
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95
+      ],
+      "item_count": 10
+    },
+    {
+      "group": "G0019_103-104-105-381-382-383",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 103,
+      "target_name": "2 x Statyw korbowy AdamHall 4m",
+      "target_category_id": 49,
+      "source_model_ids": [
+        103,
+        104,
+        105,
+        381,
+        382,
+        383
+      ],
+      "already_removed_model_ids": [
+        104,
+        105,
+        381,
+        382,
+        383
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0020_106-107-108",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 106,
+      "target_name": "2 x X-Dot Brighter Wash IP",
+      "target_category_id": 32,
+      "source_model_ids": [
+        106,
+        107,
+        108
+      ],
+      "already_removed_model_ids": [
+        107,
+        108
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0021_109-110-111-112",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 109,
+      "target_name": "2x Monitor 75\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        109,
+        110,
+        111,
+        112
+      ],
+      "already_removed_model_ids": [
+        110,
+        111,
+        112
+      ],
+      "item_count": 4
+    },
+    {
+      "group": "G0022_113-114-115-116",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 113,
+      "target_name": "4 x Aktywna kolumna DAS Audio Action-508A",
+      "target_category_id": 28,
+      "source_model_ids": [
+        113,
+        114,
+        115,
+        116
+      ],
+      "already_removed_model_ids": [
+        114,
+        115,
+        116
+      ],
+      "item_count": 4
+    },
+    {
+      "group": "G0023_123-124-125",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 123,
+      "target_name": "4 x Martin MAC Aura XIP",
+      "target_category_id": 32,
+      "source_model_ids": [
+        123,
+        124,
+        125
+      ],
+      "already_removed_model_ids": [
+        124,
+        125
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0024_126-127-128-129",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 126,
+      "target_name": "4 x Monitor Iiyama 22\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        126,
+        127,
+        128,
+        129
+      ],
+      "already_removed_model_ids": [
+        127,
+        128,
+        129
+      ],
+      "item_count": 4
+    },
+    {
+      "group": "G0025_130-131-132",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 130,
+      "target_name": "4 x Naświetlacz Brighter ATOM R+",
+      "target_category_id": 36,
+      "source_model_ids": [
+        130,
+        131,
+        132
+      ],
+      "already_removed_model_ids": [
+        131,
+        132
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0026_133-134",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 133,
+      "target_name": "4 x Naświetlacz LIGHT GO!",
+      "target_category_id": 36,
+      "source_model_ids": [
+        133,
+        134
+      ],
+      "already_removed_model_ids": [
+        134
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0027_135-136-137",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 135,
+      "target_name": "4 x Robe 600X",
+      "target_category_id": 32,
+      "source_model_ids": [
+        135,
+        136,
+        137
+      ],
+      "already_removed_model_ids": [
+        136,
+        137
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0028_283-284",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 283,
+      "target_name": "4x Zestaw słuchawkowy Intercom Vokkero",
+      "target_category_id": 13,
+      "source_model_ids": [
+        283,
+        284
+      ],
+      "already_removed_model_ids": [
+        284
+      ],
+      "item_count": 2
+    },
+    {
+      "group": "G0029_139-140-141-142-143-144-145-146",
+      "action": "SKIP",
+      "status": "SKIPPED"
+    },
+    {
+      "group": "G0030_148-149-150-151-152-153",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 148,
+      "target_name": "8 x LedBar",
+      "target_category_id": 33,
+      "source_model_ids": [
+        148,
+        149,
+        150,
+        151,
+        152,
+        153
+      ],
+      "already_removed_model_ids": [
+        149,
+        150,
+        151,
+        152,
+        153
+      ],
+      "item_count": 6
+    },
+    {
+      "group": "G0031_154-155-156",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 154,
+      "target_name": "8 x LedPar Ignition",
+      "target_category_id": 35,
+      "source_model_ids": [
+        154,
+        155,
+        156
+      ],
+      "already_removed_model_ids": [
+        155,
+        156
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0032_157-158-159-160",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 157,
+      "target_name": "AYRTON Stradale Profile",
+      "target_category_id": 32,
+      "source_model_ids": [
+        157,
+        158,
+        159,
+        160
+      ],
+      "already_removed_model_ids": [
+        158,
+        159,
+        160
+      ],
+      "item_count": 4
+    },
+    {
+      "group": "G0033_161-458",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 458,
+      "target_name": "Chamsys USB + Stairville RJ45 DMX",
+      "target_category_id": 16,
+      "source_model_ids": [
+        161,
+        458
+      ],
+      "already_removed_model_ids": [
+        161
+      ],
+      "item_count": 1
+    },
+    {
+      "group": "G0034_295-297-299",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 295,
+      "target_name": "KABINET ABSEN NT3.9W V2 0,5 x 0,5m",
+      "target_category_id": 1,
+      "source_model_ids": [
+        295,
+        297,
+        299
+      ],
+      "already_removed_model_ids": [
+        297,
+        299
+      ],
+      "item_count": 3
+    },
+    {
+      "group": "G0035_285-286-287-288-289-290-291-292-293-294-296-298-300-301-302-303-304-305-306",
+      "action": "MERGE",
+      "status": "ALREADY_APPLIED",
+      "survivor_model_id": 285,
+      "target_name": "KABINET ABSEN NT3.9W V2 0,5 x 1m",
+      "target_category_id": 1,
+      "source_model_ids": [
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        296,
+        298,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306
+      ],
+      "already_removed_model_ids": [
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        296,
+        298,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306
+      ],
+      "item_count": 19
+    },
+    {
+      "group": "G0036_162-163-164-165-166-167-168-169-170-171-172-173-174-175-176-177-178-179-180-181-182-183-184-185-186-187-188-189-190",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 162,
+      "target_name": "Kablarka",
+      "target_category_id": 72,
+      "source_model_ids": [
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 29
+    },
+    {
+      "group": "G0037_191-192-193-194-195-196-197-596-597-598-599-600-601-602",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 191,
+      "target_name": "Mediaserwer (Vmix, Resolume)",
+      "target_category_id": 49,
+      "source_model_ids": [
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        596,
+        597,
+        598,
+        599,
+        600,
+        601,
+        602
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 7
+    },
+    {
+      "group": "G0038_198-637",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 198,
+      "target_name": "Mikser wizyjny Barco S3",
+      "target_category_id": 49,
+      "source_model_ids": [
+        198,
+        637
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0039_199-200-707-708-709",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 707,
+      "target_name": "Odsłuch douszny Shure PSM 300",
+      "target_category_id": 13,
+      "source_model_ids": [
+        199,
+        200,
+        707,
+        708,
+        709
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0040_201-202-750-751",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 201,
+      "target_name": "Projektor Panasonic PT-EW640, 5800 lum., WXGA",
+      "target_category_id": 49,
+      "source_model_ids": [
+        201,
+        202,
+        750,
+        751
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0041_203-204-754-755",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 203,
+      "target_name": "Projektor Panasonic PT-EW730, 7000 lum., WXGA",
+      "target_category_id": 49,
+      "source_model_ids": [
+        203,
+        204,
+        754,
+        755
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0042_205-206",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 205,
+      "target_name": "RACK 2x Laptop MacBook Air M1",
+      "target_category_id": 44,
+      "source_model_ids": [
+        205,
+        206
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0043_239-240-241-242-243-244-824-825-826-827-828-829",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 824,
+      "target_name": "Rack 2x Mikrofon bezprzewodowy Shure SLXD",
+      "target_category_id": 12,
+      "source_model_ids": [
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        824,
+        825,
+        826,
+        827,
+        828,
+        829
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 6
+    },
+    {
+      "group": "G0044_245-246-247-248-830-831-832-833",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 830,
+      "target_name": "Rack 3x Radiotelefon Motorola",
+      "target_category_id": 13,
+      "source_model_ids": [
+        245,
+        246,
+        247,
+        248,
+        830,
+        831,
+        832,
+        833
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 4
+    },
+    {
+      "group": "G0045_249-834",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 834,
+      "target_name": "Rack 4x Mikrofon bezprzewodowy Sennheiser G3 EW100",
+      "target_category_id": 12,
+      "source_model_ids": [
+        249,
+        834
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0046_250-251-835-836",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 835,
+      "target_name": "Rack 4x Mikrofon bezprzewodowy Sennheiser SL",
+      "target_category_id": 12,
+      "source_model_ids": [
+        250,
+        251,
+        835,
+        836
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0047_252-253-837-838",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 837,
+      "target_name": "Rack 4x Mikrofon bezprzewodowy Sennheiser XS",
+      "target_category_id": 12,
+      "source_model_ids": [
+        252,
+        253,
+        837,
+        838
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0048_254-255-839-840-841-842",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 839,
+      "target_name": "Rack 4x Mikrofon bezprzewodowy Shure BLX",
+      "target_category_id": 12,
+      "source_model_ids": [
+        254,
+        255,
+        839,
+        840,
+        841,
+        842
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0049_256-257-258-259-260-261-843-844-845-846-847-848",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 843,
+      "target_name": "Rack 4x Mikrofon bezprzewodowy Shure QLXD",
+      "target_category_id": 12,
+      "source_model_ids": [
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        843,
+        844,
+        845,
+        846,
+        847,
+        848
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 6
+    },
+    {
+      "group": "G0050_207-208-209-210-788-789-790-791",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 788,
+      "target_name": "RACK Infokiosk 55\"",
+      "target_category_id": 5,
+      "source_model_ids": [
+        207,
+        208,
+        209,
+        210,
+        788,
+        789,
+        790,
+        791
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 4
+    },
+    {
+      "group": "G0051_211-212-213-792-793-794",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 792,
+      "target_name": "RACK Ipad + AP Mikrotik",
+      "target_category_id": 9,
+      "source_model_ids": [
+        211,
+        212,
+        213,
+        792,
+        793,
+        794
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 3
+    },
+    {
+      "group": "G0052_214-215-216-217-218-795-796-797-798-799",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 795,
+      "target_name": "RACK Kamera Black Magic PRO 4K",
+      "target_category_id": 3,
+      "source_model_ids": [
+        214,
+        215,
+        216,
+        217,
+        218,
+        795,
+        796,
+        797,
+        798,
+        799
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 5
+    },
+    {
+      "group": "G0053_219-220-800-801-802-803",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 219,
+      "target_name": "RACK Kamera Sony FX6",
+      "target_category_id": 3,
+      "source_model_ids": [
+        219,
+        220,
+        800,
+        801,
+        802,
+        803
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0054_221-222-223-224-804-805-806-807",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 804,
+      "target_name": "RACK Komputer produkcyjny DELL Precision 3440 SFF",
+      "target_category_id": 19,
+      "source_model_ids": [
+        221,
+        222,
+        223,
+        224,
+        804,
+        805,
+        806,
+        807
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 4
+    },
+    {
+      "group": "G0055_225-226-227-228-808-809-810-811",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 808,
+      "target_name": "RACK Mac Studio M1 Max",
+      "target_category_id": 22,
+      "source_model_ids": [
+        225,
+        226,
+        227,
+        228,
+        808,
+        809,
+        810,
+        811
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 4
+    },
+    {
+      "group": "G0056_262-849",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 849,
+      "target_name": "Rack MDG Atme",
+      "target_category_id": 16,
+      "source_model_ids": [
+        262,
+        849
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0057_237-821",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 821,
+      "target_name": "RACK mikser kamerowy + monitor",
+      "target_category_id": 4,
+      "source_model_ids": [
+        237,
+        821
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0058_263-264-850-851",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 850,
+      "target_name": "Rack Monitor dotykowy 98\" + statyw",
+      "target_category_id": 5,
+      "source_model_ids": [
+        263,
+        264,
+        850,
+        851
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0059_266-267-268-269-270-271-272-273-853-854-855-856-857-858-859-860",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 266,
+      "target_name": "Rack mównica BIAŁA",
+      "target_category_id": 6,
+      "source_model_ids": [
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        853,
+        854,
+        855,
+        856,
+        857,
+        858,
+        859,
+        860
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 8
+    },
+    {
+      "group": "G0060_274-275-861",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 274,
+      "target_name": "Rack mównica CZARNA",
+      "target_category_id": 6,
+      "source_model_ids": [
+        274,
+        275,
+        861
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0061_231-813",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 813,
+      "target_name": "RACK Projektor Panasonic PT-EW540, 5000 lum., WXGA",
+      "target_category_id": 7,
+      "source_model_ids": [
+        231,
+        813
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0062_232-233-815-816-817",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 815,
+      "target_name": "RACK Projektor Panasonic PT-MZ880B, 8000 lum., WUXGA, laserowy, LCD",
+      "target_category_id": 49,
+      "source_model_ids": [
+        232,
+        233,
+        815,
+        816,
+        817
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0063_234-818",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 818,
+      "target_name": "RACK Projektor Panasonic PT-RZ970, 9400 lum., WUXGA, laserowy, DLP",
+      "target_category_id": 7,
+      "source_model_ids": [
+        234,
+        818
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0064_229-230-812",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 229,
+      "target_name": "RACK Projektor PT-MZ882B, 8200 lum., WUXGA, laserowy, LCD",
+      "target_category_id": 7,
+      "source_model_ids": [
+        229,
+        230,
+        812
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0065_238-822",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 822,
+      "target_name": "RACK spliter DMX + bramka artnet",
+      "target_category_id": 7,
+      "source_model_ids": [
+        238,
+        822
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0066_276-277",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 276,
+      "target_name": "Set stereo 2x mikrofonów pojemnościowych Austrian Audio CC8",
+      "target_category_id": 29,
+      "source_model_ids": [
+        276,
+        277
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0067_278-915",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 915,
+      "target_name": "Stagebox Midas DL16 + Stagebox Behringer S16",
+      "target_category_id": 9,
+      "source_model_ids": [
+        278,
+        915
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 1
+    },
+    {
+      "group": "G0068_279-280-945-946",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 279,
+      "target_name": "W-DMX",
+      "target_category_id": 17,
+      "source_model_ids": [
+        279,
+        280,
+        945,
+        946
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    },
+    {
+      "group": "G0069_281-282-947",
+      "action": "MERGE",
+      "status": "OK",
+      "survivor_model_id": 281,
+      "target_name": "Walizka z mikrofonami",
+      "target_category_id": 29,
+      "source_model_ids": [
+        281,
+        282,
+        947
+      ],
+      "previously_removed_model_ids": [],
+      "item_count": 2
+    }
+  ]
+}

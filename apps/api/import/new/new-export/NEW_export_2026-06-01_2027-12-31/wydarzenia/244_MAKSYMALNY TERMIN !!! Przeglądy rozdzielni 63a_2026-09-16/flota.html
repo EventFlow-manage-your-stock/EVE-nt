@@ -1,0 +1,899 @@
+<html><head><link href="/admin/assets/7d5bd11f/css/bootstrap.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/94cd7c58/css/activeform.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/65b8ec51/css/select2.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/1cb333af/css/select2-addl.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/1cb333af/css/select2-krajee-bs3.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/d8669f62/css/kv-widgets.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/35872764/css/kv-grid.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/67ec638a/css/bootstrap-dialog-bs3.css?v=1758706583" rel="stylesheet"/>
+<link href="/admin/assets/35872764/css/jquery.resizableColumns.css?v=1758706583" rel="stylesheet"/>
+<style>
+.img-circle {
+    width: 45px;
+    height: 45px;
+}
+.do-transport {
+    color: #8D929B;
+    font-size: 12px;
+    font-family: Lato, sans-serif;
+    font-weight: 900;
+}
+#vehicle-tab-content .vertical-date {
+    paddingc-right: 38px;
+}
+#vehicle-tab-content .vehicle-schedule-actions-col {
+    position: absolute;
+    top: 24px;
+    right: 8px;
+    
+    width: auto;
+    margin: 0;
+    padding: 0;
+}
+#vehicle-tab-content .vehicle-schedule-actions-row {
+    justify-content: flex-end;
+    margin: 0;
+    width: auto;
+}
+#vehicle-tab-content .vehicle-schedule-actions {
+    margin-left: auto;
+}
+#vehicle-tab-content .vehicle-schedule-actions .vehicle-schedule-actions-menu {
+    right: 0;
+    left: auto;
+}
+.vertical-timeline-block {
+    min-height: 140px;
+}
+.panel-heading h4 {
+    color: #ffffff;
+}
+.btn-success {
+    border: none;
+}
+
+#crew-manage-grid-filters > td > input {
+    width: 100% !important;
+}
+
+table { 
+    border-spacing: 0 5px;
+    border-collapse: initial; 
+}
+.table-bordered > tbody > tr > td:first-child {
+    border-left: 1px solid #DCE0E7 !important;
+}
+.table-bordered > tbody > tr > td:last-child {
+    border-right: 1px solid #DCE0E7 !important;
+}
+
+#crew-manage-grid-filters td {
+    border-right: none;
+    border-left: none;
+    border-top: none;
+    border-bottom: none;
+}
+.table-bordered > tbody > tr > td {
+    padding: 0 8px;
+    border-top: 1px solid #DCE0E7;
+    border-bottom: 1px solid #DCE0E7 !important;
+}
+#crew-manage-grid-filters td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+#crew-manage-grid-filters td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+
+table { 
+    border-spacing: 0 5px;
+    border-collapse: initial; 
+}
+.table-bordered > tbody > tr > td:first-child {
+    border-left: 1px solid #DCE0E7 !important;
+}
+.table-bordered > tbody > tr > td:last-child {
+    border-right: 1px solid #DCE0E7 !important;
+}
+
+#crew-manage-grid-filters td {
+    border-right: none;
+    border-left: none;
+    border-top: none;
+    border-bottom: none;
+}
+.table-bordered > tbody > tr > td {
+    padding: 0 8px;
+    border-top: 1px solid #DCE0E7;
+    border-bottom: 1px solid #DCE0E7 !important;
+}
+#crew-manage-grid-filters td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+#crew-manage-grid-filters td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.table-striped > tbody > tr:nth-of-type(2n+1) {
+    background-color: #ffffff;
+}
+
+.table-bordered > thead > tr > th, .table-bordered > thead > tr > td {
+    background-color: #ffffff;
+}
+
+.vertical-timeline-content::before {
+    display: none;
+}
+.select2-container .select2-selection--single .select2-selection__rendered {
+    
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+    
+}
+
+</style>
+<script src="/admin/assets/67ec638a/js/dialog.js?v=1758706583"></script>
+<script>window.s2options_3267a624 = {"themeCss":".select2-container--krajee-bs3","sizeCss":"","doReset":true,"doToggle":false,"doOrder":false};
+window.select2_5abc7e63 = {"tags":false,"allowClear":false,"theme":"krajee-bs3","width":"100%","placeholder":"wybierz pojazd","language":"pl"};
+
+var krajeeDialogDefaults_1883eb53 = {"alert":{"type":"type-info","title":"Informacja","buttonLabel":"<span class=\"glyphicon glyphicon-ok\"></span> Ok"},"confirm":{"type":"type-warning","title":"Potwierdzenie","btnOKClass":"btn-warning","btnOKLabel":"<span class=\"glyphicon glyphicon-ok\"></span> Ok","btnCancelLabel":"<span class=\"glyphicon glyphicon-ban-circle\"></span>  Anuluj"},"prompt":{"draggable":false,"title":"Informacja","buttons":[{"label":"Anuluj","icon":"glyphicon glyphicon-ban-circle","cssClass":"btn-default"},{"label":"Ok","icon":"glyphicon glyphicon-ok","cssClass":"btn-primary"}],"closable":false},"dialog":{"draggable":true,"title":"Informacja","buttons":[{"label":"Anuluj","icon":"glyphicon glyphicon-ban-circle","cssClass":"btn-default"},{"label":"Ok","icon":"glyphicon glyphicon-ok","cssClass":"btn-primary"}]}};
+var krajeeDialog_ead3f524 = {"id":"w3"};
+var krajeeDialog=new KrajeeDialog(true,krajeeDialog_ead3f524,krajeeDialogDefaults_1883eb53);</script> </head><body><div class="panel-body" data-tab-locked="0" id="vehicle-tab-content">
+<h3></h3>
+<div class="row mb-30">
+<div class="row">
+<div class="col-md-12">
+<div class="ibox d-flex no-border">
+</div>
+<div class="row" style="margin-bottom: 10px">
+<div class="col-md-12 d-flex justify-content-begin" style="align-items: center;">
+<a class="btn add-green small-btn assign-vehicle" href="/admin/vehicle/manage-ajax?id=244"><div class="add-green-circle"></div>Dodaj flotę</a> <a class="btn purple small-btn btn-pink add-event-vehicle" href="/admin/event/add-vehicle-offer-modal?id=244"><div class="add-green-circle"></div>Dodaj zapotrzebowanie</a> <a class="btn btn-orange small-btn" href="/admin/vehicle/notes"><div class="icon-tool"></div> Dodaj zgłoszenie serwisowe do floty</a> <div class="fast-add justify-content-end" style="margin-left: 0px; width: 315px;">
+<span style="    margin-left: 0px; margin-right: 0px;width: 115px;">Szybkie dodawanie:</span><span style="width: 165px;"><form action="/admin/event/vehicle-tab?id=244" class="offer-new-gear-form form-vertical kv-form-bs3" id="w0" method="post" style="padding:0;">
+<input name="_csrf" type="hidden" value="qCJKr6H8m1dvnjl1PrqSBoVUl4kkBAqVvnd2PJla6obwFh_H5cypGg3nCEBL2MZc6Rba4ExMTN_sRjoOzWKH6w=="/><div class="form-group highlight-addon field-add-event-vehicle required">
+<div class="kv-plugin-loading loading-add-event-vehicle"> </div><select aria-required="true" class="add-event-vehicle form-control" data-krajee-select2="select2_5abc7e63" data-s2-options="s2options_3267a624" id="add-event-vehicle" name="EventVehicle[vehicle_id]" style="width: 100%; height: 1px; visibility: hidden;">
+<option value="">wybierz pojazd</option>
+<option value="10">Ford Transit/VisualRent PO 3CR29</option>
+<option value="11">Ford Transit/VisualRent PY 8597G</option>
+<option value="12">Kia Ceed</option>
+<option value="9">MAN TGE CZERWONY </option>
+<option value="8">MAN TGE NIEBIESKI </option>
+<option value="7">Peugeot Expert PO 9HJ93</option>
+<option value="4">Renault Master Najnowszy</option>
+<option value="5">Renault Master Nowy</option>
+<option value="6">Renault Master Stary</option>
+<option value="3">Renault Master/Visual Rent WE 2AY13</option>
+<option value="2">Renault Trafic III </option>
+<option value="1">Volkswagen Caddy </option>
+</select>
+<div class="help-block help-block-error"></div>
+</div></form></span>
+</div>
+<div class="header-right" style="display:flex; justify-content:center;">
+<div class="btn btn-sm btn-white d-flex video-button" data-video-link="usterka_pojazdu" style="">
+<div class="youtube-video-green"></div>
+                                    Zobacz jak zgłosić usterkę                                </div>
+</div>
+<div class="header-right" style="display:flex; justify-content:center;">
+<div class="btn btn-sm btn-white d-flex video-button" data-video-link="planowanie_floty" style="">
+<div class="youtube-video-green"></div>
+                                    Zobacz jak planować flotę                                </div>
+</div>
+<div aria-hidden="true" aria-labelledby="videoModalLabel" class="modal fade" id="videoModal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="videoModalLabel">Video</h5>
+<button aria-label="Close" class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body">
+<div class="embed-responsive embed-responsive-16by9">
+<iframe allowfullscreen="" class="embed-responsive-item" id="videoIframe" src=""></iframe>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="row np-nm">
+<div class="redblock p-5">
+<span>Dodaj komentarz                        <span class="info-white" title="Tylko jeden komentarz dla jednego użytkownika. Jeśli w grupie, komentarz nadpisze się dla tego użytkownika"></span>
+</span>
+<div class="add-green-circle" id="add-vcomment-plus" style="position: absolute; top: 8px; left: 13px; cursor: pointer"></div>
+<div class="comment-box" id="vcomment-box">
+<div class="row" style="color: #555555; margin: 0 0 15px 0;">
+<span>Dodaj komentarz</span><i class="glyphicon glyphicon-remove close-box" style="position: absolute;right: 10px;top: 10px;"></i>
+</div>
+<div class="row" style="margin: 0 0 10px 0;">
+</div>
+<div class="row" style="margin: 0 0 10px 0;">
+<textarea class="form-control1" id="comment-event-vehicle" rows="6" style="border-radius: 5px; border: 1px solid #bbbbbb; width: 100%; color: #000000"></textarea>
+</div>
+<div class="row np-nm justify-content-center d-flex">
+<div class="btn small-btn systems" id="button-event-vehicle" style="width: 62px;font-size: 12px;">Zapisz                                </div>
+</div>
+</div>
+</div>
+<div class="row mt-5 border for-vehicle">
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+<div class="vertical-container dark-timeline" id="vertical-timeline2" style="width:100%; max-width:100%;">
+<div class="vertical-timeline-block mb-5 mt-5">
+<div class="vertical-timeline-icon" style="left:290px;">
+<div class="callendar"></div>
+</div>
+<span class="vertical-date">
+<h3 class="system-fonts" style="font-size: 14px; font-weight: 900; margin: 0 0 10px 0;">Event                                            
+                                            
+                                        </h3>
+<div class="row np-nm d-flex">
+<div class="col-md np-nm">
+<span class="time" style="display: block;">
+                                                OD: 2026.09.16, 00:00                                            </span>
+<span class="time" style="display: block; margin-bottom: 5px">
+                                                DO: 2026.09.16, 23:59                                            </span>
+<!-- -->
+</div>
+<div class="col-md np-nm vehicle-schedule-actions-col">
+<div class="row d-flex crew-schedule-actions-row vehicle-schedule-actions-row">
+<div class="crew-schedule-actions vehicle-schedule-actions">
+<button aria-expanded="false" aria-label="Akcje" class="cf-btn-row-more vehicle-schedule-actions-trigger" type="button">
+<i class="icon-ellipsis"></i>
+</button>
+<div class="event-actions-menu crew-schedule-actions-menu vehicle-schedule-actions-menu" style="display:none;">
+<a class="event-actions-item add-event-vehicle" href="/admin/event/add-vehicle-offer-modal?id=244">Dodaj zapotrzebowanie</a> <a class="event-actions-item copy-event-vehicle" href="/admin/vehicle/copy-event-vehicle?id=244&amp;schedule=Event">Skopiuj zapotrzebowanie</a> </div>
+</div>
+</div>
+</div>
+</div>
+<div class="row mt-5">
+<span class="do-transport">Transport osobowy:</span>
+<div class="row d-flex np-nm" style="margin: 5px 0;">
+<div class="people"></div>
+<div class="label label-primary primary" style="margin: 0 5px;">Zapotrzebowanie 0 os.</div>
+<div class="label label-info primary">Dodanych 0 os.</div>
+</div>
+</div>
+</span>
+<div class="vertical-timeline-content" style="margin-left:330px; min-height:90px; padding: 10px;">
+<div class="col_s" style="margin-top: 22px;">
+<a class="assign-vehicle link-12" data-time_type="1" data-vehicle-id="" href="/admin/vehicle/manage-ajax?id=244&amp;vehicle_id=&amp;schedule=Event" style="position:relative;">
+<div class="green-add" style="margin-left: 5px;"></div>
+</a>
+</div>
+</div>
+</div>
+<hr class="mb-10 mt-10"/>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+<div class="panel_mid_blocks">
+<div class="panel_block">
+<div class="row d-flex np-nm mb-5" style="position: relative">
+<div class="row" style="margin-right: 10px; position: relative">
+<div class="to-search" style="margin: 5px 0px 0 3px;position: absolute;"></div>
+<input class="search-field form-control" id="searchInputVehicle" type="text"/>
+<div class="to-remove to-remove-v" style="position: absolute; right: 2px; top: 7px"></div>
+</div>
+<div class="btn btn-sm btn-white" id="add-to-comment-vehicle" style="margin-right: 10px"><span class="to-comment"></span>Dodaj komentarz                                </div>
+<div class="comment-box" id="vcomment-box-without" style="display: none;">
+<div class="row" style="color: #555555; margin: 0 0 15px 0;">
+                                        Dodaj komentarz                                    </div>
+<div class="row" style="margin: 0 0 10px 0;">
+<textarea class="form-control1" id="comment-event-vehicle-without" rows="6" style="border-radius: 5px; border: 1px solid #bbbbbb; width: 100%; color: #000000"></textarea>
+</div>
+<div class="row np-nm justify-content-center d-flex">
+<div class="btn small-btn systems" id="button-event-vehicle-without" style="width: 62px;font-size: 12px;">
+                                            Zapisz                                        </div>
+</div>
+</div>
+<div class="btn btn-sm btn-white" style="margin-right: 10px">
+<a href="/admin/vehicle/excel?id=244"><span class="to-excel"></span>Exportuj</a>
+</div>
+<div class="btn btn-sm btn-white" id="remove-vehicles" style="margin-right: 10px"><span class="to-trash"></span>Usuń                                </div>
+</div>
+<div class="is-bs3 kv-grid-bs3 kv-grid-panel hide-resize" data-krajee-grid="kvGridInit_d1894ed0" data-krajee-ps="ps_vehicles_table_container" id="vehicles-table"><div class="panel panel-default">
+<div class="kv-panel-before"> <div class="btn-toolbar kv-grid-toolbar toolbar-container pull-right">
+<div class="btn-group"><a class="btn btn-default" href="/admin/event/vehicle-tab?id=244&amp;_tog5be4c740=all" id="vehicles-table-togdata-page" title="Wyświetl wszystkie dane bez stronicowania"><i class="glyphicon glyphicon-resize-full"></i> Wyświetl wszystko</a></div>
+<div class="btn-group btn-group">
+<button class="btn btn-default btn dropdown-toggle btn" data-toggle="dropdown" id="w1" title="Eksportuj"><i class="glyphicon glyphicon-export"></i> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right dropdown-menu" id="w2"><li class="dropdown-header" role="presentation">Eksport widocznych danych</li>
+<li title="Microsoft Excel 95+"><a class="export-xls" data-css-styles='{".kv-group-even":{"background-color":"#f0f1ff"},".kv-group-odd":{"background-color":"#f9fcff"},".kv-grouped-row":{"background-color":"#fff0f5","font-size":"1.3em","padding":"10px"},".kv-table-caption":{"border":"1px solid #ddd","border-bottom":"none","font-size":"1.5em","padding":"8px"},".kv-table-footer":{"border-top":"4px double #ddd","font-weight":"bold"},".kv-page-summary td":{"background-color":"#ffeeba","border-top":"4px double #ddd","font-weight":"bold"},".kv-align-center":{"text-align":"center"},".kv-align-left":{"text-align":"left"},".kv-align-right":{"text-align":"right"},".kv-align-top":{"vertical-align":"top"},".kv-align-bottom":{"vertical-align":"bottom"},".kv-align-middle":{"vertical-align":"middle"},".kv-editable-link":{"color":"#428bca","text-decoration":"none","background":"none","border":"none","border-bottom":"1px dashed","margin":"0","padding":"2px 1px"}}' data-hash='0ed1284747d23df9cd09a737b2afb6390d912073381d6820e4cdff77cf263b54gridviewexportapplication/vnd.ms-excelutf-811{"worksheet":"Dane","cssFile":""}' data-hash-export-config="1" data-mime="application/vnd.ms-excel" href="#" tabindex="-1"><i class="text-success glyphicon glyphicon-floppy-remove"></i> Excel</a></li>
+<li title="Pola oddzielone przecinkiem"><a class="export-csv" data-css-styles="[]" data-hash='5dbc97c31f1cdba3ce40f028fcf1d2cd6ef0e26b094e7d15897cd71593af31d0gridvieweksportowanie tabeliapplication/csvutf-811{"colDelimiter":",","rowDelimiter":"\r\n"}' data-hash-export-config="1" data-mime="application/csv" href="#" tabindex="-1"><i class="text-primary glyphicon glyphicon-floppy-open"></i> CSV</a></li>
+<li title="Hyper Text Markup Language"><a class="export-html" data-css-styles='{".kv-group-even":{"background-color":"#f0f1ff"},".kv-group-odd":{"background-color":"#f9fcff"},".kv-grouped-row":{"background-color":"#fff0f5","font-size":"1.3em","padding":"10px"},".kv-table-caption":{"border":"1px solid #ddd","border-bottom":"none","font-size":"1.5em","padding":"8px"},".kv-table-footer":{"border-top":"4px double #ddd","font-weight":"bold"},".kv-page-summary td":{"background-color":"#ffeeba","border-top":"4px double #ddd","font-weight":"bold"},".kv-align-center":{"text-align":"center"},".kv-align-left":{"text-align":"left"},".kv-align-right":{"text-align":"right"},".kv-align-top":{"vertical-align":"top"},".kv-align-bottom":{"vertical-align":"bottom"},".kv-align-middle":{"vertical-align":"middle"},".kv-editable-link":{"color":"#428bca","text-decoration":"none","background":"none","border":"none","border-bottom":"1px dashed","margin":"0","padding":"2px 1px"}}' data-hash='688eafc640360ea099c67e3e587377ae00a6d4e544747f0e28f360e48e182fa5gridvieweksportowanie tabelitext/plainutf-811{"cssFile":["https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"]}' data-hash-export-config="1" data-mime="text/plain" href="#" tabindex="-1"><i class="text-info glyphicon glyphicon-save"></i> HTML</a></li>
+<li title="Tabulator oddzielający tekst"><a class="export-txt" data-css-styles="[]" data-hash='e8de4396024fb9973057acb180c71feff2b7ea28e1e458239f3659fa42b9bd8agridvieweksportowanie tabelitext/plainutf-811{"colDelimiter":"\t","rowDelimiter":"\r\n"}' data-hash-export-config="1" data-mime="text/plain" href="#" tabindex="-1"><i class="text-muted glyphicon glyphicon-floppy-save"></i> Plik tekstowy</a></li></ul>
+</div></div>
+<div class="clearfix"></div></div>
+<div class="table-responsive kv-grid-container" id="vehicles-table-container"><table class="kv-grid-table table table-condensed kv-table-wrap table-bordered table-striped"><thead class="kv-table-header vehicles-table">
+<tr><th><input id="check-all-vehicle" type="checkbox"/></th><th data-col-seq="1">Zdjęcie</th><th data-col-seq="2">Nazwa</th><th data-col-seq="3">Numer rejestracyjny</th><th data-col-seq="4">Ładowność</th><th data-col-seq="5">Pojemność</th><th data-col-seq="6">Data przeglądu</th><th data-col-seq="7">OC ważne do</th><th data-col-seq="8">Czas pracy</th><th class="action-column"> </th></tr>
+</thead>
+<tbody>
+<tr><td colspan="10"><div class="empty">Brak wyników.</div></td></tr>
+</tbody></table></div>
+<div class="kv-panel-after"></div>
+<div class="panel-footer"> <div class="kv-panel-pager">
+</div>
+<div class="clearfix"></div></div></div></div> </div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+</div>
+</div>
+</div>
+<script>
+        function createCommentBlock(resp, comment) {
+            var userIds = resp.vehicles.map(function (vehicle) {
+                return vehicle.id;
+            });
+            var userIdString = userIds.join(',');
+            var forRem = $(`.commv[data-comm="${comment}"]`)
+            forRem.find('.vehicle').remove();
+            resp.vehicles.forEach(function (vehicle) {
+                var comm = $(`.commv[data-comm="${comment}"]`)
+                $(`.vehicle[data-user-id="${vehicle.id}"]`).remove()
+
+                var el = $(`.red-message[data-vehicle="${vehicle.id}"]`)
+
+                el.show()
+                el.attr('title', comment)
+                if (comm.length) {
+                    createUserElement(vehicle.id, `/uploads/vehicle/${vehicle.photo}`, `${vehicle.name}`, comm);
+                } else {
+                    var commentDiv = $('<div></div>', {
+                        class: 'row d-flex commv',
+                        css: {
+                            margin: '5px 0',
+                            border: '1px solid #bbbbbb',
+                            borderRadius: '5px',
+                            padding: '5px'
+                        },
+                        'data-comm': comment
+                    });
+                    var div1 = $(`<div style="margin: auto 15px;"><strong data-commv="${comment}">${comment}</strong></div>`);
+                    var div2 = $(`<div class="edit-comment-vehicle edit-symbol" style="margin: auto 0; cursor: pointer;" data-vehicles="${userIdString}" data-comment="${comment}"></div>`);
+                    $('.for-vehicle').append(commentDiv);
+                    var newComm = $(`.commv[data-comm="${comment}"]`)
+                    newComm.append(div1, div2);
+                    createUserElement(vehicle.id, `/uploads/vehicle/${vehicle.photo}`, `${vehicle.name}`, newComm);
+                }
+            })
+            $('.commv').each(function () {
+                if ($(this).find('.vehicle').length === 0) {
+                    $(this).remove();
+                }
+            });
+        }
+
+        function createUserElement(userId, imgUrl, userName, div) {
+            var userDiv = $('<div></div>', {
+                class: 'row vehicle',
+                'data-user-id': userId,
+                css: {
+                    margin: '0 10px',
+                    width: '60px',
+                    textAlign: 'center'
+                }
+            });
+            var userImg = $('<img>', {
+                class: 'img-circle img-very-small',
+                src: imgUrl,
+                alt: ''
+            });
+            var userNameSpan = $('<span></span>', {
+                text: userName,
+                css: {
+                    wordWrap: 'anywhere'
+                }
+            });
+
+            userDiv.append(userImg).append(userNameSpan);
+
+            div.prepend(userDiv);
+        }
+
+    </script>
+<script>
+        $(document).on('click', '.edit-comment-vehicle', function () {
+            $('#comment-event-vehicle').val($(this).attr('data-comment'));
+            var dataVehicles = $(this).attr('data-vehicles');
+            var vehiclesArray = dataVehicles.split(',');
+            $('#select-event-vehicle').val(vehiclesArray).trigger('change');
+            $('#vcomment-box').css('display', 'block');
+        });
+
+        $(document).ready(function () {
+            var addCommentButton = $('#add-vcomment-plus');
+            var commentBox = $('#vcomment-box');
+
+            addCommentButton.on('click', function () {
+                if (commentBox.css('display') === 'block') {
+                    commentBox.css('display', 'none');
+                } else {
+                    commentBox.css('display', 'block');
+                }
+            });
+        });
+
+        $('#button-event-vehicle').on('click', function () {
+            $('#vcomment-box').css('display', 'none');
+            var vehicles = $('#select-event-vehicle').val();
+
+            var comment = $('#comment-event-vehicle').val();
+
+            if (comment.length > 0 && vehicles.length > 0) {
+                var data = {
+                    vehicles: vehicles,
+                    comment: comment
+                };
+                $.ajax({
+                    url: '/admin/vehicle/set-comment?event=' + 244,
+                    method: 'POST',
+                    data: data,
+                    success: function (response) {
+                        $('#select-event-vehicle').val('')
+                        $('#comment-event-vehicle').val('')
+                        $('#vcomment-box').css('display', 'none');
+                        createCommentBlock(response, comment)
+                        //$("#tab-vehicle").empty().load("//");
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + error);
+                    }
+                });
+            }
+        })
+
+
+    </script>
+<script>
+        var input = document.getElementById("searchInputVehicle");
+        var table = document.getElementById("vehicles-table");
+        var tbody = table.getElementsByTagName("tbody")[0];
+        var rows = tbody.getElementsByTagName("tr");
+
+        if (input && table && tbody && rows) {
+            function handleInput() {
+                var searchText = input.value.toLowerCase();
+
+                for (var i = 0; i < rows.length; i++) {
+                    var row = rows[i];
+                    var cells = row.getElementsByTagName("td");
+                    var match = false;
+
+                    for (var j = 0; j < cells.length; j++) {
+                        var cell = cells[j];
+                        if (cell.textContent.toLowerCase().indexOf(searchText) !== -1) {
+                            match = true;
+                            break;
+                        }
+                    }
+
+                    if (match) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            }
+
+            input.addEventListener("input", handleInput);
+
+            $(document).off('click', '.to-remove-v').on('click', '.to-remove-v', function() {
+                $('#searchInputVehicle').val('');
+                handleInput();
+            });
+        }
+
+
+        // var input = document.getElementById("searchInputVehicle");
+        // var table = document.getElementById("vehicles-table");
+        // var tbody = table.getElementsByTagName("tbody")[0];
+        // var rows = tbody.getElementsByTagName("tr");
+        // if (input && table && tbody && rows) {
+        //     input.addEventListener("input", function () {
+        //         var searchText = input.value.toLowerCase();
+        //
+        //         for (var i = 0; i < rows.length; i++) {
+        //             var row = rows[i];
+        //             var cells = row.getElementsByTagName("td");
+        //             var match = false;
+        //
+        //             for (var j = 0; j < cells.length; j++) {
+        //                 var cell = cells[j];
+        //                 if (cell.textContent.toLowerCase().indexOf(searchText) !== -1) {
+        //                     match = true;
+        //                     break;
+        //                 }
+        //             }
+        //
+        //             if (match) {
+        //                 row.style.display = "";
+        //             } else {
+        //                 row.style.display = "none";
+        //             }
+        //         }
+        //     })
+        // }
+        // ;
+        //
+        // $(document).off('click', '.to-remove-v').on('click', '.to-remove-v', function() {
+        //     $('#searchInputVehicle').val('').trigger('input')
+        // })
+
+        var vehicless = [];
+
+        $(document).off('click', '#button-event-vehicle-without').on('click', '#button-event-vehicle-without', function () {
+            var comment = $('#comment-event-vehicle-without').val()
+            if (vehicless.length > 0) {
+                var data = {
+                    vehicles: vehicless,
+                    comment: comment
+                };
+                $.ajax({
+                    url: '/admin/vehicle/set-comment?event=' + 244,
+                    method: 'POST',
+                    data: data,
+                    success: function (response) {
+                        $('#comment-event-vehicle-without').val('')
+                        $('#vcomment-box-without').css('display', 'none');
+                        $("#tab-vehicle").empty().load("/admin/event/vehicle-tab?id=244");
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error: ' + error);
+                    }
+                });
+            }
+        })
+
+        function selectedVehicles() {
+            var selectedCheckboxes = $("input.selected-vehicle:checked");
+
+            if (selectedCheckboxes.length === 0) {
+                vehicless = []; // Очищаем массив users
+            } else {
+                selectedCheckboxes.each(function () {
+                    var value = $(this).val();
+                    vehicless.push(value);
+                });
+            }
+        }
+
+        $('#check-all-vehicle').on('click', function () {
+            var isChecked = $(this).prop('checked');
+            $('input.selected-vehicle').prop('checked', isChecked);
+        })
+
+        $('#add-to-comment-vehicle').on('click', function () {
+            selectedVehicles();
+            var $commentBox = $('#vcomment-box-without');
+            if (vehicless.length > 0) {
+                if ($commentBox.is(':visible')) {
+                    $commentBox.hide();
+                } else {
+                    var buttonOffset = $('#add-to-comment-vehicle').offset();
+                    var buttonWidth = $('#add-to-comment-vehicle').outerWidth();
+                    var commentBoxWidth = $commentBox.outerWidth();
+                    var leftPosition = buttonOffset.left + buttonWidth - 200;
+                    var windowWidth = $(window).width();
+                    if (leftPosition + commentBoxWidth > windowWidth) {
+                        leftPosition = windowWidth - commentBoxWidth;
+                    }
+
+                    $commentBox.css({
+                        'position': 'absolute',
+                        'left': leftPosition + 'px',
+                        'display': 'block'
+                    });
+                }
+            }
+        })
+
+        $('#remove-vehicles').on('click', function () {
+            selectedVehicles();
+            if (vehicless.length > 0) {
+                swal({
+                    title: "Na pewno chcesz usunąć?",
+                    text: "Odpięcie samochód spowoduje usunięcie его godzin pracy dla tego wydarzenia",
+                    icon: "info",
+                    buttons: {
+                        cancel: "Nie",
+                        yes: {
+                            text: "Tak",
+                            value: "yes",
+                        },
+                    },
+                }).then((value) => {
+                    switch (value) {
+                        case "yes":
+                            var data = {
+                                vehicles: vehicless,
+                            };
+                            $.ajax({
+                                url: '/admin/vehicle/assign-vehicles?id=' + 244, // Замените на URL вашего действия контроллера
+                                method: 'POST',
+                                data: data,
+                                success: function (response) {
+                                    $("#tab-vehicle").empty().load("/admin/event/vehicle-tab?id=244");
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error('Error: ' + error);
+                                }
+                            });
+                            break;
+                    }
+                });
+            }
+        })
+
+        $('#vehicle_modal_edit').off('click', '.close').on('click', '.close', function () {
+            $("#tab-vehicle").empty().load("/admin/event/vehicle-tab?id=244");
+        })
+
+        $('#vehicle_modal_edit_add').off('click', '.close-and-send').on('click', '.close-and-send', function () {
+            var modal = $('#vehicle_modal_edit_add');
+            modal.modal('hide');
+            $("#tab-vehicle").empty().load("/admin/event/vehicle-tab?id=244");
+        })
+
+    </script>
+<script src="/admin/assets/a766414d/jquery.js?v=1758706583"></script>
+<script src="/admin/assets/78f58a8c/yii.js?v=1758706583"></script>
+<script src="/admin/assets/78f58a8c/yii.activeForm.js?v=1758706583"></script>
+<script src="/admin/assets/7d5bd11f/js/bootstrap.js?v=1758706583"></script>
+<script src="/admin/assets/94cd7c58/js/activeform.js?v=1758706583"></script>
+<script src="/admin/assets/65b8ec51/js/select2.full.js?v=1758706583"></script>
+<script src="/admin/assets/65b8ec51/js/i18n/pl.js?v=1758706583"></script>
+<script src="/admin/assets/1cb333af/js/select2-krajee.js?v=1758706583"></script>
+<script src="/admin/assets/d8669f62/js/kv-widgets.js?v=1758706583"></script>
+<script src="/admin/assets/78f58a8c/yii.gridView.js?v=1758706583"></script>
+<script src="/admin/assets/67ec638a/js/bootstrap-dialog.js?v=1758706583"></script>
+<script src="/admin/assets/67ec638a/js/dialog-yii.js?v=1758706583"></script>
+<script src="/admin/assets/35872764/js/kv-grid-export.js?v=1758706583"></script>
+<script src="/admin/assets/35872764/js/jquery.resizableColumns.js?v=1758706583"></script>
+<script>var $el=jQuery("#w0 .kv-hint-special");if($el.length){$el.each(function(){$(this).activeFieldHint()});}
+jQuery&&jQuery.pjax&&(jQuery.pjax.defaults.maxCacheLength=0);
+if (jQuery('#add-event-vehicle').data('select2')) { jQuery('#add-event-vehicle').select2('destroy'); }
+jQuery.when(jQuery('#add-event-vehicle').select2(select2_5abc7e63)).done(initS2Loading('add-event-vehicle','s2options_3267a624'));
+
+jQuery('#vehicles-table').yiiGridView('setSelectionColumn', {"name":"selection[]","class":null,"multiple":true,"checkAll":"selection_all"});
+jQuery('#w1').dropdown();
+krajeeYiiConfirm('krajeeDialog');
+var kvGridExp_e0d3a547={"gridId":"vehicles-table","action":"/admin/gridview/export/download","module":"gridview","encoding":"utf-8","bom":1,"target":"_self","messages":{"allowPopups":"Aby pobrać dane, odblokuj wyskakujące okienka","confirmDownload":"Kliknij Ok aby kontynuować","downloadProgress":"Generacja pliku eksportu. Proszę czekać...","downloadComplete":"Request submitted! You may safely close this dialog after saving your downloaded file."},"exportConversions":[{"from":"<span class=\"glyphicon glyphicon-ok-sign text-success\" style=\"font-weight:bold\"></span>","to":"Aktywny"},{"from":"<span class=\"glyphicon glyphicon-remove-sign text-danger\" style=\"font-weight:bold\"></span>","to":"Nieaktywny"}],"skipExportElements":[".sr-only",".hide"],"showConfirmAlert":false};
+var kvGridExp_72f2a1cf={"filename":"export","showHeader":true,"showPageSummary":true,"showFooter":true};
+var kvGridExp_17f4eae3={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_e0d3a547,"genOpts":kvGridExp_72f2a1cf,"alertMsg":"Pobieranie danych w postaci pliku Excel","config":{"worksheet":"Dane","cssFile":""}};
+var kvGridExp_5c76a28c={"filename":"eksportowanie tabeli","showHeader":true,"showPageSummary":true,"showFooter":true};
+var kvGridExp_ef2d85bc={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_e0d3a547,"genOpts":kvGridExp_5c76a28c,"alertMsg":"Pobieranie danych w postaci pliku CSV","config":{"colDelimiter":",","rowDelimiter":"\r\n"}};
+var kvGridExp_4df44466={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_e0d3a547,"genOpts":kvGridExp_5c76a28c,"alertMsg":"Pobieranie danych w postaci pliku HTML","config":{"cssFile":["https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"]}};
+var kvGridExp_a9a26af8={"dialogLib":"krajeeDialog","gridOpts":kvGridExp_e0d3a547,"genOpts":kvGridExp_5c76a28c,"alertMsg":"Pobieranie danych w postaci pliku tekstowego","config":{"colDelimiter":"\t","rowDelimiter":"\r\n"}};
+var kvGridInit_d1894ed0=function(){
+jQuery('#vehicles-table .export-xls').gridexport(kvGridExp_17f4eae3);jQuery('#vehicles-table .export-csv').gridexport(kvGridExp_ef2d85bc);jQuery('#vehicles-table .export-html').gridexport(kvGridExp_4df44466);jQuery('#vehicles-table .export-txt').gridexport(kvGridExp_a9a26af8);jQuery('#vehicles-table-container').resizableColumns('destroy').resizableColumns({"store":null,"resizeFromBody":false});
+};
+kvGridInit_d1894ed0();
+jQuery('#vehicles-table').yiiGridView({"filterUrl":"\/admin\/event\/vehicle-tab?id=244","filterSelector":"#vehicles-table-filters input, #vehicles-table-filters select","filterOnFocusOut":true});
+
+$(".remove-vehicle").unbind( "click" );
+$(".remove-vehicle").click(function(e){
+    e.preventDefault();
+    swal({
+            title: "Na pewno chcesz usunąć?",
+            text: "Odpięcie samochodu spowoduje usunięcie jego godzin pracy dla tego wydarzenia",
+            icon:"info",
+          buttons: {
+            cancel: "Nie",
+            yes: {
+              text: "Tak",
+              value: "yes",
+            },
+          },
+        })
+        .then((value) => {
+          switch (value) {
+         
+            case "yes":
+              $.post($(this).prop("href"), $(this).data());
+                $(this).parent().parent().remove();
+                $("#tab-vehicle").empty();
+                $("#tab-vehicle").load("/admin/event/vehicle-tab?id=244");
+              break;       
+          }
+        });
+    
+});
+
+$(document)
+    .off("click.vehicleScheduleActions", ".vehicle-schedule-actions-trigger")
+    .on("click.vehicleScheduleActions", ".vehicle-schedule-actions-trigger", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $trigger = $(this);
+        var $menu = $trigger.closest(".vehicle-schedule-actions").find(".vehicle-schedule-actions-menu");
+
+        $(".vehicle-schedule-actions-menu").not($menu).hide();
+        $(".vehicle-schedule-actions-trigger").not($trigger).attr("aria-expanded", "false");
+        $(".crew-schedule-actions-menu").not($menu).hide();
+        $(".crew-schedule-actions-trigger").attr("aria-expanded", "false");
+        $("#event-actions-menu").hide();
+        $("#floating-schedule-menu").remove();
+
+        $menu.toggle();
+        $trigger.attr("aria-expanded", $menu.is(":visible") ? "true" : "false");
+    });
+
+$(document)
+    .off("click.vehicleScheduleActionsClose")
+    .on("click.vehicleScheduleActionsClose", function(){
+        $(".vehicle-schedule-actions-menu").hide();
+        $(".vehicle-schedule-actions-trigger").attr("aria-expanded", "false");
+    });
+
+$(".copy-event-vehicle").click(function(e){
+    e.preventDefault();
+    var modal = $("#vehicle_modal");
+    modal.modal("show").find(".modalContent").load($(this).attr("href"));
+});
+
+$(".assign-vehicle").click(function(e){
+    e.preventDefault();
+    if ($(this).hasClass("no-time"))
+    {
+        alert ("Nim przypiszesz pracowników do tego etapu, należy uzupełnić jego harmonogram.");
+    }else{
+           var modal = $("#vehicle_modal");
+            modal.find(".modalContent").empty().load($(this).attr("href"));
+            modal.modal("show"); 
+    }
+
+});
+    $(".add-event-vehicle").click(function(e){
+    e.preventDefault();
+           var modal = $("#vehicle_modal_edit_add");
+           modal.find(".modalContent").empty();
+           modal.modal("show");
+            modal.find(".modalContent").load($(this).attr("href"));
+             
+});
+
+$("body").on("click", ".edit_vehicle", function(e){
+    e.preventDefault();
+    openVehicleModal(244, $(this).data("vehicleid"));
+});
+
+function openVehicleModal(event_id, vehicle_id){
+    var modal = $("#change-dates-vehicles");
+    modal.find(".modalContent").load("/admin/planboard/vehicle-form?event_id="+event_id+"&vehicle_id="+vehicle_id);
+    modal.modal("show");
+}
+
+$("#vehicle_modal").on("hidden.bs.modal", function () {
+    if (VehicleChanged)
+    {
+        $("#tab-vehicle").empty();
+        $("#tab-vehicle").load("/admin/event/vehicle-tab?id=244");
+    }
+});
+
+VehicleChanged = false;
+
+$(".delete-event-vehicle").click(function(e){
+    e.preventDefault();
+                            var data2 = {
+                            };
+                            $.post($(this).attr("href"), data2, function(response){
+                                $("#tab-vehicle").empty();
+                                 $("#tab-vehicle").load("/admin/event/vehicle-tab?id=244");
+                            });
+});
+
+
+
+$(document).off("click", ".js-toggle-event-tab-lock").on("click", ".js-toggle-event-tab-lock", function(e) {
+    e.preventDefault();
+    var $btn = $(this);
+    var url = $btn.data("url") || $btn.attr("href");
+    var reloadTarget = $btn.data("reload-target");
+    var reloadUrl = $btn.data("reload-url");
+    $btn.prop("disabled", true);
+    $.post(url, function(response){
+        if (response && response.success) {
+            $(reloadTarget).empty().load(reloadUrl);
+        } else {
+            alert(response && response.message ? response.message : "Nie udało się zmienić blokady.");
+            $btn.prop("disabled", false);
+        }
+    }).fail(function(){
+        alert("Błąd podczas zmiany blokady zakładki.");
+        $btn.prop("disabled", false);
+    });
+});
+
+
+(function() {
+    var $tab = $("#vehicle-tab-content");
+    $(document).off("click.vehicleTabLocked submit.vehicleTabLocked change.vehicleTabLocked");
+    if (!$tab.length || parseInt($tab.data("tab-locked"), 10) !== 1) {
+        return;
+    }
+
+    var lockMessage = "Zakładka Flota jest zablokowana.";
+
+    if ($tab.find(".js-tab-lock-info").length === 0) {
+        $tab.prepend("<div class=\"alert alert-warning js-tab-lock-info\" style=\"margin-bottom:10px;\">"+lockMessage+"</div>");
+    }
+
+    var blockedClickSelectors = ".add-event-vehicle, .assign-vehicle, .delete-event-vehicle, .copy-event-vehicle, .edit_vehicle, .remove-vehicle, #remove-vehicles, .vehicle-schedule-actions-trigger";
+    var blockedChangeSelectors = ".add-event-vehicle";
+    var blockedFormsSelector = "form.offer-new-gear-form.form-vertical.kv-form-bs3, form.offer-new-gear-form";
+
+    $tab.find(blockedClickSelectors).off("click").on("click.vehicleLockedDirect", function(e){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        toastr.warning(lockMessage);
+        return false;
+    });
+
+    $tab.find(blockedChangeSelectors).off("change").on("change.vehicleLockedDirect", function(e){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        toastr.warning(lockMessage);
+        return false;
+    });
+
+    $tab.find(blockedFormsSelector).off("submit").on("submit.vehicleLockedDirect", function(e){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        toastr.warning(lockMessage);
+        return false;
+    });
+
+    $(document)
+        .on("click.vehicleTabLocked", "#vehicle-tab-content a, #vehicle-tab-content button, #vehicle-tab-content .btn, #vehicle-tab-content .select2-selection, #vehicle-tab-content .add-green-circle, #vehicle-tab-content .edit-symbol", function(e) {
+            if ($(e.target).closest(".js-toggle-event-tab-lock").length) {
+                return true;
+            }
+            var $link = $(e.target).closest("a");
+            if ($link.length && ($link.attr("href") || "").indexOf("/vehicle/notes") !== -1) {
+                return true;
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            toastr.warning(lockMessage);
+            return false;
+        })
+        .on("submit.vehicleTabLocked", "#vehicle-tab-content form", function(e) {
+            if ($(e.target).find(".js-toggle-event-tab-lock").length) {
+                return true;
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            toastr.warning(lockMessage);
+            return false;
+        })
+        .on("change.vehicleTabLocked", "#vehicle-tab-content input, #vehicle-tab-content select, #vehicle-tab-content textarea", function(e) {
+            if ($(e.target).closest(".js-toggle-event-tab-lock").length) {
+                return true;
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            toastr.warning(lockMessage);
+            return false;
+        });
+})();
+</script></body></html>

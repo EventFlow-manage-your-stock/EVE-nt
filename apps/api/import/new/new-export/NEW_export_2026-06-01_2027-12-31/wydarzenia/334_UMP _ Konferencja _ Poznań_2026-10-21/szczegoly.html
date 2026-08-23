@@ -1,0 +1,102 @@
+<div class="tab-pane fade" id="tab-calendar">
+<div class="fade modal" id="schedule-modal" role="dialog">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button aria-hidden="true" class="close" data-dismiss="modal" type="button">×</button>
+Edytuj harmonogram
+</div>
+<div class="modal-body">
+</div>
+</div>
+</div>
+</div> <div class="panel-body">
+<div class="row">
+<div class="col-lg-6">
+<a class="btn btn-sm add-green" href="/admin/customer-note/create?customer_id=367&amp;contact_id=399&amp;event_id=334"><div class="add-green-circle"></div> Dodaj notatkę</a>
+<h3>  Opis </h3>
+<div class="form-group">
+<textarea id="first-editor-note" name="description" rows="6"></textarea> </div>
+<h3>Szczegóły </h3>
+<div class="form-group">
+<textarea id="second-editor-note" name="details" rows="6">&lt;p&gt;Dzień dobry,&lt;/p&gt;&lt;p&gt;Poniżej przesyłam bardziej szczegółowe informacje odnośnie październikowego spotkania. Pogrubionym drukiem wpisane są odpowiedzi.&lt;/p&gt;&lt;p&gt;Czy byliby Państwo w stanie zapewnić taką usługę?&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Miejsce wydarzenia i terminy montażu / demontażu &lt;strong&gt;Centrum Biologii Medycznej - Poznań, ul.Rokietnicka 8&amp;nbsp; (3 sale wykładowe) nie chodzi o streeming&amp;nbsp; ale o spotkanie na TEMSIE bardzo dobrej jakości&amp;nbsp;&amp;nbsp;&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;Czy mają już Państwo program wydarzenia (może być ramowy) ? Nie mamy, ale spotkania w osobnych 3 salach obędą się w godz.&lt;strong&gt; 9.00-18.00 każdego dnia 22 i 23 października&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;Czy podczas wydarzenia planują Państwo w salach panele dyskusyjne czy będą pojedynczy mówcy?&amp;nbsp; &lt;strong&gt;raczej pojedynczy mówcy&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;Sposób streamingu - Waszymi kanałami na social mediach (You Tubę, Facebook itp) czy planujecie osadzenie transmisji na stronie? &lt;strong&gt;nie chodzi o streeming&amp;nbsp; ale o spotkanie na TEAMSIE bardzo dobrej jakości (część gości i mówców będzie na miejscu część podłączy się online) równolegle w 3 salach&lt;/strong&gt;&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;strong&gt;Sale wykładowe są wyposażone z rzutniki multimedialne i nagłośnienie&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Zależy nam na bardzo dobrej jakości i stałego wsparcia technicznego w trakcie trawania TEAMSA&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&amp;nbsp;&lt;/p&gt;</textarea> </div>
+<div id="event-description-form">
+<form action="/admin/event/update?id=334" class="form-vertical kv-form-bs3" id="w0" method="post" role="form">
+<input name="_csrf" type="hidden" value="SmL4sDRrb3by7nbMsSLgcVAhfyB-Vf_XcYw7ssjdm-wSVq3YcFtdO5CXR_nEQLQrPGMySRYduZ0jvXeAnOX2gQ=="/>
+<div class="form-group highlight-addon field-first-editor-note-hidden">
+<textarea class="d-none form-control" id="first-editor-note-hidden" name="Event[description]" rows="6"></textarea>
+<div class="help-block help-block-error"></div>
+</div> <div class="form-group highlight-addon field-second-editor-note-hidden">
+<textarea class="d-none form-control" id="second-editor-note-hidden" name="Event[details]" rows="6">&lt;p&gt;Dzień dobry,&lt;/p&gt;&lt;p&gt;Poniżej przesyłam bardziej szczegółowe informacje odnośnie październikowego spotkania. Pogrubionym drukiem wpisane są odpowiedzi.&lt;/p&gt;&lt;p&gt;Czy byliby Państwo w stanie zapewnić taką usługę?&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Miejsce wydarzenia i terminy montażu / demontażu &lt;strong&gt;Centrum Biologii Medycznej - Poznań, ul.Rokietnicka 8&amp;nbsp; (3 sale wykładowe) nie chodzi o streeming&amp;nbsp; ale o spotkanie na TEMSIE bardzo dobrej jakości&amp;nbsp;&amp;nbsp;&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;Czy mają już Państwo program wydarzenia (może być ramowy) ? Nie mamy, ale spotkania w osobnych 3 salach obędą się w godz.&lt;strong&gt; 9.00-18.00 każdego dnia 22 i 23 października&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;Czy podczas wydarzenia planują Państwo w salach panele dyskusyjne czy będą pojedynczy mówcy?&amp;nbsp; &lt;strong&gt;raczej pojedynczy mówcy&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;Sposób streamingu - Waszymi kanałami na social mediach (You Tubę, Facebook itp) czy planujecie osadzenie transmisji na stronie? &lt;strong&gt;nie chodzi o streeming&amp;nbsp; ale o spotkanie na TEAMSIE bardzo dobrej jakości (część gości i mówców będzie na miejscu część podłączy się online) równolegle w 3 salach&lt;/strong&gt;&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;strong&gt;Sale wykładowe są wyposażone z rzutniki multimedialne i nagłośnienie&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Zależy nam na bardzo dobrej jakości i stałego wsparcia technicznego w trakcie trawania TEAMSA&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&amp;nbsp;&lt;/p&gt;</textarea>
+<div class="help-block help-block-error"></div>
+</div>
+<div class="form-group">
+<button class="btn btn-success submitdescription" type="submit">Zapisz</button> </div>
+</form>
+</div>
+<div class="form-group highlight-addon field-event-field-4">
+<label class="form-label has-star" for="event-field-4">Nocleg</label>
+<textarea class="event-field form-control" data-id="4" id="event-field-4" name="EventField[value_text]" rows="6"></textarea>
+<div class="help-block help-block-error"></div>
+</div>
+</div>
+<div class="col-lg-6">
+<h3>Kalendarz <a class="btn btn-xs add-green add-schedule" href="/admin/event/add-schedule?id=334"><div class="add-green-circle" style="margin:-1px 0 0 0"></div> Dodaj etap</a></h3>
+<div class="ibox-content" id="ibox-content">
+<div class="vertical-container dark-timeline" id="vertical-timeline">
+<div class="vertical-timeline-block">
+<div class="vertical-timeline-icon navy-bg">
+<i class="fa fa-calendar"></i>
+</div>
+<div class="vertical-timeline-content">
+<h2>Montaż                                        <div class="pull-right" style="text-align:right">
+</div>
+</h2>
+<div class="team-members pull-right">
+</div>
+<span class="vertical-date">
+                                        2026-10-21                                                                                 <br/>
+<small>08:00 - 23:00</small>
+</span>
+</div>
+</div>
+<div class="vertical-timeline-block">
+<div class="vertical-timeline-icon navy-bg">
+<i class="fa fa-calendar"></i>
+</div>
+<div class="vertical-timeline-content">
+<h2>Event                                        <div class="pull-right" style="text-align:right">
+</div>
+</h2>
+<div class="team-members pull-right">
+</div>
+<span class="vertical-date">
+                                        2026-10-22                                          - 2026-10-23                                         <br/>
+<small>08:00 - 23:00</small>
+</span>
+</div>
+</div>
+<div class="vertical-timeline-block">
+<div class="vertical-timeline-icon navy-bg">
+<i class="fa fa-calendar"></i>
+</div>
+<div class="vertical-timeline-content">
+<h2>Demontaż                                        <div class="pull-right" style="text-align:right">
+</div>
+</h2>
+<div class="team-members pull-right">
+</div>
+<span class="vertical-date">
+                                        2026-10-23                                                                                 <br/>
+<small>08:00 - 23:00</small>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+</script>
+</div>

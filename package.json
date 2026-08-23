@@ -1,0 +1,35 @@
+{
+  "name": "wms-event-saas",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "dev:api": "turbo run dev --filter=api",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:docs": "turbo run dev --filter=docs",
+    "prisma:generate": "pnpm --filter api exec prisma generate --schema=prisma/schema.prisma",
+    "prisma:studio": "pnpm --filter api exec prisma studio --schema=prisma/schema.prisma --port 5555",
+    "import:sprzet": "node apps/api/scripts/import-sprzet-case-excel.mjs",
+    "fix:wynajmy-separate": "node apps/api/scripts/odlacz-wynajmy-od-wydarzen.mjs",
+    "fix:sprzet-event-plan": "node apps/api/scripts/przenies-plan-sprzetu-z-wynajmow.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "dotenv": "^17.4.2",
+    "prettier": "^3.7.4",
+    "prisma": "^7.8.0",
+    "turbo": "^2.10.0",
+    "typescript": "5.9.2"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.8.0",
+    "xlsx": "^0.18.5"
+  }
+}
