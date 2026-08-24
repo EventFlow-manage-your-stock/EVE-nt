@@ -93,6 +93,14 @@ export class OfertyService {
     return this.prisma.extendedClient.oferta.update({ where: { id }, data: { nazwa: dto.nazwa, id_kontrahenta: this.n(dto.id_kontrahenta), id_wydarzenia: this.n(dto.id_wydarzenia), id_wynajmu: this.n(dto.id_wynajmu), budzet_netto: this.n(dto.budzet_netto), budzet_brutto: this.n(dto.budzet_brutto), warunki_zamowienia: dto.warunki_zamowienia || null, notatki_wewnetrzne: dto.notatki_wewnetrzne || null } });
   }
 
+  async remove(id: number, id_organizacji: number) {
+    await this.findOne(id, id_organizacji); // Weryfikacja dostępu i istnienia
+    return this.prisma.extendedClient.oferta.update({
+      where: { id },
+      data: { aktywny: false, data_usuniecia: new Date() }
+    });
+  }
+
   private async aktualnaWersja(id_oferty: number, id_organizacji: number) {
     const wersja = await this.prisma.extendedClient.wersjaOferty.findFirst({ where: { id_organizacji, id_oferty, aktywny: true }, orderBy: { numer_wersji: 'desc' } });
     if (!wersja) throw new NotFoundException('Oferta nie ma wersji');

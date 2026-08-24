@@ -11,7 +11,7 @@ import { PrintLabelsModal } from '../../../../components/PrintLabelsModal';
 
 export default function PackagesPage() {
   const router = useRouter();
-  const [view, setView] = useState<'egzemplarze' | 'typy'>('egzemplarze');
+  const [view, setView] = useState<'egzemplarze' | 'typy'>('typy');
   const [items, setItems] = useState<any[]>([]);
   const [models, setModels] = useState<any[]>([]);
   const [magazyny, setMagazyny] = useState<any[]>([]);
@@ -110,7 +110,7 @@ export default function PackagesPage() {
           </div>
           }
       />
-    <Card className="!p-4"><div className="flex flex-wrap gap-2"><button onClick={() => setView('egzemplarze')} className={`rounded-xl px-4 py-2 text-sm font-black ${view === 'egzemplarze' ? 'bg-cyan-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Fizyczne skrzynie / Zestawy</button><button onClick={() => setView('typy')} className={`rounded-xl px-4 py-2 text-sm font-black ${view === 'typy' ? 'bg-cyan-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Typy i parametry modeli</button></div></Card>
+    <Card className="!p-4"><div className="flex flex-wrap gap-2"><button onClick={() => setView('typy')} className={`rounded-xl px-4 py-2 text-sm font-black ${view === 'typy' ? 'bg-cyan-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Modele Case</button><button onClick={() => setView('egzemplarze')} className={`rounded-xl px-4 py-2 text-sm font-black ${view === 'egzemplarze' ? 'bg-cyan-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Egzemplarze Case</button></div></Card>
     
     <Card>
       {/* SEKCJA FILTRÓW */}

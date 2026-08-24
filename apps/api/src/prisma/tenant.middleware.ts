@@ -13,18 +13,22 @@ export class TenantMiddleware implements NestMiddleware {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
       try {
-        // Dekodujemy token bez pełnej weryfikacji (weryfikacją zajmie się Guard),
-        // potrzebujemy jedynie odczytać tenantId na wczesnym etapie żądania
-        const decoded = jwt.decode(token) as any;
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+          throw new Error('Brak konfiguracji JWT_SECRET w środowisku.');
+        }
+
+        // BEZPIECZEŃSTWO: Używamy weryfikacji kryptograficznej zapobiegającej sfałszowanym tokenom
+        const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
         
         if (decoded && decoded.tenantId) {
-          // Uruchamiamy dalszy ciąg żądania wewnątrz zizolowanego kontekstu
-          return this.tenantContextService.run(decoded.tenantId, () => {
+          // NAPRAWA BŁĘDU 500: Wymuszenie rzutowania na Number, aby Prisma dostała Int, a nie String
+          return this.tenantContextService.run(Number(decoded.tenantId), () => {
             next();
           });
         }
       } catch (err) {
-        // W razie błędu dekodowania pozwalamy przejść dalej - Guard rzuci 401
+        // Ignorujemy błędy. Jeśli token jest zły, JwtAuthGuard sam odrzuci to zapytanie (401).
       }
     }
     

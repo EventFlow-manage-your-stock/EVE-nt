@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, Req, Query, UseGuards,
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { WydarzeniaService } from './wydarzenia.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('wydarzenia')
 @UseGuards(AuthGuard('jwt'))
@@ -19,6 +20,15 @@ export class WydarzeniaController {
     const id_organizacji = Number((req.user as any).id_organizacji);
     const id_uzytkownika = Number((req.user as any).id);
     return this.wydarzeniaService.wyslijPowiadomieniaMasowe(id_organizacji, id_uzytkownika);
+  }
+
+  // ===================================================================
+  // WIDOK GOŚCIA (DLA PRACOWNIKÓW ZEWNĘTRZNYCH Z LINKU E-MAIL)
+  // ===================================================================
+  @Public()
+  @Get('guest/:id')
+  getGuestEvent(@Param('id', ParseIntPipe) id: number, @Query('token') token: string) {
+    return this.wydarzeniaService.getGuestEvent(id, token);
   }
 
   @Get()
@@ -55,12 +65,29 @@ export class WydarzeniaController {
   }
 
   // ===================================================================
-  // NOWE ENDPOINTY DLA ZAKŁADEK I HARMONOGRAMU
+  // ZARZĄDZANIE MANAGERAMI
   // ===================================================================
+  @Post(':id/managerowie')
+  addManager(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
+    return this.wydarzeniaService.addManager(id, dto, Number((req.user as any).id_organizacji));
+  }
 
+  @Delete(':id/managerowie/:managerId')
+  removeManager(@Param('id', ParseIntPipe) id: number, @Param('managerId', ParseIntPipe) managerId: number, @Req() req: Request) {
+    return this.wydarzeniaService.removeManager(id, managerId, Number((req.user as any).id_organizacji));
+  }
+
+  // ===================================================================
+  // HARMONOGRAM / ETAPY I PRZYPISANIA DO NICH
+  // ===================================================================
   @Post(':id/etapy')
   addEtap(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
     return this.wydarzeniaService.addEtap(id, dto, Number((req.user as any).id_organizacji));
+  }
+
+  @Put(':id/etapy/:etapId')
+  updateEtap(@Param('id', ParseIntPipe) id: number, @Param('etapId', ParseIntPipe) etapId: number, @Body() dto: any, @Req() req: Request) {
+    return this.wydarzeniaService.updateEtap(etapId, dto, Number((req.user as any).id_organizacji));
   }
 
   @Delete(':id/etapy/:etapId')
@@ -68,6 +95,39 @@ export class WydarzeniaController {
     return this.wydarzeniaService.removeEtap(etapId, Number((req.user as any).id_organizacji));
   }
 
+  @Post(':id/etapy/:etapId/ekipa')
+  addEtapEkipa(@Param('id', ParseIntPipe) id: number, @Param('etapId', ParseIntPipe) etapId: number, @Body() dto: any, @Req() req: Request) {
+    return this.wydarzeniaService.addEtapEkipa(etapId, dto, Number((req.user as any).id_organizacji));
+  }
+
+  @Delete(':id/etapy/ekipa/:przypisanieId')
+  removeEtapEkipa(@Param('id', ParseIntPipe) id: number, @Param('przypisanieId', ParseIntPipe) przypisanieId: number, @Req() req: Request) {
+    return this.wydarzeniaService.removeEtapEkipa(przypisanieId, Number((req.user as any).id_organizacji));
+  }
+
+  @Post(':id/etapy/:etapId/flota')
+  addEtapPojazd(@Param('id', ParseIntPipe) id: number, @Param('etapId', ParseIntPipe) etapId: number, @Body() dto: any, @Req() req: Request) {
+    return this.wydarzeniaService.addEtapPojazd(etapId, dto, Number((req.user as any).id_organizacji));
+  }
+
+  @Delete(':id/etapy/flota/:przypisanieId')
+  removeEtapPojazd(@Param('id', ParseIntPipe) id: number, @Param('przypisanieId', ParseIntPipe) przypisanieId: number, @Req() req: Request) {
+    return this.wydarzeniaService.removeEtapPojazd(przypisanieId, Number((req.user as any).id_organizacji));
+  }
+
+  @Post(':id/ekipa/:uzytkownikId/etapy')
+  assignUserToStages(@Param('id', ParseIntPipe) id: number, @Param('uzytkownikId', ParseIntPipe) uzytkownikId: number, @Body() dto: any, @Req() req: Request) {
+    return this.wydarzeniaService.assignUserToStages(id, uzytkownikId, dto.stageIds, Number((req.user as any).id_organizacji));
+  }
+
+  @Post(':id/flota/:pojazdId/etapy')
+  assignVehicleToStages(@Param('id', ParseIntPipe) id: number, @Param('pojazdId', ParseIntPipe) pojazdId: number, @Body() dto: any, @Req() req: Request) {
+    return this.wydarzeniaService.assignVehicleToStages(id, pojazdId, dto.stageIds, Number((req.user as any).id_organizacji));
+  }
+
+  // ===================================================================
+  // EKIPA I FLOTA (OGÓLNE)
+  // ===================================================================
   @Post(':id/ekipa')
   addEkipa(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
     return this.wydarzeniaService.addEkipa(id, dto, Number((req.user as any).id_organizacji));
@@ -88,6 +148,27 @@ export class WydarzeniaController {
     return this.wydarzeniaService.removeFlota(flotaId, Number((req.user as any).id_organizacji));
   }
 
+  @Post(':id/powiadomienia/ekipa')
+  wyslijPowiadomienieEkipa(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
+    return this.wydarzeniaService.wyslijPowiadomienieEkipa(id, dto.userIds, Number((req.user as any).id_organizacji));
+  }
+
+  // ===================================================================
+  // NOCLEGI
+  // ===================================================================
+  @Post(':id/noclegi')
+  addNocleg(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
+    return this.wydarzeniaService.addNocleg(id, dto, Number((req.user as any).id_organizacji));
+  }
+
+  @Delete(':id/noclegi/:noclegId')
+  removeNocleg(@Param('id', ParseIntPipe) id: number, @Param('noclegId', ParseIntPipe) noclegId: number, @Req() req: Request) {
+    return this.wydarzeniaService.removeNocleg(noclegId, Number((req.user as any).id_organizacji));
+  }
+
+  // ===================================================================
+  // CHAT I ZAŁĄCZNIKI
+  // ===================================================================
   @Post(':id/chat')
   addChatMsg(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
     return this.wydarzeniaService.addChatMessage(id, dto.message, Number((req.user as any).id_organizacji), Number((req.user as any).id));

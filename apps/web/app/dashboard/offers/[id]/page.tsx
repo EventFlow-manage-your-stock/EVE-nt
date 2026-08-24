@@ -326,6 +326,19 @@ export default function OfferDetailsPage() {
   }
 
   // ==========================================================================
+  // USUWANIE OFERTY
+  // ==========================================================================
+  async function removeOffer() {
+    if (!confirm(`Na pewno chcesz usunąć ofertę "${offer?.nazwa}"? Operacja ta ukryje ofertę w systemie.`)) return;
+    try {
+      await api.delete(`/api/oferty/${id}`);
+      router.push('/dashboard/offers');
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Błąd podczas usuwania oferty.');
+    }
+  }
+
+  // ==========================================================================
   // AKCJE SEKCJI I POZYCJI
   // ==========================================================================
   async function addSection(e: any) {
@@ -620,6 +633,7 @@ export default function OfferDetailsPage() {
             {autoSaveStatus === 'saving' && <span className="text-sm font-bold text-slate-400 flex items-center gap-2"><Loader2 size={14} className="animate-spin"/> Zapisywanie...</span>}
             {autoSaveStatus === 'saved' && <span className="text-sm font-bold text-emerald-600 flex items-center gap-2"><CheckCircle2 size={14}/> Zapisano</span>}
             <Button variant="secondary" onClick={() => router.back()}><ArrowLeft size={16} className="inline mr-2" /> Powrót</Button>
+            <Button variant="danger" onClick={removeOffer} disabled={savingId === -999999}><Trash2 size={16} className="inline mr-2" /> Usuń</Button>
             <Button onClick={saveAllChanges} disabled={autoSaveStatus === 'saving' || (dirtyCount === 0 && !metaDirty)}><Save size={16} className="inline mr-2" /> Zapisz</Button>
             <Button variant="secondary" onClick={() => setDuplicateTarget(offer)}><Copy size={16} className="inline mr-2" /> Duplikuj</Button>
             <Button variant="secondary" onClick={() => setShowPdfSettings(true)}><Printer size={16} className="inline mr-2" /> Drukuj PDF</Button>

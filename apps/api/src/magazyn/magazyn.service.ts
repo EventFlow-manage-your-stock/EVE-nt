@@ -576,7 +576,7 @@ export class MagazynService {
   }
 
   async getModelById(id: number, id_organizacji: number) {
-    return this.prisma.extendedClient.modelSprzetu.findFirst({
+    const model = await this.prisma.extendedClient.modelSprzetu.findFirst({
       where: { id, id_organizacji, aktywny: true },
       include: {
         kategoria: true,
@@ -585,12 +585,45 @@ export class MagazynService {
           where: { aktywny: true },
           orderBy: { id: 'asc' },
           include: { 
-            magazyn: true,
-            case: { select: { id: true, nazwa: true, numer_urzadzenia: true, model: { select: { nazwa: true } } } },
-            _count: { select: { zawartosc_case: { where: { aktywny: true } } } }
+             magazyn: true,
+             case: { select: { id: true, nazwa: true, numer_urzadzenia: true, model: { select: { nazwa: true } } } },
+             _count: { select: { zawartosc_case: { where: { aktywny: true } } } }
           }
         }
       }
+    });
+    if (!model) throw new NotFoundException('Nie znaleziono modelu');
+
+    // Pobieramy załączniki powiązane z tym modelem
+    const zalaczniki = await this.prisma.extendedClient.zalacznik.findMany({
+      where: { id_organizacji, typ_obiektu: 'ModelSprzetu', id_obiektu: id, aktywny: true },
+      include: { dodal: { select: { imie: true, nazwisko: true } } },
+      orderBy: { data_utworzenia: 'desc' },
+    });
+
+    return { ...model, zalaczniki };
+  }
+
+  // --- Nowe funkcje dla załączników modelu ---
+  async addZalacznik(id_modelu: number, dto: any, id_organizacji: number, id_uzytkownika: number) {
+    return this.prisma.extendedClient.zalacznik.create({
+      data: {
+        id_organizacji,
+        typ_obiektu: 'ModelSprzetu',
+        id_obiektu: id_modelu,
+        nazwa: dto.nazwa,
+        nazwa_pliku: dto.nazwa_pliku,
+        rozmiar_bajtow: Number(dto.rozmiar) || 0,
+        mime: dto.mime || 'application/octet-stream',
+        id_uzytkownika_dodal: id_uzytkownika
+      }
+    });
+  }
+
+  async removeZalacznik(id: number, id_organizacji: number) {
+    return this.prisma.extendedClient.zalacznik.update({
+      where: { id, id_organizacji },
+      data: { aktywny: false }
     });
   }
 

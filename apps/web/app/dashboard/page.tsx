@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Calendar, Wrench, Loader2, Settings, LayoutGrid, 
   Truck, FileText, CheckSquare, Plus, AlertCircle,
-  Box, Activity, Minus, Zap, ArrowRight, Flag, Car, ChevronRight, ChevronDown, Users, ArchiveRestore, CheckCircle2
+  Box, Activity, Minus, Zap, ArrowRight, Flag, Car, ChevronRight, ChevronDown, Users, ArchiveRestore, CheckCircle2, DollarSign, Search
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { Button } from '../../components/ProductUI';
@@ -33,6 +33,85 @@ const formatTaskTime = (dateStr: string) => {
   if (isTomorrow) return `Jutro, ${time}`;
   return `${d.toLocaleDateString('pl-PL')} ${time}`;
 };
+
+// ============================================================================
+// KOMPONENTY WIDGETÓW
+// ============================================================================
+
+function UnbilledWidget({ data, router }: { data: any, router: any }) {
+  const [type, setType] = useState<'wydarzenia' | 'wynajmy'>('wydarzenia');
+  const [search, setSearch] = useState('');
+
+  const items = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    const filteredAndSorted = type === 'wydarzenia'
+      ? (data?.wydarzenia || [])
+          .filter((e: any) => {
+            const statusKsiegowy = String(e.status_ksiegowy?.nazwa || '').toLowerCase();
+            // Niezafakturowane, czyli status nie wskazuje na wystawioną fakturę lub opłacenie
+            const isBilled = statusKsiegowy.includes('faktur') || statusKsiegowy.includes('opłacon') || statusKsiegowy.includes('zaksięgowan');
+            const matchesSearch = !query
+              || String(e.nazwa || '').toLowerCase().includes(query)
+              || String(e.kontrahent?.nazwa || '').toLowerCase().includes(query);
+            return !isBilled && matchesSearch;
+          })
+          .sort((a: any, b: any) => new Date(b.data_start).getTime() - new Date(a.data_start).getTime())
+      : (data?.wynajmy || [])
+          .filter((w: any) => {
+            const status = String(w.status?.nazwa || '').toLowerCase();
+            const isBilled = status.includes('faktur') || status.includes('rozliczon') || status.includes('zaksięgowan');
+            const matchesSearch = !query
+              || String(w.numer || '').toLowerCase().includes(query)
+              || String(w.kontrahent?.nazwa || '').toLowerCase().includes(query);
+            return !isBilled && matchesSearch;
+          })
+          .sort((a: any, b: any) => new Date(b.data_wydania).getTime() - new Date(a.data_wydania).getTime());
+
+    // Przy pustym wyszukiwaniu pokazujemy tylko 10 najnowszych pozycji.
+    // Po rozpoczęciu wyszukiwania użytkownik może znaleźć również starsze rekordy.
+    return query ? filteredAndSorted : filteredAndSorted.slice(0, 10);
+  }, [data, type, search]);
+
+  return (
+    <div className="h-full flex flex-col p-7 rounded-[32px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+        <h2 className="text-[12px] font-black uppercase tracking-[0.15em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <DollarSign size={16} className="text-emerald-500"/> Do zafakturowania
+        </h2>
+        <div className="flex gap-2">
+          <button onClick={() => setType('wydarzenia')} className={`text-[10px] font-black tracking-wider px-3 py-1.5 rounded-lg transition-colors ${type === 'wydarzenia' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-50 text-slate-500 dark:bg-white/5 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>Wydarzenia</button>
+          <button onClick={() => setType('wynajmy')} className={`text-[10px] font-black tracking-wider px-3 py-1.5 rounded-lg transition-colors ${type === 'wynajmy' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-50 text-slate-500 dark:bg-white/5 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>Wynajmy</button>
+        </div>
+      </div>
+      <div className="mb-3 relative">
+         <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Szukaj po nazwie lub kliencie..." className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs font-bold outline-none focus:border-emerald-500 dark:text-white transition-colors" />
+      </div>
+      <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar pr-2">
+        {items.map((it: any) => (
+          <div key={it.id} onClick={() => router.push(type === 'wydarzenia' ? `/dashboard/events/${it.id}` : `/dashboard/rentals/${it.id}`)} className="p-3 rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 cursor-pointer transition-colors flex justify-between items-center group">
+            <div className="min-w-0 pr-3">
+              <p className="text-[12px] font-black text-slate-800 dark:text-slate-200 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">{type === 'wydarzenia' ? it.nazwa : (it.numer || `Wynajem #${it.id}`)}</p>
+              <p className="text-[10px] font-bold text-slate-500 mt-1 truncate">{it.kontrahent?.nazwa_skrocona || it.kontrahent?.nazwa || 'Brak klienta'}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-[12px] font-black text-emerald-600 whitespace-nowrap bg-white dark:bg-slate-950 px-2 py-1 rounded-lg border border-slate-100 dark:border-white/5">{it.budzet_netto ? formatMoney(it.budzet_netto) : (it.oferta_glowna?.suma_netto ? formatMoney(it.oferta_glowna.suma_netto) : 'Brak kwoty')}</span>
+              <p className="text-[9px] font-bold text-slate-400 mt-1">{new Date(type === 'wydarzenia' ? it.data_start : it.data_wydania).toLocaleDateString('pl-PL')}</p>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-100 dark:border-white/5 p-6 text-center bg-slate-50/50 dark:bg-transparent mt-2">
+            <CheckCircle2 size={24} className="text-emerald-400 mb-2" />
+            <p className="text-[12px] font-bold text-slate-500 dark:text-slate-400">Wszystko rozliczone!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 // ============================================================================
 // WIDGET REGISTRY (Zmodernizowany Wygląd)
@@ -193,6 +272,12 @@ const WIDGETS: Record<string, { title: string; colSpan: string; render: (data: a
         </div>
       </div>
     )
+  },
+
+  'unbilled-finances': {
+    title: 'Niezafakturowane realizacje',
+    colSpan: 'md:col-span-2 xl:col-span-2',
+    render: (data, router) => <UnbilledWidget data={data} router={router} />
   },
 
   'smartflow-inventory': {
@@ -384,7 +469,7 @@ const WIDGETS: Record<string, { title: string; colSpan: string; render: (data: a
 
 const DEFAULT_LAYOUT = [
   'kpi-events', 'kpi-service', 'quick-actions', 
-  'events-today', 'smartflow-insights', 
+  'events-today', 'unbilled-finances', 'smartflow-insights', 
   'smartflow-inventory', 'pending-offers', 'fleet-alerts', 'tasks-todo', 'sales-funnel'
 ];
 
@@ -414,7 +499,7 @@ export default function DashboardPage() {
     setErrorMsg('');
     try {
       // Ładujemy dane agregacyjne i słownikowe równolegle, w tym z wielu endpointów API aby nakarmić dashboard
-      const [summaryRes, typy, statusy, kontrahenci, miejsca, uzytkownicy, ofertyRes, zadaniaRes, egzemplarzeRes, wynajmyRes] = await Promise.all([
+      const [summaryRes, typy, statusy, kontrahenci, miejsca, uzytkownicy, ofertyRes, zadaniaRes, egzemplarzeRes, wynajmyRes, wydarzeniaRes] = await Promise.all([
         api.get('/api/dashboard/summary').catch(err => ({ data: null, error: err })),
         api.get('/api/slowniki/typy-wydarzen').catch(() => ({ data: [] })),
         api.get('/api/slowniki/statusy-wydarzenia').catch(() => ({ data: [] })),
@@ -425,6 +510,7 @@ export default function DashboardPage() {
         api.get('/api/zadania?tab=moje').catch(() => ({ data: [] })),
         api.get('/api/magazyn/wszystkie-egzemplarze').catch(() => ({ data: [] })),
         api.get('/api/wynajmy').catch(() => ({ data: [] })),
+        api.get('/api/wydarzenia').catch(() => ({ data: [] })),
       ]);
 
       setDict({ typy: typy.data || [], statusy: statusy.data || [], kontrahenci: kontrahenci.data || [], miejsca: miejsca.data || [], uzytkownicy: uzytkownicy.data || [] });
@@ -435,6 +521,7 @@ export default function DashboardPage() {
       const zadania = (zadaniaRes.data || []).slice(0, 8);
       const egzemplarze = egzemplarzeRes.data || [];
       const wynajmy = wynajmyRes.data || [];
+      const wydarzenia = wydarzeniaRes.data || [];
 
       // Ewidencja i usterki magazynowe
       const inventory = {
@@ -467,7 +554,9 @@ export default function DashboardPage() {
         pendingOffers,
         finanse,
         tasks: zadania,
-        oferty
+        oferty,
+        wynajmy,
+        wydarzenia
       });
       
       // Układ użytkownika z bazy, lub domyślny

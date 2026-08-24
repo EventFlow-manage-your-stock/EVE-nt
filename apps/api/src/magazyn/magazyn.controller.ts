@@ -220,15 +220,26 @@ export class MagazynController {
   }
 
   @Put('wydarzenia/:id/packlista')
-async updatePacklistaUwagi(
-  @Param('id', ParseIntPipe) id: number,
-  @Body() dto: any,
-  @Req() req: Request
-) {
-  return this.magazynService.updatePacklistaUwagi(
-    id,
-    dto,
-    Number((req.user as any).id_organizacji)
-  );
-}
+  async updatePacklistaUwagi(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: any,
+    @Req() req: Request
+  ) {
+    return this.magazynService.updatePacklistaUwagi(
+      id,
+      dto,
+      Number((req.user as any).id_organizacji)
+    );
+  }
+
+  @Post('modele/:id/zalaczniki')
+  async addZalacznik(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
+    const id_uzytkownika = Number((req.user as any).id || (req.user as any).sub);
+    return this.magazynService.addZalacznik(id, dto, Number((req.user as any).id_organizacji), id_uzytkownika);
+  }
+
+  @Delete('modele/:id/zalaczniki/:zalacznikId')
+  async removeZalacznik(@Param('id', ParseIntPipe) id: number, @Param('zalacznikId', ParseIntPipe) zalacznikId: number, @Req() req: Request) {
+    return this.magazynService.removeZalacznik(zalacznikId, Number((req.user as any).id_organizacji));
+  }
 }

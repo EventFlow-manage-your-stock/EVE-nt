@@ -84,6 +84,11 @@ model Organizacja {
   pakiety                    Pakiet[]
   wynajmy_ekipa              WynajemUzytkownik[]
   wynajmy_pojazdy            WynajemPojazd[]
+  wydarzenia_managerowie     WydarzenieManager[]
+  etapy_uzytkownicy          EtapUzytkownik[]
+  etapy_pojazdy              EtapPojazd[]
+  wydarzenia_noclegi         WydarzenieNocleg[]
+  powiadomienia_ekipa        PowiadomienieEkipa[]
 
   @@map("organizacje")
 }
@@ -146,6 +151,9 @@ model Uzytkownik {
   utworzone_zapytania          Zapytanie[]            @relation("TworcaZapytania")
   zarzadzane_wynajmy           Wynajem[]              @relation("ManagerWynajmu")
   wynajmy_ekipa                WynajemUzytkownik[]
+  wydarzenia_manager           WydarzenieManager[]
+  etapy_przypisania            EtapUzytkownik[]
+  powiadomienia_ekipa          PowiadomienieEkipa[]
 
   @@unique([id_organizacji, email])
   @@map("uzytkownicy")
@@ -562,9 +570,28 @@ model Wydarzenie {
   status_magazynowy  StatusMagazynowy?          @relation(fields: [id_statusu_magazynowego], references: [id])
   status_ksiegowy    StatusKsiegowy?            @relation(fields: [id_statusu_ksiegowego], references: [id])
   oferta_glowna      Oferta?                    @relation("OfertaGlownaWydarzenia", fields: [id_oferty_glownej], references: [id])
+  managerowie        WydarzenieManager[]        @relation("ManagerowieWydarzenia")
+  noclegi            WydarzenieNocleg[]
+  powiadomienia      PowiadomienieEkipa[]
 
   @@index([data_start, data_koniec])
   @@map("wydarzenia")
+}
+
+model WydarzenieManager {
+  id              Int      @id @default(autoincrement())
+  id_organizacji  Int
+  id_wydarzenia   Int
+  id_uzytkownika  Int
+  aktywny         Boolean  @default(true)
+  data_utworzenia DateTime @default(now())
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenie  Wydarzenie  @relation("ManagerowieWydarzenia", fields: [id_wydarzenia], references: [id], onDelete: Cascade)
+  uzytkownik  Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+
+  @@unique([id_wydarzenia, id_uzytkownika])
+  @@map("wydarzenia_managerowie")
 }
 
 model StatusMagazynowy {
@@ -638,12 +665,76 @@ model EtapWydarzenia {
   data_aktualizacji DateTime  @updatedAt
   data_usuniecia    DateTime?
 
-  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
-  wydarzenie  Wydarzenie  @relation(fields: [id_wydarzenia], references: [id])
-  typ         TypEtapu?   @relation(fields: [id_typu_etapu], references: [id])
+  organizacja            Organizacja      @relation(fields: [id_organizacji], references: [id])
+  wydarzenie             Wydarzenie       @relation(fields: [id_wydarzenia], references: [id])
+  typ                    TypEtapu?        @relation(fields: [id_typu_etapu], references: [id])
+  przypisani_uzytkownicy EtapUzytkownik[]
+  przypisane_pojazdy     EtapPojazd[]
 
   @@index([id_wydarzenia])
   @@map("etapy_wydarzen")
+}
+
+model EtapUzytkownik {
+  id             Int     @id @default(autoincrement())
+  id_organizacji Int
+  id_etapu       Int
+  id_uzytkownika Int
+  aktywny        Boolean @default(true)
+
+  organizacja Organizacja    @relation(fields: [id_organizacji], references: [id])
+  etap        EtapWydarzenia @relation(fields: [id_etapu], references: [id], onDelete: Cascade)
+  uzytkownik  Uzytkownik     @relation(fields: [id_uzytkownika], references: [id])
+
+  @@unique([id_etapu, id_uzytkownika])
+  @@map("etapy_uzytkownicy")
+}
+
+model EtapPojazd {
+  id                Int     @id @default(autoincrement())
+  id_organizacji    Int
+  id_etapu          Int
+  id_pojazdu        Int? // Null jeśli auto z zewnątrz
+  pojazd_zewnetrzny String? @db.VarChar(255)
+  aktywny           Boolean @default(true)
+
+  organizacja Organizacja    @relation(fields: [id_organizacji], references: [id])
+  etap        EtapWydarzenia @relation(fields: [id_etapu], references: [id], onDelete: Cascade)
+  pojazd      Pojazd?        @relation(fields: [id_pojazdu], references: [id])
+
+  @@map("etapy_pojazdy")
+}
+
+model WydarzenieNocleg {
+  id                Int       @id @default(autoincrement())
+  id_organizacji    Int
+  id_wydarzenia     Int
+  nazwa_obiektu     String    @db.VarChar(255)
+  adres             String?   @db.VarChar(255)
+  data_zameldowania DateTime?
+  data_wymeldowania DateTime?
+  liczba_osob       Int?
+  opis              String?   @db.Text
+  aktywny           Boolean   @default(true)
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenie  Wydarzenie  @relation(fields: [id_wydarzenia], references: [id], onDelete: Cascade)
+
+  @@map("wydarzenia_noclegi")
+}
+
+model PowiadomienieEkipa {
+  id             Int      @id @default(autoincrement())
+  id_organizacji Int
+  id_wydarzenia  Int
+  id_uzytkownika Int
+  data_wyslania  DateTime @default(now())
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
+  wydarzenie  Wydarzenie  @relation(fields: [id_wydarzenia], references: [id], onDelete: Cascade)
+  uzytkownik  Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+
+  @@map("powiadomienia_ekipa")
 }
 
 // =========================================================
@@ -853,7 +944,7 @@ model StatusWynajmu {
   id_organizacji    Int
   nazwa             String    @db.VarChar(150)
   kolor             String?   @db.VarChar(20)
-  ikona              String?  @db.VarChar(20)
+  ikona             String?   @db.VarChar(20)
   kolejnosc         Int       @default(0)
   aktywny           Boolean   @default(true)
   data_utworzenia   DateTime  @default(now())
@@ -1177,6 +1268,7 @@ model Pojazd {
   serwisy_pojazdu   SerwisPojazdu[]
   przeglady_pojazdu PrzegladPojazdu[]
   wynajmy_pojazdy   WynajemPojazd[]
+  etapy_przypisania EtapPojazd[]
 
   @@unique([id_organizacji, nr_rejestracyjny])
   @@index([vin])

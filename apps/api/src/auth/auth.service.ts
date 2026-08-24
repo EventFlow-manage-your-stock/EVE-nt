@@ -14,7 +14,6 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
   ) {
-    // Inicjalizacja klienta SMTP do wysyłki maili
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'localhost',
       port: Number(process.env.SMTP_PORT) || 465,
@@ -50,7 +49,6 @@ export class AuthService {
       throw new UnauthorizedException('Konto lub organizacja są nieaktywne');
     }
 
-    // 1. Zbieranie uprawnień ze wszystkich ról użytkownika
     const rolePermissions = new Set<string>();
     for (const userRole of uzytkownik.role) {
       const upr = userRole.rola.uprawnienia;
@@ -59,17 +57,16 @@ export class AuthService {
       }
     }
 
-    // 2. Odejmowanie uprawnień z czarnej listy (Zablokowane dla tego użytkownika)
     const blocked = Array.isArray(uzytkownik.zablokowane_uprawnienia) ? uzytkownik.zablokowane_uprawnienia : [];
     blocked.forEach((p: string) => rolePermissions.delete(p));
 
     const permissions = Array.from(rolePermissions);
 
-    // 3. Budowa payloadu dla tokena JWT i stanu Frontendowego
     const payload = {
       sub: uzytkownik.id,
       email: uzytkownik.email,
       orgId: uzytkownik.id_organizacji,
+      tenantId: uzytkownik.id_organizacji, // BEZPIECZEŃSTWO: Używane przez Middleware do weryfikacji izolacji DB
       role: uzytkownik.role[0]?.rola.nazwa || 'Użytkownik',
       permissions
     };
@@ -91,7 +88,6 @@ export class AuthService {
   async forgotPassword(email: string) {
     const user = await this.prisma.extendedClient.uzytkownik.findFirst({ where: { email, aktywny: true } });
     
-    // Niezależnie czy mail istnieje czy nie, odpowiadamy tak samo (zapobiega wyliczaniu kont przez hakerów)
     if (!user) {
       return { success: true, message: 'Jeśli adres e-mail istnieje w bazie, wysłano na niego link.' };
     }
@@ -104,15 +100,13 @@ export class AuthService {
     const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const tokenExpiry = new Date(Date.now() + 3600000); // Token ważny 1 godzinę
+    const tokenExpiry = new Date(Date.now() + 3600000); 
 
     await this.prisma.uzytkownik.updateMany({
       where: { email },
       data: { token_resetu_hasla: resetToken, data_waznosci_tokenu: tokenExpiry }
     });
 
-
-    // Właściwa wysyłka HTML na E-mail
     try {
       await this.transporter.sendMail({
         from: process.env.SMTP_FROM || '"EventFlow WMS" <no-reply@eventflow.pl>',
@@ -134,7 +128,6 @@ export class AuthService {
       });
     } catch (err) {
       console.error('Błąd wysyłki SMTP:', err);
-      // Nie rzucamy wyjątku 500, żeby nie pokazywać na zewnątrz, że wysyłka e-mail nie działa
     }
 
     return { success: true,message: 'Jeśli adres istnieje w bazie, wysłano na niego link do resetu hasła.' };
@@ -142,13 +135,11 @@ export class AuthService {
 
   async resetPassword(token: string, passwordRaw: string) {
     try {
-      // Dekodujemy payload by zdobyć ID usera (bez weryfikacji podpisu, bo nie znamy jeszcze hasła)
       const decoded: any = jwt.decode(token);
       if (!decoded || !decoded.sub) {
         throw new BadRequestException('Błędny lub zniekształcony link.');
       }
 
-      // Pobieramy użytkownika
       const user = await this.prisma.extendedClient.uzytkownik.findUnique({
         where: { id: decoded.sub },
       });
@@ -157,13 +148,9 @@ export class AuthService {
         throw new BadRequestException('Konto użytkownika jest nieaktywne.');
       }
 
-      // Odtwarzamy ten sam secret (z aktualnym hashem usera)
       const secret = process.env.JWT_SECRET + user.haslo;
-
-      // Terz twarda weryfikacja JWT (czy nie wygasł i czy secret się zgadza)
       jwt.verify(token, secret);
 
-      // Skoro weryfikacja przeszła, zmieniamy hasło
       const hashed = await bcrypt.hash(passwordRaw, 10);
       await this.prisma.extendedClient.uzytkownik.update({
         where: { id: user.id },

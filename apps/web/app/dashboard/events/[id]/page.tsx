@@ -7,15 +7,16 @@ import {
   ArrowLeft, Box, CheckSquare, ChevronDown, ChevronRight, Copy, DollarSign,
   FileArchive, FileText, History, Loader2, MapPin, MessageSquare, Plus, Save,
   Search, Trash2, Truck, Users, Wrench, Calendar, Send, Download, Paperclip, 
-  Phone, CheckCircle2, Flag, Car, X, Clock, Layers, RotateCcw
+  CheckCircle2, Car, X, Clock, Layers, RotateCcw, Home, MailCheck, Edit2
 } from 'lucide-react';
 import { api } from '../../../../lib/api';
-import { Button, Card, Field, inputClass, SearchableSelect} from '../../../../components/ProductUI';
+import { Button, Card, Field, inputClass, SearchableSelect } from '../../../../components/ProductUI';
 import { OfferDuplicateTargetModal } from '../../../../components/OfferDuplicateTargetModal';
 import { googleMapsDirectionsUrl } from '../../../../lib/googleMaps';
 import { QuickAddCrmModal } from '../../../../components/QuickAddCrmModal';
 import { SimpleModal } from '../../../../components/SimpleModal';
 import { useAuthStore } from '../../../../store/auth.store';
+import { openLabelsPage } from '../../../../lib/labels';
 
 // ============================================================================
 // GLOBALNE HELPERY WMS & UI
@@ -25,7 +26,9 @@ const TABS = [
   { id: 'sprzet', label: 'Sprzęt (Wydania/Zwroty)', icon: Box },
   { id: 'oferty', label: 'Oferty', icon: DollarSign },
   { id: 'ekipa', label: 'Ekipa', icon: Users },
+  { id: 'podsumowanie_ekipy', label: 'Technicy (Liczniki)', icon: Users },
   { id: 'flota', label: 'Flota', icon: Truck },
+  { id: 'nocleg', label: 'Noclegi', icon: Home },
   { id: 'zadania', label: 'Zadania', icon: CheckSquare },
   { id: 'chat', label: 'Chat Grupowy', icon: MessageSquare },
   { id: 'zalaczniki', label: 'Załączniki', icon: FileArchive },
@@ -61,8 +64,12 @@ function flattenCategories(categories: any[]): any[] {
 function buildCategoryTree(categories: any[]) {
   const flatInput = flattenCategories(categories || []);
   const byId = new Map<string, any>();
-  for (const cat of flatInput) byId.set(String(cat.id), { ...cat, dzieci: [], _parentId: getCategoryParentId(cat) ? String(getCategoryParentId(cat)) : null });
-  for (const cat of Array.from(byId.values())) if (!cat._parentId && cat.parent?.id) cat._parentId = String(cat.parent.id);
+  for (const cat of flatInput) {
+    byId.set(String(cat.id), { ...cat, dzieci: [], _parentId: getCategoryParentId(cat) ? String(getCategoryParentId(cat)) : null });
+  }
+  for (const cat of Array.from(byId.values())) {
+    if (!cat._parentId && cat.parent?.id) cat._parentId = String(cat.parent.id);
+  }
   const roots: any[] = [];
   for (const cat of Array.from(byId.values())) {
     if (cat._parentId && byId.has(cat._parentId)) byId.get(cat._parentId).dzieci.push(cat);
@@ -100,71 +107,16 @@ function categoryPath(categoryId: string, byId: Map<string, any>) {
   return parts.join(' / ');
 }
 
-// ============================================================================
-// WMS CORE HELPERS - INTELIGENTNY SKANER & KONTENERY
-// ============================================================================
-
-function normalizeCode(v: any) {
-  return String(v || '').trim().replace(/\s+/g, '').toLowerCase();
-}
-function getEquipmentCodes(row: any): string[] {
-  const egz = row?.egzemplarz || row;
-  const model = row?.model || egz?.model || row;
-  return [
-    row?.kod, row?.kod_kreskowy, row?.barcode, row?.qr_kod, row?.sn, row?.numer_seryjny,
-    egz?.kod, egz?.kod_kreskowy, egz?.zewnetrzny_kod_kreskowy, egz?.zewnetrzny_qr_kod, egz?.qr_kod, egz?.sn, egz?.numer_seryjny,
-    model?.kod, model?.kod_kreskowy, model?.barcode,
-  ].map(normalizeCode).filter(Boolean);
-}
-
-function getEquipmentText(row: any): string {
-  const egz = row?.egzemplarz || row;
-  const model = row?.model || egz?.model || row;
-  return [
-    row?.nazwa, row?.nazwa_modelu, row?.typ, row?.rodzaj, row?.tryb_ewidencji, row?.kategoria, row?.kategoria_nazwa,
-    egz?.nazwa, egz?.numer_egzemplarza, egz?.numer_urzadzenia, egz?.sn, egz?.numer_seryjny,
-    model?.nazwa, model?.typ, model?.rodzaj, model?.typ_sprzetu, model?.tryb_ewidencji, model?.kategoria?.nazwa, model?.kategoria?.sciezka
-  ].filter(Boolean).map((v) => String(v).toLowerCase()).join(' ');
-}
-
-function isQuantityOnly(row: any): boolean {
-  if (!row) return false;
-  const model = row?.model || row?.egzemplarz?.model || row;
-  return Boolean(
-    row.rowType === 'ilosciowy_model' || row.quantityOnly === true ||
-    model?.tryb_ewidencji === 'ilosciowe' || model?.typ_sprzetu === 'ilosciowe'
-  );
-}
-
-// Sprawdza czy sprzęt to Zestaw (Rack, Szafa Rack) - nierozerwalna całość na wyjeździe
-function isZestawRow(row: any): boolean {
-  const modelType = String(row?.model?.typ_sprzetu || row?.egzemplarz?.model?.typ_sprzetu || row?.typ_sprzetu || '').toLowerCase();
-  return Boolean(
-    modelType === 'zestaw' || modelType === 'rack' || row?.rowType === 'zestaw' || row?.czy_zestaw === true || row?.isZestaw === true
-  );
-}
-
-// Sprawdza czy sprzęt to Opakowanie (Case, Skrzynia) - rozpakowuje się z automatu
-function isCaseRow(row: any): boolean {
-  if (isZestawRow(row)) return false; // PRIORYTET: Zestaw absolutnie nie jest case'm!
-  const modelType = String(row?.model?.typ_sprzetu || row?.egzemplarz?.model?.typ_sprzetu || row?.typ_sprzetu || '').toLowerCase();
-  return Boolean(
-    modelType === 'opakowanie' || row?.isCase === true || row?.czy_case === true || row?.rowType === 'case'
-  );
-}
-
-function isEquipmentInstance(row: any): boolean {
-  const hasInstance = Boolean(row?.id_egzemplarza || row?.egzemplarz || row?.id);
-  // Jeśli to zwykły sprzęt albo Zestaw to może wejść na dokument. 
-  // Odrzucamy sprzęt ilościowy (inna logika) i bezpośrednie puste case'y.
-  return hasInstance && !isQuantityOnly(row) && !isCaseRow(row);
-}
-
+function normalizeCode(v: any) { return String(v || '').trim().replace(/\s+/g, '').toLowerCase(); }
+function getEquipmentCodes(row: any): string[] { const egz = row?.egzemplarz || row; const model = row?.model || egz?.model || row; return [ row?.kod, row?.kod_kreskowy, row?.barcode, row?.qr_kod, row?.sn, row?.numer_seryjny, egz?.kod, egz?.kod_kreskowy, egz?.zewnetrzny_kod_kreskowy, egz?.zewnetrzny_qr_kod, egz?.qr_kod, egz?.sn, egz?.numer_seryjny, model?.kod, model?.kod_kreskowy, model?.barcode, ].map(normalizeCode).filter(Boolean); }
+function isQuantityOnly(row: any): boolean { if (!row) return false; const model = row?.model || row?.egzemplarz?.model || row; return Boolean( row.rowType === 'ilosciowy_model' || row.quantityOnly === true || model?.tryb_ewidencji === 'ilosciowe' || model?.typ_sprzetu === 'ilosciowe' ); }
+function isZestawRow(row: any): boolean { const modelType = String(row?.model?.typ_sprzetu || row?.egzemplarz?.model?.typ_sprzetu || row?.typ_sprzetu || '').toLowerCase(); return Boolean( modelType === 'zestaw' || modelType === 'rack' || row?.rowType === 'zestaw' || row?.czy_zestaw === true || row?.isZestaw === true ); }
+function isCaseRow(row: any): boolean { if (isZestawRow(row)) return false; const modelType = String(row?.model?.typ_sprzetu || row?.egzemplarz?.model?.typ_sprzetu || row?.typ_sprzetu || '').toLowerCase(); return Boolean( modelType === 'opakowanie' || row?.isCase === true || row?.czy_case === true || row?.rowType === 'case' ); }
+function isEquipmentInstance(row: any): boolean { const hasInstance = Boolean(row?.id_egzemplarza || row?.egzemplarz || row?.id); return hasInstance && !isQuantityOnly(row) && !isCaseRow(row); }
 function modelIdOf(row: any) { return row?.id_modelu || row?.model?.id || row?.egzemplarz?.id_modelu || row?.egzemplarz?.model?.id || null; }
 function modelNameOf(row: any) { return row?.nazwa_modelu || row?.model?.nazwa || row?.egzemplarz?.model?.nazwa || row?.nazwa || row?.egzemplarz?.nazwa || 'Sprzęt'; }
 function modelCategoryIdOf(row: any) { return row?.id_kategorii || row?.model?.id_kategorii || row?.model?.kategoria?.id || row?.egzemplarz?.model?.id_kategorii || row?.egzemplarz?.model?.kategoria?.id || modelCategoryId(row?.model || row); }
 function numberOf(row: any) { const egz = row?.egzemplarz || row; return egz?.numer_egzemplarza || egz?.numer_urzadzenia || egz?.sn || egz?.kod_kreskowy || ''; }
-
 
 // ============================================================================
 // KOMPONENT GŁÓWNY (Szczegóły Wydarzenia)
@@ -174,6 +126,7 @@ export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const isNew = params.id === 'new';
+  const eventIdAsNumber = Number(params.id);
   
   const [activeTab, setActiveTab] = useState('sprzet');
   const [tabSearchQuery, setTabSearchQuery] = useState('');
@@ -189,7 +142,14 @@ export default function EventDetailsPage() {
   const [crmModalMode, setCrmModalMode] = useState<'kontrahent' | 'kontakt' | null>(null);
 
   // States for Modals
+  const [showManagerModal, setShowManagerModal] = useState(false);
+  const [selectedManagerId, setSelectedManagerId] = useState('');
+  
   const [showEtapModal, setShowEtapModal] = useState(false);
+  const [etapToManage, setEtapToManage] = useState<any>(null);
+  const [etapToEdit, setEtapToEdit] = useState<any>(null);
+  
+  const [showMassAssign, setShowMassAssign] = useState<{type: 'user' | 'vehicle', obj: any} | null>(null);
 
   useEffect(() => { setTabSearchQuery(''); }, [activeTab]);
 
@@ -207,14 +167,9 @@ export default function EventDetailsPage() {
     
     setDict((prev: any) => ({
       ...prev,
-      typy: typy.data || [],
-      statusy: statusy.data || [],
-      statusyMagazynowe: statusyMagazynowe.data || [],
-      statusyKsiegowe: statusyKsiegowe.data || [],
-      kontrahenci: kontrahenci.data || [],
-      miejsca: miejsca.data || [],
-      uzytkownicy: uzytkownicy.data || [],
-      pojazdy: pojazdy.data || [],
+      typy: typy.data || [], statusy: statusy.data || [], statusyMagazynowe: statusyMagazynowe.data || [],
+      statusyKsiegowe: statusyKsiegowe.data || [], kontrahenci: kontrahenci.data || [], miejsca: miejsca.data || [],
+      uzytkownicy: uzytkownicy.data || [], pojazdy: pojazdy.data || [],
     }));
   }
 
@@ -226,24 +181,23 @@ export default function EventDetailsPage() {
       const res = await api.get(`/api/wydarzenia/${params.id}`);
       const e = res.data;
       setEventData(e);
+
+      // Synchronizujemy aktualnie otwarty modal etapu z najnowszymi danymi.
+      // Dzięki temu po dodaniu/usunięciu technika lub pojazdu licznik
+      // na karcie harmonogramu od razu pokazuje faktyczną wartość.
+      setEtapToManage((currentEtap: any) => {
+        if (!currentEtap?.id) return currentEtap;
+        return e?.etapy?.find((etap: any) => etap.id === currentEtap.id) || currentEtap;
+      });
+
       setOfferName(e?.nazwa ? `Oferta - ${e.nazwa}` : 'Nowa oferta');
       setForm({
-        nazwa: e.nazwa || '',
-        id_typu_wydarzenia: toSelect(e.id_typu_wydarzenia),
-        id_statusu_wydarzenia: toSelect(e.id_statusu_wydarzenia),
-        id_statusu_magazynowego: toSelect(e.id_statusu_magazynowego),
-        id_statusu_ksiegowego: toSelect(e.id_statusu_ksiegowego),
-        id_oferty_glownej: toSelect(e.id_oferty_glownej),
-        id_managera: toSelect(e.id_managera),
-        id_kontrahenta: toSelect(e.id_kontrahenta),
-        id_kontaktu: toSelect(e.id_kontaktu),
-        id_miejsca: toSelect(e.id_miejsca),
-        data_start: toDateInput(e.data_start),
-        data_koniec: toDateInput(e.data_koniec),
-        budzet_netto: e.budzet_netto || '',
-        miejsce_reczne: e.miejsce_reczne || '',
-        adres_reczny: e.adres_reczny || '',
-        opis: e.opis || e.uwagi || '',
+        nazwa: e.nazwa || '', id_typu_wydarzenia: toSelect(e.id_typu_wydarzenia), id_statusu_wydarzenia: toSelect(e.id_statusu_wydarzenia),
+        id_statusu_magazynowego: toSelect(e.id_statusu_magazynowego), id_statusu_ksiegowego: toSelect(e.id_statusu_ksiegowego),
+        id_oferty_glownej: toSelect(e.id_oferty_glownej), id_managera: toSelect(e.id_managera), id_kontrahenta: toSelect(e.id_kontrahenta),
+        id_kontaktu: toSelect(e.id_kontaktu), id_miejsca: toSelect(e.id_miejsca), data_start: toDateInput(e.data_start),
+        data_koniec: toDateInput(e.data_koniec), budzet_netto: e.budzet_netto || '', miejsce_reczne: e.miejsce_reczne || '',
+        adres_reczny: e.adres_reczny || '', opis: e.opis || e.uwagi || '',
       });
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Nie udało się wczytać wydarzenia.');
@@ -265,22 +219,11 @@ export default function EventDetailsPage() {
   useEffect(() => { loadDictionaries(); loadEvent(); }, [params.id]);
 
   const payload = useMemo(() => ({
-    nazwa: strOrNull(form.nazwa),
-    opis: strOrNull(form.opis),
-    data_start: strOrNull(form.data_start),
-    data_koniec: strOrNull(form.data_koniec),
-    budzet_netto: numOrNull(form.budzet_netto),
-    id_typu_wydarzenia: numOrNull(form.id_typu_wydarzenia),
-    id_statusu_wydarzenia: numOrNull(form.id_statusu_wydarzenia),
-    id_statusu_magazynowego: numOrNull(form.id_statusu_magazynowego),
-    id_statusu_ksiegowego: numOrNull(form.id_statusu_ksiegowego),
-    id_oferty_glownej: numOrNull(form.id_oferty_glownej),
-    id_kontrahenta: numOrNull(form.id_kontrahenta),
-    id_kontaktu: numOrNull(form.id_kontaktu), 
-    id_miejsca: numOrNull(form.id_miejsca),
-    id_managera: numOrNull(form.id_managera),
-    miejsce_reczne: strOrNull(form.miejsce_reczne),
-    adres_reczny: strOrNull(form.adres_reczny),
+    nazwa: strOrNull(form.nazwa), opis: strOrNull(form.opis), data_start: strOrNull(form.data_start), data_koniec: strOrNull(form.data_koniec),
+    budzet_netto: numOrNull(form.budzet_netto), id_typu_wydarzenia: numOrNull(form.id_typu_wydarzenia), id_statusu_wydarzenia: numOrNull(form.id_statusu_wydarzenia),
+    id_statusu_magazynowego: numOrNull(form.id_statusu_magazynowego), id_statusu_ksiegowego: numOrNull(form.id_statusu_ksiegowego),
+    id_oferty_glownej: numOrNull(form.id_oferty_glownej), id_kontrahenta: numOrNull(form.id_kontrahenta), id_kontaktu: numOrNull(form.id_kontaktu), 
+    id_miejsca: numOrNull(form.id_miejsca), miejsce_reczne: strOrNull(form.miejsce_reczne), adres_reczny: strOrNull(form.adres_reczny),
   }), [form]);
 
   async function submit(e?: any) {
@@ -295,11 +238,7 @@ export default function EventDetailsPage() {
         await api.put(`/api/wydarzenia/${params.id}`, payload);
         await loadEvent();
       }
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Nie udało się zapisać wydarzenia.');
-    } finally {
-      setSaving(false);
-    }
+    } catch (err: any) { setError(err?.response?.data?.message || err.message || 'Nie udało się zapisać wydarzenia.'); } finally { setSaving(false); }
   }
 
   async function remove() {
@@ -310,11 +249,7 @@ export default function EventDetailsPage() {
 
   async function createOffer() {
     if (isNew) return;
-    const r = await api.post('/api/oferty', {
-      nazwa: offerName || `Oferta - ${form.nazwa || eventData?.nazwa || params.id}`,
-      id_wydarzenia: Number(params.id),
-      id_kontrahenta: numOrNull(form.id_kontrahenta),
-    });
+    const r = await api.post('/api/oferty', { nazwa: offerName || `Oferta - ${form.nazwa || eventData?.nazwa || params.id}`, id_wydarzenia: Number(params.id), id_kontrahenta: numOrNull(form.id_kontrahenta) });
     router.push(`/dashboard/offers/${r.data.id}`);
   }
 
@@ -329,11 +264,26 @@ export default function EventDetailsPage() {
     setCrmModalMode(null);
   }
 
+  async function assignManager() {
+    if (!selectedManagerId) return alert('Wybierz osobę!');
+    try {
+      await api.post(`/api/wydarzenia/${params.id}/managerowie`, { id_uzytkownika: selectedManagerId });
+      setShowManagerModal(false); 
+      setSelectedManagerId(''); 
+      loadEvent();
+    } catch (err: any) { alert(err?.response?.data?.message || 'Nie udało się dodać managera'); }
+  }
+
+  async function removeManager(managerId: number) {
+    if(!confirm('Odpisać managera od tego wydarzenia?')) return;
+    await api.delete(`/api/wydarzenia/${params.id}/managerowie/${managerId}`);
+    loadEvent();
+  }
+
   if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-[#04e0ff] w-10 h-10" /> <span className="ml-4 font-bold text-slate-500">Ładowanie danych wydarzenia...</span></div>;
 
   const offers = eventData?.oferty || [];
   const maps = googleMapsDirectionsUrl(form.adres_reczny);
-  const currentManager = dict.uzytkownicy.find((u: any) => String(u.id) === String(form.id_managera)) || eventData?.manager;
 
   return (
     <div className="mx-auto max-w-[1800px] space-y-6 animate-fade-in-up">
@@ -374,114 +324,120 @@ export default function EventDetailsPage() {
       )}
 
       <form onSubmit={submit} className="grid gap-6 xl:grid-cols-[1.1fr_.9fr_1.1fr]">
-        <Card className="space-y-4">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Podstawowe Informacje</p>
-              <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-white">{form.nazwa || 'Nowe wydarzenie'}</h2>
+        <div className="flex flex-col gap-6">
+          <Card className="space-y-4">
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Podstawowe Informacje</p>
+                <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-white">{form.nazwa || 'Nowe wydarzenie'}</h2>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-end">
+                 {eventData?.status && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: eventData.status.kolor || '#0891B2' }}>{eventData.status.ikona || '●'} {eventData.status.nazwa}</span>}
+                 {eventData?.status_magazynowy && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: eventData.status_magazynowy.kolor || '#F97316' }}>{eventData.status_magazynowy.ikona || '📦'} {eventData.status_magazynowy.nazwa}</span>}
+                 {eventData?.status_ksiegowy && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: eventData.status_ksiegowy.kolor || '#22C55E' }}>{eventData.status_ksiegowy.ikona || '💰'} {eventData.status_ksiegowy.nazwa}</span>}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2 justify-end">
-               {eventData?.status && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: eventData.status.kolor || '#0891B2' }}>{eventData.status.ikona || '●'} {eventData.status.nazwa}</span>}
-               {eventData?.status_magazynowy && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: eventData.status_magazynowy.kolor || '#F97316' }}>{eventData.status_magazynowy.ikona || '📦'} {eventData.status_magazynowy.nazwa}</span>}
-               {eventData?.status_ksiegowy && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: eventData.status_ksiegowy.kolor || '#22C55E' }}>{eventData.status_ksiegowy.ikona || '💰'} {eventData.status_ksiegowy.nazwa}</span>}
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Nazwa (Odbiorca / Projekt)"><input className={inputClass} value={form.nazwa || ''} onChange={(e) => setForm({ ...form, nazwa: e.target.value })} required /></Field>
+              
+              <Field label="Założony budżet netto (PLN)">
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><DollarSign size={15} className="text-slate-400" /></div>
+                  <input type="number" step="0.01" min="0" className={`${inputClass} pl-9`} value={form.budzet_netto || ''} onChange={(e) => setForm({ ...form, budzet_netto: e.target.value })} placeholder="np. 15000.00" />
+                </div>
+              </Field>
+
+              <Field label="Typ wydarzenia">
+                <SearchableSelect value={form.id_typu_wydarzenia || ''} onChange={(v) => setForm({ ...form, id_typu_wydarzenia: v })} options={dict.typy.map((t: any) => ({ value: String(t.id), label: t.nazwa }))} placeholder="Wybierz..." />
+              </Field>
+
+              <Field label="Start"><input type="datetime-local" className={inputClass} value={form.data_start || ''} onChange={(e) => setForm({ ...form, data_start: e.target.value })} /></Field>
+              
+              <Field label="Status główny">
+                <SearchableSelect value={form.id_statusu_wydarzenia || ''} onChange={(v) => setForm({ ...form, id_statusu_wydarzenia: v })} options={dict.statusy.map((s: any) => ({ value: String(s.id), label: `${s.ikona || '●'} ${s.nazwa}` }))} placeholder="Wybierz..." />
+              </Field>
+
+              <Field label="Koniec"><input type="datetime-local" className={inputClass} value={form.data_koniec || ''} onChange={(e) => setForm({ ...form, data_koniec: e.target.value })} /></Field>
+              
+              <Field label="Klient z bazy">
+                <div className="flex gap-2">
+                  <div className="flex-1 min-w-0">
+                    <SearchableSelect value={form.id_kontrahenta || ''} onChange={(v) => setForm({ ...form, id_kontrahenta: v, id_kontaktu: '' })} options={dict.kontrahenci.map((k: any) => ({ value: String(k.id), label: k.nazwa }))} placeholder="Brak" />
+                  </div>
+                  <button type="button" onClick={() => setCrmModalMode('kontrahent')} className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"><Plus size={18} /></button>
+                </div>
+              </Field>
+              
+              <Field label="Osoba kontaktowa">
+                <div className="flex gap-2">
+                  <div className="flex-1 min-w-0">
+                    <SearchableSelect value={form.id_kontaktu || ''} onChange={(v) => setForm({ ...form, id_kontaktu: v })} options={dict.kontakty?.map((k: any) => ({ value: String(k.id), label: `${k.imie} ${k.nazwisko} ${k.stanowisko ? `(${k.stanowisko})` : ''}` })) || []} placeholder={form.id_kontrahenta ? "Wybierz osobę..." : "Najpierw wybierz klienta"} disabled={!form.id_kontrahenta} />
+                  </div>
+                  <button type="button" disabled={!form.id_kontrahenta} onClick={() => setCrmModalMode('kontakt')} className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition disabled:opacity-50 disabled:pointer-events-none"><Plus size={18} /></button>
+                </div>
+              </Field>
+
+              <Field label="Miejsce z bazy">
+                <SearchableSelect value={form.id_miejsca || ''} onChange={(v) => setForm({ ...form, id_miejsca: v })} options={dict.miejsca.map((m: any) => ({ value: String(m.id), label: m.nazwa }))} placeholder="Wpiszę ręcznie (lub wybierz)" />
+              </Field>
+              
+               <Field label="Miejsce ręcznie (Gdy brak w bazie)"><input className={inputClass} value={form.miejsce_reczne || ''} onChange={(e) => setForm({ ...form, miejsce_reczne: e.target.value })} /></Field>
             </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Nazwa (Odbiorca / Projekt)"><input className={inputClass} value={form.nazwa || ''} onChange={(e) => setForm({ ...form, nazwa: e.target.value })} required /></Field>
             
-            <Field label="Założony budżet netto (PLN)">
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><DollarSign size={15} className="text-slate-400" /></div>
-                <input type="number" step="0.01" min="0" className={`${inputClass} pl-9`} value={form.budzet_netto || ''} onChange={(e) => setForm({ ...form, budzet_netto: e.target.value })} placeholder="np. 15000.00" />
-              </div>
-            </Field>
-
-            <Field label="Typ wydarzenia">
-              <SearchableSelect value={form.id_typu_wydarzenia || ''} onChange={(v) => setForm({ ...form, id_typu_wydarzenia: v })} options={dict.typy.map((t: any) => ({ value: String(t.id), label: t.nazwa }))} placeholder="Wybierz..." />
-            </Field>
-
-            <Field label="Start"><input type="datetime-local" className={inputClass} value={form.data_start || ''} onChange={(e) => setForm({ ...form, data_start: e.target.value })} /></Field>
-            
-            <Field label="Status główny">
-              <SearchableSelect value={form.id_statusu_wydarzenia || ''} onChange={(v) => setForm({ ...form, id_statusu_wydarzenia: v })} options={dict.statusy.map((s: any) => ({ value: String(s.id), label: `${s.ikona || '●'} ${s.nazwa}` }))} placeholder="Wybierz..." />
-            </Field>
-
-            <Field label="Koniec"><input type="datetime-local" className={inputClass} value={form.data_koniec || ''} onChange={(e) => setForm({ ...form, data_koniec: e.target.value })} /></Field>
-            
-            <Field label="Klient z bazy">
-              <div className="flex gap-2">
-                <div className="flex-1 min-w-0">
-                  <SearchableSelect value={form.id_kontrahenta || ''} onChange={(v) => setForm({ ...form, id_kontrahenta: v, id_kontaktu: '' })} options={dict.kontrahenci.map((k: any) => ({ value: String(k.id), label: k.nazwa }))} placeholder="Brak" />
-                </div>
-                <button type="button" onClick={() => setCrmModalMode('kontrahent')} className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"><Plus size={18} /></button>
-              </div>
-            </Field>
-            
-            <Field label="Osoba kontaktowa">
-              <div className="flex gap-2">
-                <div className="flex-1 min-w-0">
-                  <SearchableSelect value={form.id_kontaktu || ''} onChange={(v) => setForm({ ...form, id_kontaktu: v })} options={dict.kontakty?.map((k: any) => ({ value: String(k.id), label: `${k.imie} ${k.nazwisko} ${k.stanowisko ? `(${k.stanowisko})` : ''}` })) || []} placeholder={form.id_kontrahenta ? "Wybierz osobę..." : "Najpierw wybierz klienta"} disabled={!form.id_kontrahenta} />
-                </div>
-                <button type="button" disabled={!form.id_kontrahenta} onClick={() => setCrmModalMode('kontakt')} className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition disabled:opacity-50 disabled:pointer-events-none"><Plus size={18} /></button>
-              </div>
-            </Field>
-
-            <Field label="Miejsce z bazy">
-              <SearchableSelect value={form.id_miejsca || ''} onChange={(v) => setForm({ ...form, id_miejsca: v })} options={dict.miejsca.map((m: any) => ({ value: String(m.id), label: m.nazwa }))} placeholder="Wpiszę ręcznie (lub wybierz)" />
-            </Field>
-            
-             <Field label="Miejsce ręcznie (Gdy brak w bazie)"><input className={inputClass} value={form.miejsce_reczne || ''} onChange={(e) => setForm({ ...form, miejsce_reczne: e.target.value })} /></Field>
-          </div>
-          
-          <div className="grid gap-4 md:grid-cols-1 border-t border-slate-100 dark:border-white/10 pt-5 mt-4">
-             <Field label="Adres docelowy / Lokalizacja">
-               <div className="flex gap-2">
-                 <input className={inputClass} value={form.adres_reczny || ''} onChange={(e) => setForm({ ...form, adres_reczny: e.target.value })} placeholder="Wpisz dokładny adres, np. ul. Długa 1, Poznań" />
-                 {maps && <a className="flex items-center justify-center gap-2 rounded-xl bg-cyan-50 dark:bg-cyan-500/10 px-4 py-2 text-sm font-black text-cyan-700 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition whitespace-nowrap" href={maps} target="_blank" rel="noreferrer"><MapPin size={16} /> Otwórz trasę</a>}
-               </div>
-             </Field>
-             <div className="h-64 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#02080a] shadow-sm relative">
-               {form.adres_reczny ? (
-                 <iframe
-                   width="100%"
-                   height="100%"
-                   style={{ border: 0, filter: 'contrast(0.9)' }} // Lekki kontrast dla mapy
-                   loading="lazy"
-                   allowFullScreen
-                   referrerPolicy="no-referrer-when-downgrade"
-                   src={`https://maps.google.com/maps?q=${encodeURIComponent(form.adres_reczny)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
-                 ></iframe>
-               ) : (
-                 <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                   <MapPin size={32} className="mb-2 opacity-30" />
-                   <p className="text-sm font-bold opacity-60">Wpisz adres, aby wygenerować podgląd mapy</p>
+            <div className="grid gap-4 md:grid-cols-1 border-t border-slate-100 dark:border-white/10 pt-5 mt-4">
+               <Field label="Adres docelowy / Lokalizacja">
+                 <div className="flex gap-2">
+                   <input className={inputClass} value={form.adres_reczny || ''} onChange={(e) => setForm({ ...form, adres_reczny: e.target.value })} placeholder="Wpisz dokładny adres, np. ul. Długa 1, Poznań" />
+                   {maps && <a className="flex items-center justify-center gap-2 rounded-xl bg-cyan-50 dark:bg-cyan-500/10 px-4 py-2 text-sm font-black text-cyan-700 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition whitespace-nowrap" href={maps} target="_blank" rel="noreferrer"><MapPin size={16} /> Otwórz trasę</a>}
                  </div>
-               )}
-             </div>
-          </div>
-
-          <Field label="Notatki / Wytyczne ogólne"><textarea className={`${inputClass} min-h-[100px] resize-none`} value={form.opis || ''} onChange={(e) => setForm({ ...form, opis: e.target.value })} /></Field>
-        </Card>
+               </Field>
+               <div className="h-64 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#02080a] shadow-sm relative">
+                 {form.adres_reczny ? (
+                   <iframe
+                     width="100%"
+                     height="100%"
+                     style={{ border: 0, filter: 'contrast(0.9)' }}
+                     loading="lazy"
+                     allowFullScreen
+                     referrerPolicy="no-referrer-when-downgrade"
+                     src={`https://maps.google.com/maps?q=${encodeURIComponent(form.adres_reczny)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                   ></iframe>
+                 ) : (
+                   <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                     <MapPin size={32} className="mb-2 opacity-30" />
+                     <p className="text-sm font-bold opacity-60">Wpisz adres, aby wygenerować podgląd mapy</p>
+                   </div>
+                 )}
+               </div>
+            </div>
+          </Card>
+        </div>
 
         <div className="flex flex-col gap-6">
           <Card className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/10 dark:to-white/5 text-lg font-black text-slate-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10">
-                {initials(currentManager)}
-              </div>
-              <div className="min-w-0">
-                <p className="font-black text-slate-900 dark:text-white text-lg truncate">{currentManager ? `${currentManager.imie || ''} ${currentManager.nazwisko || ''}`.trim() : 'Brak managera'}</p>
-                <p className="text-sm font-bold text-[#04e0ff] uppercase tracking-wider mt-0.5">Event Manager</p>
-              </div>
-            </div>
-            <div className="pt-2">
-              <Field label="Zmień Managera Projektu">
-                <SearchableSelect value={form.id_managera || ''} onChange={(v) => setForm({ ...form, id_managera: v })} options={dict.uzytkownicy.map((u: any) => ({ value: String(u.id), label: `${u.imie} ${u.nazwisko}` }))} placeholder="Brak" />
-              </Field>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3 mb-2">
+               <h3 className="font-black text-lg text-slate-900 dark:text-white">Project Managerowie</h3>
+               <Button variant="secondary" onClick={() => setShowManagerModal(true)}><Plus size={14} className="inline mr-1"/>Dodaj</Button>
             </div>
             
-            <div className="grid gap-3 grid-cols-2 pt-4 border-t border-slate-100 dark:border-white/10 mt-2">
+            <div className="space-y-3">
+              {(eventData?.managerowie || []).map((m: any) => (
+                <div key={m.id} className="flex items-center gap-4 p-3 border border-slate-200 dark:border-white/10 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-cyan-300 transition group">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-sm font-black text-cyan-700 dark:text-cyan-400 shadow-inner">
+                    {initials(m.uzytkownik)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-black text-slate-900 dark:text-white truncate">{m.uzytkownik?.imie} {m.uzytkownik?.nazwisko}</p>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 truncate mt-0.5">{m.uzytkownik?.email && <a href={`mailto:${m.uzytkownik?.email}`} className="hover:underline">{m.uzytkownik?.email}</a>} • {m.uzytkownik?.telefon && <a href={`tel:${m.uzytkownik?.telefon}`} className="hover:underline">{m.uzytkownik?.telefon}</a> || 'Brak tel.'}</p>
+                  </div>
+                  <button type="button" onClick={() => removeManager(m.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition opacity-0 group-hover:opacity-100"><X size={16}/></button>
+                </div>
+              ))}
+              {!eventData?.managerowie?.length && <p className="text-sm font-bold text-slate-400 text-center py-4">Brak przypisanych managerów.</p>}
+            </div>
+
+            <div className="grid gap-3 grid-cols-2 pt-6 border-t border-slate-100 dark:border-white/10">
               <Info label="Waga sprzętu" value="Wymaga planu" />
               <Info label="Objętość" value="Wymaga planu" />
             </div>
@@ -498,40 +454,76 @@ export default function EventDetailsPage() {
               </div>
             </div>
           </Card>
+          <Card>
+             <div className="flex items-center justify-between mb-4">
+               <h3 className="font-black text-lg text-slate-900 dark:text-white">Notatki / Wytyczne ogólne (Brief)</h3>
+             </div>
+             <textarea 
+               className={`${inputClass} min-h-[400px] resize-none text-base p-4 bg-slate-50 dark:bg-black/20`} 
+               value={form.opis || ''} 
+               onChange={(e) => setForm({ ...form, opis: e.target.value })} 
+               placeholder="Wpisz pełne wytyczne dla eventu, sprzętu, ekipy. Pamiętaj, że każdy ma do tego wgląd."
+             />
+          </Card>
         </div>
+
+        {/* HARMONOGRAM Z OSIĄ Czasu */}
         <div className="flex flex-col gap-6">
           <Card className="flex-1 flex flex-col">
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Harmonogram</p>
-                <h2 className="text-xl font-black text-slate-900 dark:text-white mt-1">Etapy (Stages)</h2>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Harmonogram i Oś Czasu</p>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white mt-1">Etapy Eventu</h2>
               </div>
-              <Button variant="secondary" onClick={() => setShowEtapModal(true)}><Plus size={16} className="inline" /> Dodaj</Button>
+              <Button variant="secondary" onClick={() => setEtapToEdit({ isNew: true })}><Plus size={16} className="inline" /> Dodaj etap</Button>
             </div>
-            <div className="space-y-3 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-              {(eventData?.etapy || []).map((etap: any) => (
-                <div key={etap.id} className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 shadow-sm flex justify-between items-center group transition-colors hover:border-cyan-300 dark:hover:border-cyan-500/50">
-                  <div className="min-w-0 pr-4">
-                    <p className="font-black text-slate-900 dark:text-white truncate">{etap.nazwa}</p>
-                    <p className="text-[11px] font-bold text-[#04e0ff] mt-1">{dateTime(etap.data_start)} → {dateTime(etap.data_koniec)}</p>
-                    {etap.opis && <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1.5 truncate">{etap.opis}</p>}
-                  </div>
-                  <button type="button" onClick={async () => {
-                     if(confirm('Usunąć etap?')) {
-                       await api.delete(`/api/wydarzenia/${params.id}/etapy/${etap.id}`);
-                       loadEvent();
-                     }
-                  }} className="text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition opacity-0 group-hover:opacity-100 p-2">
-                    <Trash2 size={18}/>
-                  </button>
+            
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative">
+              {eventData?.etapy?.length > 0 ? (
+                <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-5 space-y-8 pb-4 pt-2">
+                  {(eventData.etapy || []).map((etap: any) => (
+                    <div key={etap.id} className="relative pl-8 group">
+                      <div className="absolute -left-[11px] top-1.5 h-5 w-5 rounded-full border-4 border-white dark:border-slate-900 bg-[#04e0ff] z-10"></div>
+                      
+                      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:border-cyan-300 dark:hover:border-cyan-500/50 hover:shadow-md relative">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="text-lg font-black text-slate-900 dark:text-white">{etap.nazwa}</h4>
+                            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+                              <Clock size={13} className="text-[#04e0ff]" /> {dateTime(etap.data_start)} → {dateTime(etap.data_koniec)}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button type="button" onClick={() => setEtapToEdit(etap)} className="p-2 bg-slate-50 dark:bg-white/5 text-slate-500 rounded-xl hover:text-[#04e0ff] transition" title="Edytuj dane etapu"><Edit2 size={16} /></button>
+                            <button type="button" onClick={async () => { if(confirm('Usunąć ten etap?')) { await api.delete(`/api/wydarzenia/${params.id}/etapy/${etap.id}`); loadEvent(); } }} className="p-2 bg-slate-50 dark:bg-red-500/10 text-slate-400 hover:text-red-500 rounded-xl transition"><Trash2 size={16} /></button>
+                          </div>
+                        </div>
+
+                        {etap.opis && <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{etap.opis}</p>}
+                        
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/5">
+                          <div className="flex gap-2">
+                            <span className="text-[10px] font-black uppercase bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 px-2 py-1 rounded shadow-sm border border-cyan-100 dark:border-cyan-500/20">
+                              Ekipa: {etap.przypisani_uzytkownicy?.length || 0}
+                            </span>
+                            <span className="text-[10px] font-black uppercase bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 px-2 py-1 rounded shadow-sm border border-indigo-100 dark:border-indigo-500/20">
+                              Flota: {etap.przypisane_pojazdy?.length || 0}
+                            </span>
+                          </div>
+                          <button type="button" onClick={() => setEtapToManage(etap)} className="text-[11px] font-black text-slate-500 dark:text-slate-400 hover:text-[#04e0ff] transition flex items-center gap-1 bg-slate-50 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-white/10 shadow-sm">
+                            <Wrench size={12} /> Zarządzaj przydziałem
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {!eventData?.etapy?.length && (
-                 <div className="h-full flex flex-col items-center justify-center p-8 text-center border border-dashed border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/5">
-                    <Clock size={24} className="text-slate-300 dark:text-slate-600 mb-3" />
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400">Brak zdefiniowanych etapów</p>
-                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-1">Zbuduj harmonogram dodając montaż, próby, etc.</p>
-                 </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center p-8 text-center border border-dashed border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/5 mt-4">
+                  <Clock size={24} className="text-slate-300 dark:text-slate-600 mb-3" />
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400">Brak zdefiniowanych etapów</p>
+                  <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-1">Zbuduj harmonogram dodając montaż, próby, demontaż.</p>
+                </div>
               )}
             </div>
           </Card>
@@ -561,7 +553,7 @@ export default function EventDetailsPage() {
             })}
           </div>
 
-          {['oferty', 'ekipa', 'flota', 'historia', 'sprzet', 'zadania', 'zalaczniki'].includes(activeTab) && (
+          {['oferty', 'ekipa', 'flota', 'historia', 'sprzet', 'zadania', 'zalaczniki', 'nocleg'].includes(activeTab) && (
             <div className="p-3 border-t md:border-t-0 border-slate-100 dark:border-white/10 w-full md:w-auto">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -577,14 +569,16 @@ export default function EventDetailsPage() {
         </div>
         
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 border-t-0 rounded-b-3xl shadow-sm min-h-[500px]">
-          {activeTab === 'chat' && <EventChatPanel eventId={Number(params.id)} historia={eventData?.historia || []} reloadEvent={loadEvent} />}
-          {activeTab === 'zadania' && <EventTasksPanel eventId={Number(params.id)} zadania={eventData?.zadania || []} dict={dict} reloadEvent={loadEvent} tabQuery={tabSearchQuery} />}
-          {activeTab === 'ekipa' && <EventCrewPanel eventId={Number(params.id)} ekipa={eventData?.ekipa || []} dict={dict} tabQuery={tabSearchQuery} reloadEvent={loadEvent} />}
-          {activeTab === 'flota' && <EventFleetPanel eventId={Number(params.id)} pojazdy={eventData?.pojazdy || []} dict={dict} tabQuery={tabSearchQuery} reloadEvent={loadEvent} />}
-          {activeTab === 'zalaczniki' && <AttachmentsPanel eventId={Number(params.id)} zalaczniki={eventData?.zalaczniki || []} reloadEvent={loadEvent} tabQuery={tabSearchQuery} />}
+          {activeTab === 'chat' && <EventChatPanel eventId={eventIdAsNumber} historia={eventData?.historia || []} reloadEvent={loadEvent} />}
+          {activeTab === 'zadania' && <EventTasksPanel eventId={eventIdAsNumber} zadania={eventData?.zadania || []} dict={dict} reloadEvent={loadEvent} tabQuery={tabSearchQuery} />}
+          {activeTab === 'ekipa' && <EventCrewPanel eventId={eventIdAsNumber} ekipa={eventData?.ekipa || []} etapy={eventData?.etapy || []} powiadomienia={eventData?.powiadomienia || []} dict={dict} tabQuery={tabSearchQuery} reloadEvent={loadEvent} onMassAssign={(u: any) => setShowMassAssign({type: 'user', obj: u})} />}
+          {activeTab === 'podsumowanie_ekipy' && <EventCrewSummaryPanel ekipa={eventData?.ekipa || []} />}
+          {activeTab === 'flota' && <EventFleetPanel eventId={eventIdAsNumber} pojazdy={eventData?.pojazdy || []} etapy={eventData?.etapy || []} dict={dict} tabQuery={tabSearchQuery} reloadEvent={loadEvent} onMassAssign={(v: any) => setShowMassAssign({type: 'vehicle', obj: v})} />}
+          {activeTab === 'nocleg' && <EventNoclegiPanel eventId={eventIdAsNumber} noclegi={eventData?.noclegi || []} reloadEvent={loadEvent} />}
+          {activeTab === 'zalaczniki' && <AttachmentsPanel eventId={eventIdAsNumber} zalaczniki={eventData?.zalaczniki || []} reloadEvent={loadEvent} tabQuery={tabSearchQuery} />}
           
           {activeTab === 'oferty' && <OffersPanel offers={offers} mainOfferId={form.id_oferty_glownej} setMainOfferId={(id: any) => setForm({ ...form, id_oferty_glownej: id })} offerName={offerName} setOfferName={setOfferName} createOffer={createOffer} duplicateOffer={(o:any)=>setDuplicateTarget(o)} tabQuery={tabSearchQuery} />}
-          {activeTab === 'sprzet' && !isNew && <EquipmentPanel eventId={Number(params.id)} eventName={form.nazwa || eventData?.nazwa} />}
+          {activeTab === 'sprzet' && !isNew && <EquipmentPanel eventId={eventIdAsNumber} eventName={form.nazwa || eventData?.nazwa} />}
           {activeTab === 'historia' && <HistoryPanel history={eventData?.historia || []} tabQuery={tabSearchQuery} />}
         </div>
       </Card>
@@ -593,35 +587,223 @@ export default function EventDetailsPage() {
       {crmModalMode && <QuickAddCrmModal mode={crmModalMode} parentId={form.id_kontrahenta} onClose={() => setCrmModalMode(null)} onSuccess={() => { setCrmModalMode(null); loadDictionaries(); }} />}
       {duplicateTarget && <OfferDuplicateTargetModal offer={duplicateTarget} defaultEventId={params.id as any} onClose={() => setDuplicateTarget(null)} onDone={(o) => router.push(`/dashboard/offers/${o.id}`)} />}
       
-      {showEtapModal && (
-        <SimpleModal title="Dodaj etap wydarzenia" onClose={() => setShowEtapModal(false)}>
+      {showManagerModal && (
+        <SimpleModal title="Dodaj Managera Projektu" onClose={() => setShowManagerModal(false)}>
+          <div className="space-y-4">
+            <Field label="Wybierz osobę z zespołu">
+              <SearchableSelect 
+                options={dict.uzytkownicy.map((u:any)=>({value:String(u.id), label:`${u.imie} ${u.nazwisko}`}))} 
+                onChange={(v) => setSelectedManagerId(v)} 
+                value={selectedManagerId} 
+                placeholder="Szukaj osoby..."
+              />
+            </Field>
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10 mt-4">
+              <Button variant="secondary" onClick={() => setShowManagerModal(false)}>Anuluj</Button>
+              <Button onClick={assignManager}>Przypisz</Button>
+            </div>
+          </div>
+        </SimpleModal>
+      )}
+
+      {etapToEdit && (
+        <SimpleModal title={etapToEdit.isNew ? "Dodaj nowy etap" : `Edycja etapu: ${etapToEdit.nazwa}`} onClose={() => setEtapToEdit(null)}>
           <form onSubmit={async (e) => {
             e.preventDefault();
             const f = new FormData(e.currentTarget);
-            await api.post(`/api/wydarzenia/${params.id}/etapy`, { nazwa: f.get('nazwa'), opis: f.get('opis'), data_start: f.get('start'), data_koniec: f.get('koniec') });
-            setShowEtapModal(false);
+            const body = { nazwa: f.get('nazwa'), opis: f.get('opis'), data_start: f.get('start'), data_koniec: f.get('koniec') };
+            if (etapToEdit.isNew) {
+               await api.post(`/api/wydarzenia/${params.id}/etapy`, body);
+            } else {
+               await api.put(`/api/wydarzenia/${params.id}/etapy/${etapToEdit.id}`, body);
+            }
+            setEtapToEdit(null);
             loadEvent();
           }} className="space-y-4">
-            <Field label="Nazwa etapu (np. Próby, Montaż, Gala)"><input name="nazwa" required className={inputClass} /></Field>
+            <Field label="Nazwa etapu (np. Montaż, Próby)"><input name="nazwa" defaultValue={etapToEdit.nazwa || ''} required className={inputClass} /></Field>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Start"><input type="datetime-local" name="start" required className={inputClass} /></Field>
-              <Field label="Koniec"><input type="datetime-local" name="koniec" required className={inputClass} /></Field>
+              <Field label="Start"><input type="datetime-local" name="start" defaultValue={toDateInput(etapToEdit.data_start)} required className={inputClass} /></Field>
+              <Field label="Koniec"><input type="datetime-local" name="koniec" defaultValue={toDateInput(etapToEdit.data_koniec)} required className={inputClass} /></Field>
             </div>
-            <Field label="Opis / Wytyczne"><textarea name="opis" className={`${inputClass} resize-none min-h-[100px]`} /></Field>
+            <Field label="Opis / Wytyczne"><textarea name="opis" defaultValue={etapToEdit.opis || ''} className={`${inputClass} resize-none min-h-[100px]`} /></Field>
             <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
-              <Button variant="secondary" type="button" onClick={() => setShowEtapModal(false)}>Anuluj</Button>
-              <Button type="submit">Dodaj etap</Button>
+              <Button variant="secondary" type="button" onClick={() => setEtapToEdit(null)}>Anuluj</Button>
+              <Button type="submit">{etapToEdit.isNew ? 'Utwórz etap' : 'Zapisz zmiany'}</Button>
             </div>
           </form>
         </SimpleModal>
+      )}
+
+      {showMassAssign && (
+        <MassAssignModal 
+          data={showMassAssign} 
+          eventId={eventIdAsNumber} 
+          etapy={eventData?.etapy || []} 
+          onClose={() => setShowMassAssign(null)} 
+          reloadEvent={loadEvent} 
+        />
+      )}
+
+      {etapToManage && (
+        <EtapManagementModal 
+          etap={etapToManage} 
+          ekipa={eventData?.ekipa || []}
+          pojazdy={eventData?.pojazdy || []}
+          eventId={eventIdAsNumber}
+          onClose={() => setEtapToManage(null)} 
+          reloadEvent={loadEvent}
+        />
       )}
     </div>
   );
 }
 
 // ============================================================================
-// KOMPONENTY ZAKŁADEK DOLNYCH
+// MODAL ZARZĄDZANIA KONKRETNYM ETAPEM (WIDOK DLA ETAPU)
 // ============================================================================
+function EtapManagementModal({ etap, ekipa, pojazdy, eventId, onClose, reloadEvent }: any) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  async function assignPerson(id_uzytkownika: number) {
+    if(isProcessing) return;
+    setIsProcessing(true);
+    try { await api.post(`/api/wydarzenia/${eventId}/etapy/${etap.id}/ekipa`, { id_uzytkownika }); await reloadEvent(); }
+    catch(e) { console.error(e); } finally { setIsProcessing(false); }
+  }
+  async function removePerson(przypisanieId: number) {
+    if(isProcessing) return;
+    setIsProcessing(true);
+    try { await api.delete(`/api/wydarzenia/${eventId}/etapy/ekipa/${przypisanieId}`); await reloadEvent(); }
+    catch(e) { console.error(e); } finally { setIsProcessing(false); }
+  }
+
+  async function assignVehicle(id_pojazdu: number | null, customName: string | null = null) {
+    if(isProcessing) return;
+    setIsProcessing(true);
+    try { await api.post(`/api/wydarzenia/${eventId}/etapy/${etap.id}/flota`, { id_pojazdu, pojazd_zewnetrzny: customName }); await reloadEvent(); }
+    catch(e) { console.error(e); } finally { setIsProcessing(false); }
+  }
+  async function removeVehicle(przypisanieId: number) {
+    if(isProcessing) return;
+    setIsProcessing(true);
+    try { await api.delete(`/api/wydarzenia/${eventId}/etapy/flota/${przypisanieId}`); await reloadEvent(); }
+    catch(e) { console.error(e); } finally { setIsProcessing(false); }
+  }
+
+  const assignedUsers = new Set(etap.przypisani_uzytkownicy?.map((p:any)=>p.id_uzytkownika));
+  const assignedVehicles = new Set(etap.przypisane_pojazdy?.map((p:any)=>p.id_pojazdu));
+
+  return (
+    <SimpleModal title={`Przydział do etapu: ${etap.nazwa}`} className="max-w-4xl" onClose={onClose}>
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
+          <h3 className="text-lg font-black mb-4 text-cyan-700 border-b border-slate-100 dark:border-white/10 pb-2">Ekipa na tym etapie</h3>
+          <div className="space-y-2 max-h-[400px] overflow-auto custom-scrollbar pr-2">
+            {ekipa.map((e: any) => {
+              const isAssigned = assignedUsers.has(e.id_uzytkownika);
+              const p_id = etap.przypisani_uzytkownicy?.find((x:any)=>x.id_uzytkownika === e.id_uzytkownika)?.id;
+              return (
+                <div key={e.id} className={`flex items-center justify-between p-3 border rounded-xl ${isAssigned ? 'border-cyan-300 bg-cyan-50 dark:bg-cyan-900/20' : 'border-slate-100 bg-slate-50 dark:bg-white/5'} ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <div>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">{e.uzytkownik.imie} {e.uzytkownik.nazwisko}</p>
+                    <p className="text-[10px] text-slate-500">{e.rola_w_wydarzeniu}</p>
+                  </div>
+                  {isAssigned ? (
+                    <button onClick={() => removePerson(p_id)} className="text-xs font-black text-red-500 hover:text-red-700 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-red-100 dark:border-red-900/30">Odłącz</button>
+                  ) : (
+                    <button onClick={() => assignPerson(e.id_uzytkownika)} className="text-xs font-black text-cyan-700 hover:text-cyan-900 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-cyan-100 dark:border-cyan-900/30">Przypisz</button>
+                  )}
+                </div>
+              )
+            })}
+            {ekipa.length === 0 && <p className="text-xs text-slate-500 font-bold">Brak ekipy przypisanej do wydarzenia ogółem.</p>}
+          </div>
+        </div>
+        <div>
+          <h3 className="text-lg font-black mb-4 text-indigo-700 border-b border-slate-100 dark:border-white/10 pb-2">Pojazdy na tym etapie</h3>
+          <div className="space-y-2 max-h-[400px] overflow-auto custom-scrollbar pr-2">
+            {pojazdy.map((v: any) => {
+              const isAssigned = assignedVehicles.has(v.id_pojazdu);
+              const p_id = etap.przypisane_pojazdy?.find((x:any)=>x.id_pojazdu === v.id_pojazdu)?.id;
+              return (
+                <div key={v.id} className={`flex items-center justify-between p-3 border rounded-xl ${isAssigned ? 'border-indigo-300 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-100 bg-slate-50 dark:bg-white/5'} ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <div>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">{v.pojazd.nazwa}</p>
+                    <p className="text-[10px] text-slate-500">{v.pojazd.nr_rejestracyjny}</p>
+                  </div>
+                  {isAssigned ? (
+                    <button onClick={() => removeVehicle(p_id)} className="text-xs font-black text-red-500 hover:text-red-700 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-red-100 dark:border-red-900/30">Odłącz</button>
+                  ) : (
+                    <button onClick={() => assignVehicle(v.id_pojazdu)} className="text-xs font-black text-indigo-700 hover:text-indigo-900 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-indigo-100 dark:border-indigo-900/30">Przypisz</button>
+                  )}
+                </div>
+              )
+            })}
+             {pojazdy.length === 0 && <p className="text-xs text-slate-500 font-bold">Brak pojazdów przypisanych do wydarzenia ogółem.</p>}
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-end pt-6 border-t border-slate-100 dark:border-white/10 mt-6"><Button onClick={onClose} disabled={isProcessing}>Zamknij</Button></div>
+    </SimpleModal>
+  )
+}
+
+// ============================================================================
+// MODAL SZYBKIEGO PRZYPISANIA DO WIELU ETAPÓW
+// ============================================================================
+function MassAssignModal({ data, eventId, etapy, onClose, reloadEvent }: any) {
+  const isUser = data.type === 'user';
+  const targetId = isUser ? data.obj.id_uzytkownika : data.obj.id_pojazdu;
+  const name = isUser ? `${data.obj.uzytkownik.imie} ${data.obj.uzytkownik.nazwisko}` : data.obj.pojazd.nazwa;
+
+  const [selectedStages, setSelectedStages] = useState<number[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const current = etapy.filter((etap: any) => {
+      if (isUser) return etap.przypisani_uzytkownicy?.some((u:any) => u.id_uzytkownika === targetId);
+      return etap.przypisane_pojazdy?.some((p:any) => p.id_pojazdu === targetId);
+    }).map((e: any) => e.id);
+    setSelectedStages(current);
+  }, []);
+
+  const toggle = (id: number) => setSelectedStages(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+
+  async function save() {
+    setSaving(true);
+    try {
+      if (isUser) {
+        await api.post(`/api/wydarzenia/${eventId}/ekipa/${targetId}/etapy`, { stageIds: selectedStages });
+      } else {
+        await api.post(`/api/wydarzenia/${eventId}/flota/${targetId}/etapy`, { stageIds: selectedStages });
+      }
+      await reloadEvent();
+      onClose();
+    } catch(e) { alert('Wystąpił błąd zapisu.'); } finally { setSaving(false); }
+  }
+
+  return (
+    <SimpleModal title={`Przypisz do etapów: ${name}`} onClose={onClose}>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Zaznacz wszystkie etapy wydarzenia, w których ta osoba/pojazd ma wziąć udział.</p>
+      <div className="space-y-2 mb-6 max-h-[400px] overflow-y-auto custom-scrollbar">
+        {etapy.map((etap: any) => (
+           <label key={etap.id} className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${selectedStages.includes(etap.id) ? 'border-cyan-400 bg-cyan-50 dark:bg-cyan-900/20' : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-white/5'} ${saving ? 'opacity-50 pointer-events-none' : ''}`}>
+             <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-600" checked={selectedStages.includes(etap.id)} onChange={() => toggle(etap.id)} disabled={saving} />
+             <div>
+               <p className="font-black text-slate-900 dark:text-white">{etap.nazwa}</p>
+               <p className="text-xs text-slate-500 dark:text-slate-400">{dateTime(etap.data_start)} → {dateTime(etap.data_koniec)}</p>
+             </div>
+           </label>
+        ))}
+        {etapy.length === 0 && <p className="text-red-500 font-bold">Wydarzenie nie ma zdefiniowanych etapów!</p>}
+      </div>
+      <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-white/10 pt-4">
+        <Button variant="secondary" onClick={onClose} disabled={saving}>Anuluj</Button>
+        <Button onClick={save} disabled={saving}>{saving ? 'Zapisywanie...' : 'Zapisz harmonogram'}</Button>
+      </div>
+    </SimpleModal>
+  )
+}
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
@@ -639,6 +821,115 @@ function Info({ label, value }: { label: string; value: string }) {
       <p className="mt-1 text-sm font-black text-slate-800 dark:text-slate-200">{value}</p>
     </div>
   );
+}
+
+// -------------------------------------------------------------
+// NOCLEGI
+// -------------------------------------------------------------
+function EventNoclegiPanel({ eventId, noclegi, reloadEvent }: any) {
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState<any>({});
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  async function saveNocleg(e: any) {
+    e.preventDefault();
+    if(isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await api.post(`/api/wydarzenia/${eventId}/noclegi`, form);
+      setForm({}); setAdding(false); await reloadEvent();
+    } catch(err) { console.error(err); } finally { setIsProcessing(false); }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-black text-xl text-slate-900 dark:text-white">Rezerwacje Hotelowe i Noclegi</h3>
+        <Button onClick={() => setAdding(true)} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Zarezerwuj nocleg</Button>
+      </div>
+
+      {adding && (
+        <Card className="mb-6 bg-slate-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-[24px]">
+          <form onSubmit={saveNocleg} className="grid grid-cols-2 gap-4 items-end">
+            <Field label="Nazwa obiektu (Hotel, Apartament)"><input required className={inputClass} disabled={isProcessing} value={form.nazwa_obiektu||''} onChange={e=>setForm({...form, nazwa_obiektu: e.target.value})} /></Field>
+            <Field label="Adres"><input className={inputClass} disabled={isProcessing} value={form.adres||''} onChange={e=>setForm({...form, adres: e.target.value})} /></Field>
+            <Field label="Data zameldowania"><input type="datetime-local" disabled={isProcessing} className={inputClass} value={form.data_zameldowania||''} onChange={e=>setForm({...form, data_zameldowania: e.target.value})} /></Field>
+            <Field label="Data wymeldowania"><input type="datetime-local" disabled={isProcessing} className={inputClass} value={form.data_wymeldowania||''} onChange={e=>setForm({...form, data_wymeldowania: e.target.value})} /></Field>
+            <Field label="Liczba osób"><input type="number" className={inputClass} disabled={isProcessing} value={form.liczba_osob||''} onChange={e=>setForm({...form, liczba_osob: e.target.value})} /></Field>
+            <Field label="Opis / Wytyczne"><input className={inputClass} disabled={isProcessing} value={form.opis||''} onChange={e=>setForm({...form, opis: e.target.value})} /></Field>
+            <div className="col-span-2 flex justify-end gap-2 mt-4">
+              <Button variant="secondary" type="button" onClick={() => setAdding(false)} disabled={isProcessing}>Anuluj</Button>
+              <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : 'Zapisz Nocleg'}</Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {noclegi.map((n: any) => (
+          <div key={n.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex flex-col group hover:shadow-md transition ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <p className="font-black text-slate-900 dark:text-white text-lg flex items-center gap-2"><Home size={18} className="text-[#04e0ff]"/> {n.nazwa_obiektu}</p>
+                <p className="text-xs font-bold text-slate-500 mt-1">{n.adres}</p>
+              </div>
+              <button onClick={async () => { 
+                if(isProcessing || !confirm('Odwołać/Usunąć ten nocleg?')) return; 
+                setIsProcessing(true);
+                try { await api.delete(`/api/wydarzenia/${eventId}/noclegi/${n.id}`); await reloadEvent(); } catch(e) {} finally { setIsProcessing(false); }
+              }} className="p-2 text-slate-300 hover:text-red-500 bg-slate-50 hover:bg-red-50 dark:bg-white/5 rounded-xl transition opacity-0 group-hover:opacity-100"><Trash2 size={16}/></button>
+            </div>
+            <div className="mt-auto pt-3 border-t border-slate-100 dark:border-white/5 grid grid-cols-2 gap-2 text-xs font-bold">
+              <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg"><span className="text-slate-400 block mb-0.5">Zamel.</span>{n.data_zameldowania ? new Date(n.data_zameldowania).toLocaleDateString() : '-'}</div>
+              <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg"><span className="text-slate-400 block mb-0.5">Wymel.</span>{n.data_wymeldowania ? new Date(n.data_wymeldowania).toLocaleDateString() : '-'}</div>
+              <div className="col-span-2 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 p-2 rounded-lg text-center mt-1">Dla {n.liczba_osob || '?'} osób</div>
+            </div>
+          </div>
+        ))}
+        {noclegi.length === 0 && !adding && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak zaplanowanych noclegów dla tego wyjazdu.</div>}
+      </div>
+    </div>
+  )
+}
+
+function EventCrewSummaryPanel({ ekipa }: { ekipa: any[] }) {
+  const stats = useMemo(() => {
+    const roles: Record<string, number> = {};
+    let external = 0;
+    let internal = 0;
+    ekipa.forEach(e => {
+      const rola = e.rola_w_wydarzeniu || 'Inne';
+      roles[rola] = (roles[rola] || 0) + 1;
+      if (e.uzytkownik?.stanowisko === 'Współpracownik Zewnętrzny') external++;
+      else internal++;
+    });
+    return { roles, total: ekipa.length, internal, external };
+  }, [ekipa]);
+
+  return (
+    <div className="space-y-6">
+       <div className="flex justify-between items-center mb-6">
+        <h3 className="font-black text-xl text-slate-900 dark:text-white">Podsumowanie i Liczniki Ekipy</h3>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Metric label="Cała ekipa" value={`${stats.total} osób`} />
+        <Metric label="Konta wew. (Firma)" value={`${stats.internal} osób`} />
+        <Metric label="Konta zew. (Freelance)" value={`${stats.external} osób`} />
+      </div>
+      <Card>
+        <h4 className="font-black text-lg mb-4 text-slate-800 dark:text-white">Podział według stanowisk na wyjeździe</h4>
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+          {Object.entries(stats.roles).map(([rola, count]) => (
+            <div key={rola} className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/10 flex items-center justify-between">
+              <span className="font-bold text-sm text-slate-600 dark:text-slate-300 truncate mr-2">{rola}</span>
+              <span className="font-black text-lg text-cyan-600 dark:text-[#04e0ff] bg-white dark:bg-black/40 px-3 py-1 rounded-lg shadow-sm">{count as React.ReactNode}</span>
+            </div>
+          ))}
+          {Object.keys(stats.roles).length === 0 && <p className="text-slate-400 font-bold">Brak przypisanych osób do policzenia.</p>}
+        </div>
+      </Card>
+    </div>
+  )
 }
 
 // -------------------------------------------------------------
@@ -806,7 +1097,6 @@ function EventTasksPanel({ eventId, zadania, dict, reloadEvent, tabQuery = '' }:
              <p className={`font-black text-[15px] truncate ${isDone ? 'text-slate-500 line-through' : 'text-slate-800 dark:text-slate-100'}`}>{t.tytul}</p>
              <div className="flex items-center gap-4 mt-1.5 text-xs font-bold text-slate-400">
                <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2 py-1 rounded-md"><Users size={12} className="text-slate-400"/> {t.przypisani_uzytkownicy?.map((u:any)=>u.uzytkownik.imie).join(', ') || 'Brak'}</span>
-               {t.data_koniec && <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 px-2 py-1 rounded-md"><Calendar size={12} className="text-slate-400"/> {new Date(t.data_koniec).toLocaleDateString('pl-PL')}</span>}
              </div>
           </div>
           <button onClick={async () => { if(confirm('Usunąć zadanie?')) { await api.delete(`/api/zadania/${t.id}`); reloadEvent(); } }} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition"><Trash2 size={18}/></button>
@@ -820,9 +1110,11 @@ function EventTasksPanel({ eventId, zadania, dict, reloadEvent, tabQuery = '' }:
 // -------------------------------------------------------------
 // EKIPA
 // -------------------------------------------------------------
-function EventCrewPanel({ eventId, ekipa, dict, tabQuery = '', reloadEvent }: any) {
+function EventCrewPanel({ eventId, ekipa, etapy = [], powiadomienia, dict, tabQuery = '', reloadEvent, onMassAssign }: any) {
   const [form, setForm] = useState<any>({ isExternal: false, rola: 'Obsługa techniczna' });
   const [adding, setAdding] = useState(false);
+  const [sendingMails, setSendingMails] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const filtered = useMemo(() => {
     if (!tabQuery) return ekipa;
@@ -832,14 +1124,40 @@ function EventCrewPanel({ eventId, ekipa, dict, tabQuery = '', reloadEvent }: an
 
   async function saveCrew(e: any) {
     e.preventDefault();
-    await api.post(`/api/wydarzenia/${eventId}/ekipa`, form);
-    setForm({ isExternal: false, rola: 'Obsługa techniczna' }); setAdding(false); reloadEvent();
+    if(isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await api.post(`/api/wydarzenia/${eventId}/ekipa`, form);
+      setForm({ isExternal: false, rola: 'Obsługa techniczna' }); setAdding(false); await reloadEvent();
+    } catch(err) { console.error(err); } finally { setIsProcessing(false); }
+  }
+
+  async function handleSendMails() {
+    if(!ekipa.length) return alert('Brak ekipy do powiadomienia.');
+    if(!confirm('Na pewno wysłać powiadomienia e-mail do wszystkich przypisanych członków ekipy (wewnętrznych i zewnętrznych)? System odłoży ślad w historii.')) return;
+    
+    setSendingMails(true);
+    try {
+      const userIds = ekipa.map((e: any) => e.id_uzytkownika);
+      await api.post(`/api/wydarzenia/${eventId}/powiadomienia/ekipa`, { userIds });
+      alert('Powiadomienia zostały wygenerowane i dodane do kolejki wysyłkowej.');
+      await reloadEvent();
+    } catch(err: any) {
+      alert(err?.response?.data?.message || 'Nie udało się zlecić wysyłki maili.');
+    } finally {
+      setSendingMails(false);
+    }
   }
 
   return <div className="space-y-4">
     <div className="flex justify-between items-center mb-6">
       <h3 className="font-black text-xl text-slate-900 dark:text-white">Personel i Ekipa Techniczna</h3>
-      <Button onClick={() => setAdding(true)}><Plus size={16} className="inline mr-1"/> Przypisz osobę</Button>
+      <div className="flex gap-2">
+        <Button variant="secondary" disabled={sendingMails || isProcessing} onClick={handleSendMails}>
+           {sendingMails ? <Loader2 size={16} className="animate-spin inline mr-1"/> : <Send size={16} className="inline mr-1"/>} Wyślij maile do ekipy
+        </Button>
+        <Button onClick={() => setAdding(true)} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Przypisz osobę</Button>
+      </div>
     </div>
 
     {adding && <SimpleModal title="Dodaj osobę do obsługi eventu" onClose={() => setAdding(false)}>
@@ -869,23 +1187,53 @@ function EventCrewPanel({ eventId, ekipa, dict, tabQuery = '', reloadEvent }: an
           <input required className={inputClass} value={form.rola || ''} onChange={e => setForm({...form, rola: e.target.value})} placeholder="np. Główny realizator, Kierowca, Technik..." />
         </Field>
 
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10"><Button variant="secondary" type="button" onClick={()=>setAdding(false)}>Anuluj</Button><Button type="submit">Zapisz przypisanie</Button></div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
+          <Button variant="secondary" type="button" onClick={()=>setAdding(false)} disabled={isProcessing}>Anuluj</Button>
+          <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : 'Zapisz przypisanie'}</Button>
+        </div>
       </form>
     </SimpleModal>}
 
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {filtered.map((p: any) => <div key={p.id} className="rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group">
-         <div className="flex items-center gap-4">
-           <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-black text-slate-500 dark:text-slate-300 text-lg border border-slate-200 dark:border-white/10">
-             {initials(p.uzytkownik)}
-           </div>
-           <div>
-             <p className="font-black text-slate-900 dark:text-white text-[15px]">{p.uzytkownik?.imie} {p.uzytkownik?.nazwisko}</p>
-             <p className="text-[11px] font-bold text-[#04e0ff] bg-cyan-50 dark:bg-[#04e0ff]/10 px-2 py-0.5 rounded-md inline-block mt-1 uppercase tracking-wider">{p.rola_w_wydarzeniu || 'Obsługa'}</p>
-           </div>
-         </div>
-         <button onClick={async () => { if(confirm('Odpiąć osobę od wydarzenia?')) { await api.delete(`/api/wydarzenia/${eventId}/ekipa/${p.id}`); reloadEvent(); } }} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition opacity-0 group-hover:opacity-100"><Trash2 size={16}/></button>
-      </div>)}
+      {filtered.map((p: any) => {
+         const hasBeenNotified = powiadomienia?.some((pow:any) => pow.id_uzytkownika === p.id_uzytkownika);
+         return (
+          <div key={p.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-black text-slate-500 dark:text-slate-300 text-lg border border-slate-200 dark:border-white/10 relative">
+                {initials(p.uzytkownik)}
+                {hasBeenNotified && <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5" title="Wysłano powiadomienie email"><MailCheck size={10}/></div>}
+              </div>
+              <div>
+                <p className="font-black text-slate-900 dark:text-white text-[15px]">{p.uzytkownik?.imie} {p.uzytkownik?.nazwisko}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-[11px] font-bold text-[#04e0ff] bg-cyan-50 dark:bg-[#04e0ff]/10 px-2 py-0.5 rounded-md inline-block uppercase tracking-wider">{p.rola_w_wydarzeniu || 'Obsługa'}</p>
+                  {hasBeenNotified && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-md">Powiadomiono</span>}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button title="Przypisz osobę do etapów wydarzenia" onClick={() => onMassAssign(p)} className="p-2 text-cyan-600 bg-cyan-50 dark:bg-[#04e0ff]/10 hover:bg-cyan-100 rounded-xl transition"><Clock size={16}/></button>
+              <button title="Odłącz od wydarzenia" onClick={async () => { 
+                if(confirm('Odpiąć osobę od wydarzenia?')) { 
+                  setIsProcessing(true);
+                  try {
+                    // Najpierw usuwamy wszystkie przypisania tej osoby do etapów,
+                    // aby liczniki harmonogramu odpowiadały faktycznemu stanowi.
+                    await api.post(`/api/wydarzenia/${eventId}/ekipa/${p.id_uzytkownika}/etapy`, { stageIds: [] });
+                    await api.delete(`/api/wydarzenia/${eventId}/ekipa/${p.id}`);
+                    await reloadEvent();
+                  } catch(e) {
+                    console.error('Nie udało się usunąć osoby z wydarzenia i etapów:', e);
+                    alert('Nie udało się usunąć osoby. Spróbuj ponownie.');
+                  } finally { setIsProcessing(false); }
+                } 
+              }} className="p-2 text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
+            </div>
+          </div>
+         )
+      })}
       {filtered.length === 0 && ekipa.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak osób pasujących do wyszukiwania.</div>}
       {ekipa.length === 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak przypisanej ekipy do wydarzenia.</div>}
     </div>
@@ -895,9 +1243,10 @@ function EventCrewPanel({ eventId, ekipa, dict, tabQuery = '', reloadEvent }: an
 // -------------------------------------------------------------
 // FLOTA
 // -------------------------------------------------------------
-function EventFleetPanel({ eventId, pojazdy, dict, tabQuery = '', reloadEvent }: any) {
+function EventFleetPanel({ eventId, pojazdy, etapy = [], dict, tabQuery = '', reloadEvent, onMassAssign }: any) {
   const [form, setForm] = useState<any>({ rola: 'Transport sprzętu' });
   const [adding, setAdding] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const filtered = useMemo(() => {
     if (!tabQuery) return pojazdy;
@@ -907,14 +1256,18 @@ function EventFleetPanel({ eventId, pojazdy, dict, tabQuery = '', reloadEvent }:
 
   async function saveFleet(e: any) {
     e.preventDefault();
-    await api.post(`/api/wydarzenia/${eventId}/flota`, form);
-    setForm({ rola: 'Transport sprzętu' }); setAdding(false); reloadEvent();
+    if(isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await api.post(`/api/wydarzenia/${eventId}/flota`, form);
+      setForm({ rola: 'Transport sprzętu' }); setAdding(false); await reloadEvent();
+    } catch(err) { console.error(err); } finally { setIsProcessing(false); }
   }
 
   return <div className="space-y-4">
     <div className="flex justify-between items-center mb-6">
       <h3 className="font-black text-xl text-slate-900 dark:text-white">Flota i transport</h3>
-      <Button onClick={() => setAdding(true)}><Plus size={16} className="inline mr-1"/> Przypisz pojazd</Button>
+      <Button onClick={() => setAdding(true)} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Przypisz pojazd</Button>
     </div>
 
     {adding && <SimpleModal title="Zarezerwuj pojazd na wydarzenie" onClose={() => setAdding(false)}>
@@ -925,17 +1278,38 @@ function EventFleetPanel({ eventId, pojazdy, dict, tabQuery = '', reloadEvent }:
         <Field label="Rola pojazdu na wyjeździe">
           <input required className={inputClass} value={form.rola || ''} onChange={e => setForm({...form, rola: e.target.value})} placeholder="np. Transport główny, Auto dla realizatorów..." />
         </Field>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10"><Button variant="secondary" type="button" onClick={()=>setAdding(false)}>Anuluj</Button><Button type="submit">Zapisz rezerwację</Button></div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
+          <Button variant="secondary" type="button" onClick={()=>setAdding(false)} disabled={isProcessing}>Anuluj</Button>
+          <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : 'Zapisz rezerwację'}</Button>
+        </div>
       </form>
     </SimpleModal>}
 
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {filtered.map((v: any) => <div key={v.id} className="rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:shadow-md transition">
+      {filtered.map((v: any) => <div key={v.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:shadow-md transition ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
         <div>
            <p className="font-black text-slate-900 dark:text-white text-[15px] flex items-center gap-2 mb-2"><Car size={16} className="text-[#04e0ff]"/> {v.pojazd?.nazwa || 'Pojazd'}</p>
            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center"><span className="text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-white/10 px-2 py-1 rounded-md uppercase tracking-widest text-[10px] mr-2">{v.pojazd?.nr_rejestracyjny || '-'}</span> {v.rola_pojazdu || 'Rezerwacja'}</p>
         </div>
-        <button onClick={async () => { if(confirm('Zwolnić rezerwację pojazdu?')) { await api.delete(`/api/wydarzenia/${eventId}/flota/${v.id}`); reloadEvent(); } }} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition opacity-0 group-hover:opacity-100"><Trash2 size={16}/></button>
+        
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+           <button title="Przypisz auto do etapów wydarzenia" onClick={() => onMassAssign(v)} className="p-2 text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 rounded-xl transition"><Clock size={16}/></button>
+           <button title="Usuń z wyjazdu" onClick={async () => { 
+             if(confirm('Zwolnić rezerwację pojazdu?')) { 
+               setIsProcessing(true);
+               try {
+                 // Najpierw usuwamy wszystkie przypisania tego pojazdu do etapów,
+                 // aby liczniki harmonogramu odpowiadały faktycznemu stanowi.
+                 await api.post(`/api/wydarzenia/${eventId}/flota/${v.id_pojazdu}/etapy`, { stageIds: [] });
+                 await api.delete(`/api/wydarzenia/${eventId}/flota/${v.id}`);
+                 await reloadEvent();
+               } catch(e) {
+                 console.error('Nie udało się usunąć pojazdu z wydarzenia i etapów:', e);
+                 alert('Nie udało się usunąć pojazdu. Spróbuj ponownie.');
+               } finally { setIsProcessing(false); }
+             } 
+           }} className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
+        </div>
       </div>)}
       {filtered.length === 0 && pojazdy.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak aut pasujących do wyszukiwania.</div>}
       {pojazdy.length === 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak zarezerwowanych aut dla tego wydarzenia.</div>}
@@ -958,7 +1332,6 @@ function AttachmentsPanel({ eventId, zalaczniki, tabQuery = '', reloadEvent }: a
 
   async function saveFile(e: any) {
     e.preventDefault();
-    // Symulacja uploadu pliku z zapisem metadanych
     await api.post(`/api/wydarzenia/${eventId}/zalaczniki`, {
        nazwa: form.nazwa || form.nazwa_pliku,
        nazwa_pliku: form.nazwa_pliku || 'skan.pdf',
@@ -1040,7 +1413,7 @@ function HistoryPanel({ history, tabQuery = '' }: { history: any[], tabQuery?: s
 }
 
 // -------------------------------------------------------------
-// SPRZĘT (EquipmentPanel - Odbudowany na ścisłych typach dla WMS)
+// SPRZĘT (EquipmentPanel)
 // -------------------------------------------------------------
 function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: string }) {
   const router = useRouter();
@@ -1070,8 +1443,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
   const [packlistNotes, setPacklistNotes] = useState<Record<string, string>>({});
   const [packlistGeneralNotes, setPacklistGeneralNotes] = useState('');
   const [packlistNotesLoaded, setPacklistNotesLoaded] = useState(false);
-  const [packlistSaveStatus, setPacklistSaveStatus] =
-    useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [packlistSaveStatus, setPacklistSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -1090,19 +1462,13 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     setData(gearData);
 
     const loadedPacklistNotes: Record<string, string> = {};
-
     (gearData.planowane || []).forEach((p: any) => {
       const modelId = p.id_modelu || p.model?.id;
-
-      if (modelId) {
-        loadedPacklistNotes[String(modelId)] = p.uwagi || '';
-      }
+      if (modelId) loadedPacklistNotes[String(modelId)] = p.uwagi || '';
     });
 
     setPacklistNotes(loadedPacklistNotes);
-    setPacklistGeneralNotes(
-      gearData.wydarzenie?.uwagi_packlista || ''
-    );
+    setPacklistGeneralNotes(gearData.wydarzenie?.uwagi_packlista || '');
     setPacklistNotesLoaded(true);
 
     setItems(i.data || []);
@@ -1257,124 +1623,60 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     }).sort((a, b) => String(a.kategoria).localeCompare(String(b.kategoria), 'pl') || String(a.nazwa).localeCompare(String(b.nazwa), 'pl'));
   }, [data, docItems, equipmentCategoryById, modelById]);
 
-const plannedGroups = useMemo(() => {
-  const groups = new Map<string, any>();
-
-  plannedRows.forEach((row: any) => {
-    if (!groups.has(row.kategoria)) {
-      groups.set(row.kategoria, {
-        nazwa: row.kategoria,
-        rows: [],
-        plan: 0,
-        wydane: 0,
-        przyjete: 0,
-        scanned: 0,
-      });
-    }
-
-    const group = groups.get(row.kategoria);
-
-    group.rows.push(row);
-    group.plan += row.plan;
-    group.wydane += row.wydane;
-    group.przyjete += row.przyjete;
-    group.scanned += row.scanned;
-  });
-
-  return Array.from(groups.values());
-}, [plannedRows]);
-
-
-const packlistGroups = useMemo(() => {
-  const groups = new Map<string, any>();
-
-  plannedRows
-    .filter((row: any) => Number(row.plan || 0) > 0)
-    .forEach((row: any) => {
-      const rootCategory = String(
-        row.kategoria || 'Bez kategorii'
-      )
-        .split(' / ')[0]
-        .trim();
-
-      if (!groups.has(rootCategory)) {
-        groups.set(rootCategory, {
-          nazwa: rootCategory,
-          rows: [],
-          plan: 0,
-        });
+  const plannedGroups = useMemo(() => {
+    const groups = new Map<string, any>();
+    plannedRows.forEach((row: any) => {
+      if (!groups.has(row.kategoria)) {
+        groups.set(row.kategoria, { nazwa: row.kategoria, rows: [], plan: 0, wydane: 0, przyjete: 0, scanned: 0 });
       }
+      const group = groups.get(row.kategoria);
+      group.rows.push(row);
+      group.plan += row.plan;
+      group.wydane += row.wydane;
+      group.przyjete += row.przyjete;
+      group.scanned += row.scanned;
+    });
+    return Array.from(groups.values());
+  }, [plannedRows]);
 
+
+  const packlistGroups = useMemo(() => {
+    const groups = new Map<string, any>();
+    plannedRows.filter((row: any) => Number(row.plan || 0) > 0).forEach((row: any) => {
+      const rootCategory = String(row.kategoria || 'Bez kategorii').split(' / ')[0].trim();
+      if (!groups.has(rootCategory)) {
+        groups.set(rootCategory, { nazwa: rootCategory, rows: [], plan: 0 });
+      }
       const group = groups.get(rootCategory);
-
       group.rows.push(row);
       group.plan += Number(row.plan || 0);
     });
+    return Array.from(groups.values());
+  }, [plannedRows]);
 
-  return Array.from(groups.values());
-}, [plannedRows]);
+  useEffect(() => {
+    if (!packlistNotesLoaded) return;
+    const timer = window.setTimeout(async () => {
+      try {
+        setPacklistSaveStatus('saving');
+        await api.put(`/api/magazyn/wydarzenia/${eventId}/packlista`, {
+            uwagi_packlista: packlistGeneralNotes || null,
+            pozycje: Object.entries(packlistNotes).map(([id_modelu, uwagi]) => ({ id_modelu: Number(id_modelu), uwagi: uwagi || null })),
+          }
+        );
+        setPacklistSaveStatus('saved');
+      } catch (e) {
+        setPacklistSaveStatus('error');
+      }
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [packlistNotes, packlistGeneralNotes, packlistNotesLoaded, eventId]);
 
-
-/*
- * AUTOZAPIS UWAG PACKLISTY
- *
- * UWAGA:
- * useEffect MUSI być poza useMemo powyżej.
- */
-useEffect(() => {
-  if (!packlistNotesLoaded) return;
-
-  const timer = window.setTimeout(async () => {
-    try {
-      setPacklistSaveStatus('saving');
-
-      await api.put(
-        `/api/magazyn/wydarzenia/${eventId}/packlista`,
-        {
-          uwagi_packlista: packlistGeneralNotes || null,
-
-          pozycje: Object.entries(packlistNotes).map(
-            ([id_modelu, uwagi]) => ({
-              id_modelu: Number(id_modelu),
-              uwagi: uwagi || null,
-            })
-          ),
-        }
-      );
-
-      setPacklistSaveStatus('saved');
-    } catch (e) {
-      console.error('Błąd zapisu uwag packlisty:', e);
-      setPacklistSaveStatus('error');
-    }
-  }, 700);
-
-  return () => window.clearTimeout(timer);
-}, [
-  packlistNotes,
-  packlistGeneralNotes,
-  packlistNotesLoaded,
-  eventId,
-]);
-
-
-const activeCategoryIds = useMemo(() => {
-  if (activeSub) {
-    return descendantsOf(activeSub, equipmentCategoryById);
-  }
-
-  if (activeRoot && activeRoot !== 'all') {
-    return descendantsOf(activeRoot, equipmentCategoryById);
-  }
-
-  return new Set<string>();
-}, [
-  activeRoot,
-  activeSub,
-  equipmentCategoryById,
-]);
-
-
+  const activeCategoryIds = useMemo(() => {
+    if (activeSub) return descendantsOf(activeSub, equipmentCategoryById);
+    if (activeRoot && activeRoot !== 'all') return descendantsOf(activeRoot, equipmentCategoryById);
+    return new Set<string>();
+  }, [activeRoot, activeSub, equipmentCategoryById]);
 
   const activeRootObj = useMemo(() => activeRoot && activeRoot !== 'all' ? equipmentCategoryById.get(String(activeRoot)) : null, [activeRoot, equipmentCategoryById]);
 
@@ -1515,7 +1817,6 @@ const activeCategoryIds = useMemo(() => {
     }
 
     setDocItems((prev) => {
-      // Dla fizycznych egzemplarzy zabezpieczamy przed duplikatami w koszyku
       const existingIds = new Set(prev.map((p: any) => Number(p.id_egzemplarza)).filter(Boolean));
       const toAdd: any[] = [];
       
@@ -1603,19 +1904,13 @@ const activeCategoryIds = useMemo(() => {
     setError('');
     setNotice('');
     
-    // Reguła 6: Sprzęt ilościowy
-    if (isQuantityOnly(row)) { 
-      addQuantityDocumentItem(row, source); 
-      return; 
-    }
+    if (isQuantityOnly(row)) { addQuantityDocumentItem(row, source); return; }
     
-    // Reguła 3: Zestawy (RACK). Wchodzą jako jedna pozycja.
     if (isZestawRow(row)) {
       addDocumentItemsBulk([row], source, 'Zeskanowano zestaw jako spójną pozycję');
       return;
     }
 
-    // Reguła 2: Case/Opakowanie. Wyciągamy elementy ze środka.
     if (isCaseRow(row)) {
       const contents = (row.zawartosc_case || row.contents || []).filter((child: any) => !isCaseRow(child) && isEquipmentInstance(child));
       if (!contents.length) { 
@@ -1627,7 +1922,6 @@ const activeCategoryIds = useMemo(() => {
       return;
     }
 
-    // Skoro to nie kontener i nie sprzęt ilościowy, to musi być fizyczny, pojedynczy egzemplarz
     if (!isEquipmentInstance(row)) { 
       setError('Wydanie/przyjęcie działa na egzemplarzach. Upewnij się, że wpisany kod wskazuje na konkretne urządzenie z bazy.'); 
       return; 
@@ -1653,7 +1947,6 @@ const activeCategoryIds = useMemo(() => {
     setError('');
     setNotice('');
 
-    // Szybka ścieżka dla ilościówek skanowanych po kodzie modelu
     const quantityModel = findQuantityModelByCode(code);
     if (quantityModel) {
       addQuantityDocumentItem({
@@ -1742,80 +2035,11 @@ const activeCategoryIds = useMemo(() => {
 
       <div className="flex flex-col gap-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 p-5 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-wrap gap-2.5">
-
-  <button
-    type="button"
-    onClick={() => {
-      setMode('plan');
-      setQuery('');
-      setError('');
-      setNotice('');
-      setDocItems([]);
-    }}
-    className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${
-      mode === 'plan'
-        ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20'
-        : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'
-    }`}
-  >
-    Lista sprzętu (Plan)
-  </button>
-
-<button
-  type="button"
-  onClick={() => {
-    setMode('packlista');
-    setQuery('');
-    setError('');
-    setNotice('');
-    setDocItems([]);
-  }}
-  className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${
-    mode === 'packlista'
-      ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20'
-      : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'
-  }`}
->
-  Packlista
-</button>
-
-  <button
-    type="button"
-    onClick={() => {
-      setMode('wydanie');
-      setQuery('');
-      setError('');
-      setNotice('');
-      setDocItems([]);
-    }}
-    className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${
-      mode === 'wydanie'
-        ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20'
-        : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'
-    }`}
-  >
-    Wydaj WZ
-  </button>
-
-  <button
-    type="button"
-    onClick={() => {
-      setMode('przyjecie');
-      setQuery('');
-      setError('');
-      setNotice('');
-      setDocItems([]);
-    }}
-    className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${
-      mode === 'przyjecie'
-        ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20'
-        : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'
-    }`}
-  >
-    Przyjmij PZ
-  </button>
-
-</div>
+          <button type="button" onClick={() => { setMode('plan'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'plan' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'}`}>Lista sprzętu (Plan)</button>
+          <button type="button" onClick={() => { setMode('packlista'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'packlista' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'}`}>Packlista</button>
+          <button type="button" onClick={() => { setMode('wydanie'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'wydanie' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'}`}>Wydaj WZ</button>
+          <button type="button" onClick={() => { setMode('przyjecie'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'przyjecie' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'}`}>Przyjmij PZ</button>
+        </div>
         {mode === 'plan' && (
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => setShowBundlePicker(true)} className="shadow-sm"><Layers size={16} className="inline mr-1" /> Dodaj Pakiet</Button>
@@ -1824,6 +2048,7 @@ const activeCategoryIds = useMemo(() => {
         )}
       </div>
 
+      {/* PLAN TAB */}
       {mode === 'plan' && <div className="grid gap-0 xl:grid-cols-[1fr_520px]">
         <div className="p-6">
           <div className="mb-6 flex items-center justify-between gap-3">
@@ -1913,483 +2138,230 @@ const activeCategoryIds = useMemo(() => {
           </div>
         </aside>}
       </div>}
-{mode === 'packlista' && (
-  <>
-    <style jsx global>{`
-      .packlist-print-document {
-        display: none;
-      }
 
-      @media print {
-        @page {
-          size: A4 portrait;
-          margin: 9mm;
-        }
-
-        html,
-        body {
-          margin: 0 !important;
-          padding: 0 !important;
-          background: #ffffff !important;
-        }
-
-        body * {
-          visibility: hidden !important;
-        }
-
-        .packlist-print-document,
-        .packlist-print-document * {
-          visibility: visible !important;
-        }
-
-        .packlist-print-document {
-          display: block !important;
-          position: absolute !important;
-          left: 0 !important;
-          top: 0 !important;
-          width: 100% !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          background: #ffffff !important;
-          color: #0f172a !important;
-
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-
-        .packlist-print-header,
-        .packlist-print-meta,
-        .packlist-print-general-notes,
-        .packlist-print-footer {
-          break-inside: avoid !important;
-          page-break-inside: avoid !important;
-        }
-
-        .packlist-print-category-title {
-          break-after: avoid !important;
-          page-break-after: avoid !important;
-          background: #fb8500 !important;
-          color: white !important;
-        }
-
-        .packlist-print-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        .packlist-print-table thead {
-          display: table-header-group;
-        }
-
-        .packlist-print-table tr {
-          break-inside: avoid !important;
-          page-break-inside: avoid !important;
-        }
-      }
-    `}</style>
-
-    {/* =======================================================
-        WIDOK EKRANOWY / EDYCJA
-    ======================================================= */}
-
-    <div className="packlist-screen p-6">
-
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">
-            Packlista
-          </p>
-
-          <h4 className="mt-1 text-xl font-black text-slate-900 dark:text-white">
-            Sprzęt do przygotowania
-          </h4>
-
-          <p className="mt-1 text-sm font-bold text-slate-500">
-            {eventName}
-          </p>
-
-          <p className="mt-2 text-xs font-bold text-slate-400">
-            {packlistSaveStatus === 'saving' && 'Zapisywanie uwag...'}
-            {packlistSaveStatus === 'saved' && '✓ Uwagi zapisane'}
-            {packlistSaveStatus === 'error' && '⚠ Błąd zapisu uwag'}
-          </p>
-        </div>
-
-        <Button onClick={() => window.print()}>
-          <FileText size={16} className="inline mr-1" />
-          Drukuj / zapisz PDF
-        </Button>
-      </div>
-
-      <div className="space-y-5">
-
-        {packlistGroups.map((group: any) => (
-          <div
-            key={group.nazwa}
-            className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm"
-          >
-            <div className="flex items-center justify-between bg-orange-500 px-5 py-3 text-white">
+      {/* PACKLISTA TAB */}
+      {mode === 'packlista' && (
+        <>
+          <style jsx global>{`
+            .packlist-print-document { display: none; }
+            @media print {
+              @page { size: A4 portrait; margin: 9mm; }
+              html, body { margin: 0 !important; padding: 0 !important; background: #ffffff !important; }
+              body * { visibility: hidden !important; }
+              .packlist-print-document, .packlist-print-document * { visibility: visible !important; }
+              .packlist-print-document { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: #ffffff !important; color: #0f172a !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+              .packlist-print-header, .packlist-print-meta, .packlist-print-general-notes, .packlist-print-footer { break-inside: avoid !important; page-break-inside: avoid !important; }
+              .packlist-print-category-title { break-after: avoid !important; page-break-after: avoid !important; background: #fb8500 !important; color: white !important; }
+              .packlist-print-table { width: 100%; border-collapse: collapse; }
+              .packlist-print-table thead { display: table-header-group; }
+              .packlist-print-table tr { break-inside: avoid !important; page-break-inside: avoid !important; }
+            }
+          `}</style>
+          <div className="packlist-screen p-6">
+            <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <p className="font-black">
-                  {group.nazwa}
-                </p>
-
-                <p className="text-xs font-bold text-white/70">
-                  {group.rows.length} modeli
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Packlista</p>
+                <h4 className="mt-1 text-xl font-black text-slate-900 dark:text-white">Sprzęt do przygotowania</h4>
+                <p className="mt-1 text-sm font-bold text-slate-500">{eventName}</p>
+                <p className="mt-2 text-xs font-bold text-slate-400">
+                  {packlistSaveStatus === 'saving' && 'Zapisywanie uwag...'}
+                  {packlistSaveStatus === 'saved' && '✓ Uwagi zapisane'}
+                  {packlistSaveStatus === 'error' && '⚠ Błąd zapisu uwag'}
                 </p>
               </div>
-
-              <span className="rounded-xl bg-white/15 px-3 py-1.5 text-xs font-black">
-                {group.plan} szt.
-              </span>
+              <Button onClick={() => window.print()}><FileText size={16} className="inline mr-1" /> Drukuj / zapisz PDF</Button>
             </div>
-
-            <div className="divide-y divide-slate-100 dark:divide-white/5">
-
-              {group.rows.map((row: any, index: number) => (
-                <div
-                  key={row.id_modelu}
-                  className="grid grid-cols-[32px_38px_1fr_80px_1fr] items-center gap-3 px-5 py-3"
-                >
-                  <div className="h-5 w-5 rounded border-2 border-slate-400 bg-white" />
-
-                  <div className="text-sm font-bold text-slate-400">
-                    {index + 1}.
+            <div className="space-y-5">
+              {packlistGroups.map((group: any) => (
+                <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm">
+                  <div className="flex items-center justify-between bg-orange-500 px-5 py-3 text-white">
+                    <div><p className="font-black">{group.nazwa}</p><p className="text-xs font-bold text-white/70">{group.rows.length} modeli</p></div>
+                    <span className="rounded-xl bg-white/15 px-3 py-1.5 text-xs font-black">{group.plan} szt.</span>
                   </div>
-
-                  <div>
-                    <p className="font-black text-slate-900 dark:text-white">
-                      {row.nazwa}
-                    </p>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5">
+                    {group.rows.map((row: any, index: number) => (
+                      <div key={row.id_modelu} className="grid grid-cols-[32px_38px_1fr_80px_1fr] items-center gap-3 px-5 py-3">
+                        <div className="h-5 w-5 rounded border-2 border-slate-400 bg-white" />
+                        <div className="text-sm font-bold text-slate-400">{index + 1}.</div>
+                        <div><p className="font-black text-slate-900 dark:text-white">{row.nazwa}</p></div>
+                        <div className="text-center"><p className="text-xl font-black text-slate-900 dark:text-white">{row.plan}</p><p className="text-[9px] font-black uppercase text-slate-400">{row.jednostka || 'szt.'}</p></div>
+                        <textarea value={packlistNotes[String(row.id_modelu)] || ''} onChange={(e) => setPacklistNotes((prev) => ({ ...prev, [String(row.id_modelu)]: e.target.value, }))} placeholder="Uwagi..." className="min-h-[42px] w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-950 dark:text-white" />
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="text-center">
-                    <p className="text-xl font-black text-slate-900 dark:text-white">
-                      {row.plan}
-                    </p>
-
-                    <p className="text-[9px] font-black uppercase text-slate-400">
-                      {row.jednostka || 'szt.'}
-                    </p>
-                  </div>
-
-                  <textarea
-                    value={
-                      packlistNotes[String(row.id_modelu)] || ''
-                    }
-                    onChange={(e) =>
-                      setPacklistNotes((prev) => ({
-                        ...prev,
-                        [String(row.id_modelu)]: e.target.value,
-                      }))
-                    }
-                    placeholder="Uwagi..."
-                    className="min-h-[42px] w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
-                  />
                 </div>
               ))}
-
+            </div>
+            <div className="mt-7">
+              <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Uwagi</p>
+              <textarea value={packlistGeneralNotes} onChange={(e) => setPacklistGeneralNotes(e.target.value)} className="min-h-[110px] w-full resize-none rounded-2xl border border-slate-200 bg-white p-4 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
             </div>
           </div>
-        ))}
 
-      </div>
-
-      <div className="mt-7">
-        <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
-          Uwagi
-        </p>
-
-        <textarea
-          value={packlistGeneralNotes}
-          onChange={(e) =>
-            setPacklistGeneralNotes(e.target.value)
-          }
-          className="min-h-[110px] w-full resize-none rounded-2xl border border-slate-200 bg-white p-4 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-900 dark:text-white"
-        />
-      </div>
-    </div>
-
-
-    {/* =======================================================
-        WERSJA WYŁĄCZNIE DO PDF / DRUKU A4
-    ======================================================= */}
-
-    <div className="packlist-print-document">
-
-      <header className="packlist-print-header mb-[7mm] grid grid-cols-2 gap-[10mm]">
-
-        <div>
-          <img
-            src={
-              data.wydarzenie?.organizacja?.logo ||
-              '/eventflow-logo.svg'
-            }
-            alt={
-              data.wydarzenie?.organizacja?.nazwa ||
-              'Logo firmy'
-            }
-            className="max-h-[16mm] max-w-[70mm] object-contain object-left"
-          />
-        </div>
-
-        <div className="text-right">
-          <h1 className="text-[20px] font-black uppercase leading-tight">
-            Packlista
-          </h1>
-
-          <p className="mt-2 text-[9px]">
-            Numer: <b>{data.wydarzenie?.numer || `#${eventId}`}</b>
-          </p>
-
-          <p className="text-[9px]">
-            Start:{' '}
-            <b>
-              {data.wydarzenie?.data_start
-                ? new Date(data.wydarzenie.data_start)
-                    .toLocaleString('pl-PL')
-                : '-'}
-            </b>
-          </p>
-        </div>
-      </header>
-
-
-      <section className="packlist-print-meta mb-[6mm] grid grid-cols-2 gap-[10mm] text-[9px]">
-
-        <div>
-          <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">
-            Wydarzenie
-          </h2>
-
-          <p className="font-black">
-            {data.wydarzenie?.nazwa || eventName}
-          </p>
-
-          <p>
-            {data.wydarzenie?.kontrahent?.nazwa || ''}
-          </p>
-        </div>
-
-        <div>
-          <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">
-            Lokalizacja
-          </h2>
-
-          <p className="font-black">
-            {data.wydarzenie?.miejsce?.nazwa ||
-              data.wydarzenie?.miejsce_reczne ||
-              '-'}
-          </p>
-
-          {data.wydarzenie?.adres_reczny && (
-            <p>{data.wydarzenie.adres_reczny}</p>
-          )}
-        </div>
-
-      </section>
-
-
-      {packlistGroups.map((group: any) => (
-        <section
-          key={group.nazwa}
-          className="mb-[4mm]"
-        >
-
-          <div className="packlist-print-category-title flex items-center justify-between rounded px-[2.5mm] py-[1.5mm] text-[9px] font-black">
-            <span>{group.nazwa}</span>
-            <span>{group.plan} szt.</span>
+          <div className="packlist-print-document">
+            <header className="packlist-print-header mb-[7mm] grid grid-cols-2 gap-[10mm]">
+              <div><img src={data.wydarzenie?.organizacja?.logo || '/eventflow-logo.svg'} alt={data.wydarzenie?.organizacja?.nazwa || 'Logo firmy'} className="max-h-[16mm] max-w-[70mm] object-contain object-left" /></div>
+              <div className="text-right">
+                <h1 className="text-[20px] font-black uppercase leading-tight">Packlista</h1>
+                <p className="mt-2 text-[9px]">Numer: <b>{data.wydarzenie?.numer || `#${eventId}`}</b></p>
+                <p className="text-[9px]">Start: <b>{data.wydarzenie?.data_start ? new Date(data.wydarzenie.data_start).toLocaleString('pl-PL') : '-'}</b></p>
+              </div>
+            </header>
+            <section className="packlist-print-meta mb-[6mm] grid grid-cols-2 gap-[10mm] text-[9px]">
+              <div>
+                <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Wydarzenie</h2>
+                <p className="font-black">{data.wydarzenie?.nazwa || eventName}</p>
+                <p>{data.wydarzenie?.kontrahent?.nazwa || ''}</p>
+              </div>
+              <div>
+                <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Lokalizacja</h2>
+                <p className="font-black">{data.wydarzenie?.miejsce?.nazwa || data.wydarzenie?.miejsce_reczne || '-'}</p>
+                {data.wydarzenie?.adres_reczny && <p>{data.wydarzenie.adres_reczny}</p>}
+              </div>
+            </section>
+            {packlistGroups.map((group: any) => (
+              <section key={group.nazwa} className="mb-[4mm]">
+                <div className="packlist-print-category-title flex items-center justify-between rounded px-[2.5mm] py-[1.5mm] text-[9px] font-black">
+                  <span>{group.nazwa}</span><span>{group.plan} szt.</span>
+                </div>
+                <table className="packlist-print-table text-[8.5px]">
+                  <thead>
+                    <tr className="bg-slate-100 text-left">
+                      <th className="w-[8mm] px-[1.5mm] py-[1.3mm]" />
+                      <th className="w-[8mm] px-[1.5mm] py-[1.3mm]">Lp.</th>
+                      <th className="px-[1.5mm] py-[1.3mm]">Model</th>
+                      <th className="w-[15mm] px-[1.5mm] py-[1.3mm] text-center">Ilość</th>
+                      <th className="w-[62mm] px-[1.5mm] py-[1.3mm]">Uwagi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.rows.map((row: any, index: number) => {
+                      const note = packlistNotes[String(row.id_modelu)] || '';
+                      return (
+                        <tr key={row.id_modelu} className="border-b border-slate-200 align-middle">
+                          <td className="px-[1.5mm] py-[1.5mm]"><span className="block h-[3.8mm] w-[3.8mm] rounded-[1px] border border-slate-800" /></td>
+                          <td className="px-[1.5mm] py-[1.5mm] text-slate-500">{index + 1}</td>
+                          <td className="px-[1.5mm] py-[1.5mm] font-bold">{row.nazwa}</td>
+                          <td className="px-[1.5mm] py-[1.5mm] text-center font-black">{row.plan}</td>
+                          <td className="px-[1.5mm] py-[1.5mm]">{note ? <span>{note}</span> : <span className="block min-h-[4mm] border-b border-dotted border-slate-300" />}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </section>
+            ))}
+            {packlistGeneralNotes && (
+              <section className="packlist-print-general-notes mt-[5mm]">
+                <h2 className="mb-[1mm] text-[8px] font-black uppercase text-slate-500">Uwagi</h2>
+                <div className="min-h-[15mm] rounded border border-slate-300 p-[2mm] text-[8.5px]">{packlistGeneralNotes}</div>
+              </section>
+            )}
+            <footer className="packlist-print-footer mt-[7mm] flex justify-between gap-4 border-t pt-[2mm] text-[7px] font-bold text-slate-400">
+              <span>Packlistę wygenerowano w systemie EVE-nt.</span>
+              <span>{data.wydarzenie?.numer || `#${eventId}`} · {new Date().toLocaleDateString('pl-PL')}</span>
+            </footer>
           </div>
-
-          <table className="packlist-print-table text-[8.5px]">
-
-            <thead>
-              <tr className="bg-slate-100 text-left">
-                <th className="w-[8mm] px-[1.5mm] py-[1.3mm]" />
-                <th className="w-[8mm] px-[1.5mm] py-[1.3mm]">
-                  Lp.
-                </th>
-                <th className="px-[1.5mm] py-[1.3mm]">
-                  Model
-                </th>
-                <th className="w-[15mm] px-[1.5mm] py-[1.3mm] text-center">
-                  Ilość
-                </th>
-                <th className="w-[62mm] px-[1.5mm] py-[1.3mm]">
-                  Uwagi
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {group.rows.map((row: any, index: number) => {
-                const note =
-                  packlistNotes[String(row.id_modelu)] || '';
-
-                return (
-                  <tr
-                    key={row.id_modelu}
-                    className="border-b border-slate-200 align-middle"
-                  >
-                    <td className="px-[1.5mm] py-[1.5mm]">
-                      <span className="block h-[3.8mm] w-[3.8mm] rounded-[1px] border border-slate-800" />
-                    </td>
-
-                    <td className="px-[1.5mm] py-[1.5mm] text-slate-500">
-                      {index + 1}
-                    </td>
-
-                    <td className="px-[1.5mm] py-[1.5mm] font-bold">
-                      {row.nazwa}
-                    </td>
-
-                    <td className="px-[1.5mm] py-[1.5mm] text-center font-black">
-                      {row.plan}
-                    </td>
-
-                    <td className="px-[1.5mm] py-[1.5mm]">
-                      {note ? (
-                        <span>{note}</span>
-                      ) : (
-                        <span className="block min-h-[4mm] border-b border-dotted border-slate-300" />
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-
-            </tbody>
-          </table>
-        </section>
-      ))}
-
-
-      {packlistGeneralNotes && (
-        <section className="packlist-print-general-notes mt-[5mm]">
-
-          <h2 className="mb-[1mm] text-[8px] font-black uppercase text-slate-500">
-            Uwagi
-          </h2>
-
-          <div className="min-h-[15mm] rounded border border-slate-300 p-[2mm] text-[8.5px]">
-            {packlistGeneralNotes}
-          </div>
-
-        </section>
+        </>
       )}
 
-
-      <footer className="packlist-print-footer mt-[7mm] flex justify-between gap-4 border-t pt-[2mm] text-[7px] font-bold text-slate-400">
-
-        <span>
-          Packlistę wygenerowano w systemie EVE-nt by Evenement Systems.
-        </span>
-
-        <span>
-          {data.wydarzenie?.numer || `#${eventId}`} ·{' '}
-          {new Date().toLocaleDateString('pl-PL')}
-        </span>
-
-      </footer>
-    </div>
-  </>
-)}
+      {/* WYDANIE / PRZYJĘCIE TAB */}
       {(mode === 'wydanie' || mode === 'przyjecie') && (
-  <div className="grid gap-0 xl:grid-cols-[1.15fr_.85fr] min-w-0">
-        <div className="p-6 min-w-0">
-          <div className="mb-6 rounded-2xl border border-cyan-200 dark:border-cyan-500/20 bg-cyan-50 dark:bg-cyan-500/10 p-5 shadow-sm min-w-0">
-            <p className="text-sm font-bold leading-relaxed text-cyan-900 dark:text-cyan-100">{mode === 'wydanie' ? 'Skanuj egzemplarze albo kody kontenerów aby je wydać (WZ). Sprzęt ilościowy możesz zaznaczyć checkboxem by pobrać brakującą ilość sztuk bez ręcznego wpisywania w skaner.' : 'Skanuj zwracane egzemplarze i kontenery (PZ). Sprzęt ilościowy możesz zaznaczyć checkboxem by zwrócić brakującą na magazynie ilość sztuk bez skanera.'}</p>
-          </div>
-          <div className="space-y-5 min-w-0">
-            {plannedGroups.map((group: any) => <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm min-w-0">
-              <div className="bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-white/5 px-5 py-3.5"><b className="text-slate-900 dark:text-white">{group.nazwa}</b></div>
-              <div className="divide-y divide-slate-100 dark:divide-white/5">
-                {group.rows.map((row: any) => {
-                  const after = countAfterScan(row);
-                  const missing = missingAfterScan(row);
-                  const base = mode === 'wydanie' ? row.plan : row.wydane;
-                  const percent = base > 0 ? Math.min(100, Math.round((after / base) * 100)) : 100;
-                  return <div key={row.id_modelu} className="px-5 py-4 min-w-0">
-                    <div className="grid gap-4 lg:grid-cols-[1fr_300px] lg:items-center min-w-0">
-                      <div className="min-w-0">
-                        <p className="font-black text-slate-900 dark:text-white text-[15px] truncate">{row.nazwa}</p>
-                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-1 truncate">{mode === 'wydanie' ? `Plan: ${row.plan} szt. · Wydano na zewnątrz: ${row.wydane} szt. · Skan w koszyku: ${row.scanned} szt.` : `Wydano w teren: ${row.wydane} szt. · Przyjęto już: ${row.przyjete} szt. · Skan w koszyku: ${row.scanned} szt.`}</p>
-                        {row.quantityOnly && <label className="mt-3 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-cyan-100 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-500/10 px-4 py-2.5 text-xs font-black text-cyan-900 dark:text-cyan-100 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition shadow-sm max-w-full">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 rounded border-slate-300 text-[#04e0ff] focus:ring-[#04e0ff] cursor-pointer shrink-0"
-                            checked={quantityRowSelected(row)}
-                            onChange={(e) => toggleQuantityRowWithoutScan(row, e.target.checked)}
-                          />
-                          <span className="truncate">{mode === 'wydanie' ? 'Wydaj brakujące na sztuki' : 'Przyjmij brakujące na sztuki'}</span>
-                          <span className="rounded-full bg-white dark:bg-black/20 border border-slate-200 dark:border-transparent px-2.5 py-1 text-cyan-700 dark:text-[#04e0ff] shadow-sm ml-auto shrink-0">{quantityRowSelected(row) ? `${row.scanned} ${row.jednostka || 'szt.'}` : `${missing} ${row.jednostka || 'szt.'}`}</span>
-                        </label>}
-                      </div>
-                      <div className="rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4 shadow-inner min-w-0">
-                        <div className="mb-2.5 flex justify-between text-xs font-black"><span>{mode === 'wydanie' ? 'Status wydania' : 'Status przyjęcia'}: {after}/{base}</span><span className={missing ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}>{missing ? `Brakuje jeszcze ${missing}` : 'Wszystko OK'}</span></div>
-                        <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 shadow-inner"><div className={`h-full rounded-full transition-all duration-1000 ${missing ? 'bg-orange-500 shadow-[0_0_8px_#f97316]' : 'bg-emerald-500 shadow-[0_0_8px_#10b981]'}`} style={{ width: `${percent}%` }} /></div>
-                      </div>
-                    </div>
-                  </div>;
-                })}
-        </div>
-      </div>)}
-    </div>
-  </div>
-  
-  <div className="border-l border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/20 p-6 shadow-inner min-w-0 flex flex-col">
-    <div className="sticky top-4 space-y-5 min-w-0">
-      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
-        <Field label="Skanuj kod kreskowy / QR / SN / Case z Naklejki">
-           <div className="flex gap-2">
-             <input ref={scanInputRef} className={`${inputClass} py-3 text-lg font-bold shadow-inner min-w-0`} autoFocus value={scanCode} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setScanCode(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); scan(); } }} placeholder="Kliknij Skanuj, skanuj kod i wciśnij Enter..."/>
-             <Button onClick={scan} className="px-6 shadow-md shadow-cyan-600/20 shrink-0">{scanCode.trim() ? 'Dodaj skan' : 'Skanuj'}</Button>
-           </div>
-        </Field>
-        <p className="mt-3 text-xs font-bold text-slate-400 leading-relaxed">Zeskanowanie kontenera (Opakowanie/Case) automatycznie rozpakuje go i doda na listę ukryty w nim sprzęt. Zeskanowanie Zestawu(Racka) doda go jako spójną całość. Sprzęt ilościowy dodasz skanem modelu lub checkboxem po lewej.</p>
-      </div>
-      
-      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
-        <div className="mb-4 flex items-center justify-between min-w-0"><h4 className="text-lg font-black text-slate-900 dark:text-white truncate pr-2">Koszyk Skanera (Teraz)</h4><span className="rounded-full bg-cyan-100 dark:bg-cyan-500/10 px-3 py-1 text-xs font-black text-cyan-700 dark:text-[#04e0ff] border border-cyan-200 dark:border-cyan-500/20 shrink-0">{docItems.reduce((s: number, p: any) => s + Number(p.ilosc || 1), 0)} szt.</span></div>
-        <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1 custom-scrollbar min-w-0">
-          {docItems.map((p, idx) => <div key={`${p.id_egzemplarza || p.id_modelu}-${idx}`} className="rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 p-3 flex justify-between gap-3 group transition-colors hover:border-cyan-300 dark:hover:border-cyan-700 min-w-0">
-            <div className="min-w-0">
-               <b className="text-[13px] text-slate-900 dark:text-white block truncate">{p.nazwa}</b>
-               <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
-                  {p.kategoria} · {isQuantityOnly(p) ? <span className="text-[#04e0ff]">{p.ilosc || 1} {p.jednostka || 'szt.'}</span> : `${p.nazwa_zeskanowanego_case ? `w: ${p.nazwa_zeskanowanego_case} · ` : ''}${p.kod || '-'}` } {p.kod && isQuantityOnly(p) ? ` · kod ${p.kod}` : ''}
-               </p>
+        <div className="grid gap-0 xl:grid-cols-[1.15fr_.85fr] min-w-0">
+          <div className="p-6 min-w-0">
+            <div className="mb-6 rounded-2xl border border-cyan-200 dark:border-cyan-500/20 bg-cyan-50 dark:bg-cyan-500/10 p-5 shadow-sm min-w-0">
+              <p className="text-sm font-bold leading-relaxed text-cyan-900 dark:text-cyan-100">{mode === 'wydanie' ? 'Skanuj egzemplarze albo kody kontenerów aby je wydać (WZ). Sprzęt ilościowy możesz zaznaczyć checkboxem by pobrać brakującą ilość sztuk bez ręcznego wpisywania w skaner.' : 'Skanuj zwracane egzemplarze i kontenery (PZ). Sprzęt ilościowy możesz zaznaczyć checkboxem by zwrócić brakującą na magazynie ilość sztuk bez skanera.'}</p>
             </div>
-            <button onClick={() => setDocItems((s) => s.filter((_, i) => i !== idx))} className="font-black text-slate-400 hover:text-red-500 bg-white dark:bg-transparent rounded-lg px-2.5 py-1.5 h-fit shadow-sm border border-slate-200 dark:border-transparent transition flex items-center gap-1.5 opacity-0 group-hover:opacity-100 shrink-0" title="Cofnij skan">
-              <RotateCcw size={14}/> Cofnij
-            </button>
-          </div>)}
-          {!docItems.length && <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-8 text-center text-sm font-bold text-slate-400 bg-white dark:bg-transparent">Rozpocznij skanowanie fizycznego sprzętu albo zaznacz checkbox przy sprzęcie ilościowym — ta lista zaktualizuje się automatycznie.</div>}
+            <div className="space-y-5 min-w-0">
+              {plannedGroups.map((group: any) => <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm min-w-0">
+                <div className="bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-white/5 px-5 py-3.5"><b className="text-slate-900 dark:text-white">{group.nazwa}</b></div>
+                <div className="divide-y divide-slate-100 dark:divide-white/5">
+                  {group.rows.map((row: any) => {
+                    const after = countAfterScan(row);
+                    const missing = missingAfterScan(row);
+                    const base = mode === 'wydanie' ? row.plan : row.wydane;
+                    const percent = base > 0 ? Math.min(100, Math.round((after / base) * 100)) : 100;
+                    return <div key={row.id_modelu} className="px-5 py-4 min-w-0">
+                      <div className="grid gap-4 lg:grid-cols-[1fr_300px] lg:items-center min-w-0">
+                        <div className="min-w-0">
+                          <p className="font-black text-slate-900 dark:text-white text-[15px] truncate">{row.nazwa}</p>
+                          <p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-1 truncate">{mode === 'wydanie' ? `Plan: ${row.plan} szt. · Wydano na zewnątrz: ${row.wydane} szt. · Skan w koszyku: ${row.scanned} szt.` : `Wydano w teren: ${row.wydane} szt. · Przyjęto już: ${row.przyjete} szt. · Skan w koszyku: ${row.scanned} szt.`}</p>
+                          {row.quantityOnly && <label className="mt-3 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-cyan-100 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-500/10 px-4 py-2.5 text-xs font-black text-cyan-900 dark:text-cyan-100 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition shadow-sm max-w-full">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-slate-300 text-[#04e0ff] focus:ring-[#04e0ff] cursor-pointer shrink-0"
+                              checked={quantityRowSelected(row)}
+                              onChange={(e) => toggleQuantityRowWithoutScan(row, e.target.checked)}
+                            />
+                            <span className="truncate">{mode === 'wydanie' ? 'Wydaj brakujące na sztuki' : 'Przyjmij brakujące na sztuki'}</span>
+                            <span className="rounded-full bg-white dark:bg-black/20 border border-slate-200 dark:border-transparent px-2.5 py-1 text-cyan-700 dark:text-[#04e0ff] shadow-sm ml-auto shrink-0">{quantityRowSelected(row) ? `${row.scanned} ${row.jednostka || 'szt.'}` : `${missing} ${row.jednostka || 'szt.'}`}</span>
+                          </label>}
+                        </div>
+                        <div className="rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4 shadow-inner min-w-0">
+                          <div className="mb-2.5 flex justify-between text-xs font-black"><span>{mode === 'wydanie' ? 'Status wydania' : 'Status przyjęcia'}: {after}/{base}</span><span className={missing ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}>{missing ? `Brakuje jeszcze ${missing}` : 'Wszystko OK'}</span></div>
+                          <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 shadow-inner"><div className={`h-full rounded-full transition-all duration-1000 ${missing ? 'bg-orange-500 shadow-[0_0_8px_#f97316]' : 'bg-emerald-500 shadow-[0_0_8px_#10b981]'}`} style={{ width: `${percent}%` }} /></div>
+                        </div>
+                      </div>
+                    </div>;
+                  })}
+                </div>
+              </div>)}
+            </div>
+          </div>
+          
+          <div className="border-l border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/20 p-6 shadow-inner min-w-0 flex flex-col">
+            <div className="sticky top-4 space-y-5 min-w-0">
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                <Field label="Skanuj kod kreskowy / QR / SN / Case z Naklejki">
+                   <div className="flex gap-2">
+                     <input ref={scanInputRef} className={`${inputClass} py-3 text-lg font-bold shadow-inner min-w-0`} autoFocus value={scanCode} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setScanCode(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); scan(); } }} placeholder="Kliknij Skanuj, skanuj kod i wciśnij Enter..."/>
+                     <Button onClick={scan} className="px-6 shadow-md shadow-cyan-600/20 shrink-0">{scanCode.trim() ? 'Dodaj skan' : 'Skanuj'}</Button>
+                   </div>
+                </Field>
+                <p className="mt-3 text-xs font-bold text-slate-400 leading-relaxed">Zeskanowanie kontenera (Opakowanie/Case) automatycznie rozpakuje go i doda na listę ukryty w nim sprzęt. Zeskanowanie Zestawu(Racka) doda go jako spójną całość. Sprzęt ilościowy dodasz skanem modelu lub checkboxem po lewej.</p>
+              </div>
+              
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                <div className="mb-4 flex items-center justify-between min-w-0"><h4 className="text-lg font-black text-slate-900 dark:text-white truncate pr-2">Koszyk Skanera (Teraz)</h4><span className="rounded-full bg-cyan-100 dark:bg-cyan-500/10 px-3 py-1 text-xs font-black text-cyan-700 dark:text-[#04e0ff] border border-cyan-200 dark:border-cyan-500/20 shrink-0">{docItems.reduce((s: number, p: any) => s + Number(p.ilosc || 1), 0)} szt.</span></div>
+                <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1 custom-scrollbar min-w-0">
+                  {docItems.map((p, idx) => <div key={`${p.id_egzemplarza || p.id_modelu}-${idx}`} className="rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 p-3 flex justify-between gap-3 group transition-colors hover:border-cyan-300 dark:hover:border-cyan-700 min-w-0">
+                    <div className="min-w-0">
+                       <b className="text-[13px] text-slate-900 dark:text-white block truncate">{p.nazwa}</b>
+                       <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
+                          {p.kategoria} · {isQuantityOnly(p) ? <span className="text-[#04e0ff]">{p.ilosc || 1} {p.jednostka || 'szt.'}</span> : `${p.nazwa_zeskanowanego_case ? `w: ${p.nazwa_zeskanowanego_case} · ` : ''}${p.kod || '-'}` } {p.kod && isQuantityOnly(p) ? ` · kod ${p.kod}` : ''}
+                       </p>
+                    </div>
+                    <button onClick={() => setDocItems((s) => s.filter((_, i) => i !== idx))} className="font-black text-slate-400 hover:text-red-500 bg-white dark:bg-transparent rounded-lg px-2.5 py-1.5 h-fit shadow-sm border border-slate-200 dark:border-transparent transition flex items-center gap-1.5 opacity-0 group-hover:opacity-100 shrink-0" title="Cofnij skan">
+                      <RotateCcw size={14}/> Cofnij
+                    </button>
+                  </div>)}
+                  {!docItems.length && <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-8 text-center text-sm font-bold text-slate-400 bg-white dark:bg-transparent">Rozpocznij skanowanie fizycznego sprzętu albo zaznacz checkbox przy sprzęcie ilościowym — ta lista zaktualizuje się automatycznie.</div>}
+                </div>
+              </div>
+              
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                <Field label="Wyszukaj i dodaj egzemplarz ręcznie (Awaryjnie)"><div className="relative min-w-0"><Search className="absolute left-3 top-3 text-slate-400" size={16}/><input className={`${inputClass} pl-9 min-w-0`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="nazwa, numer boczny, kod kreskowy..." /></div></Field>
+                <div className="mt-4 max-h-[220px] space-y-2 overflow-y-auto pr-1 custom-scrollbar min-w-0">
+                  {visibleInstances.map((r: any) => <button key={r.id} type="button" onClick={() => addDocumentItem(r, 'manual')} className="w-full rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 p-3 text-left hover:border-cyan-300 dark:hover:border-cyan-700 transition shadow-sm min-w-0">
+                    <b className="text-[13px] text-slate-900 dark:text-white block truncate">{r.model?.nazwa || r.nazwa_wiersza}</b>
+                    <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">{r.nazwa_wiersza} · S/N: {r.kod || '-'}</p>
+                  </button>)}
+                </div>
+              </div>
+              
+              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                <div className="rounded-xl border border-cyan-100 dark:border-cyan-500/20 bg-cyan-50 dark:bg-cyan-500/10 p-3.5 text-xs font-bold text-cyan-900 dark:text-cyan-100 mb-4 leading-relaxed">
+                  Dokument magazynowy podpisze automatycznie w systemie aktualnie zalogowany użytkownik. Na wygenerowanym potwierdzeniu PDF będzie widoczny cyfrowy ślad audytowy transakcji.
+                </div>
+                <Field label="Dodatkowe uwagi dla magazyniera do wpisania na dokument WZ/PZ"><textarea className={`${inputClass} resize-none min-h-[80px] min-w-0`} value={docForm.uwagi || ''} onChange={(e) => setDocForm({ ...docForm, uwagi: e.target.value })} placeholder="opcjonalne uwagi..."/></Field>
+                <button type="button" disabled={!docItems.length || savingDocs} onClick={() => createDocument(mode)} className={`mt-4 w-full rounded-xl px-5 py-3.5 text-sm font-black text-white disabled:opacity-50 transition shadow-lg ${mode === 'wydanie' ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-500/30 hover:opacity-90' : 'bg-gradient-to-r from-[#04e0ff] to-blue-600 shadow-[#04e0ff]/30 hover:opacity-90'} flex items-center justify-center gap-2`}>
+                  {savingDocs ? <Loader2 size={18} className="animate-spin shrink-0"/> : <FileText size={18} className="shrink-0" />} <span className="truncate">{savingDocs ? 'Generowanie...' : mode === 'wydanie' ? 'Zatwierdź i Wystaw WZ' : 'Zatwierdź i Wystaw PZ'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
-        <Field label="Wyszukaj i dodaj egzemplarz ręcznie (Awaryjnie)"><div className="relative min-w-0"><Search className="absolute left-3 top-3 text-slate-400" size={16}/><input className={`${inputClass} pl-9 min-w-0`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="nazwa, numer boczny, kod kreskowy..." /></div></Field>
-        <div className="mt-4 max-h-[220px] space-y-2 overflow-y-auto pr-1 custom-scrollbar min-w-0">
-          {visibleInstances.map((r: any) => <button key={r.id} type="button" onClick={() => addDocumentItem(r, 'manual')} className="w-full rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 p-3 text-left hover:border-cyan-300 dark:hover:border-cyan-700 transition shadow-sm min-w-0">
-            <b className="text-[13px] text-slate-900 dark:text-white block truncate">{r.model?.nazwa || r.nazwa_wiersza}</b>
-            <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">{r.nazwa_wiersza} · S/N: {r.kod || '-'}</p>
-          </button>)}
-        </div>
-      </div>
-      
-      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
-        <div className="rounded-xl border border-cyan-100 dark:border-cyan-500/20 bg-cyan-50 dark:bg-cyan-500/10 p-3.5 text-xs font-bold text-cyan-900 dark:text-cyan-100 mb-4 leading-relaxed">
-          Dokument magazynowy podpisze automatycznie w systemie aktualnie zalogowany użytkownik. Na wygenerowanym potwierdzeniu PDF będzie widoczny cyfrowy ślad audytowy transakcji.
-        </div>
-        <Field label="Dodatkowe uwagi dla magazyniera do wpisania na dokument WZ/PZ"><textarea className={`${inputClass} resize-none min-h-[80px] min-w-0`} value={docForm.uwagi || ''} onChange={(e) => setDocForm({ ...docForm, uwagi: e.target.value })} placeholder="opcjonalne uwagi..."/></Field>
-        <button type="button" disabled={!docItems.length || savingDocs} onClick={() => createDocument(mode)} className={`mt-4 w-full rounded-xl px-5 py-3.5 text-sm font-black text-white disabled:opacity-50 transition shadow-lg ${mode === 'wydanie' ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-500/30 hover:opacity-90' : 'bg-gradient-to-r from-[#04e0ff] to-blue-600 shadow-[#04e0ff]/30 hover:opacity-90'} flex items-center justify-center gap-2`}>
-          {savingDocs ? <Loader2 size={18} className="animate-spin shrink-0"/> : <FileText size={18} className="shrink-0" />} <span className="truncate">{savingDocs ? 'Generowanie...' : mode === 'wydanie' ? 'Zatwierdź i Wystaw WZ' : 'Zatwierdź i Wystaw PZ'}</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>)}
+      )}
     </section>
 
     <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-sm mt-8">
