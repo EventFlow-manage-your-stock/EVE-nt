@@ -284,7 +284,7 @@ export function EntityEditorPage({ config }: { config: EntityEditorConfig }) {
           <div className="grid gap-3">
             <Info label="ID rekordu" value={isNew ? 'Nowy' : `#${record?.id}`} />
             <Info label="Aktywny" value={record?.aktywny === false ? 'Nie' : 'Tak'} />
-            <InfoImage label="Źródło" value={<Image src="/eventflow-logo-dark.svg" alt="EventFlow" width={120} height={40} className="mt-2" priority/>} />
+            {/* <InfoImage label="Źródło" value={<Image src="/eventflow-logo-dark.svg" alt="EventFlow" width={120} height={40} className="mt-2" priority/>} /> */}
           </div>
         </Card>
       </form>

@@ -1,9 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from 'src/storage/storage.service';
 
 @Injectable()
 export class MagazynService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService // <-- To naprawi Twój błąd TS2339!
+  ) {}
 
   private cleanNumber(val: any): number | null {
     if (val === "" || val === null || val === undefined) return null;
@@ -592,9 +596,9 @@ export class MagazynService {
         }
       }
     });
+    
     if (!model) throw new NotFoundException('Nie znaleziono modelu');
 
-    // Pobieramy załączniki powiązane z tym modelem
     const zalaczniki = await this.prisma.extendedClient.zalacznik.findMany({
       where: { id_organizacji, typ_obiektu: 'ModelSprzetu', id_obiektu: id, aktywny: true },
       include: { dodal: { select: { imie: true, nazwisko: true } } },
@@ -605,22 +609,35 @@ export class MagazynService {
   }
 
   // --- Nowe funkcje dla załączników modelu ---
-  async addZalacznik(id_modelu: number, dto: any, id_organizacji: number, id_uzytkownika: number) {
+  async addZalacznik(id_modelu: number, dto: any, file: Express.Multer.File, id_organizacji: number, id_uzytkownika: number) {
+    // 1. Zapis pliku fizycznego do MinIO/S3 (zwraca krótki klucz np. org_1/zalaczniki/123.pdf)
+    const objectKey = await this.storage.uploadFile(file, id_organizacji, 'modele_zalaczniki');
+
+    // 2. Zapis krótkiego klucza w PostgreSQL
     return this.prisma.extendedClient.zalacznik.create({
       data: {
         id_organizacji,
         typ_obiektu: 'ModelSprzetu',
         id_obiektu: id_modelu,
-        nazwa: dto.nazwa,
-        nazwa_pliku: dto.nazwa_pliku,
-        rozmiar_bajtow: Number(dto.rozmiar) || 0,
-        mime: dto.mime || 'application/octet-stream',
+        nazwa: dto.nazwa || file.originalname,
+        nazwa_pliku: file.originalname,
+        rozmiar_bajtow: file.size,
+        mime: file.mimetype,
+        sciezka: objectKey, // Oszczędność kilkunastu megabajtów na wierszu bazy
         id_uzytkownika_dodal: id_uzytkownika
       }
     });
   }
 
   async removeZalacznik(id: number, id_organizacji: number) {
+    const zalacznik = await this.prisma.extendedClient.zalacznik.findFirst({
+      where: { id, id_organizacji }
+    });
+
+    if (zalacznik && zalacznik.sciezka && !zalacznik.sciezka.startsWith('data:')) {
+      await this.storage.deleteFile(zalacznik.sciezka);
+    }
+
     return this.prisma.extendedClient.zalacznik.update({
       where: { id, id_organizacji },
       data: { aktywny: false }
@@ -1843,4 +1860,38 @@ export class MagazynService {
     return { ok: true };
   });
 }
+
+async addZalacznikWithS3(id_modelu: number, dto: any, file: Express.Multer.File, id_organizacji: number, id_uzytkownika: number) {
+    // 1. Wrzucamy plik na MinIO (ścieżka np: org_1/modele_zalaczniki/...)
+    const objectKey = await this.storage.uploadFile(file, id_organizacji, 'modele_zalaczniki');
+
+    // 2. Zapisujemy zwięzły klucz (ObjectKey) w bazie danych
+    return this.prisma.extendedClient.zalacznik.create({
+      data: {
+        id_organizacji,
+        typ_obiektu: 'ModelSprzetu',
+        id_obiektu: id_modelu,
+        nazwa: dto.nazwa || file.originalname,
+        nazwa_pliku: file.originalname,
+        rozmiar_bajtow: file.size,
+        mime: file.mimetype,
+        sciezka: objectKey, // Tu siedzi teraz czysty, krótki klucz obiektu z S3, a nie tona tekstu!
+        id_uzytkownika_dodal: id_uzytkownika
+      }
+    });
+  }
+
+  async getDownloadUrl(id_zalacznika: number, id_organizacji: number) {
+    const zalacznik = await this.prisma.extendedClient.zalacznik.findFirst({
+      where: { id: id_zalacznika, id_organizacji, aktywny: true }
+    });
+    
+    if (!zalacznik || !zalacznik.sciezka) {
+      throw new NotFoundException('Zalącznik nie istnieje lub brakuje pliku fizycznego.');
+    }
+
+    // W locie generujemy jednorazowy, ważny 5 minut link
+    const url = await this.storage.getPresignedDownloadUrl(zalacznik.sciezka);
+    return { url };
+  }
 }

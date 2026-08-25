@@ -87,7 +87,6 @@ export default function ModelDetailsPage() {
   const [form, setForm] = useState<any>({});
   const [saving, setSaving] = useState(false);
   
-  // NOWE: Stan kontrolujący aktualną zakładkę w prawej kolumnie
   const [activeTab, setActiveTab] = useState<'egzemplarze' | 'zalaczniki'>('egzemplarze');
 
   async function load() {
@@ -180,7 +179,6 @@ export default function ModelDetailsPage() {
       />
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.4fr]">
-        {/* LEWA KOLUMNA - DANE MODELU */}
         <Card>
           <div className="mb-4 flex items-center justify-between gap-4">
             <h2 className="text-lg font-black">Dane modelu</h2>
@@ -246,7 +244,6 @@ export default function ModelDetailsPage() {
           </form>
         </Card>
 
-        {/* PRAWA KOLUMNA - TABS (Ewidencja / Załączniki) */}
         <div className="flex flex-col gap-4">
           <div className="flex gap-2 border-b border-slate-200 pb-2">
             <button 
@@ -372,32 +369,60 @@ function defaultItemForm(model: any, nextNumber = 1) {
 }
 
 // -------------------------------------------------------------
-// PANEL ZAŁĄCZNIKÓW
+// PANEL ZAŁĄCZNIKÓW (Wsparcie dla S3 / MinIO)
 // -------------------------------------------------------------
 function AttachmentsPanel({ modelId, zalaczniki, reloadModel }: any) {
   const [form, setForm] = useState<any>({});
+  const [file, setFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   async function saveFile(e: any) {
     e.preventDefault();
-    await api.post(`/api/magazyn/modele/${modelId}/zalaczniki`, {
-       nazwa: form.nazwa || form.nazwa_pliku,
-       nazwa_pliku: form.nazwa_pliku || 'dokument.pdf',
-       rozmiar: form.rozmiar || Math.floor(Math.random() * 5000000) + 100000, 
-       mime: form.mime || 'application/pdf',
-       sciezka: form.sciezka || ''
-    });
-    setForm({}); setAdding(false); reloadModel();
+    if (!file) return alert('Wybierz plik!');
+
+    setUploading(true);
+    try {
+      // Zamiast JSON, tworzymy obiekt FormData
+      const formData = new FormData();
+      formData.append('file', file);
+      if (form.nazwa) formData.append('nazwa', form.nazwa);
+
+      await api.post(`/api/magazyn/modele/${modelId}/zalaczniki`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setForm({}); 
+      setFile(null);
+      setAdding(false); 
+      reloadModel();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Nie udało się wgrać pliku na serwer obiektów.');
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
   }
 
-  function handleDownload(z: any) {
-    if (z.sciezka) {
-      // Otwiera plik w nowej karcie (podgląd) lub wymusza pobieranie, 
-      // w zależności od ustawień serwera docelowego S3/Cloud
-      window.open(z.sciezka, '_blank');
-    } else {
-      // Fallback na wypadek starszych rekordów testowych bez pliku
-      alert('Ten plik nie posiada poprawnej ścieżki URL na serwerze. Pełna funkcja pobierania będzie dostępna po integracji z S3.');
+  async function handleDownload(z: any) {
+    try {
+      if (z.sciezka?.startsWith('data:')) {
+        // Fallback dla starych plików zapisanych czystym Base64 w testach
+        const link = document.createElement('a');
+        link.href = z.sciezka;
+        link.download = z.nazwa_pliku || 'pobrany-zalacznik';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // Nowa, właściwa ścieżka S3 - generowanie wygasającego linku z naszego API
+        const res = await api.get(`/api/storage/download/${z.id}`);
+        if (res.data?.url) {
+          window.open(res.data.url, '_blank');
+        }
+      }
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Nie udało się uzyskać bezpiecznego linku pobierania.');
     }
   }
 
@@ -406,31 +431,28 @@ function AttachmentsPanel({ modelId, zalaczniki, reloadModel }: any) {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="font-black text-xl text-slate-900 dark:text-white">Pliki i Dokumentacja</h3>
-          <p className="text-sm font-bold text-slate-500">Instrukcje obsługi, certyfikaty, karty DTR.</p>
+          <p className="text-sm font-bold text-slate-500">Bezpieczny magazyn chmurowy (Object Storage).</p>
         </div>
-        <Button onClick={() => setAdding(true)}><Paperclip size={16} className="inline mr-1"/> Dodaj plik</Button>
+        <Button onClick={() => setAdding(true)} disabled={uploading}><Paperclip size={16} className="inline mr-1"/> Dodaj plik</Button>
       </div>
 
       {adding && <div className="mb-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[24px] p-5">
         <form onSubmit={saveFile} className="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
           <Field label="Nazwa wyświetlana (Opcjonalnie)">
-            <input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} placeholder="np. Instrukcja PDF"/>
+            <input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} placeholder="np. Karta DTR"/>
           </Field>
           <Field label="Wybierz Plik z Dysku">
             <input 
               required 
               type="file" 
               className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-4 file:py-2.5 file:font-black file:text-white hover:file:bg-cyan-700 transition cursor-pointer" 
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setForm({...form, nazwa_pliku: file.name, rozmiar: file.size, mime: file.type});
-                  // W przyszłości w tym miejscu nastąpi upload na S3 i przypisanie linku do form.sciezka
-                }
-              }} 
+              onChange={(e) => setFile(e.target.files?.[0] || null)} 
             />
           </Field>
-          <div className="flex gap-2"><Button variant="secondary" type="button" onClick={()=>setAdding(false)}>Anuluj</Button><Button type="submit">Wgraj plik na serwer</Button></div>
+          <div className="flex gap-2">
+            <Button variant="secondary" type="button" onClick={() => {setAdding(false); setForm({}); setFile(null);}} disabled={uploading}>Anuluj</Button>
+            <Button type="submit" disabled={uploading || !file}>{uploading ? 'Wysyłanie...' : 'Wgraj na serwer'}</Button>
+          </div>
         </form>
       </div>}
 
@@ -440,15 +462,15 @@ function AttachmentsPanel({ modelId, zalaczniki, reloadModel }: any) {
                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20"><FileText size={24} strokeWidth={1.5}/></div>
                <div className="min-w-0 pr-2">
                   <p className="font-black text-[15px] text-slate-900 dark:text-white truncate">{z.nazwa || z.nazwa_pliku}</p>
-                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 truncate">{z.nazwa_pliku} · {(z.rozmiar_bajtow / 1024 / 1024).toFixed(2)} MB</p>
+                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 truncate">{z.nazwa_pliku} · {((z.rozmiar_bajtow || 0) / 1024 / 1024).toFixed(2)} MB</p>
                   <p className="text-[10px] font-semibold text-slate-400 mt-1">Dodał: {z.dodal?.imie || 'System'} · {new Date(z.data_utworzenia).toLocaleDateString()}</p>
                </div>
             </div>
             <div className="flex flex-col gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => handleDownload(z)} className="p-2 text-[#04e0ff] hover:bg-cyan-50 dark:hover:bg-white/5 rounded-xl transition" title="Podgląd / Pobierz">
+              <button type="button" onClick={() => handleDownload(z)} className="p-2 text-[#04e0ff] hover:bg-cyan-50 dark:hover:bg-white/5 rounded-xl transition" title="Podgląd / Pobierz bezpiecznie">
                 <Download size={18}/>
               </button>
-              <button onClick={async () => { if(confirm('Usunąć załącznik z systemu?')) { await api.delete(`/api/magazyn/modele/${modelId}/zalaczniki/${z.id}`); reloadModel(); } }} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition" title="Usuń z serwera">
+              <button type="button" onClick={async () => { if(confirm('Zarówno plik na serwerze jak i powiązanie z systemem zostaną usunięte. Kontynuować?')) { await api.delete(`/api/magazyn/modele/${modelId}/zalaczniki/${z.id}`); reloadModel(); } }} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition" title="Usuń z S3 i Bazy">
                 <Trash2 size={18}/>
               </button>
             </div>

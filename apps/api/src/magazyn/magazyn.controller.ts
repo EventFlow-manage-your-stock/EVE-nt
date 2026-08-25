@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Req, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, Req, UseGuards, ParseIntPipe, BadRequestException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { MagazynService } from './magazyn.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile, UseInterceptors } from '@nestjs/common';
 
 @Controller('magazyn')
 @UseGuards(AuthGuard('jwt'))
@@ -233,13 +235,25 @@ export class MagazynController {
   }
 
   @Post('modele/:id/zalaczniki')
-  async addZalacznik(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
+  @UseInterceptors(FileInterceptor('file')) // <-- Multer przetwarza "multipart/form-data" z frontendu
+  async addZalacznik(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() dto: any, 
+    @UploadedFile() file: Express.Multer.File, // Odbiór do pamięci RAM na czas przesłania do MinIO
+    @Req() req: Request
+  ) {
+    if (!file) throw new BadRequestException('Brak pliku w żądaniu. Upewnij się, że przesyłasz obiekt FormData z kluczem "file".');
+
     const id_uzytkownika = Number((req.user as any).id || (req.user as any).sub);
-    return this.magazynService.addZalacznik(id, dto, Number((req.user as any).id_organizacji), id_uzytkownika);
+    return this.magazynService.addZalacznik(id, dto, file, Number((req.user as any).id_organizacji), id_uzytkownika);
   }
 
   @Delete('modele/:id/zalaczniki/:zalacznikId')
   async removeZalacznik(@Param('id', ParseIntPipe) id: number, @Param('zalacznikId', ParseIntPipe) zalacznikId: number, @Req() req: Request) {
     return this.magazynService.removeZalacznik(zalacznikId, Number((req.user as any).id_organizacji));
+  }
+  @Get('zalaczniki/:zalacznikId/download')
+  async downloadZalacznik(@Param('zalacznikId', ParseIntPipe) id: number, @Req() req: Request) {
+    return this.magazynService.getDownloadUrl(id, Number((req.user as any).id_organizacji));
   }
 }

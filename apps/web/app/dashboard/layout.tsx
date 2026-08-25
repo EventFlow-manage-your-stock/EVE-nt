@@ -7,7 +7,8 @@ import Image from 'next/image';
 import { 
   Calendar, CheckSquare, Home, Users, Box, Wrench, Truck, Settings, FileText, 
   ChevronDown, LogOut, Star, Phone, Tags, Shield, Car, Palmtree, Palette, 
-  ShieldAlert, Menu, Bell, Search, Sun, Moon, PanelLeftClose, PanelLeftOpen, Plus, Layers, Loader2, ArrowRight
+  ShieldAlert, Menu, Bell, Search, Sun, Moon, PanelLeftClose, PanelLeftOpen, Plus, Layers, Loader2, ArrowRight,
+  FileArchive
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { Button } from '../../components/ProductUI';
@@ -56,6 +57,7 @@ const menuConfig: MenuItem[] = [
   ]},
   { icon: FileText, label: 'Oferty', requiredPermission: 'offers:view', href: '/dashboard/offers' },
   { icon: FileText, label: 'Zapytanie ofertowe', requiredPermission: 'offers:view', href: '/dashboard/zapytania' },
+  { label: 'Globalne Załączniki', href: '/dashboard/attachments', icon: FileArchive },
   { icon: Settings, label: 'Ustawienia', requiredPermission: 'settings:view', children: [
     { label: 'Personalizacja systemu', href: '/dashboard/settings', icon: Settings },
     { label: 'Typy wydarzeń', href: '/dashboard/settings/event-types', icon: Palette },

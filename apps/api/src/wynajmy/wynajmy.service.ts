@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from 'src/storage/storage.service';
 
 @Injectable()
 export class WynajmyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly storage: StorageService) {}
 
   private n(v: any) { return v === '' || v == null ? null : Number(v); }
   private d(v: any) { return v ? new Date(v) : null; }
@@ -340,16 +341,36 @@ export class WynajmyService {
     });
   }
 
-  async addAttachment(id: number, dto: any, id_organizacji: number, id_uzytkownika: number) {
+  async addZalacznik(id_wynajmu: number, dto: any, file: Express.Multer.File, id_organizacji: number, id_uzytkownika: number) {
+    const objectKey = await this.storage.uploadFile(file, id_organizacji, 'wynajmy_zalaczniki');
+
     return this.prisma.extendedClient.zalacznik.create({
-      data: { id_organizacji, typ_obiektu: 'Wynajem', id_obiektu: id, nazwa: dto.nazwa, nazwa_pliku: dto.nazwa_pliku, rozmiar_bajtow: dto.rozmiar, mime: dto.mime, id_uzytkownika_dodal: id_uzytkownika }
+      data: {
+        id_organizacji,
+        typ_obiektu: 'Wynajem',
+        id_obiektu: id_wynajmu,
+        nazwa: dto.nazwa || file.originalname,
+        nazwa_pliku: file.originalname,
+        rozmiar_bajtow: file.size,
+        mime: file.mimetype,
+        sciezka: objectKey,
+        id_uzytkownika_dodal: id_uzytkownika
+      }
     });
   }
 
-  async removeAttachment(id: number, zalId: number, id_organizacji: number) {
-    return this.prisma.extendedClient.zalacznik.updateMany({
-      where: { id: zalId, id_obiektu: id, typ_obiektu: 'Wynajem', id_organizacji },
-      data: { aktywny: false, data_usuniecia: new Date() }
+  async removeZalacznik(id: number, id_organizacji: number) {
+    const zalacznik = await this.prisma.extendedClient.zalacznik.findFirst({
+      where: { id, id_organizacji }
+    });
+    
+    if (zalacznik && zalacznik.sciezka && !zalacznik.sciezka.startsWith('data:')) {
+      await this.storage.deleteFile(zalacznik.sciezka);
+    }
+    
+    return this.prisma.extendedClient.zalacznik.update({
+      where: { id, id_organizacji },
+      data: { aktywny: false }
     });
   }
 }

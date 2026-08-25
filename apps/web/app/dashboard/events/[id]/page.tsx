@@ -1318,11 +1318,13 @@ function EventFleetPanel({ eventId, pojazdy, etapy = [], dict, tabQuery = '', re
 }
 
 // -------------------------------------------------------------
-// ZAŁĄCZNIKI
+// ZAŁĄCZNIKI (Wsparcie dla S3 / MinIO) - Wydarzenia
 // -------------------------------------------------------------
 function AttachmentsPanel({ eventId, zalaczniki, tabQuery = '', reloadEvent }: any) {
   const [form, setForm] = useState<any>({});
+  const [file, setFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const filtered = useMemo(() => {
     if (!tabQuery) return zalaczniki;
@@ -1332,48 +1334,84 @@ function AttachmentsPanel({ eventId, zalaczniki, tabQuery = '', reloadEvent }: a
 
   async function saveFile(e: any) {
     e.preventDefault();
-    await api.post(`/api/wydarzenia/${eventId}/zalaczniki`, {
-       nazwa: form.nazwa || form.nazwa_pliku,
-       nazwa_pliku: form.nazwa_pliku || 'skan.pdf',
-       rozmiar: Math.floor(Math.random() * 5000000) + 100000, 
-       mime: 'application/pdf'
-    });
-    setForm({}); setAdding(false); reloadEvent();
+    if (!file) return alert('Wybierz plik!');
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (form.nazwa) formData.append('nazwa', form.nazwa);
+
+      await api.post(`/api/wydarzenia/${eventId}/zalaczniki`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setForm({});
+      setFile(null);
+      setAdding(false);
+      reloadEvent();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Nie udało się wgrać pliku.');
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
   }
 
-  return <div className="space-y-4">
-    <div className="flex justify-between items-center mb-6">
-      <h3 className="font-black text-xl text-slate-900 dark:text-white">Pliki i Załączniki</h3>
-      <Button onClick={() => setAdding(true)}><Paperclip size={16} className="inline mr-1"/> Dodaj plik</Button>
-    </div>
+  async function handleDownload(z: any) {
+    try {
+      if (z.sciezka?.startsWith('data:')) {
+        const link = document.createElement('a'); link.href = z.sciezka; link.download = z.nazwa_pliku || 'plik'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      } else {
+        const res = await api.get(`/api/storage/download/${z.id}`);
+        if (res.data?.url) window.open(res.data.url, '_blank');
+      }
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Nie udało się uzyskać linku do pliku.');
+    }
+  }
 
-    {adding && <Card className="mb-6 bg-slate-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-[24px]">
-      <form onSubmit={saveFile} className="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
-        <Field label="Nazwa wyświetlana (Opcjonalnie)"><input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} placeholder="np. Skan Umowy"/></Field>
-        <Field label="Wybierz Plik z Dysku"><input required type="file" className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-4 file:py-2.5 file:font-black file:text-white hover:file:bg-cyan-700 transition cursor-pointer" onChange={(e) => setForm({...form, nazwa_pliku: e.target.files?.[0]?.name})} /></Field>
-        <div className="flex gap-2"><Button variant="secondary" type="button" onClick={()=>setAdding(false)}>Anuluj</Button><Button type="submit">Wgraj plik na serwer</Button></div>
-      </form>
-    </Card>}
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-black text-xl text-slate-900 dark:text-white">Pliki i Załączniki</h3>
+        <Button onClick={() => setAdding(true)} disabled={uploading}><Paperclip size={16} className="inline mr-1"/> Dodaj plik</Button>
+      </div>
 
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-       {filtered.map((z: any) => <div key={z.id} className="rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:border-cyan-300 dark:hover:border-cyan-500/50 transition-colors">
-          <div className="flex items-center gap-4 min-w-0">
-             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20"><FileText size={24} strokeWidth={1.5}/></div>
-             <div className="min-w-0 pr-2">
-                <p className="font-black text-[15px] text-slate-900 dark:text-white truncate">{z.nazwa || z.nazwa_pliku}</p>
-                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 truncate">{z.nazwa_pliku} · {(z.rozmiar_bajtow / 1024 / 1024).toFixed(2)} MB</p>
-                <p className="text-[10px] font-semibold text-slate-400 mt-1">Dodał: {z.dodal?.imie || 'System'} · {new Date(z.data_utworzenia).toLocaleDateString()}</p>
-             </div>
+      {adding && <Card className="mb-6 bg-slate-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-[24px]">
+        <form onSubmit={saveFile} className="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+          <Field label="Nazwa wyświetlana (Opcjonalnie)">
+            <input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} placeholder="np. Skan Umowy"/>
+          </Field>
+          <Field label="Wybierz Plik z Dysku">
+            <input required type="file" className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-4 file:py-2.5 file:font-black file:text-white hover:file:bg-cyan-700 transition cursor-pointer" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          </Field>
+          <div className="flex gap-2">
+            <Button variant="secondary" type="button" onClick={() => {setAdding(false); setForm({}); setFile(null);}} disabled={uploading}>Anuluj</Button>
+            <Button type="submit" disabled={uploading || !file}>{uploading ? 'Wysyłanie...' : 'Wgraj na serwer'}</Button>
           </div>
-          <div className="flex flex-col gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="p-2 text-[#04e0ff] hover:bg-cyan-50 dark:hover:bg-white/5 rounded-xl transition" title="Pobierz"><Download size={18}/></button>
-            <button onClick={async () => { if(confirm('Usunąć załącznik z systemu?')) { await api.delete(`/api/wydarzenia/${eventId}/zalaczniki/${z.id}`); reloadEvent(); } }} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition" title="Usuń z serwera"><Trash2 size={18}/></button>
-          </div>
-       </div>)}
-       {filtered.length === 0 && zalaczniki.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak plików pasujących do wyszukiwania.</div>}
-       {zalaczniki.length === 0 && !adding && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak wgranych plików do tego wydarzenia. Pamiętaj by załączyć tu skan podpisanej umowy!</div>}
+        </form>
+      </Card>}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+         {filtered.map((z: any) => <div key={z.id} className="rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:border-cyan-300 dark:hover:border-cyan-500/50 transition-colors">
+            <div className="flex items-center gap-4 min-w-0">
+               <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20"><FileText size={24} strokeWidth={1.5}/></div>
+               <div className="min-w-0 pr-2">
+                  <p className="font-black text-[15px] text-slate-900 dark:text-white truncate">{z.nazwa || z.nazwa_pliku}</p>
+                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 truncate">{z.nazwa_pliku} · {((z.rozmiar_bajtow||0) / 1024 / 1024).toFixed(2)} MB</p>
+                  <p className="text-[10px] font-semibold text-slate-400 mt-1">Dodał: {z.dodal?.imie || 'System'} · {new Date(z.data_utworzenia).toLocaleDateString()}</p>
+               </div>
+            </div>
+            <div className="flex flex-col gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button type="button" onClick={() => handleDownload(z)} className="p-2 text-[#04e0ff] hover:bg-cyan-50 dark:hover:bg-white/5 rounded-xl transition" title="Pobierz bezpiecznie"><Download size={18}/></button>
+              <button type="button" onClick={async () => { if(confirm('Usunąć załącznik z serwera?')) { await api.delete(`/api/wydarzenia/${eventId}/zalaczniki/${z.id}`); reloadEvent(); } }} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition" title="Usuń"><Trash2 size={18}/></button>
+            </div>
+         </div>)}
+         {filtered.length === 0 && zalaczniki.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak plików pasujących do wyszukiwania.</div>}
+         {zalaczniki.length === 0 && !adding && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak wgranych plików do tego wydarzenia. Pamiętaj by załączyć tu skan podpisanej umowy!</div>}
+      </div>
     </div>
-  </div>
+  );
 }
 
 // -------------------------------------------------------------

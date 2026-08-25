@@ -3,6 +3,8 @@ import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { WydarzeniaService } from './wydarzenia.service';
 import { Public } from '../auth/decorators/public.decorator';
+import { UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('wydarzenia')
 @UseGuards(AuthGuard('jwt'))
@@ -175,12 +177,20 @@ export class WydarzeniaController {
   }
 
   @Post(':id/zalaczniki')
-  addZalacznik(@Param('id', ParseIntPipe) id: number, @Body() dto: any, @Req() req: Request) {
-    return this.wydarzeniaService.addZalacznik(id, dto, Number((req.user as any).id_organizacji), Number((req.user as any).id));
+  @UseInterceptors(FileInterceptor('file'))
+  async addZalacznik(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request
+  ) {
+    if (!file) throw new BadRequestException('Brak pliku w żądaniu');
+    const id_uzytkownika = Number((req.user as any).id || (req.user as any).sub);
+    return this.wydarzeniaService.addZalacznik(id, dto, file, Number((req.user as any).id_organizacji), id_uzytkownika);
   }
 
   @Delete(':id/zalaczniki/:zalacznikId')
-  removeZalacznik(@Param('id', ParseIntPipe) id: number, @Param('zalacznikId', ParseIntPipe) zalacznikId: number, @Req() req: Request) {
+  async removeZalacznik(@Param('id', ParseIntPipe) id: number, @Param('zalacznikId', ParseIntPipe) zalacznikId: number, @Req() req: Request) {
     return this.wydarzeniaService.removeZalacznik(zalacznikId, Number((req.user as any).id_organizacji));
   }
 }

@@ -1,12 +1,13 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as nodemailer from 'nodemailer';
+import { StorageService } from 'src/storage/storage.service';
 
 @Injectable()
 export class WydarzeniaService {
   private transporter: nodemailer.Transporter;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(private readonly prisma: PrismaService, private readonly storage: StorageService) {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'localhost',
       port: Number(process.env.SMTP_PORT) || 465,
@@ -498,6 +499,36 @@ export class WydarzeniaService {
   }
 
   async addChatMessage(id_wydarzenia: number, message: string, id_organizacji: number, id_uzytkownika: number) { return this.prisma.extendedClient.logZmian.create({ data: { id_organizacji, id_uzytkownika, typ_obiektu: 'Wydarzenie', id_obiektu: id_wydarzenia, akcja: 'CHAT', nowa_wartosc: message } }); }
-  async addZalacznik(id_wydarzenia: number, dto: any, id_organizacji: number, id_uzytkownika: number) { return this.prisma.extendedClient.zalacznik.create({ data: { id_organizacji, typ_obiektu: 'Wydarzenie', id_obiektu: id_wydarzenia, nazwa: dto.nazwa, nazwa_pliku: dto.nazwa_pliku, rozmiar_bajtow: Number(dto.rozmiar) || 0, mime: dto.mime || 'application/octet-stream', id_uzytkownika_dodal: id_uzytkownika } }); }
-  async removeZalacznik(id: number, id_organizacji: number) { return this.prisma.extendedClient.zalacznik.update({ where: { id, id_organizacji }, data: { aktywny: false } }); }
+  async addZalacznik(id_wydarzenia: number, dto: any, file: Express.Multer.File, id_organizacji: number, id_uzytkownika: number) {
+    const objectKey = await this.storage.uploadFile(file, id_organizacji, 'wydarzenia_zalaczniki');
+
+    return this.prisma.extendedClient.zalacznik.create({
+      data: {
+        id_organizacji,
+        typ_obiektu: 'Wydarzenie',
+        id_obiektu: id_wydarzenia,
+        nazwa: dto.nazwa || file.originalname,
+        nazwa_pliku: file.originalname,
+        rozmiar_bajtow: file.size,
+        mime: file.mimetype,
+        sciezka: objectKey,
+        id_uzytkownika_dodal: id_uzytkownika
+      }
+    });
+  }
+
+  async removeZalacznik(id: number, id_organizacji: number) {
+    const zalacznik = await this.prisma.extendedClient.zalacznik.findFirst({
+      where: { id, id_organizacji }
+    });
+    
+    if (zalacznik && zalacznik.sciezka && !zalacznik.sciezka.startsWith('data:')) {
+      await this.storage.deleteFile(zalacznik.sciezka);
+    }
+    
+    return this.prisma.extendedClient.zalacznik.update({
+      where: { id, id_organizacji },
+      data: { aktywny: false }
+    });
+  }
 }
