@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from 'src/storage/storage.service';
 @Injectable()
 export class UstawieniaService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly storage: StorageService) {}
   async getRole(id_organizacji: number) { return this.prisma.extendedClient.rola.findMany({ where: { id_organizacji, aktywny: true }, orderBy: { kolejnosc: 'asc' } }); }
   async getUzytkownicy(id_organizacji: number) { return this.prisma.extendedClient.uzytkownik.findMany({ where: { id_organizacji, aktywny: true }, include: { role: { include: { rola: true } } }, orderBy: { nazwisko: 'asc' } }); }
   async createRole(dto: any, id_organizacji: number) { return this.prisma.extendedClient.rola.create({ data: { id_organizacji, nazwa: dto.nazwa, opis: dto.opis || null, kolejnosc: Number(dto.kolejnosc || 0) } }); }
@@ -29,6 +30,47 @@ export class UstawieniaService {
     return this.prisma.extendedClient.rola.update({
       where: { id, id_organizacji },
       data: { aktywny: false, data_usuniecia: new Date() }
+    });
+  }
+  async getMyProfile(id_uzytkownika: number, id_organizacji: number) {
+    const user = await this.prisma.extendedClient.uzytkownik.findFirst({
+      where: { id: id_uzytkownika, id_organizacji, aktywny: true },
+      include: {
+        role: { include: { rola: true } },
+        organizacja: { select: { nazwa: true, plan_abonamentu: true } }
+      }
+    });
+
+    if (!user) throw new NotFoundException('Nie znaleziono Twojego konta.');
+
+    // ROZWIĄZANIE: Generujemy bezpieczny URL w locie i osadzamy od razu w odpowiedzi do uzycia w <img src="..." />
+    let avatarUrl: string | null = null;
+    if (user.avatar) {
+      try {
+        avatarUrl = await this.storage.getPresignedDownloadUrl(user.avatar, 3600); // Ważne przez godzinę
+      } catch (err) {
+        console.error('Błąd pobierania presigned URL avatara:', err);
+      }
+    }
+
+    return { ...user, avatarUrl };
+  }
+
+  async updateMyProfile(id_uzytkownika: number, dto: any, file: Express.Multer.File | undefined, id_organizacji: number) {
+    const data: any = {
+      imie: String(dto.imie || '').trim(),
+      nazwisko: String(dto.nazwisko || '').trim(),
+      telefon: String(dto.telefon || '').trim() || null,
+    };
+
+    if (file) {
+      // Wgrywamy nowy avatar bezpiecznie do S3 (katalog avatarów)
+      data.avatar = await this.storage.uploadFile(file, id_organizacji, 'avatars');
+    }
+
+    return this.prisma.extendedClient.uzytkownik.update({
+      where: { id: id_uzytkownika },
+      data
     });
   }
 }

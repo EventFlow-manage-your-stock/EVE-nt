@@ -8,7 +8,7 @@ import {
   Calendar, CheckSquare, Home, Users, Box, Wrench, Truck, Settings, FileText, 
   ChevronDown, LogOut, Star, Phone, Tags, Shield, Car, Palmtree, Palette, 
   ShieldAlert, Menu, Bell, Search, Sun, Moon, PanelLeftClose, PanelLeftOpen, Plus, Layers, Loader2, ArrowRight,
-  FileArchive
+  FileArchive, UserCircle
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { Button } from '../../components/ProductUI';
@@ -24,6 +24,7 @@ type MenuItem = {
 
 // Mapowanie linków do wymaganych uprawnień (ACL z permissions.enum.ts)
 const menuConfig: MenuItem[] = [
+  { icon: UserCircle, label: 'Profil', href: '/dashboard/settings/profile' },
   { icon: Home, label: 'Kokpit', href: '/dashboard' },
   { icon: Calendar, label: 'Kalendarz', href: '/dashboard/calendar' },
   { icon: Star, label: 'Wydarzenia', requiredPermission: 'events:view', children: [

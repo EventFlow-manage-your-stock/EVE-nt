@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Delete, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Delete, Req, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { UstawieniaService } from './ustawienia.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+
 @Controller('ustawienia')
 @UseGuards(AuthGuard('jwt'))
 export class UstawieniaController {
@@ -24,5 +26,24 @@ export class UstawieniaController {
   @Delete('role/:id')
   deleteRole(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     return this.service.deleteRole(id, Number((req.user as any).id_organizacji));
+  }
+
+  @Get('profil')
+  async getMyProfile(@Req() req: Request) {
+    const id_organizacji = Number((req.user as any).id_organizacji);
+    const id_uzytkownika = Number((req.user as any).id || (req.user as any).sub);
+    return this.service.getMyProfile(id_uzytkownika, id_organizacji);
+  }
+
+  @Put('profil')
+  @UseInterceptors(FileInterceptor('avatar')) // Przechwytywanie obrazka z formularza
+  async updateMyProfile(
+    @Req() req: Request, 
+    @Body() dto: any, 
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    const id_organizacji = Number((req.user as any).id_organizacji);
+    const id_uzytkownika = Number((req.user as any).id || (req.user as any).sub);
+    return this.service.updateMyProfile(id_uzytkownika, dto, file, id_organizacji);
   }
 }
