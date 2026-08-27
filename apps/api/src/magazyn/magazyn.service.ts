@@ -106,126 +106,112 @@ export class MagazynService {
   async createDokumentMagazynowy(dto: any, id_organizacji: number, id_uzytkownika: number | null) {
     const typ = this.cleanString(dto.typ) || 'wydanie';
     const prefix = typ === 'przyjecie' ? 'PZ' : typ === 'plan' ? 'PLAN' : 'WZ';
-    const pozycjeZFrontu = Array.isArray(dto.pozycje) ? dto.pozycje : [];
+    const pozycje = Array.isArray(dto.pozycje) ? dto.pozycje : [];
+    const id_wydarzenia = this.cleanNumber(dto.id_wydarzenia);
+    const id_wynajmu = this.cleanNumber(dto.id_wynajmu);
 
     return this.prisma.extendedClient.$transaction(async (tx) => {
-      // Docelowa unikalna lista sprzętu do wrzucenia na dokument
-      const gotoweDoZapisu: any[] = [];
-      const przetwarzaneEgzemplarze = new Set<number>();
+      const expandedPozycje: any[] = [];
+      const instancesToUpdateStatus: { id: number; targetStatus: string }[] = [];
 
-      // Funkcja wewnętrzna aplikująca reguły 1-6 na każdym zgłoszonym elemencie (rekursywna dla paczek/caseów)
-      const processElement = async (element: any, multiplier: number = 1) => {
-        // Zabezpieczenie przed błędnymi danymi
-        if (!element) return;
+      for (const p of pozycje) {
+        const id_egzemplarza = this.cleanNumber(p.id_egzemplarza);
 
-        // Reguła 4: Pakiety (rozbijamy je na czynniki pierwsze od razu)
-        if (element.id_pakietu) {
-          const pakiet = await tx.pakiet.findUnique({
-            where: { id: Number(element.id_pakietu) },
-            include: { pozycje: true }
-          });
-          if (pakiet) {
-            const mult = Number(element.ilosc_pakietow || element.ilosc || 1) * multiplier;
-            for (const pozPakietu of pakiet.pozycje) {
-              await processElement(pozPakietu, mult);
+        // --- OBSŁUGA SPRZĘTU ILOŚCIOWEGO ---
+        if (!id_egzemplarza) {
+          const id_modelu = this.cleanNumber(p.id_modelu);
+          const modelIlosciowy = id_modelu ? await tx.modelSprzetu.findFirst({
+            where: { id: id_modelu, id_organizacji, aktywny: true },
+            include: { kategoria: true },
+          }) : null;
+
+          if (modelIlosciowy && (modelIlosciowy.tryb_ewidencji === 'ilosciowe' || modelIlosciowy.typ_sprzetu === 'ilosciowe')) {
+            const qty = Number(p.ilosc || 0);
+            if (!qty || qty <= 0) {
+              throw new BadRequestException(`Podaj prawidłową ilość dla sprzętu ilościowego: ${modelIlosciowy.nazwa}.`);
             }
-          }
-          return;
-        }
-
-        // Reguła 6: Sprzęt ilościowy (zapisywany po id_modelu i ilości)
-        if (!element.id_egzemplarza && element.id_modelu) {
-          const model = await tx.modelSprzetu.findFirst({ where: { id: element.id_modelu, id_organizacji }});
-          if (model && this.isSprzetIlosciowy(model)) {
-            const requestedQty = Number(element.ilosc || 1) * multiplier;
-            if (requestedQty <= 0) return;
 
             if (typ === 'wydanie') {
-              const dostepne = Number(model.ilosc_magazynowa || 0);
-              if (requestedQty > dostepne) {
-                throw new BadRequestException(`Brak wystarczającej ilości sprzętu: ${model.nazwa}. Próba wydania ${requestedQty}, na stanie: ${dostepne}.`);
+              const availableQty = Number(modelIlosciowy.ilosc_magazynowa || 0);
+              if (qty > availableQty) {
+                throw new BadRequestException(`Brak wystarczającej ilości w magazynie dla "${modelIlosciowy.nazwa}". Dostępne: ${availableQty} ${modelIlosciowy.jednostka || 'szt.'}, próba wydania: ${qty}.`);
               }
             }
-            
-            gotoweDoZapisu.push({
-              id_modelu: model.id,
+
+            expandedPozycje.push({
+              ...p,
+              id_modelu: modelIlosciowy.id,
               id_egzemplarza: null,
-              nazwa: element.nazwa_na_dokumencie || element.nazwa || model.nazwa,
-              ilosc: requestedQty,
-              uwagi: element.uwagi || 'Sprzęt ilościowy'
+              nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || modelIlosciowy.nazwa,
+              ilosc: qty,
+              uwagi: [this.cleanString(p.uwagi), 'Sprzęt ilościowy bez egzemplarzy'].filter(Boolean).join(' | '),
             });
-            return;
+            continue;
           }
+          throw new BadRequestException('Pozycja dokumentu musi zawierać konkretny egzemplarz albo model ilościowy.');
         }
 
-        // Fizyczny sprzęt (Egzemplarz)
-        const idEgzemplarza = element.id_egzemplarza || element.id;
-        if (!idEgzemplarza) return;
-
-        // Zapobiega duplikatom z zagnieżdżeń lub podwójnych skanów
-        if (przetwarzaneEgzemplarze.has(Number(idEgzemplarza))) return;
-        
+        // --- OBSŁUGA FIZYCZNYCH EGZEMPLARZY ---
         const egz = await tx.egzemplarz.findFirst({
-          where: { id: Number(idEgzemplarza), id_organizacji, aktywny: true },
-          include: { 
-            model: true,
-            zawartosc_case: { 
-              where: { aktywny: true }, 
-              include: { model: true } 
-            } 
-          }
+          where: { id: id_egzemplarza, id_organizacji, aktywny: true },
+          include: {
+            model: { include: { kategoria: true } },
+            zawartosc_case: {
+              where: { aktywny: true },
+              include: { model: { include: { kategoria: true } } },
+              orderBy: [{ id_modelu: 'asc' }, { numer_egzemplarza: 'asc' }, { id: 'asc' }],
+            },
+          },
         });
 
-        if (!egz) throw new BadRequestException(`Nie odnaleziono sprzętu fizycznego (ID: ${idEgzemplarza}).`);
-        przetwarzaneEgzemplarze.add(egz.id);
-
-        // Reguła 3: Zestawy (RACK). Nie rozpakowujemy. Wchodzi jako jedna pozycja.
-        if (this.isZestaw(egz)) {
-          gotoweDoZapisu.push({
-            id_modelu: egz.id_modelu,
-            id_egzemplarza: egz.id,
-            nazwa: element.nazwa_na_dokumencie || element.nazwa || egz.nazwa || egz.model.nazwa,
-            ilosc: 1 * multiplier,
-            uwagi: element.uwagi || ''
-          });
-          return;
+        if (!egz) {
+          throw new BadRequestException(`Nie znaleziono egzemplarza #${id_egzemplarza}.`);
         }
 
-        // Reguła 2: Opakowania (Case). Rozpakowujemy i wrzucamy pojedyncze rzeczy ze środka.
-        // Samo opakowanie omija koszyk.
-        if (this.isOpakowanie(egz)) {
-          for (const child of egz.zawartosc_case) {
-            // Procesujemy dzieci (zabezpiecza to ew. Zestawy ukryte wewnątrz Case'a)
-            await processElement({ id_egzemplarza: child.id, uwagi: `Z case: ${egz.nazwa || egz.model.nazwa}` }, multiplier);
+        const isCase = egz.model?.typ_sprzetu === 'opakowanie' || (egz.zawartosc_case?.length || 0) > 0;
+        if (isCase) {
+          const contents = (egz.zawartosc_case || []).filter((child: any) => child.model?.typ_sprzetu !== 'opakowanie');
+          if (!contents.length) {
+            throw new BadRequestException(`Zeskanowany case "${egz.nazwa || egz.model?.nazwa}" jest pusty.`);
           }
-          return; 
+          const meta = this.caseScanMeta(egz);
+          for (const child of contents) {
+            const validation = await this.validateInstanceMovement(tx, child.id, child.nazwa || child.model?.nazwa, typ, id_wydarzenia, id_organizacji);
+            expandedPozycje.push({
+              ...p,
+              system_case_scan: meta,
+              id_zeskanowanego_case: meta?.id || egz.id,
+              nazwa_zeskanowanego_case: meta?.nazwa || egz.nazwa || egz.model?.nazwa || 'Case',
+              id_modelu: child.id_modelu,
+              id_egzemplarza: child.id,
+              nazwa: this.cleanString(child.nazwa) || this.cleanString(child.model?.nazwa) || 'Egzemplarz z case',
+              ilosc: 1,
+              uwagi: validation.crossEventNote ? [this.cleanString(p.uwagi), validation.crossEventNote].filter(Boolean).join(' | ') : p.uwagi,
+            });
+            instancesToUpdateStatus.push({ id: child.id, targetStatus: typ === 'wydanie' ? 'Wydany' : 'Działa' });
+          }
+          continue;
         }
 
-        // Reguła 1 & 5: Zwykły, pojedynczy egzemplarz
-        gotoweDoZapisu.push({
+        if (egz.model?.typ_sprzetu === 'opakowanie') {
+          throw new BadRequestException('Opakowanie/case nie może być samodzielną pozycją dokumentu WZ/PZ.');
+        }
+
+        const validation = await this.validateInstanceMovement(tx, egz.id, egz.nazwa || egz.model?.nazwa, typ, id_wydarzenia, id_organizacji);
+
+        expandedPozycje.push({
+          ...p,
           id_modelu: egz.id_modelu,
           id_egzemplarza: egz.id,
-          nazwa: element.nazwa_na_dokumencie || element.nazwa || egz.nazwa || egz.model.nazwa,
-          ilosc: 1 * multiplier,
-          uwagi: element.uwagi || ''
+          nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || this.cleanString(egz.nazwa) || this.cleanString(egz.model?.nazwa) || 'Egzemplarz sprzętu',
+          ilosc: 1,
+          uwagi: validation.crossEventNote ? [this.cleanString(p.uwagi), validation.crossEventNote].filter(Boolean).join(' | ') : p.uwagi,
         });
-      };
-
-      for (const p of pozycjeZFrontu) {
-        await processElement(p, 1);
+        instancesToUpdateStatus.push({ id: egz.id, targetStatus: typ === 'wydanie' ? 'Wydany' : 'Działa' });
       }
-
-      if (gotoweDoZapisu.length === 0) {
-        throw new BadRequestException('Brak poprawnego sprzętu do wygenerowania dokumentu.');
-      }
-      
-      
-      // Finalne generowanie Wydania (WZ/PZ) w bazie
-      const id_wydarzenia = this.cleanNumber(dto.id_wydarzenia);
-      const id_wynajmu = this.cleanNumber(dto.id_wynajmu);
 
       if (id_wynajmu && typ === 'wydanie' && !this.cleanString(dto.osoba_odbierajaca)) {
-        throw new BadRequestException('Przy wydaniu do wynajmu wpisz osobę odbierającą sprzęt.');
+        throw new BadRequestException('Przy wydaniu do wynajmu wymagane jest podanie osoby odbierającej.');
       }
 
       const doc = await tx.wydanieMagazynowe.create({
@@ -241,29 +227,38 @@ export class MagazynService {
           podpis_odbierajacego: this.cleanString(dto.podpis_odbierajacego),
           uwagi: this.cleanString(dto.uwagi),
           pozycje: {
-            create: gotoweDoZapisu.map((p: any) => ({
+            create: expandedPozycje.map((p: any) => ({
               id_organizacji,
-              id_modelu: p.id_modelu,
-              id_egzemplarza: p.id_egzemplarza,
-              nazwa: p.nazwa,
-              ilosc: p.ilosc,
-              status: typ === 'wydanie' ? 'wydany' : 'przyjety',
-              uwagi: p.uwagi,
+              id_modelu: this.cleanNumber(p.id_modelu),
+              id_egzemplarza: this.cleanNumber(p.id_egzemplarza),
+              nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || this.cleanString(p.model?.nazwa) || this.cleanString(p.egzemplarz?.nazwa) || 'Pozycja sprzętu',
+              ilosc: this.cleanNumber(p.ilosc) || 1,
+              status: this.cleanString(p.status) || (typ === 'przyjecie' ? 'przyjety' : typ === 'plan' ? 'plan' : 'wydany'),
+              uwagi: this.buildDocumentUwagi(p),
             })),
           },
         },
         include: { pozycje: true },
       });
 
-      // Aktualizacja zasobów ilościowych
+      // ZMIANA STATUSU FIZYCZNEGO EGZEMPLARZA (PUNKT 4)
+      for (const item of instancesToUpdateStatus) {
+        await tx.egzemplarz.update({
+          where: { id: item.id },
+          data: { status_serwisowy: item.targetStatus },
+        });
+      }
+
+      // Aktualizacja stanów ilościowych
       if (typ === 'wydanie' || typ === 'przyjecie') {
         const deltas = new Map<number, number>();
-        for (const p of gotoweDoZapisu) {
-          if (!p.id_egzemplarza && p.id_modelu) {
-            const qty = Number(p.ilosc || 0);
-            if (!qty) continue;
-            deltas.set(p.id_modelu, (deltas.get(p.id_modelu) || 0) + (typ === 'wydanie' ? -qty : qty));
-          }
+        for (const p of expandedPozycje) {
+          const modelId = this.cleanNumber(p.id_modelu);
+          const egzId = this.cleanNumber(p.id_egzemplarza);
+          if (!modelId || egzId) continue;
+          const qty = Number(p.ilosc || 0);
+          if (!qty) continue;
+          deltas.set(modelId, (deltas.get(modelId) || 0) + (typ === 'wydanie' ? -qty : qty));
         }
         for (const [modelId, delta] of deltas.entries()) {
           await tx.modelSprzetu.update({
@@ -280,12 +275,81 @@ export class MagazynService {
           typ_obiektu: 'WydanieMagazynowe',
           id_obiektu: doc.id,
           akcja: typ.toUpperCase(),
-          nowa_wartosc: JSON.stringify({ itemCount: gotoweDoZapisu.length }),
+          nowa_wartosc: JSON.stringify({ ...dto, pozycje_count: expandedPozycje.length }),
         },
       });
 
       return doc;
     });
+  }
+  private async validateInstanceMovement(
+    tx: any,
+    idEgzemplarza: number,
+    name: string,
+    typ: string,
+    idWydarzenia: number | null,
+    idOrganizacji: number
+  ): Promise<{ crossEventNote?: string }> {
+    const allHistory = await tx.pozycjaWydaniaMagazynowego.findMany({
+      where: {
+        id_organizacji: idOrganizacji,
+        id_egzemplarza: idEgzemplarza,
+        aktywny: true,
+        wydanie: { aktywny: true }
+      },
+      select: {
+        ilosc: true,
+        wydanie: { select: { typ: true, id_wydarzenia: true, numer: true, wydarzenie: { select: { nazwa: true } } } }
+      },
+      orderBy: { data_utworzenia: 'desc' }
+    });
+
+    let globalWydane = 0;
+    let globalPrzyjete = 0;
+    let eventWydane = 0;
+    let eventPrzyjete = 0;
+    let lastIssuingEventName: string | null = null;
+    let lastIssuingEventId: number | null = null;
+
+    for (const h of allHistory) {
+      if (h.wydanie.typ === 'wydanie') {
+        globalWydane += Number(h.ilosc || 1);
+        if (!lastIssuingEventName && h.wydanie.wydarzenie?.nazwa) {
+          lastIssuingEventName = h.wydanie.wydarzenie.nazwa;
+          lastIssuingEventId = h.wydanie.id_wydarzenia;
+        }
+        if (idWydarzenia && h.wydanie.id_wydarzenia === idWydarzenia) eventWydane += Number(h.ilosc || 1);
+      }
+      if (h.wydanie.typ === 'przyjecie') {
+        globalPrzyjete += Number(h.ilosc || 1);
+        if (idWydarzenia && h.wydanie.id_wydarzenia === idWydarzenia) eventPrzyjete += Number(h.ilosc || 1);
+      }
+    }
+
+    // PUNKT 1: Zabezpieczenie przed podwójnym wydaniem (WZ)
+    if (typ === 'wydanie') {
+      if (idWydarzenia && eventWydane > eventPrzyjete) {
+        throw new BadRequestException(`Egzemplarz "${name}" (ID #${idEgzemplarza}) został już wydany na to wydarzenie.`);
+      }
+      if (globalWydane > globalPrzyjete) {
+        throw new BadRequestException(`Egzemplarz "${name}" (ID #${idEgzemplarza}) jest aktualnie wydany w teren (poza magazynem) i nie może zostać wydany ponownie.`);
+      }
+    }
+
+    // PUNKT 3: Inteligentne przyjęcie (PZ)
+    if (typ === 'przyjecie') {
+      if (globalWydane <= globalPrzyjete) {
+        throw new BadRequestException(`Egzemplarz "${name}" (ID #${idEgzemplarza}) znajduje się już na magazynie.`);
+      }
+
+      // Jeśli sprzęt był wydany na inne wydarzenie, zezwalamy, ale odnotowujemy to
+      if (idWydarzenia && (eventWydane === 0 || eventWydane <= eventPrzyjete)) {
+        const fromWhere = lastIssuingEventName ? `wydarzenia "${lastIssuingEventName}"` : `innego zlecenia`;
+        return { crossEventNote: `Przyjęto ze zwrotu z ${fromWhere}` };
+      }
+    }
+
+    return {};
   }
 
   // --- PRECYZYJNY SKANER (Reguła 5 i 6) ---
@@ -1277,37 +1341,16 @@ export class MagazynService {
 }
 
   async getSprzetWydarzenia(id_wydarzenia: number, id_organizacji: number) {
-    const [wydarzenie, planPozycje, dokumenty] = await Promise.all([
+    const [wydarzenie, planPozycje, dokumenty, wszystkieEgzemplarze] = await Promise.all([
       this.prisma.extendedClient.wydarzenie.findFirst({
-        where: {
-          id: id_wydarzenia,
-          id_organizacji,
-          aktywny: true
-        },
+        where: { id: id_wydarzenia, id_organizacji, aktywny: true },
         include: {
-          organizacja: true,
-          kontrahent: true,
-          miejsce: true,
-
-          oferty: {
-            where: { aktywny: true },
-            include: {
-              wersje: {
-                take: 1,
-                orderBy: { numer_wersji: 'desc' },
-                include: {
-                  pozycje: true,
-                  sekcje: true
-                }
-              }
-            }
-          },
+          oferty: { where: { aktywny: true }, include: { wersje: { take: 1, orderBy: { numer_wersji: 'desc' }, include: { pozycje: true, sekcje: true } } } },
         },
       }),
-      
       this.prisma.extendedClient.pozycjaSprzetuWydarzenia.findMany({
         where: { id_organizacji, id_wydarzenia, aktywny: true },
-        include: { model: { include: { kategoria: true } } },
+        include: { model: { include: { kategoria: true, egzemplarze: { where: { aktywny: true } } } } },
         orderBy: [{ kolejnosc: 'asc' }, { data_utworzenia: 'asc' }],
       }),
       this.prisma.extendedClient.wydanieMagazynowe.findMany({
@@ -1323,10 +1366,13 @@ export class MagazynService {
         },
         orderBy: { data_operacji: 'desc' },
       }),
+      this.prisma.extendedClient.egzemplarz.findMany({
+        where: { id_organizacji, aktywny: true, model: { typ_sprzetu: { not: 'opakowanie' } } },
+        include: { model: { include: { kategoria: true } }, magazyn: true },
+      }),
     ]);
 
     if (!wydarzenie) throw new NotFoundException('Nie znaleziono wydarzenia');
-
     const toNumber = (value: any) => Number(value || 0);
     const keyFor = (p: any) => String(p.id_modelu || p.model?.id || p.egzemplarz?.id_modelu || p.egzemplarz?.model?.id || p.nazwa);
     const nameFor = (p: any) => p.nazwa || p.model?.nazwa || p.egzemplarz?.model?.nazwa || p.egzemplarz?.nazwa || 'Pozycja sprzętu';
@@ -1404,6 +1450,7 @@ export class MagazynService {
         wydane: dokumentowe.filter((p: any) => p.zrodlo === 'wydanie').reduce((s: number, p: any) => s + toNumber(p.ilosc), 0),
         przyjete: dokumentowe.filter((p: any) => p.zrodlo === 'przyjecie').reduce((s: number, p: any) => s + toNumber(p.ilosc), 0),
       },
+      wszystkie_egzemplarze: wszystkieEgzemplarze,
     };
   }
 

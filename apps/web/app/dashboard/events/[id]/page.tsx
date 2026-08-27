@@ -7,7 +7,8 @@ import {
   ArrowLeft, Box, CheckSquare, ChevronDown, ChevronRight, Copy, DollarSign,
   FileArchive, FileText, History, Loader2, MapPin, MessageSquare, Plus, Save,
   Search, Trash2, Truck, Users, Wrench, Calendar, Send, Download, Paperclip, 
-  CheckCircle2, Car, X, Clock, Layers, RotateCcw, Home, MailCheck, Edit2
+  CheckCircle2, Car, X, Clock, Layers, RotateCcw, Home, MailCheck, Edit2,
+  ArrowRight
 } from 'lucide-react';
 import { api } from '../../../../lib/api';
 import { Button, Card, Field, inputClass, SearchableSelect } from '../../../../components/ProductUI';
@@ -1451,7 +1452,7 @@ function HistoryPanel({ history, tabQuery = '' }: { history: any[], tabQuery?: s
 }
 
 // -------------------------------------------------------------
-// SPRZĘT (EquipmentPanel)
+// SPRZĘT (EquipmentPanel - Zaawansowana obsługa WMS)
 // -------------------------------------------------------------
 function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: string }) {
   const router = useRouter();
@@ -1486,6 +1487,8 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [savingDocs, setSavingDocs] = useState(false);
+
+  const [instanceModalModel, setInstanceModalModel] = useState<any>(null);
 
   async function load() {
     const [gear, i, m, k, b] = await Promise.all([
@@ -1558,6 +1561,30 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     return map;
   }, [models]);
 
+  const eventInstanceStatus = useMemo(() => {
+    const issuedMap = new Map<number, any>();
+    const returnedSet = new Set<number>();
+
+    (data.pozycje_dokumentow || []).forEach((p: any) => {
+      const egzId = p.id_egzemplarza || p.egzemplarz?.id;
+      if (!egzId) return;
+
+      if (p.zrodlo === 'wydanie') issuedMap.set(egzId, p.egzemplarz || p);
+      if (p.zrodlo === 'przyjecie') returnedSet.add(egzId);
+    });
+
+    const currentlyInField = Array.from(issuedMap.entries())
+      .filter(([id]) => !returnedSet.has(id))
+      .map(([, egz]) => egz);
+
+    return {
+      issuedMap,
+      returnedSet,
+      currentlyInField,
+      currentlyInFieldIds: new Set(currentlyInField.map((e: any) => e.id)),
+    };
+  }, [data.pozycje_dokumentow]);
+
   const plannedRows = useMemo(() => {
     const map = new Map<string, any>();
 
@@ -1580,6 +1607,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
           scanned: 0,
           egzemplarze_wydane: [],
           egzemplarze_przyjete: [],
+          egzemplarze_w_terenie: [],
         });
       }
       const row = map.get(key);
@@ -1611,17 +1639,26 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
           scanned: 0,
           egzemplarze_wydane: [],
           egzemplarze_przyjete: [],
+          egzemplarze_w_terenie: [],
         });
       }
       const row = map.get(key);
       const label = numberOf(p) || p.kod || p.nazwa || `#${p.id_egzemplarza || ''}`;
+      const egzObj = p.egzemplarz || (p.id_egzemplarza ? { id: p.id_egzemplarza, nazwa: p.nazwa, sn: p.sn, kod: p.kod, numer_egzemplarza: p.numer_egzemplarza } : null);
+
       if (p.zrodlo === 'wydanie') {
         row.wydane += Number(p.ilosc || 1);
         if (label) row.egzemplarze_wydane.push(label);
+        if (egzObj && !row.egzemplarze_w_terenie.some((x: any) => x.id === egzObj.id)) {
+          row.egzemplarze_w_terenie.push(egzObj);
+        }
       }
       if (p.zrodlo === 'przyjecie') {
         row.przyjete += Number(p.ilosc || 1);
         if (label) row.egzemplarze_przyjete.push(label);
+        if (egzObj) {
+          row.egzemplarze_w_terenie = row.egzemplarze_w_terenie.filter((x: any) => x.id !== egzObj.id);
+        }
       }
     });
 
@@ -1629,24 +1666,9 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       const id = modelIdOf(p);
       if (!id) return;
       const key = String(id);
-      if (!map.has(key)) {
-        map.set(key, {
-          id_modelu: id,
-          nazwa: modelNameOf(p),
-          kategoria: categoryOf(p),
-          kategoria_id: modelCategoryIdOf(p),
-          quantityOnly: false,
-          kod: '',
-          jednostka: 'szt.',
-          plan: 0,
-          wydane: 0,
-          przyjete: 0,
-          scanned: 0,
-          egzemplarze_wydane: [],
-          egzemplarze_przyjete: [],
-        });
+      if (map.has(key)) {
+        map.get(key).scanned += Number(p.ilosc || 1);
       }
-      map.get(key).scanned += Number(p.ilosc || 1);
     });
 
     return Array.from(map.values()).map((row: any) => {
@@ -1677,7 +1699,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     return Array.from(groups.values());
   }, [plannedRows]);
 
-
   const packlistGroups = useMemo(() => {
     const groups = new Map<string, any>();
     plannedRows.filter((row: any) => Number(row.plan || 0) > 0).forEach((row: any) => {
@@ -1698,10 +1719,9 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       try {
         setPacklistSaveStatus('saving');
         await api.put(`/api/magazyn/wydarzenia/${eventId}/packlista`, {
-            uwagi_packlista: packlistGeneralNotes || null,
-            pozycje: Object.entries(packlistNotes).map(([id_modelu, uwagi]) => ({ id_modelu: Number(id_modelu), uwagi: uwagi || null })),
-          }
-        );
+          uwagi_packlista: packlistGeneralNotes || null,
+          pozycje: Object.entries(packlistNotes).map(([id_modelu, uwagi]) => ({ id_modelu: Number(id_modelu), uwagi: uwagi || null })),
+        });
         setPacklistSaveStatus('saved');
       } catch (e) {
         setPacklistSaveStatus('error');
@@ -1718,10 +1738,11 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
   const activeRootObj = useMemo(() => activeRoot && activeRoot !== 'all' ? equipmentCategoryById.get(String(activeRoot)) : null, [activeRoot, equipmentCategoryById]);
 
+  // PUNKT 4: Wykluczenie case'ów z planowania
   const visibleModels = useMemo(() => {
     const q = query.trim().toLowerCase();
     return models
-      .filter((m: any) => !isCaseRow(m))
+      .filter((m: any) => m.typ_sprzetu !== 'opakowanie' && !isCaseRow(m))
       .map((m: any) => {
         const catId = modelCategoryId(m);
         const path = catId ? categoryPath(catId, equipmentCategoryById) : '';
@@ -1732,27 +1753,53 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       .sort((a: any, b: any) => String(a.kategoria_nazwa || '').localeCompare(String(b.kategoria_nazwa || ''), 'pl') || String(a.nazwa || '').localeCompare(String(b.nazwa || ''), 'pl'));
   }, [models, activeRoot, activeCategoryIds, query, equipmentCategoryById]);
 
-  function findQuantityModelByCode(code: string) {
-    const normalized = normalizeCode(code);
-    return (models || []).find((m: any) =>
-      isQuantityOnly(m) && getEquipmentCodes(m).includes(normalized)
-    );
-  }
-
-  const visibleInstances = useMemo(() => {
+  // PUNKT 2: Połączenie egzemplarzy i sprzętu ilościowego w wyszukiwarce WZ/PZ
+  const visibleInstancesAndQuantity = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return items
-      .filter((x: any) => isEquipmentInstance(x) || isZestawRow(x))
+
+    // 1. Egzemplarze fizyczne
+    let physicalList = items
+      .filter((x: any) => (isEquipmentInstance(x) || isZestawRow(x)) && x.model?.typ_sprzetu !== 'opakowanie')
       .map((x: any) => ({
         ...x,
         rowType: 'egzemplarz',
+        isQuantity: false,
         nazwa_wiersza: x.nazwa || x.model?.nazwa,
         kategoria_nazwa: x.model?.kategoria?.nazwa || 'Bez kategorii',
         kod: x.kod_kreskowy || x.zewnetrzny_kod_kreskowy || x.zewnetrzny_qr_kod || x.qr_kod || x.sn || '',
-      }))
-      .filter((x: any) => !q || `${x.nazwa_wiersza || ''} ${x.model?.nazwa || ''} ${x.kategoria_nazwa || ''} ${x.kod || ''} ${x.sn || ''}`.toLowerCase().includes(q))
-      .slice(0, 120);
-  }, [items, query]);
+      }));
+
+    // 2. Modele ilościowe
+    const quantityList = models
+      .filter((m: any) => isQuantityOnly(m))
+      .map((m: any) => ({
+        ...m,
+        id_modelu: m.id,
+        rowType: 'ilosciowy_model',
+        isQuantity: true,
+        nazwa_wiersza: `[ILOŚCIOWY] ${m.nazwa}`,
+        kategoria_nazwa: m.kategoria?.nazwa || 'Bez kategorii',
+        kod: m.kod_kreskowy || m.kod || '',
+      }));
+
+    let combined = [...physicalList, ...quantityList];
+
+    // Filtrowanie kontekstowe dla PZ:
+    if (mode === 'przyjecie') {
+      combined = combined.filter((x: any) => {
+        if (x.isQuantity) {
+          const pl = plannedRows.find((r: any) => r.id_modelu === x.id);
+          return pl ? (pl.wydane - pl.przyjete) > 0 : false;
+        }
+        // Pozwalamy na wyświetlenie egzemplarzy z innych eventów (PUNKT 3), ale oznaczamy
+        return true;
+      });
+    }
+
+    return combined
+      .filter((x: any) => !q || `${x.nazwa_wiersza || ''} ${x.nazwa || ''} ${x.kategoria_nazwa || ''} ${x.kod || ''} ${x.sn || ''}`.toLowerCase().includes(q))
+      .slice(0, 100);
+  }, [items, models, query, mode, plannedRows]);
 
   function changeQty(model: any, value: string) {
     const qty = Math.max(0, Number(value || 0) || 0);
@@ -1771,15 +1818,15 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     const mult = Number(bundleForm.mnoznik) || 1;
     const newPlanQty = { ...planQty };
     (bundle.pozycje || []).forEach((p: any) => {
-       const modelId = p.id_modelu;
-       const current = Number(newPlanQty[String(modelId)] || 0);
-       newPlanQty[String(modelId)] = String(current + Number(p.ilosc || 1) * mult);
+      const modelId = p.id_modelu;
+      const current = Number(newPlanQty[String(modelId)] || 0);
+      newPlanQty[String(modelId)] = String(current + Number(p.ilosc || 1) * mult);
     });
     setPlanQty(newPlanQty);
     setShowBundlePicker(false);
     setBundleForm({ id_pakietu: '', mnoznik: 1 });
     setShowEditor(true);
-    setNotice(`Dodano pakiet "${bundle.nazwa}" x${mult} do koszyka planu. Pamiętaj, aby na dole zapisać cały plan!`);
+    setNotice(`Dodano pakiet "${bundle.nazwa}" x${mult} do koszyka planu.`);
   }
 
   async function savePlan() {
@@ -1791,7 +1838,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
         .filter((p) => p.id_modelu && p.ilosc > 0);
       await api.post(`/api/magazyn/wydarzenia/${eventId}/sprzet`, { replace: true, pozycje });
       setShowEditor(false);
-      setNotice('Zapisano plan sprzętu wydarzenia. Wydanie robisz później przez skanowanie konkretnych egzemplarzy i kontenerów.');
+      setNotice('Zapisano plan sprzętu wydarzenia.');
       await load();
     } catch (e: any) {
       setError(e?.response?.data?.message || e?.message || 'Nie udało się zapisać planu sprzętu.');
@@ -1815,7 +1862,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
         nazwa_modelu: row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy',
         numer_egzemplarza: '',
         kategoria: categoryOf(row),
-        kod: row.kod || row.kod_kreskowy || row.model?.kod_kreskowy || row.model?.kod || '',
+        kod: row.kod || row.kod_kreskowy || row.model?.kod_kreskowy || '',
         ilosc: Number(row.ilosc || 1),
         jednostka: row.jednostka || row.model?.jednostka || 'szt.',
         uwagi: row.uwagi || 'Sprzęt ilościowy bez egzemplarzy',
@@ -1840,6 +1887,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     };
   }
 
+  // PUNKT 1 & 3: Dodawanie ze sprawdzaniem duplikatów i cross-event return
   function addDocumentItemsBulk(rows: any[], source: 'scan' | 'manual' = 'manual', sourceLabel = '', scannedContainer: any = null) {
     const normalized = rows
       .map((row: any) => {
@@ -1850,8 +1898,26 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       .filter((item: any) => item.id_modelu);
 
     if (!normalized.length) {
-      setError('Nie znaleziono poprawnych elementów sprzętu do dodania na dokument.');
+      setError('Nie znaleziono poprawnych elementów sprzętu.');
       return;
+    }
+
+    // PUNKT 1: Walidacja przy WYDANIU (WZ)
+    if (mode === 'wydanie') {
+      const alreadyIssuedOnThisEvent = normalized.filter(item => item.id_egzemplarza && eventInstanceStatus.currentlyInFieldIds.has(Number(item.id_egzemplarza)));
+      if (alreadyIssuedOnThisEvent.length > 0) {
+        setError(`Egzemplarz "${alreadyIssuedOnThisEvent[0].nazwa}" został już wydany na to wydarzenie`);
+        return;
+      }
+    }
+
+    // PUNKT 3: Komunikat informacyjny przy PZ z innego wydarzenia
+    if (mode === 'przyjecie') {
+      for (const item of normalized) {
+        if (item.id_egzemplarza && !eventInstanceStatus.issuedMap.has(Number(item.id_egzemplarza))) {
+          setNotice(`Uwaga: Egzemplarz "${item.nazwa}" nie był wydany na to wydarzenie. Zostanie przyjęty na magazyn jako zwrot z innej realizacji.`);
+        }
+      }
     }
 
     setDocItems((prev) => {
@@ -1869,7 +1935,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
       const skipped = normalized.length - toAdd.length;
       if (!toAdd.length) {
-        setNotice(sourceLabel ? `${sourceLabel}: wszystkie pozycje ze środka są już w koszyku.` : 'Ten sprzęt jest już w koszyku dokumentu.');
+        setNotice(sourceLabel ? `${sourceLabel}: wszystkie pozycje są już w koszyku dokumentu.` : 'Ten sprzęt jest już w koszyku dokumentu.');
         return prev;
       }
       setNotice(sourceLabel ? `${sourceLabel}` : `Dodano ${toAdd.length} elementów${skipped ? `, pominięto duplikaty: ${skipped}` : ''}.`);
@@ -1879,35 +1945,44 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
   function addQuantityDocumentItem(row: any, source: 'scan' | 'manual' = 'scan') {
     const modelId = Number(row.id_modelu || row.model?.id || row.id);
-    if (!modelId) {
-      setError('Nie udało się rozpoznać modelu ilościowego.');
-      return;
-    }
+    if (!modelId) return;
+
     const name = row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy';
     const available = Number(row.ilosc_dostepna || row.ilosc_magazynowa || row.model?.ilosc_magazynowa || 0);
     const unit = row.jednostka || row.model?.jednostka || 'szt.';
-    const answer = window.prompt(`Ile sztuk wydać/przyjąć?\n${name}${available ? `\nDostępnie w magazynie: ${available} ${unit}` : ''}`, '1');
-    if (answer === null) {
-      setNotice('Anulowano dodawanie sprzętu ilościowego.');
-      return;
-    }
+
+    const plannedRow = plannedRows.find((r: any) => r.id_modelu === modelId);
+    const maxToReturn = plannedRow ? Math.max(0, plannedRow.wydane - plannedRow.przyjete) : 0;
+
+    const promptText = mode === 'przyjecie'
+      ? `Ile sztuk przyjąć z wydarzenia?\n${name}\nWydano na event: ${plannedRow?.wydane || 0} ${unit}\nPozostało do zwrotu: ${maxToReturn} ${unit}`
+      : `Ile sztuk wydać?\n${name}${available ? `\nDostępne w magazynie: ${available} ${unit}` : ''}`;
+
+    const answer = window.prompt(promptText, mode === 'przyjecie' ? String(maxToReturn || 1) : '1');
+    if (answer === null) return;
+
     const requested = Number(String(answer).replace(',', '.'));
-    const suggested = Math.max(0, available ? Math.min(available, requested) : requested);
-    if (!Number.isFinite(suggested) || suggested <= 0) {
+    if (!Number.isFinite(requested) || requested <= 0) {
       setError('Podaj ilość większą od 0.');
       return;
     }
-    const item = normalizeDocumentItem({ ...row, rowType: 'ilosciowy_model', quantityOnly: true, id_modelu: modelId, id: modelId, ilosc: suggested, jednostka: unit }, source);
+
+    if (mode === 'przyjecie' && maxToReturn > 0 && requested > maxToReturn) {
+      setError(`Nie możesz przyjąć ${requested} ${unit}. Do zwrotu z tego wydarzenia pozostało maksymalnie ${maxToReturn} ${unit}.`);
+      return;
+    }
+
+    const item = normalizeDocumentItem({ ...row, id_modelu: modelId, rowType: 'ilosciowy_model', quantityOnly: true, ilosc: requested, jednostka: unit }, source);
     setDocItems((prev) => {
       const idx = prev.findIndex((p: any) => isQuantityOnly(p) && Number(p.id_modelu) === modelId);
       if (idx >= 0) {
         const next = [...prev];
-        next[idx] = { ...next[idx], ilosc: Number(next[idx].ilosc || 0) + suggested };
+        next[idx] = { ...next[idx], ilosc: Number(next[idx].ilosc || 0) + requested };
         return next;
       }
       return [...prev, item];
     });
-    setNotice(`Dodano ${suggested} ${unit} · ${name}.`);
+    setNotice(`Dodano ${requested} ${unit} · ${name}.`);
   }
 
   function quantityRowSelected(row: any) { 
@@ -1920,14 +1995,20 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     setError('');
     setNotice('');
     const modelId = Number(row?.id_modelu);
-    if (!modelId) { setError('Nie udało się rozpoznać modelu ilościowego.'); return; }
+    if (!modelId) return;
+
     if (!checked) {
       setDocItems((prev) => prev.filter((p: any) => !(isQuantityOnly(p) && Number(p.id_modelu) === modelId)));
       setNotice(`Usunięto ${row.nazwa || 'sprzęt ilościowy'} z aktualnego dokumentu.`);
       return;
     }
+
     const amount = missingAfterScan(row);
-    if (!Number.isFinite(amount) || amount <= 0) { setNotice(`${row.nazwa || 'Ten model'} nie ma już brakujących sztuk do ${mode === 'wydanie' ? 'wydania' : 'przyjęcia'}.`); return; }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setNotice(`${row.nazwa || 'Ten model'} nie ma już brakujących sztuk do ${mode === 'wydanie' ? 'wydania' : 'przyjęcia'}.`);
+      return;
+    }
+
     const model = modelById.get(String(modelId)) || {};
     const unit = row.jednostka || model.jednostka || 'szt.';
     const item = normalizeDocumentItem({ ...model, rowType: 'ilosciowy_model', quantityOnly: true, id: modelId, id_modelu: modelId, nazwa: row.nazwa || model.nazwa, nazwa_modelu: row.nazwa || model.nazwa, kategoria: row.kategoria, kod: row.kod || model.kod_kreskowy || model.kod || '', ilosc: amount, jednostka: unit, uwagi: `${mode === 'wydanie' ? 'Wydanie' : 'Przyjęcie'} sprzętu ilościowego bez skanowania`, }, 'manual');
@@ -1942,7 +2023,10 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     setError('');
     setNotice('');
     
-    if (isQuantityOnly(row)) { addQuantityDocumentItem(row, source); return; }
+    if (isQuantityOnly(row) || row.isQuantity) { 
+      addQuantityDocumentItem(row, source); 
+      return; 
+    }
     
     if (isZestawRow(row)) {
       addDocumentItemsBulk([row], source, 'Zeskanowano zestaw jako spójną pozycję');
@@ -1952,7 +2036,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     if (isCaseRow(row)) {
       const contents = (row.zawartosc_case || row.contents || []).filter((child: any) => !isCaseRow(child) && isEquipmentInstance(child));
       if (!contents.length) { 
-        setError('Ten case jest pusty albo nie ma w nim aktywnych pojedynczych egzemplarzy sprzętu. Do dokumentów WZ/PZ trafia tylko zawartość.'); 
+        setError(`Case "${row.nazwa || 'opakowanie'}" jest pusty. Do dokumentów WZ/PZ trafia tylko zawartość.`); 
         return; 
       }
       const label = row.nazwa || row.nazwa_modelu || row.kod || `kontener #${row.id || row.id_egzemplarza || ''}`;
@@ -1961,7 +2045,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     }
 
     if (!isEquipmentInstance(row)) { 
-      setError('Wydanie/przyjęcie działa na egzemplarzach. Upewnij się, że wpisany kod wskazuje na konkretne urządzenie z bazy.'); 
+      setError('Wydanie/przyjęcie wymaga użycia fizycznych egzemplarzy sprzętu.'); 
       return; 
     }
     
@@ -1975,7 +2059,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
   async function scan() {
     const code = scanCode.trim();
-
     if (!code) {
       focusScanInput();
       setNotice('Wpisz albo zeskanuj kod w polu tekstowym i naciśnij Enter.');
@@ -1985,28 +2068,9 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     setError('');
     setNotice('');
 
-    const quantityModel = findQuantityModelByCode(code);
-    if (quantityModel) {
-      addQuantityDocumentItem({
-        ...quantityModel,
-        rowType: 'ilosciowy_model',
-        quantityOnly: true,
-        id_modelu: quantityModel.id,
-        nazwa_modelu: quantityModel.nazwa,
-        kod: quantityModel.kod_kreskowy || quantityModel.kod || code,
-        jednostka: quantityModel.jednostka || 'szt.',
-        ilosc_dostepna: quantityModel.ilosc_magazynowa || quantityModel.ilość_magazynowa || quantityModel.ilosc || 0,
-      }, 'scan');
-
-      setScanCode('');
-      setTimeout(focusScanInput, 0);
-      return;
-    }
-
     try {
       const response = await api.get(`/api/magazyn/skan?kod=${encodeURIComponent(code)}`);
       addDocumentItem(response.data, 'scan');
-      
       setScanCode('');
       setTimeout(focusScanInput, 0);
     } catch (e: any) {
@@ -2017,7 +2081,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
   async function createDocument(type: 'wydanie' | 'przyjecie') {
     if (!docItems.length) {
-      return alert('Koszyk WZ/PZ jest pusty. Zeskanuj egzemplarze, skrzynie albo sprzęt ilościowy.');
+      return alert('Koszyk WZ/PZ jest pusty. Zeskanuj egzemplarze, skrzynie albo wybierz sprzęt z listy.');
     }
 
     setError('');
@@ -2053,390 +2117,583 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
   const issuedTotal = plannedRows.reduce((s, r) => s + r.wydane, 0);
   const returnedTotal = plannedRows.reduce((s, r) => s + r.przyjete, 0);
 
-  return <div className="space-y-6 pt-2">
-    {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-black text-red-700">{error}</div>}
-    {notice && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-black text-emerald-700">{notice}</div>}
+  return (
+    <div className="space-y-6 pt-2">
+      {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-black text-red-700">{error}</div>}
+      {notice && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-black text-emerald-700">{notice}</div>}
 
-    <section className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
-      <div className="flex flex-col gap-4 border-b border-slate-100 dark:border-white/5 p-6 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Sprzęt wydarzenia</p>
-          <h3 className="mt-1 text-2xl font-black text-slate-900 dark:text-white">Plan sprzętu, wydanie i przyjęcie</h3>
-          <p className="mt-1.5 max-w-3xl text-sm font-bold text-slate-500 dark:text-slate-400 leading-relaxed">Plan edytujesz po modelach i ilościach. Wydanie oraz przyjęcie działa na konkretnych egzemplarzach po skanie.</p>
+      <section className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+        <div className="flex flex-col gap-4 border-b border-slate-100 dark:border-white/5 p-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Sprzęt wydarzenia</p>
+            <h3 className="mt-1 text-2xl font-black text-slate-900 dark:text-white">Plan sprzętu, wydanie i przyjęcie</h3>
+            <p className="mt-1.5 max-w-3xl text-sm font-bold text-slate-500 dark:text-slate-400 leading-relaxed">
+              Plan edytujesz po modelach i ilościach. Wydanie oraz przyjęcie działa na fizycznych egzemplarzach.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
+            <Metric label="Plan" value={`${plannedTotal} szt.`} />
+            <Metric label="Wydano" value={`${issuedTotal} szt.`} />
+            <Metric label="Przyjęto" value={`${returnedTotal} szt.`} />
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
-          <Metric label="Plan" value={`${plannedTotal} szt.`} />
-          <Metric label="Wydano" value={`${issuedTotal} szt.`} />
-          <Metric label="Przyjęto" value={`${returnedTotal} szt.`} />
-        </div>
-      </div>
 
-      <div className="flex flex-col gap-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 p-5 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex flex-wrap gap-2.5">
-          <button type="button" onClick={() => { setMode('plan'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'plan' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'}`}>Lista sprzętu (Plan)</button>
-          <button type="button" onClick={() => { setMode('packlista'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'packlista' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'}`}>Packlista</button>
-          <button type="button" onClick={() => { setMode('wydanie'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'wydanie' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'}`}>Wydaj WZ</button>
-          <button type="button" onClick={() => { setMode('przyjecie'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'przyjecie' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300 dark:hover:border-cyan-700/50 hover:bg-cyan-50 dark:hover:bg-cyan-500/10'}`}>Przyjmij PZ</button>
+        <div className="flex flex-col gap-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 p-5 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-wrap gap-2.5">
+            <button type="button" onClick={() => { setMode('plan'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'plan' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300'}`}>Lista sprzętu (Plan)</button>
+            <button type="button" onClick={() => { setMode('packlista'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'packlista' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300'}`}>Packlista</button>
+            <button type="button" onClick={() => { setMode('wydanie'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'wydanie' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300'}`}>Wydaj WZ</button>
+            <button type="button" onClick={() => { setMode('przyjecie'); setQuery(''); setError(''); setNotice(''); setDocItems([]); }} className={`rounded-xl px-5 py-3 text-sm font-black transition-all shadow-sm ${mode === 'przyjecie' ? 'bg-gradient-to-r from-[#04e0ff] to-blue-600 text-white shadow-cyan-600/20' : 'border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cyan-300'}`}>Przyjmij PZ</button>
+          </div>
+          {mode === 'plan' && (
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={() => setShowBundlePicker(true)} className="shadow-sm"><Layers size={16} className="inline mr-1" /> Dodaj Pakiet</Button>
+              <Button onClick={() => setShowEditor((v) => !v)} className="shadow-md shadow-cyan-600/20"><Plus size={16} className="inline mr-1" /> {showEditor ? 'Zamknij dodawanie' : 'Dodaj / zmień plan'}</Button>
+            </div>
+          )}
         </div>
+
+        {/* PLAN TAB */}
         {mode === 'plan' && (
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => setShowBundlePicker(true)} className="shadow-sm"><Layers size={16} className="inline mr-1" /> Dodaj Pakiet</Button>
-            <Button onClick={() => setShowEditor((v) => !v)} className="shadow-md shadow-cyan-600/20"><Plus size={16} className="inline mr-1" /> {showEditor ? 'Zamknij dodawanie' : 'Dodaj / zmień plan'}</Button>
-          </div>
-        )}
-      </div>
-
-      {/* PLAN TAB */}
-      {mode === 'plan' && <div className="grid gap-0 xl:grid-cols-[1fr_520px]">
-        <div className="p-6">
-          <div className="mb-6 flex items-center justify-between gap-3">
-            <div>
-              <h4 className="text-xl font-black text-slate-900 dark:text-white">Plan sprzętowy przypisany do wydarzenia</h4>
-              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">Podział jak w ofertach: kategoria główna / podkategoria / model.</p>
-            </div>
-          </div>
-          <div className="space-y-5">
-            {plannedGroups.map((group: any) => <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 px-5 py-3.5">
-                <div><p className="text-base font-black text-slate-900 dark:text-white">{group.nazwa}</p><p className="text-xs font-bold text-slate-400 dark:text-slate-500">{group.rows.length} modeli</p></div>
-                <span className="rounded-xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/5 px-3 py-1.5 text-xs font-black text-slate-500 dark:text-slate-300 shadow-sm">plan {group.plan} · WZ {group.wydane} · PZ {group.przyjete}</span>
-              </div>
-              <div className="divide-y divide-slate-100 dark:divide-white/5">
-                {group.rows.map((row: any) => <div key={row.id_modelu} className="grid gap-4 px-5 py-4 md:grid-cols-[1fr_280px] md:items-center">
-                  <div><p className="font-black text-slate-900 dark:text-white text-[15px]">{row.nazwa}</p><p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-0.5">model · {row.kategoria}</p></div>
-                  <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 dark:bg-white/5 p-2 text-center text-xs font-black border border-slate-100 dark:border-transparent"><span><b className="block text-lg text-slate-900 dark:text-white">{row.plan}</b>plan</span><span><b className="block text-lg text-emerald-600 dark:text-emerald-400">{row.wydane}</b>WZ</span><span><b className="block text-lg text-blue-600 dark:text-blue-400">{row.przyjete}</b>PZ</span></div>
-                </div>)}
-              </div>
-            </div>)}
-            {!plannedGroups.length && <p className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-10 text-center text-sm font-bold text-slate-400 bg-slate-50/50 dark:bg-black/20">Brak sprzętu przypisanego do planu. Kliknij „Dodaj / zmień plan sprzętowy”.</p>}
-          </div>
-        </div>
-
-        {showEditor && <aside className="border-l border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 p-6 shadow-inner">
-          <div className="sticky top-4 space-y-5">
-            <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm">
-              <div className="mb-5 flex items-start justify-between gap-3 border-b border-slate-100 dark:border-white/5 pb-4">
-                <div><h4 className="text-lg font-black text-slate-900 dark:text-white">Dodaj / zmień sprzęt w planie</h4><p className="text-xs font-bold text-slate-500 mt-1">Wybierz kategorię główną, potem podkategorię i wpisz ilość przy modelu.</p></div>
-                <button type="button" onClick={() => setShowEditor(false)} className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-xs font-black text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10 transition shadow-sm">Zamknij</button>
-              </div>
-
-              <Field label="Szukaj modelu w bazie sprzętowej"><div className="relative"><Search className="absolute left-3.5 top-3.5 text-slate-400" size={17}/><input className={`${inputClass} pl-11 py-3`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="projektor, monitor, kabel..." /></div></Field>
-
-              <div className="mt-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4">
-                <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Filtry / Kategorie główne</p>
-                <div className="flex max-h-[140px] flex-wrap gap-2 overflow-y-auto pr-1 custom-scrollbar">
-                  <button type="button" onClick={() => { setActiveRoot('all'); setActiveSub(''); }} className={`rounded-xl px-3 py-2 text-xs font-black transition shadow-sm ${activeRoot === 'all' ? 'bg-[#04e0ff] text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-cyan-300'}`}>Wszystkie</button>
-                  {equipmentCategoryRoots.map((root: any) => <button key={root.id} type="button" onClick={() => { setActiveRoot(String(root.id)); setActiveSub(''); }} className={`rounded-xl px-3 py-2 text-xs font-black transition shadow-sm ${activeRoot === String(root.id) ? 'bg-[#04e0ff] text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-cyan-300'}`}>{root.nazwa} <span className="opacity-60 font-bold ml-1">{totalForEquipmentCategory(String(root.id))}</span></button>)}
+          <div className="grid gap-0 xl:grid-cols-[1fr_520px]">
+            <div className="p-6">
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-xl font-black text-slate-900 dark:text-white">Plan sprzętowy przypisany do wydarzenia</h4>
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">Podział na kategorie główne i modele.</p>
                 </div>
               </div>
-
-              {activeRootObj?.dzieci?.length > 0 && <div className="mt-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4 animate-fade-in-up">
-                <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Podkategorie ({activeRootObj.nazwa})</p>
-                <div className="flex max-h-[160px] flex-wrap gap-2 overflow-y-auto pr-1 custom-scrollbar">
-                  <button type="button" onClick={() => setActiveSub('')} className={`rounded-xl px-3 py-2 text-xs font-black transition shadow-sm ${!activeSub ? 'bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-cyan-300'}`}>Wszystkie w dziale</button>
-                  {activeRootObj.dzieci.map((child: any) => <button key={child.id} type="button" onClick={() => setActiveSub(String(child.id))} className={`rounded-xl px-3 py-2 text-xs font-black transition shadow-sm ${activeSub === String(child.id) ? 'bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-cyan-300'}`}>{child.nazwa} <span className="opacity-60 font-bold ml-1">{totalForEquipmentCategory(String(child.id))}</span></button>)}
-                </div>
-              </div>}
-            </div>
-
-            <div className="max-h-[500px] space-y-3 overflow-y-auto pr-2 custom-scrollbar">
-              {visibleModels.map((model: any) => {
-                const qty = Number(planQty[String(model.id)] || 0) || 0;
-                return <div key={model.id} className={`rounded-2xl border bg-white dark:bg-slate-900 p-4 shadow-sm transition-all duration-300 ${qty > 0 ? 'border-[#04e0ff] ring-1 ring-[#04e0ff]/30 shadow-md' : 'border-slate-200 dark:border-white/10 hover:border-cyan-300 dark:hover:border-cyan-700'}`}>
-                  <div className="flex gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 dark:bg-white/5 text-xs font-black text-slate-400 border border-slate-200 dark:border-white/10">
-                      {model.zdjecie ? <img src={model.zdjecie} alt="" className="h-full w-full object-cover" /> : <Box size={22} className="opacity-50" />}
+              <div className="space-y-5">
+                {plannedGroups.map((group: any) => (
+                  <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 px-5 py-3.5">
+                      <div><p className="text-base font-black text-slate-900 dark:text-white">{group.nazwa}</p><p className="text-xs font-bold text-slate-400 dark:text-slate-500">{group.rows.length} modeli</p></div>
+                      <span className="rounded-xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/5 px-3 py-1.5 text-xs font-black text-slate-500 dark:text-slate-300 shadow-sm">plan {group.plan} · WZ {group.wydane} · PZ {group.przyjete}</span>
                     </div>
-                    <div className="min-w-0 flex-1 pr-2">
-                      <p className="truncate font-black text-slate-900 dark:text-white leading-tight">{model.nazwa}</p>
-                      <p className="truncate text-[11px] font-bold text-slate-400 mt-1">{model.kategoria_nazwa}</p>
-                      <p className="mt-1.5 text-[11px] font-black text-[#04e0ff]">Dostępne w magazynie: <span className="text-slate-800 dark:text-slate-200 ml-1">{model.dostepnych ?? model.dostepne ?? model.ilosc_dostepna ?? model.na_stanie ?? 0}</span></p>
+                    <div className="divide-y divide-slate-100 dark:divide-white/5">
+                      {group.rows.map((row: any) => (
+                        <div key={row.id_modelu} className="grid gap-4 px-5 py-4 md:grid-cols-[1fr_280px] md:items-center">
+                          <div><p className="font-black text-slate-900 dark:text-white text-[15px]">{row.nazwa}</p><p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-0.5">model · {row.kategoria}</p></div>
+                          <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 dark:bg-white/5 p-2 text-center text-xs font-black border border-slate-100 dark:border-transparent"><span><b className="block text-lg text-slate-900 dark:text-white">{row.plan}</b>plan</span><span><b className="block text-lg text-emerald-600 dark:text-emerald-400">{row.wydane}</b>WZ</span><span><b className="block text-lg text-blue-600 dark:text-blue-400">{row.przyjete}</b>PZ</span></div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <div className="mt-4 grid grid-cols-[44px_1fr_44px] gap-2 pt-4 border-t border-slate-100 dark:border-white/5">
-                    <button type="button" onClick={() => stepQty(model, -1)} className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-lg font-black text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10 transition shadow-sm">-</button>
-                    <input type="number" min={0} className={`${inputClass} text-center text-lg font-black !py-1`} value={planQty[String(model.id)] ?? '0'} onChange={(e) => changeQty(model, e.target.value)} />
-                    <button type="button" onClick={() => stepQty(model, 1)} className="rounded-xl bg-gradient-to-br from-[#04e0ff] to-blue-600 text-lg font-black text-white hover:scale-105 transition shadow-sm">+</button>
-                  </div>
-                </div>;
-              })}
-              {!visibleModels.length && <p className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-8 text-center text-sm font-bold text-slate-400 bg-white dark:bg-slate-900">Brak modeli w tej kategorii. Wyszukaj ponownie.</p>}
+                ))}
+                {!plannedGroups.length && <p className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-10 text-center text-sm font-bold text-slate-400 bg-slate-50/50 dark:bg-black/20">Brak sprzętu przypisanego do planu. Kliknij „Dodaj / zmień plan”.</p>}
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm">
-              <div className="mb-4 flex items-center justify-between"><p className="font-black text-slate-900 dark:text-white">Koszyk Planu</p><span className="rounded-full bg-cyan-100 dark:bg-cyan-500/10 px-3 py-1 text-[11px] font-black text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/20">{Object.values(planQty).filter((v) => Number(v) > 0).length} modeli wybrano</span></div>
-              <div className="max-h-[180px] space-y-2 overflow-y-auto pr-2 custom-scrollbar">
-                {Object.entries(planQty).filter(([, qty]) => Number(qty) > 0).map(([id, qty]) => {
-                  const model = models.find((m: any) => String(m.id) === String(id));
-                  return <div key={id} className="flex justify-between items-center rounded-xl bg-slate-50 dark:bg-white/5 px-3 py-2.5 text-sm font-bold border border-slate-100 dark:border-transparent"><span className="truncate pr-4 text-slate-700 dark:text-slate-300">{model?.nazwa || `Model #${id}`}</span><b className="text-slate-900 dark:text-white">x{qty}</b></div>;
-                })}
-              </div>
-              <div className="mt-5 flex gap-2 pt-4 border-t border-slate-100 dark:border-white/5"><button type="button" onClick={load} className="flex-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 text-sm font-black text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10 transition shadow-sm">Cofnij</button><button type="button" onClick={savePlan} className="flex-1 rounded-xl bg-gradient-to-r from-[#04e0ff] to-blue-600 px-4 py-3 text-sm font-black text-white hover:opacity-90 transition shadow-md shadow-cyan-500/20">Zapisz cały plan</button></div>
-            </div>
-          </div>
-        </aside>}
-      </div>}
+            {showEditor && (
+              <aside className="border-l border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 p-6 shadow-inner">
+                <div className="sticky top-4 space-y-5">
+                  <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm">
+                    <div className="mb-5 flex items-start justify-between gap-3 border-b border-slate-100 dark:border-white/5 pb-4">
+                      <div><h4 className="text-lg font-black text-slate-900 dark:text-white">Dodaj sprzęt do planu</h4><p className="text-xs font-bold text-slate-500 mt-1">Wybierz kategorię i wpisz ilość przy modelu.</p></div>
+                      <button type="button" onClick={() => setShowEditor(false)} className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-xs font-black text-slate-600 dark:text-slate-300">Zamknij</button>
+                    </div>
 
-      {/* PACKLISTA TAB */}
-      {mode === 'packlista' && (
-        <>
-          <style jsx global>{`
-            .packlist-print-document { display: none; }
-            @media print {
-              @page { size: A4 portrait; margin: 9mm; }
-              html, body { margin: 0 !important; padding: 0 !important; background: #ffffff !important; }
-              body * { visibility: hidden !important; }
-              .packlist-print-document, .packlist-print-document * { visibility: visible !important; }
-              .packlist-print-document { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: #ffffff !important; color: #0f172a !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-              .packlist-print-header, .packlist-print-meta, .packlist-print-general-notes, .packlist-print-footer { break-inside: avoid !important; page-break-inside: avoid !important; }
-              .packlist-print-category-title { break-after: avoid !important; page-break-after: avoid !important; background: #fb8500 !important; color: white !important; }
-              .packlist-print-table { width: 100%; border-collapse: collapse; }
-              .packlist-print-table thead { display: table-header-group; }
-              .packlist-print-table tr { break-inside: avoid !important; page-break-inside: avoid !important; }
-            }
-          `}</style>
-          <div className="packlist-screen p-6">
-            <div className="mb-6 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Packlista</p>
-                <h4 className="mt-1 text-xl font-black text-slate-900 dark:text-white">Sprzęt do przygotowania</h4>
-                <p className="mt-1 text-sm font-bold text-slate-500">{eventName}</p>
-                <p className="mt-2 text-xs font-bold text-slate-400">
-                  {packlistSaveStatus === 'saving' && 'Zapisywanie uwag...'}
-                  {packlistSaveStatus === 'saved' && '✓ Uwagi zapisane'}
-                  {packlistSaveStatus === 'error' && '⚠ Błąd zapisu uwag'}
-                </p>
-              </div>
-              <Button onClick={() => window.print()}><FileText size={16} className="inline mr-1" /> Drukuj / zapisz PDF</Button>
-            </div>
-            <div className="space-y-5">
-              {packlistGroups.map((group: any) => (
-                <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm">
-                  <div className="flex items-center justify-between bg-orange-500 px-5 py-3 text-white">
-                    <div><p className="font-black">{group.nazwa}</p><p className="text-xs font-bold text-white/70">{group.rows.length} modeli</p></div>
-                    <span className="rounded-xl bg-white/15 px-3 py-1.5 text-xs font-black">{group.plan} szt.</span>
-                  </div>
-                  <div className="divide-y divide-slate-100 dark:divide-white/5">
-                    {group.rows.map((row: any, index: number) => (
-                      <div key={row.id_modelu} className="grid grid-cols-[32px_38px_1fr_80px_1fr] items-center gap-3 px-5 py-3">
-                        <div className="h-5 w-5 rounded border-2 border-slate-400 bg-white" />
-                        <div className="text-sm font-bold text-slate-400">{index + 1}.</div>
-                        <div><p className="font-black text-slate-900 dark:text-white">{row.nazwa}</p></div>
-                        <div className="text-center"><p className="text-xl font-black text-slate-900 dark:text-white">{row.plan}</p><p className="text-[9px] font-black uppercase text-slate-400">{row.jednostka || 'szt.'}</p></div>
-                        <textarea value={packlistNotes[String(row.id_modelu)] || ''} onChange={(e) => setPacklistNotes((prev) => ({ ...prev, [String(row.id_modelu)]: e.target.value, }))} placeholder="Uwagi..." className="min-h-[42px] w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-950 dark:text-white" />
+                    <Field label="Szukaj modelu w bazie sprzętowej">
+                      <div className="relative"><Search className="absolute left-3.5 top-3.5 text-slate-400" size={17}/><input className={`${inputClass} pl-11 py-3`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="projektor, monitor, kabel..." /></div>
+                    </Field>
+
+                    <div className="mt-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4">
+                      <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Kategorie główne</p>
+                      <div className="flex max-h-[140px] flex-wrap gap-2 overflow-y-auto pr-1 custom-scrollbar">
+                        <button type="button" onClick={() => { setActiveRoot('all'); setActiveSub(''); }} className={`rounded-xl px-3 py-2 text-xs font-black transition shadow-sm ${activeRoot === 'all' ? 'bg-[#04e0ff] text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300'}`}>Wszystkie</button>
+                        {equipmentCategoryRoots.map((root: any) => <button key={root.id} type="button" onClick={() => { setActiveRoot(String(root.id)); setActiveSub(''); }} className={`rounded-xl px-3 py-2 text-xs font-black transition shadow-sm ${activeRoot === String(root.id) ? 'bg-[#04e0ff] text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300'}`}>{root.nazwa} <span className="opacity-60 font-bold ml-1">{totalForEquipmentCategory(String(root.id))}</span></button>)}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-7">
-              <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Uwagi</p>
-              <textarea value={packlistGeneralNotes} onChange={(e) => setPacklistGeneralNotes(e.target.value)} className="min-h-[110px] w-full resize-none rounded-2xl border border-slate-200 bg-white p-4 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
-            </div>
-          </div>
+                    </div>
 
-          <div className="packlist-print-document">
-            <header className="packlist-print-header mb-[7mm] grid grid-cols-2 gap-[10mm]">
-              <div><img src={data.wydarzenie?.organizacja?.logo || '/eventflow-logo.svg'} alt={data.wydarzenie?.organizacja?.nazwa || 'Logo firmy'} className="max-h-[16mm] max-w-[70mm] object-contain object-left" /></div>
-              <div className="text-right">
-                <h1 className="text-[20px] font-black uppercase leading-tight">Packlista</h1>
-                <p className="mt-2 text-[9px]">Numer: <b>{data.wydarzenie?.numer || `#${eventId}`}</b></p>
-                <p className="text-[9px]">Start: <b>{data.wydarzenie?.data_start ? new Date(data.wydarzenie.data_start).toLocaleString('pl-PL') : '-'}</b></p>
-              </div>
-            </header>
-            <section className="packlist-print-meta mb-[6mm] grid grid-cols-2 gap-[10mm] text-[9px]">
-              <div>
-                <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Wydarzenie</h2>
-                <p className="font-black">{data.wydarzenie?.nazwa || eventName}</p>
-                <p>{data.wydarzenie?.kontrahent?.nazwa || ''}</p>
-              </div>
-              <div>
-                <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Lokalizacja</h2>
-                <p className="font-black">{data.wydarzenie?.miejsce?.nazwa || data.wydarzenie?.miejsce_reczne || '-'}</p>
-                {data.wydarzenie?.adres_reczny && <p>{data.wydarzenie.adres_reczny}</p>}
-              </div>
-            </section>
-            {packlistGroups.map((group: any) => (
-              <section key={group.nazwa} className="mb-[4mm]">
-                <div className="packlist-print-category-title flex items-center justify-between rounded px-[2.5mm] py-[1.5mm] text-[9px] font-black">
-                  <span>{group.nazwa}</span><span>{group.plan} szt.</span>
-                </div>
-                <table className="packlist-print-table text-[8.5px]">
-                  <thead>
-                    <tr className="bg-slate-100 text-left">
-                      <th className="w-[8mm] px-[1.5mm] py-[1.3mm]" />
-                      <th className="w-[8mm] px-[1.5mm] py-[1.3mm]">Lp.</th>
-                      <th className="px-[1.5mm] py-[1.3mm]">Model</th>
-                      <th className="w-[15mm] px-[1.5mm] py-[1.3mm] text-center">Ilość</th>
-                      <th className="w-[62mm] px-[1.5mm] py-[1.3mm]">Uwagi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.rows.map((row: any, index: number) => {
-                      const note = packlistNotes[String(row.id_modelu)] || '';
+                    {activeRootObj?.dzieci?.length > 0 && (
+                      <div className="mt-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4 animate-fade-in-up">
+                        <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Podkategorie ({activeRootObj.nazwa})</p>
+                        <div className="flex max-h-[160px] flex-wrap gap-2 overflow-y-auto pr-1 custom-scrollbar">
+                          <button type="button" onClick={() => setActiveSub('')} className={`rounded-xl px-3 py-2 text-xs font-black transition shadow-sm ${!activeSub ? 'bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300'}`}>Wszystkie w dziale</button>
+                          {activeRootObj.dzieci.map((child: any) => <button key={child.id} type="button" onClick={() => setActiveSub(String(child.id))} className={`rounded-xl px-3 py-2 text-xs font-black transition shadow-sm ${activeSub === String(child.id) ? 'bg-slate-900 dark:bg-slate-200 text-white dark:text-slate-900' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300'}`}>{child.nazwa} <span className="opacity-60 font-bold ml-1">{totalForEquipmentCategory(String(child.id))}</span></button>)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="max-h-[500px] space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+                    {visibleModels.map((model: any) => {
+                      const qty = Number(planQty[String(model.id)] || 0) || 0;
                       return (
-                        <tr key={row.id_modelu} className="border-b border-slate-200 align-middle">
-                          <td className="px-[1.5mm] py-[1.5mm]"><span className="block h-[3.8mm] w-[3.8mm] rounded-[1px] border border-slate-800" /></td>
-                          <td className="px-[1.5mm] py-[1.5mm] text-slate-500">{index + 1}</td>
-                          <td className="px-[1.5mm] py-[1.5mm] font-bold">{row.nazwa}</td>
-                          <td className="px-[1.5mm] py-[1.5mm] text-center font-black">{row.plan}</td>
-                          <td className="px-[1.5mm] py-[1.5mm]">{note ? <span>{note}</span> : <span className="block min-h-[4mm] border-b border-dotted border-slate-300" />}</td>
-                        </tr>
+                        <div key={model.id} className={`rounded-2xl border bg-white dark:bg-slate-900 p-4 shadow-sm transition-all duration-300 ${qty > 0 ? 'border-[#04e0ff] ring-1 ring-[#04e0ff]/30 shadow-md' : 'border-slate-200 dark:border-white/10'}`}>
+                          <div className="flex gap-4">
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 dark:bg-white/5 text-xs font-black text-slate-400 border border-slate-200 dark:border-white/10">
+                              {model.zdjecie ? <img src={model.zdjecie} alt="" className="h-full w-full object-cover" /> : <Box size={22} className="opacity-50" />}
+                            </div>
+                            <div className="min-w-0 flex-1 pr-2">
+                              <p className="truncate font-black text-slate-900 dark:text-white leading-tight">{model.nazwa}</p>
+                              <p className="truncate text-[11px] font-bold text-slate-400 mt-1">{model.kategoria_nazwa}</p>
+                              <p className="mt-1.5 text-[11px] font-black text-[#04e0ff]">Dostępne w magazynie: <span className="text-slate-800 dark:text-slate-200 ml-1">{model.dostepnych ?? model.dostepne ?? model.ilosc_dostepna ?? model.na_stanie ?? 0}</span></p>
+                            </div>
+                          </div>
+                          <div className="mt-4 grid grid-cols-[44px_1fr_44px] gap-2 pt-4 border-t border-slate-100 dark:border-white/5">
+                            <button type="button" onClick={() => stepQty(model, -1)} className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-lg font-black text-slate-600 dark:text-slate-300 hover:bg-slate-50">-</button>
+                            <input type="number" min={0} className={`${inputClass} text-center text-lg font-black !py-1`} value={planQty[String(model.id)] ?? '0'} onChange={(e) => changeQty(model, e.target.value)} />
+                            <button type="button" onClick={() => stepQty(model, 1)} className="rounded-xl bg-gradient-to-br from-[#04e0ff] to-blue-600 text-lg font-black text-white hover:scale-105 transition">+</button>
+                          </div>
+                        </div>
                       );
                     })}
-                  </tbody>
-                </table>
-              </section>
-            ))}
-            {packlistGeneralNotes && (
-              <section className="packlist-print-general-notes mt-[5mm]">
-                <h2 className="mb-[1mm] text-[8px] font-black uppercase text-slate-500">Uwagi</h2>
-                <div className="min-h-[15mm] rounded border border-slate-300 p-[2mm] text-[8.5px]">{packlistGeneralNotes}</div>
-              </section>
-            )}
-            <footer className="packlist-print-footer mt-[7mm] flex justify-between gap-4 border-t pt-[2mm] text-[7px] font-bold text-slate-400">
-              <span>Packlistę wygenerowano w systemie EVE-nt.</span>
-              <span>{data.wydarzenie?.numer || `#${eventId}`} · {new Date().toLocaleDateString('pl-PL')}</span>
-            </footer>
-          </div>
-        </>
-      )}
+                    {!visibleModels.length && <p className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-8 text-center text-sm font-bold text-slate-400 bg-white dark:bg-slate-900">Brak modeli w tej kategorii.</p>}
+                  </div>
 
-      {/* WYDANIE / PRZYJĘCIE TAB */}
-      {(mode === 'wydanie' || mode === 'przyjecie') && (
-        <div className="grid gap-0 xl:grid-cols-[1.15fr_.85fr] min-w-0">
-          <div className="p-6 min-w-0">
-            <div className="mb-6 rounded-2xl border border-cyan-200 dark:border-cyan-500/20 bg-cyan-50 dark:bg-cyan-500/10 p-5 shadow-sm min-w-0">
-              <p className="text-sm font-bold leading-relaxed text-cyan-900 dark:text-cyan-100">{mode === 'wydanie' ? 'Skanuj egzemplarze albo kody kontenerów aby je wydać (WZ). Sprzęt ilościowy możesz zaznaczyć checkboxem by pobrać brakującą ilość sztuk bez ręcznego wpisywania w skaner.' : 'Skanuj zwracane egzemplarze i kontenery (PZ). Sprzęt ilościowy możesz zaznaczyć checkboxem by zwrócić brakującą na magazynie ilość sztuk bez skanera.'}</p>
-            </div>
-            <div className="space-y-5 min-w-0">
-              {plannedGroups.map((group: any) => <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm min-w-0">
-                <div className="bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-white/5 px-5 py-3.5"><b className="text-slate-900 dark:text-white">{group.nazwa}</b></div>
-                <div className="divide-y divide-slate-100 dark:divide-white/5">
-                  {group.rows.map((row: any) => {
-                    const after = countAfterScan(row);
-                    const missing = missingAfterScan(row);
-                    const base = mode === 'wydanie' ? row.plan : row.wydane;
-                    const percent = base > 0 ? Math.min(100, Math.round((after / base) * 100)) : 100;
-                    return <div key={row.id_modelu} className="px-5 py-4 min-w-0">
-                      <div className="grid gap-4 lg:grid-cols-[1fr_300px] lg:items-center min-w-0">
-                        <div className="min-w-0">
-                          <p className="font-black text-slate-900 dark:text-white text-[15px] truncate">{row.nazwa}</p>
-                          <p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-1 truncate">{mode === 'wydanie' ? `Plan: ${row.plan} szt. · Wydano na zewnątrz: ${row.wydane} szt. · Skan w koszyku: ${row.scanned} szt.` : `Wydano w teren: ${row.wydane} szt. · Przyjęto już: ${row.przyjete} szt. · Skan w koszyku: ${row.scanned} szt.`}</p>
-                          {row.quantityOnly && <label className="mt-3 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-cyan-100 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-500/10 px-4 py-2.5 text-xs font-black text-cyan-900 dark:text-cyan-100 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition shadow-sm max-w-full">
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4 rounded border-slate-300 text-[#04e0ff] focus:ring-[#04e0ff] cursor-pointer shrink-0"
-                              checked={quantityRowSelected(row)}
-                              onChange={(e) => toggleQuantityRowWithoutScan(row, e.target.checked)}
-                            />
-                            <span className="truncate">{mode === 'wydanie' ? 'Wydaj brakujące na sztuki' : 'Przyjmij brakujące na sztuki'}</span>
-                            <span className="rounded-full bg-white dark:bg-black/20 border border-slate-200 dark:border-transparent px-2.5 py-1 text-cyan-700 dark:text-[#04e0ff] shadow-sm ml-auto shrink-0">{quantityRowSelected(row) ? `${row.scanned} ${row.jednostka || 'szt.'}` : `${missing} ${row.jednostka || 'szt.'}`}</span>
-                          </label>}
-                        </div>
-                        <div className="rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4 shadow-inner min-w-0">
-                          <div className="mb-2.5 flex justify-between text-xs font-black"><span>{mode === 'wydanie' ? 'Status wydania' : 'Status przyjęcia'}: {after}/{base}</span><span className={missing ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}>{missing ? `Brakuje jeszcze ${missing}` : 'Wszystko OK'}</span></div>
-                          <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 shadow-inner"><div className={`h-full rounded-full transition-all duration-1000 ${missing ? 'bg-orange-500 shadow-[0_0_8px_#f97316]' : 'bg-emerald-500 shadow-[0_0_8px_#10b981]'}`} style={{ width: `${percent}%` }} /></div>
-                        </div>
-                      </div>
-                    </div>;
-                  })}
-                </div>
-              </div>)}
-            </div>
-          </div>
-          
-          <div className="border-l border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/20 p-6 shadow-inner min-w-0 flex flex-col">
-            <div className="sticky top-4 space-y-5 min-w-0">
-              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
-                <Field label="Skanuj kod kreskowy / QR / SN / Case z Naklejki">
-                   <div className="flex gap-2">
-                     <input ref={scanInputRef} className={`${inputClass} py-3 text-lg font-bold shadow-inner min-w-0`} autoFocus value={scanCode} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setScanCode(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); scan(); } }} placeholder="Kliknij Skanuj, skanuj kod i wciśnij Enter..."/>
-                     <Button onClick={scan} className="px-6 shadow-md shadow-cyan-600/20 shrink-0">{scanCode.trim() ? 'Dodaj skan' : 'Skanuj'}</Button>
-                   </div>
-                </Field>
-                <p className="mt-3 text-xs font-bold text-slate-400 leading-relaxed">Zeskanowanie kontenera (Opakowanie/Case) automatycznie rozpakuje go i doda na listę ukryty w nim sprzęt. Zeskanowanie Zestawu(Racka) doda go jako spójną całość. Sprzęt ilościowy dodasz skanem modelu lub checkboxem po lewej.</p>
-              </div>
-              
-              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
-                <div className="mb-4 flex items-center justify-between min-w-0"><h4 className="text-lg font-black text-slate-900 dark:text-white truncate pr-2">Koszyk Skanera (Teraz)</h4><span className="rounded-full bg-cyan-100 dark:bg-cyan-500/10 px-3 py-1 text-xs font-black text-cyan-700 dark:text-[#04e0ff] border border-cyan-200 dark:border-cyan-500/20 shrink-0">{docItems.reduce((s: number, p: any) => s + Number(p.ilosc || 1), 0)} szt.</span></div>
-                <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1 custom-scrollbar min-w-0">
-                  {docItems.map((p, idx) => <div key={`${p.id_egzemplarza || p.id_modelu}-${idx}`} className="rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 p-3 flex justify-between gap-3 group transition-colors hover:border-cyan-300 dark:hover:border-cyan-700 min-w-0">
-                    <div className="min-w-0">
-                       <b className="text-[13px] text-slate-900 dark:text-white block truncate">{p.nazwa}</b>
-                       <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
-                          {p.kategoria} · {isQuantityOnly(p) ? <span className="text-[#04e0ff]">{p.ilosc || 1} {p.jednostka || 'szt.'}</span> : `${p.nazwa_zeskanowanego_case ? `w: ${p.nazwa_zeskanowanego_case} · ` : ''}${p.kod || '-'}` } {p.kod && isQuantityOnly(p) ? ` · kod ${p.kod}` : ''}
-                       </p>
+                  <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm">
+                    <div className="mb-4 flex items-center justify-between"><p className="font-black text-slate-900 dark:text-white">Koszyk Planu</p><span className="rounded-full bg-cyan-100 dark:bg-cyan-500/10 px-3 py-1 text-[11px] font-black text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/20">{Object.values(planQty).filter((v) => Number(v) > 0).length} modeli</span></div>
+                    <div className="max-h-[180px] space-y-2 overflow-y-auto pr-2 custom-scrollbar">
+                      {Object.entries(planQty).filter(([, qty]) => Number(qty) > 0).map(([id, qty]) => {
+                        const model = models.find((m: any) => String(m.id) === String(id));
+                        return <div key={id} className="flex justify-between items-center rounded-xl bg-slate-50 dark:bg-white/5 px-3 py-2.5 text-sm font-bold"><span className="truncate pr-4 text-slate-700 dark:text-slate-300">{model?.nazwa || `Model #${id}`}</span><b className="text-slate-900 dark:text-white">x{qty}</b></div>;
+                      })}
                     </div>
-                    <button onClick={() => setDocItems((s) => s.filter((_, i) => i !== idx))} className="font-black text-slate-400 hover:text-red-500 bg-white dark:bg-transparent rounded-lg px-2.5 py-1.5 h-fit shadow-sm border border-slate-200 dark:border-transparent transition flex items-center gap-1.5 opacity-0 group-hover:opacity-100 shrink-0" title="Cofnij skan">
-                      <RotateCcw size={14}/> Cofnij
-                    </button>
-                  </div>)}
-                  {!docItems.length && <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-8 text-center text-sm font-bold text-slate-400 bg-white dark:bg-transparent">Rozpocznij skanowanie fizycznego sprzętu albo zaznacz checkbox przy sprzęcie ilościowym — ta lista zaktualizuje się automatycznie.</div>}
+                    <div className="mt-5 flex gap-2 pt-4 border-t border-slate-100 dark:border-white/5">
+                      <button type="button" onClick={load} className="flex-1 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 text-sm font-black text-slate-600 dark:text-slate-300">Cofnij</button>
+                      <button type="button" onClick={savePlan} className="flex-1 rounded-xl bg-gradient-to-r from-[#04e0ff] to-blue-600 px-4 py-3 text-sm font-black text-white hover:opacity-90 transition">Zapisz cały plan</button>
+                    </div>
+                  </div>
                 </div>
+              </aside>
+            )}
+          </div>
+        )}
+
+        {/* PACKLISTA TAB */}
+        {mode === 'packlista' && (
+          <>
+            <style jsx global>{`
+              .packlist-print-document { display: none; }
+              @media print {
+                @page { size: A4 portrait; margin: 9mm; }
+                html, body { margin: 0 !important; padding: 0 !important; background: #ffffff !important; }
+                body * { visibility: hidden !important; }
+                .packlist-print-document, .packlist-print-document * { visibility: visible !important; }
+                .packlist-print-document { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: #ffffff !important; color: #0f172a !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                .packlist-print-header, .packlist-print-meta, .packlist-print-general-notes, .packlist-print-footer { break-inside: avoid !important; page-break-inside: avoid !important; }
+                .packlist-print-category-title { break-after: avoid !important; page-break-after: avoid !important; background: #fb8500 !important; color: white !important; }
+                .packlist-print-table { width: 100%; border-collapse: collapse; }
+                .packlist-print-table thead { display: table-header-group; }
+                .packlist-print-table tr { break-inside: avoid !important; page-break-inside: avoid !important; }
+              }
+            `}</style>
+            <div className="packlist-screen p-6">
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Packlista</p>
+                  <h4 className="mt-1 text-xl font-black text-slate-900 dark:text-white">Sprzęt do przygotowania</h4>
+                  <p className="mt-1 text-sm font-bold text-slate-500">{eventName}</p>
+                </div>
+                <Button onClick={() => window.print()}><FileText size={16} className="inline mr-1" /> Drukuj / zapisz PDF</Button>
               </div>
-              
-              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
-                <Field label="Wyszukaj i dodaj egzemplarz ręcznie (Awaryjnie)"><div className="relative min-w-0"><Search className="absolute left-3 top-3 text-slate-400" size={16}/><input className={`${inputClass} pl-9 min-w-0`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="nazwa, numer boczny, kod kreskowy..." /></div></Field>
-                <div className="mt-4 max-h-[220px] space-y-2 overflow-y-auto pr-1 custom-scrollbar min-w-0">
-                  {visibleInstances.map((r: any) => <button key={r.id} type="button" onClick={() => addDocumentItem(r, 'manual')} className="w-full rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 p-3 text-left hover:border-cyan-300 dark:hover:border-cyan-700 transition shadow-sm min-w-0">
-                    <b className="text-[13px] text-slate-900 dark:text-white block truncate">{r.model?.nazwa || r.nazwa_wiersza}</b>
-                    <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">{r.nazwa_wiersza} · S/N: {r.kod || '-'}</p>
-                  </button>)}
-                </div>
+              <div className="space-y-5">
+                {packlistGroups.map((group: any) => (
+                  <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm">
+                    <div className="flex items-center justify-between bg-orange-500 px-5 py-3 text-white">
+                      <div><p className="font-black">{group.nazwa}</p><p className="text-xs font-bold text-white/70">{group.rows.length} modeli</p></div>
+                      <span className="rounded-xl bg-white/15 px-3 py-1.5 text-xs font-black">{group.plan} szt.</span>
+                    </div>
+                    <div className="divide-y divide-slate-100 dark:divide-white/5">
+                      {group.rows.map((row: any, index: number) => (
+                        <div key={row.id_modelu} className="grid grid-cols-[32px_38px_1fr_80px_1fr] items-center gap-3 px-5 py-3">
+                          <div className="h-5 w-5 rounded border-2 border-slate-400 bg-white" />
+                          <div className="text-sm font-bold text-slate-400">{index + 1}.</div>
+                          <div><p className="font-black text-slate-900 dark:text-white">{row.nazwa}</p></div>
+                          <div className="text-center"><p className="text-xl font-black text-slate-900 dark:text-white">{row.plan}</p><p className="text-[9px] font-black uppercase text-slate-400">{row.jednostka || 'szt.'}</p></div>
+                          <textarea value={packlistNotes[String(row.id_modelu)] || ''} onChange={(e) => setPacklistNotes((prev) => ({ ...prev, [String(row.id_modelu)]: e.target.value }))} placeholder="Uwagi..." className="min-h-[42px] w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-950 dark:text-white" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-              
-              <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
-                <div className="rounded-xl border border-cyan-100 dark:border-cyan-500/20 bg-cyan-50 dark:bg-cyan-500/10 p-3.5 text-xs font-bold text-cyan-900 dark:text-cyan-100 mb-4 leading-relaxed">
-                  Dokument magazynowy podpisze automatycznie w systemie aktualnie zalogowany użytkownik. Na wygenerowanym potwierdzeniu PDF będzie widoczny cyfrowy ślad audytowy transakcji.
+              <div className="mt-7">
+                <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Uwagi ogólne</p>
+                <textarea value={packlistGeneralNotes} onChange={(e) => setPacklistGeneralNotes(e.target.value)} className="min-h-[110px] w-full resize-none rounded-2xl border border-slate-200 bg-white p-4 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-900 dark:text-white" />
+              </div>
+            </div>
+
+            <div className="packlist-print-document">
+              <header className="packlist-print-header mb-[7mm] grid grid-cols-2 gap-[10mm]">
+                <div><img src={data.wydarzenie?.organizacja?.logo || '/eventflow-logo.svg'} alt={data.wydarzenie?.organizacja?.nazwa || 'Logo firmy'} className="max-h-[16mm] max-w-[70mm] object-contain object-left" /></div>
+                <div className="text-right">
+                  <h1 className="text-[20px] font-black uppercase leading-tight">Packlista</h1>
+                  <p className="mt-2 text-[9px]">Numer: <b>{data.wydarzenie?.numer || `#${eventId}`}</b></p>
+                  <p className="text-[9px]">Start: <b>{data.wydarzenie?.data_start ? new Date(data.wydarzenie.data_start).toLocaleString('pl-PL') : '-'}</b></p>
                 </div>
-                <Field label="Dodatkowe uwagi dla magazyniera do wpisania na dokument WZ/PZ"><textarea className={`${inputClass} resize-none min-h-[80px] min-w-0`} value={docForm.uwagi || ''} onChange={(e) => setDocForm({ ...docForm, uwagi: e.target.value })} placeholder="opcjonalne uwagi..."/></Field>
-                <button type="button" disabled={!docItems.length || savingDocs} onClick={() => createDocument(mode)} className={`mt-4 w-full rounded-xl px-5 py-3.5 text-sm font-black text-white disabled:opacity-50 transition shadow-lg ${mode === 'wydanie' ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-500/30 hover:opacity-90' : 'bg-gradient-to-r from-[#04e0ff] to-blue-600 shadow-[#04e0ff]/30 hover:opacity-90'} flex items-center justify-center gap-2`}>
-                  {savingDocs ? <Loader2 size={18} className="animate-spin shrink-0"/> : <FileText size={18} className="shrink-0" />} <span className="truncate">{savingDocs ? 'Generowanie...' : mode === 'wydanie' ? 'Zatwierdź i Wystaw WZ' : 'Zatwierdź i Wystaw PZ'}</span>
-                </button>
+              </header>
+              <section className="packlist-print-meta mb-[6mm] grid grid-cols-2 gap-[10mm] text-[9px]">
+                <div>
+                  <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Wydarzenie</h2>
+                  <p className="font-black">{data.wydarzenie?.nazwa || eventName}</p>
+                  <p>{data.wydarzenie?.kontrahent?.nazwa || ''}</p>
+                </div>
+                <div>
+                  <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Lokalizacja</h2>
+                  <p className="font-black">{data.wydarzenie?.miejsce?.nazwa || data.wydarzenie?.miejsce_reczne || '-'}</p>
+                  {data.wydarzenie?.adres_reczny && <p>{data.wydarzenie.adres_reczny}</p>}
+                </div>
+              </section>
+              {packlistGroups.map((group: any) => (
+                <section key={group.nazwa} className="mb-[4mm]">
+                  <div className="packlist-print-category-title flex items-center justify-between rounded px-[2.5mm] py-[1.5mm] text-[9px] font-black">
+                    <span>{group.nazwa}</span><span>{group.plan} szt.</span>
+                  </div>
+                  <table className="packlist-print-table text-[8.5px]">
+                    <thead>
+                      <tr className="bg-slate-100 text-left">
+                        <th className="w-[8mm] px-[1.5mm] py-[1.3mm]" />
+                        <th className="w-[8mm] px-[1.5mm] py-[1.3mm]">Lp.</th>
+                        <th className="px-[1.5mm] py-[1.3mm]">Model</th>
+                        <th className="w-[15mm] px-[1.5mm] py-[1.3mm] text-center">Ilość</th>
+                        <th className="w-[62mm] px-[1.5mm] py-[1.3mm]">Uwagi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.rows.map((row: any, index: number) => {
+                        const note = packlistNotes[String(row.id_modelu)] || '';
+                        return (
+                          <tr key={row.id_modelu} className="border-b border-slate-200 align-middle">
+                            <td className="px-[1.5mm] py-[1.5mm]"><span className="block h-[3.8mm] w-[3.8mm] rounded-[1px] border border-slate-800" /></td>
+                            <td className="px-[1.5mm] py-[1.5mm] text-slate-500">{index + 1}</td>
+                            <td className="px-[1.5mm] py-[1.5mm] font-bold">{row.nazwa}</td>
+                            <td className="px-[1.5mm] py-[1.5mm] text-center font-black">{row.plan}</td>
+                            <td className="px-[1.5mm] py-[1.5mm]">{note ? <span>{note}</span> : <span className="block min-h-[4mm] border-b border-dotted border-slate-300" />}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </section>
+              ))}
+              {packlistGeneralNotes && (
+                <section className="packlist-print-general-notes mt-[5mm]">
+                  <h2 className="mb-[1mm] text-[8px] font-black uppercase text-slate-500">Uwagi</h2>
+                  <div className="min-h-[15mm] rounded border border-slate-300 p-[2mm] text-[8.5px]">{packlistGeneralNotes}</div>
+                </section>
+              )}
+              <footer className="packlist-print-footer mt-[7mm] flex justify-between gap-4 border-t pt-[2mm] text-[7px] font-bold text-slate-400">
+                <span>Packlistę wygenerowano w systemie EventFlow.</span>
+                <span>{data.wydarzenie?.numer || `#${eventId}`} · {new Date().toLocaleDateString('pl-PL')}</span>
+              </footer>
+            </div>
+          </>
+        )}
+
+        {/* WYDANIE (WZ) / PRZYJĘCIE (PZ) */}
+        {(mode === 'wydanie' || mode === 'przyjecie') && (
+          <div className="grid gap-0 xl:grid-cols-[1.15fr_.85fr] min-w-0">
+            <div className="p-6 min-w-0">
+              <div className="mb-6 rounded-2xl border border-cyan-200 dark:border-cyan-500/20 bg-cyan-50 dark:bg-cyan-500/10 p-5 shadow-sm min-w-0">
+                <p className="text-sm font-bold leading-relaxed text-cyan-900 dark:text-cyan-100">
+                  {mode === 'wydanie'
+                    ? 'Skanuj egzemplarze lub kody kontenerów, albo wybierz ręcznie egzemplarze z magazynu. Sprzęt ilościowy możesz zaznaczyć checkboxem.'
+                    : 'Skanuj zwracane egzemplarze lub kliknij przycisk „Przyjmij” przy liście sprzętu będącego w terenie. System pozwala również na przyjęcie egzemplarzy z innych wydarzeń i odnotowuje ten fakt w dokumentacji.'}
+                </p>
+              </div>
+
+              <div className="space-y-5 min-w-0">
+                {plannedGroups.map((group: any) => (
+                  <div key={group.nazwa} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm min-w-0">
+                    <div className="bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-white/5 px-5 py-3.5"><b className="text-slate-900 dark:text-white">{group.nazwa}</b></div>
+                    <div className="divide-y divide-slate-100 dark:divide-white/5">
+                      {group.rows.map((row: any) => {
+                        const after = countAfterScan(row);
+                        const missing = missingAfterScan(row);
+                        const base = mode === 'wydanie' ? row.plan : row.wydane;
+                        const percent = base > 0 ? Math.min(100, Math.round((after / base) * 100)) : 100;
+                        return (
+                          <div key={row.id_modelu} className="px-5 py-4 min-w-0">
+                            <div className="grid gap-4 lg:grid-cols-[1fr_320px] lg:items-center min-w-0">
+                              <div className="min-w-0">
+                                <p className="font-black text-slate-900 dark:text-white text-[15px] truncate">{row.nazwa}</p>
+                                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-1 truncate">
+                                  {mode === 'wydanie'
+                                    ? `Plan: ${row.plan} szt. · Wydano: ${row.wydane} szt. · Skan w koszyku: ${row.scanned} szt.`
+                                    : `Wydano w teren: ${row.wydane} szt. · Przyjęto: ${row.przyjete} szt. · Skan w koszyku: ${row.scanned} szt.`}
+                                </p>
+
+                                {/* SPRZĘT ILOŚCIOWY - CHECKBOX */}
+                                {row.quantityOnly && (
+                                  <label className="mt-3 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-cyan-100 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-500/10 px-4 py-2.5 text-xs font-black text-cyan-900 dark:text-cyan-100 hover:bg-cyan-100 transition shadow-sm max-w-full">
+                                    <input
+                                      type="checkbox"
+                                      className="h-4 w-4 rounded border-slate-300 text-[#04e0ff] focus:ring-[#04e0ff] cursor-pointer shrink-0"
+                                      checked={quantityRowSelected(row)}
+                                      onChange={(e) => toggleQuantityRowWithoutScan(row, e.target.checked)}
+                                    />
+                                    <span className="truncate">{mode === 'wydanie' ? 'Wydaj brakujące na sztuki' : 'Przyjmij brakujące na sztuki'}</span>
+                                    <span className="rounded-full bg-white dark:bg-black/20 border border-slate-200 dark:border-transparent px-2.5 py-1 text-cyan-700 dark:text-[#04e0ff] shadow-sm ml-auto shrink-0">
+                                      {quantityRowSelected(row) ? `${row.scanned} ${row.jednostka || 'szt.'}` : `${missing} ${row.jednostka || 'szt.'}`}
+                                    </span>
+                                  </label>
+                                )}
+
+                                {/* RĘCZNY WYBÓR EGZEMPLARZY PRZY WZ */}
+                                {!row.quantityOnly && mode === 'wydanie' && (
+                                  <div className="mt-3 flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => setInstanceModalModel(row)}
+                                      className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-200 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-500/10 px-3 py-1.5 text-xs font-black text-cyan-700 dark:text-cyan-400 hover:bg-cyan-100 transition shadow-sm"
+                                    >
+                                      <Plus size={13} /> Wybierz egzemplarze z magazynu
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* RĘCZNY WYBÓR EGZEMPLARZY W TERENIE PRZY PZ */}
+                                {!row.quantityOnly && mode === 'przyjecie' && row.egzemplarze_w_terenie?.length > 0 && (
+                                  <div className="mt-3 space-y-1.5">
+                                    <p className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                      Egzemplarze w terenie ({row.egzemplarze_w_terenie.length} szt. do zwrotu):
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {row.egzemplarze_w_terenie.map((egz: any) => {
+                                        const inBasket = docItems.some((d) => d.id_egzemplarza === egz.id);
+                                        return (
+                                          <button
+                                            key={egz.id}
+                                            type="button"
+                                            disabled={inBasket}
+                                            onClick={() => addDocumentItem(egz, 'manual')}
+                                            className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-black transition ${
+                                              inBasket
+                                                ? 'bg-emerald-100 text-emerald-800 opacity-60'
+                                                : 'bg-slate-100 hover:bg-cyan-500 hover:text-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                                            }`}
+                                          >
+                                            {inBasket ? <CheckCircle2 size={12} /> : <ArrowRight size={12} />}
+                                            {egz.nazwa || `Egzemplarz #${egz.id}`} {egz.numer_egzemplarza ? `(nr ${egz.numer_egzemplarza})` : ''}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4 shadow-inner min-w-0">
+                                <div className="mb-2.5 flex justify-between text-xs font-black">
+                                  <span>{mode === 'wydanie' ? 'Status wydania' : 'Status przyjęcia'}: {after}/{base}</span>
+                                  <span className={missing ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}>
+                                    {missing ? `Brakuje jeszcze ${missing}` : 'Wszystko OK'}
+                                  </span>
+                                </div>
+                                <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 shadow-inner">
+                                  <div className={`h-full rounded-full transition-all duration-1000 ${missing ? 'bg-orange-500 shadow-[0_0_8px_#f97316]' : 'bg-emerald-500 shadow-[0_0_8px_#10b981]'}`} style={{ width: `${percent}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* PRAWA KOLUMNA: SKANER & KOSZYK */}
+            <div className="border-l border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/20 p-6 shadow-inner min-w-0 flex flex-col">
+              <div className="sticky top-4 space-y-5 min-w-0">
+                <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                  <Field label="Skanuj kod kreskowy / QR / SN / Case">
+                    <div className="flex gap-2">
+                      <input
+                        ref={scanInputRef}
+                        className={`${inputClass} py-3 text-lg font-bold shadow-inner min-w-0`}
+                        autoFocus
+                        value={scanCode}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => setScanCode(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); scan(); } }}
+                        placeholder="Kliknij Skanuj, skanuj kod i wciśnij Enter..."
+                      />
+                      <Button onClick={scan} className="px-6 shadow-md shadow-cyan-600/20 shrink-0">
+                        {scanCode.trim() ? 'Dodaj skan' : 'Skanuj'}
+                      </Button>
+                    </div>
+                  </Field>
+                  <p className="mt-3 text-xs font-bold text-slate-400 leading-relaxed">
+                    Zeskanowanie kontenera (Case) automatycznie rozpakuje go i doda na listę ukryty w nim sprzęt.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                  <div className="mb-4 flex items-center justify-between min-w-0">
+                    <h4 className="text-lg font-black text-slate-900 dark:text-white truncate pr-2">
+                      Koszyk ({mode === 'wydanie' ? 'Do Wydania WZ' : 'Do Przyjęcia PZ'})
+                    </h4>
+                    <span className="rounded-full bg-cyan-100 dark:bg-cyan-500/10 px-3 py-1 text-xs font-black text-cyan-700 dark:text-[#04e0ff] border border-cyan-200 dark:border-cyan-500/20 shrink-0">
+                      {docItems.reduce((s: number, p: any) => s + Number(p.ilosc || 1), 0)} szt.
+                    </span>
+                  </div>
+
+                  <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1 custom-scrollbar min-w-0">
+                    {docItems.map((p, idx) => (
+                      <div key={`${p.id_egzemplarza || p.id_modelu}-${idx}`} className="rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 p-3 flex justify-between gap-3 group transition-colors hover:border-cyan-300 min-w-0">
+                        <div className="min-w-0">
+                          <b className="text-[13px] text-slate-900 dark:text-white block truncate">{p.nazwa}</b>
+                          <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
+                            {p.kategoria} · {isQuantityOnly(p) ? <span className="text-[#04e0ff]">{p.ilosc || 1} {p.jednostka || 'szt.'}</span> : `${p.nazwa_zeskanowanego_case ? `w: ${p.nazwa_zeskanowanego_case} · ` : ''}${p.kod || '-'}` }
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setDocItems((s) => s.filter((_, i) => i !== idx))}
+                          className="font-black text-slate-400 hover:text-red-500 bg-white dark:bg-transparent rounded-lg px-2.5 py-1.5 h-fit shadow-sm border border-slate-200 dark:border-transparent transition flex items-center gap-1.5 opacity-0 group-hover:opacity-100 shrink-0"
+                          title="Cofnij pozycję"
+                        >
+                          <RotateCcw size={14}/> Cofnij
+                        </button>
+                      </div>
+                    ))}
+                    {!docItems.length && (
+                      <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 p-8 text-center text-sm font-bold text-slate-400 bg-white dark:bg-transparent">
+                        Skanuj sprzęt lub wybierz egzemplarze z listy po lewej.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* PUNKT 2: Zintegrowana wyszukiwarka egzemplarzy i sprzętu ilościowego */}
+                <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                  <Field label={mode === 'wydanie' ? "Wyszukaj egzemplarz lub model ilościowy" : "Wyszukaj zwracany sprzęt"}>
+                    <div className="relative min-w-0">
+                      <Search className="absolute left-3 top-3 text-slate-400" size={16}/>
+                      <input className={`${inputClass} pl-9 min-w-0`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="nazwa, model, numer seryjny, kod..." />
+                    </div>
+                  </Field>
+                  <div className="mt-4 max-h-[220px] space-y-2 overflow-y-auto pr-1 custom-scrollbar min-w-0">
+                    {visibleInstancesAndQuantity.map((r: any) => (
+                      <button
+                        key={`${r.isQuantity ? 'model' : 'egz'}-${r.id}`}
+                        type="button"
+                        onClick={() => addDocumentItem(r, 'manual')}
+                        className="w-full rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 p-3 text-left hover:border-cyan-300 transition shadow-sm min-w-0"
+                      >
+                        <b className="text-[13px] text-slate-900 dark:text-white block truncate">{r.nazwa_wiersza || r.nazwa}</b>
+                        <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
+                          {r.kategoria_nazwa} {r.kod ? `· Kod/SN: ${r.kod}` : ''} {r.isQuantity ? `· [STAN: ${r.ilosc_magazynowa || 0} ${r.jednostka || 'szt.'}]` : ''}
+                        </p>
+                      </button>
+                    ))}
+                    {visibleInstancesAndQuantity.length === 0 && (
+                      <p className="text-center text-xs font-bold text-slate-400 py-4">Brak pasującego sprzętu.</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                  <Field label="Uwagi do dokumentu WZ/PZ">
+                    <textarea className={`${inputClass} resize-none min-h-[70px] min-w-0`} value={docForm.uwagi || ''} onChange={(e) => setDocForm({ ...docForm, uwagi: e.target.value })} placeholder="opcjonalne uwagi..." />
+                  </Field>
+                  <button
+                    type="button"
+                    disabled={!docItems.length || savingDocs}
+                    onClick={() => createDocument(mode)}
+                    className={`mt-4 w-full rounded-xl px-5 py-3.5 text-sm font-black text-white disabled:opacity-50 transition shadow-lg flex items-center justify-center gap-2 ${
+                      mode === 'wydanie'
+                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-500/30'
+                        : 'bg-gradient-to-r from-[#04e0ff] to-blue-600 shadow-[#04e0ff]/30'
+                    }`}
+                  >
+                    {savingDocs ? <Loader2 size={18} className="animate-spin shrink-0"/> : <FileText size={18} className="shrink-0" />}
+                    <span className="truncate">{savingDocs ? 'Generowanie...' : mode === 'wydanie' ? 'Zatwierdź i Wystaw WZ' : 'Zatwierdź i Wystaw PZ'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </section>
+        )}
+      </section>
 
-    <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-sm mt-8">
-      <h3 className="mb-4 text-xl font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/5 pb-4">Wygenerowane dokumenty magazynowe dla tego wydarzenia</h3>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {(data.dokumenty || []).map((d: any) => <a key={d.id} href={`/dashboard/warehouse/documents/${d.id}`} className="rounded-2xl border border-slate-200 dark:border-white/10 p-5 bg-slate-50 dark:bg-white/5 hover:border-[#04e0ff] hover:bg-white dark:hover:bg-white/10 transition shadow-sm group">
-           <div className="flex items-center justify-between mb-2">
-              <b className="text-lg font-black text-slate-900 dark:text-white group-hover:text-[#04e0ff] transition">{d.numer}</b>
-              <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${d.typ === 'wydanie' ? 'bg-orange-100 text-orange-700' : d.typ === 'przyjecie' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}`}>{d.typ}</span>
-           </div>
-           <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5"><Calendar size={13}/> {new Date(d.data_operacji).toLocaleString('pl-PL')}</p>
-           <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1.5"><Box size={13}/> Załączono sztuk egzemplarzy: {d.pozycje?.length || 0}</p>
-        </a>)}
-        {!data.dokumenty?.length && <div className="col-span-full p-10 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-center font-bold text-slate-400 bg-slate-50/50 dark:bg-transparent">Brak wystawionych dokumentów logistycznych w systemie. Zeskanuj i wydaj pierwszy sprzęt!</div>}
+      {/* DOKUMENTY WYGENEROWANE */}
+      <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-sm mt-8">
+        <h3 className="mb-4 text-xl font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/5 pb-4">
+          Wygenerowane dokumenty magazynowe dla tego wydarzenia
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {(data.dokumenty || []).map((d: any) => (
+            <a key={d.id} href={`/dashboard/warehouse/documents/${d.id}`} className="rounded-2xl border border-slate-200 dark:border-white/10 p-5 bg-slate-50 dark:bg-white/5 hover:border-[#04e0ff] transition shadow-sm group">
+              <div className="flex items-center justify-between mb-2">
+                <b className="text-lg font-black text-slate-900 dark:text-white group-hover:text-[#04e0ff] transition">{d.numer}</b>
+                <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${d.typ === 'wydanie' ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700'}`}>{d.typ}</span>
+              </div>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5"><Calendar size={13}/> {new Date(d.data_operacji).toLocaleString('pl-PL')}</p>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1.5"><Box size={13}/> Pozycji: {d.pozycje?.length || 0}</p>
+            </a>
+          ))}
+          {!data.dokumenty?.length && <div className="col-span-full p-10 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-center font-bold text-slate-400 bg-slate-50/50 dark:bg-transparent">Brak wystawionych dokumentów logistycznych.</div>}
+        </div>
       </div>
-    </div>
-    
-    {/* MODAL PAKIETÓW */}
-    {showBundlePicker && (
-      <SimpleModal title="Dodaj gotowy pakiet do planu" onClose={() => setShowBundlePicker(false)}>
-        <form onSubmit={handleAddBundle} className="space-y-4">
-           <Field label="Wybierz pakiet z szablonów systemowych">
-             <select className={inputClass} value={bundleForm.id_pakietu} onChange={e => setBundleForm({...bundleForm, id_pakietu: e.target.value})} required>
-                <option value="">Wybierz zdefiniowany pakiet...</option>
+
+      {/* MODAL PAKIETÓW */}
+      {showBundlePicker && (
+        <SimpleModal title="Dodaj gotowy pakiet do planu" onClose={() => setShowBundlePicker(false)}>
+          <form onSubmit={handleAddBundle} className="space-y-4">
+            <Field label="Wybierz pakiet ze słowników">
+              <select className={inputClass} value={bundleForm.id_pakietu} onChange={e => setBundleForm({...bundleForm, id_pakietu: e.target.value})} required>
+                <option value="">Wybierz pakiet...</option>
                 {bundles.map(b => <option key={b.id} value={b.id}>{b.nazwa} ({b._count?.pozycje || 0} elementów)</option>)}
-             </select>
-           </Field>
-           <Field label="Mnożnik (Ile pakietów dodać?)">
-             <input type="number" min="1" step="1" className={inputClass} value={bundleForm.mnoznik} onChange={e => setBundleForm({...bundleForm, mnoznik: Number(e.target.value)})} required />
-           </Field>
-           <p className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-white/5 p-4 rounded-xl">Wszystkie pozycje znajdujące się w szablonie wybranego pakietu zostaną automatycznie rozwinięte i dodane jako indywidualne linie sprzętowe do Twojego koszyka planu wydarzenia, pomnożone przez wskazany mnożnik.</p>
-           <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
-             <Button variant="secondary" type="button" onClick={() => setShowBundlePicker(false)}>Anuluj</Button>
-             <Button type="submit"><Layers size={16} className="inline mr-1.5"/> Dodaj do planu</Button>
-           </div>
-        </form>
-      </SimpleModal>
-    )}
-  </div>;
+              </select>
+            </Field>
+            <Field label="Mnożnik (Ile pakietów dodać?)">
+              <input type="number" min="1" step="1" className={inputClass} value={bundleForm.mnoznik} onChange={e => setBundleForm({...bundleForm, mnoznik: Number(e.target.value)})} required />
+            </Field>
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
+              <Button variant="secondary" type="button" onClick={() => setShowBundlePicker(false)}>Anuluj</Button>
+              <Button type="submit"><Layers size={16} className="inline mr-1.5"/> Dodaj do planu</Button>
+            </div>
+          </form>
+        </SimpleModal>
+      )}
+
+      {/* MODAL RĘCZNEGO WYBORU EGZEMPLARZY DLA MODELU */}
+      {instanceModalModel && (
+        <SimpleModal title={`Wybierz egzemplarze: ${instanceModalModel.nazwa}`} onClose={() => setInstanceModalModel(null)}>
+          <div className="space-y-4">
+            <p className="text-sm font-bold text-slate-500">
+              Poniżej znajduje się lista fizycznych egzemplarzy tego modelu. Kliknij, aby dodać do koszyka WZ.
+            </p>
+            <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+              {items
+                .filter((egz: any) => egz.id_modelu === instanceModalModel.id_modelu && isEquipmentInstance(egz))
+                .map((egz: any) => {
+                  const inBasket = docItems.some((d) => d.id_egzemplarza === egz.id);
+                  const isIssued = eventInstanceStatus.currentlyInFieldIds.has(egz.id);
+                  return (
+                    <div key={egz.id} className="flex items-center justify-between p-3 border rounded-xl bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10">
+                      <div>
+                        <p className="font-black text-slate-900 dark:text-white">{egz.nazwa || `Egzemplarz #${egz.id}`}</p>
+                        <p className="text-xs font-bold text-slate-400">
+                          Nr: {egz.numer_egzemplarza || egz.numer_urzadzenia || '-'} · S/N: {egz.sn || '-'} · Kod: {egz.kod_kreskowy || '-'}
+                        </p>
+                      </div>
+                      <Button
+                        disabled={inBasket || isIssued}
+                        onClick={() => {
+                          addDocumentItem(egz, 'manual');
+                          setInstanceModalModel(null);
+                        }}
+                      >
+                        {isIssued ? 'W terenie (Wydany)' : inBasket ? 'W koszyku' : 'Wybierz na WZ'}
+                      </Button>
+                    </div>
+                  );
+                })}
+              {items.filter((egz: any) => egz.id_modelu === instanceModalModel.id_modelu).length === 0 && (
+                <p className="text-center text-sm font-bold text-slate-400 py-8">Brak zdefiniowanych egzemplarzy dla tego modelu.</p>
+              )}
+            </div>
+            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-white/10">
+              <Button variant="secondary" onClick={() => setInstanceModalModel(null)}>Zamknij</Button>
+            </div>
+          </div>
+        </SimpleModal>
+      )}
+    </div>
+  );
 }

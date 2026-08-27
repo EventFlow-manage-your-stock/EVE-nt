@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, CalendarDays, Check, ImageIcon, Pencil, Plus, QrCode, Trash2, X, Download, FileText, Paperclip } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Check, ImageIcon, Pencil, Plus, QrCode, Trash2, X, Download, FileText, Paperclip, Box, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { api } from '../../../../../lib/api';
 import { Button, Card, Field, inputClass, PageTitle } from '../../../../../components/ProductUI';
 import { DataTable } from '../../../../../components/DataTable';
@@ -86,7 +86,6 @@ export default function ModelDetailsPage() {
   const [edit, setEdit] = useState(searchParams?.get('edit') === '1');
   const [form, setForm] = useState<any>({});
   const [saving, setSaving] = useState(false);
-  
   const [activeTab, setActiveTab] = useState<'egzemplarze' | 'zalaczniki'>('egzemplarze');
 
   async function load() {
@@ -110,6 +109,22 @@ export default function ModelDetailsPage() {
   }
 
   const egzemplarze = model?.egzemplarze || [];
+  
+  // Statystyki magazynowe
+  const stockStats = useMemo(() => {
+    if (!model) return { total: 0, available: 0, issued: 0, service: 0 };
+    const quantity = isQuantityModel(model);
+    if (quantity) {
+      const total = Number(model.ilosc_magazynowa || 0);
+      return { total, available: total, issued: 0, service: 0 };
+    }
+    const total = egzemplarze.length;
+    const service = egzemplarze.filter((e: any) => e.status_serwisowy && e.status_serwisowy !== 'Działa' && e.status_serwisowy !== 'Naprawiony' && e.status_serwisowy !== 'Wydany').length;
+    const issued = egzemplarze.filter((e: any) => e.status_serwisowy === 'Wydany').length;
+    const available = Math.max(0, total - service - issued);
+    return { total, available, issued, service };
+  }, [model, egzemplarze]);
+
   const nextNumber = useMemo(() => {
     const nums = egzemplarze.map((e: any) => Number(e.numer_egzemplarza || e.numer_urzadzenia)).filter((n: number) => !Number.isNaN(n));
     return nums.length ? Math.max(...nums) + 1 : 1;
@@ -130,7 +145,7 @@ export default function ModelDetailsPage() {
   async function saveModel(e?: any) {
     e?.preventDefault?.();
     if (isQuantityModel(form) && !String(form.kod_kreskowy || '').trim()) {
-      alert('Sprzęt ilościowy musi mieć kod kreskowy modelu. Ten kod skanujesz przy WZ/PZ, a system zapyta o liczbę sztuk.');
+      alert('Sprzęt ilościowy musi posiadać kod kreskowy modelu do skanowania.');
       setEdit(true);
       return;
     }
@@ -146,7 +161,7 @@ export default function ModelDetailsPage() {
   }
 
   async function removeModel() {
-    if (!confirm(`Usunąć model "${model?.nazwa}"?\n\nModel zostanie ukryty, a nie fizycznie skasowany z bazy.`)) return;
+    if (!confirm(`Ukryć model "${model?.nazwa}" w systemie?`)) return;
     await api.delete(`/api/magazyn/modele/${id}`);
     router.push('/dashboard/warehouse/models');
   }
@@ -166,133 +181,172 @@ export default function ModelDetailsPage() {
       <PageTitle
         eyebrow="Model sprzętu"
         title={model.nazwa}
-        description={quantityModel ? "Model ilościowy: stan, jednostka i kod kreskowy są zapisane na modelu. Nie dodajemy egzemplarzy z numerem/SN." : "Model egzemplarzowy: cena domyślna, parametry i lista fizycznych egzemplarzy. Kod kreskowy, QR i SN nadajemy egzemplarzom."}
+        description={quantityModel ? "Model ilościowy: stan, parametry i kod kreskowy są zapisane bezpośrednio na modelu." : "Model egzemplarzowy: cena domyślna, parametry gabarytowe oraz lista fizycznych sztuk z własnymi kodami i numerami seryjnymi."}
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => router.back()}><ArrowLeft size={16} className="inline" /> Powrót</Button>
             <Button variant="secondary" onClick={loadCalendar}><CalendarDays size={16} className="inline" /> Kalendarz</Button>
-            <Button variant="secondary" onClick={() => openLabelsPage({ modelId: Number(id) })}><QrCode size={16} className="inline" /> Naklejki</Button>
+            {!quantityModel && <Button variant="secondary" onClick={() => openLabelsPage({ modelId: Number(id) })}><QrCode size={16} className="inline" /> Naklejki</Button>}
             <Button variant="secondary" onClick={() => setEdit(!edit)}>{edit ? <X size={16} className="inline" /> : <Pencil size={16} className="inline" />} {edit ? 'Anuluj edycję' : 'Edytuj model'}</Button>
             {!quantityModel && <Button onClick={openAdd}><Plus size={16} className="inline" /> Dodaj egzemplarz</Button>}
           </div>
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.4fr]">
+      {/* METRYKI STANU MAGAZYNOWEGO */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900">
+          <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Dostępne w magazynie</p>
+          <p className="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">{stockStats.available} <span className="text-sm font-bold text-slate-400">{model.jednostka || 'szt.'}</span></p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900">
+          <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Wydane na realizacje</p>
+          <p className="mt-2 text-3xl font-black text-cyan-600 dark:text-[#04e0ff]">{stockStats.issued} <span className="text-sm font-bold text-slate-400">{model.jednostka || 'szt.'}</span></p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900">
+          <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">W serwisie / uszkodzone</p>
+          <p className="mt-2 text-3xl font-black text-amber-600 dark:text-amber-400">{stockStats.service} <span className="text-sm font-bold text-slate-400">{model.jednostka || 'szt.'}</span></p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900">
+          <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Całkowity stan</p>
+          <p className="mt-2 text-3xl font-black text-slate-900 dark:text-white">{stockStats.total} <span className="text-sm font-bold text-slate-400">{model.jednostka || 'szt.'}</span></p>
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.35fr]">
+        {/* LEWA KOLUMNA: EDYCJA DANYCH MODELU */}
         <Card>
           <div className="mb-4 flex items-center justify-between gap-4">
-            <h2 className="text-lg font-black">Dane modelu</h2>
-            {edit && <Button onClick={saveModel} disabled={saving}><Check size={16} className="inline" /> {saving ? 'Zapisuję...' : 'Zapisz'}</Button>}
+            <h2 className="text-lg font-black text-slate-900 dark:text-white">Parametry i dane modelu</h2>
+            {edit && <Button onClick={saveModel} disabled={saving}><Check size={16} className="inline" /> {saving ? 'Zapisuję...' : 'Zapisz model'}</Button>}
           </div>
 
           <form onSubmit={saveModel} className="space-y-5">
-            <div className="grid gap-5 lg:grid-cols-[240px_1fr]">
+            <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
               <div className="space-y-3">
-                <div className="aspect-[4/3] overflow-hidden rounded-2xl border bg-slate-50 shadow-inner">
+                <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-inner dark:border-white/10 dark:bg-black/20">
                   {form.zdjecie ? <img src={form.zdjecie} alt={form.nazwa} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-slate-300"><ImageIcon size={54} /></div>}
                 </div>
-                {edit ? <input type="file" accept="image/*" onChange={e => onPhoto(e.target.files?.[0])} className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-3 file:py-2 file:font-black file:text-white" /> : null}
-                {edit && form.zdjecie ? <button type="button" onClick={() => setForm({ ...form, zdjecie: '' })} className="text-xs font-black text-red-500">Usuń zdjęcie</button> : null}
+                {edit && <input type="file" accept="image/*" onChange={e => onPhoto(e.target.files?.[0])} className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-3 file:py-2 file:font-black file:text-white" />}
+                {edit && form.zdjecie && <button type="button" onClick={() => setForm({ ...form, zdjecie: '' })} className="text-xs font-black text-red-500">Usuń zdjęcie</button>}
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Nazwa modelu"><input disabled={!edit} className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} /></Field>
+              <Field label="Kategoria"><select disabled={!edit} className={inputClass} value={form.id_kategorii || ''} onChange={e => setForm({ ...form, id_kategorii: e.target.value })}><option value="">Brak</option>{categories.map((k: any) => <option key={k.id} value={k.id}>{k.nazwa}</option>)}</select></Field>
+              <Field label="Producent"><input disabled={!edit} className={inputClass} value={form.producent || ''} onChange={e => setForm({ ...form, producent: e.target.value })} /></Field>
+              <Field label="Typ"><select disabled={!edit} className={inputClass} value={form.typ_sprzetu || 'sprzet'} onChange={e => setForm({ ...form, typ_sprzetu: e.target.value })}><option value="sprzet">Sprzęt</option><option value="opakowanie">Opakowanie (Case)</option><option value="zestaw">Zestaw (Rack)</option></select></Field>
+              
+              <div className="md:col-span-2 rounded-2xl border border-cyan-100 bg-cyan-50/50 p-4 dark:border-cyan-500/20 dark:bg-cyan-900/10">
+                <label className="flex cursor-pointer items-start gap-3 text-sm font-black text-slate-800 dark:text-slate-200">
+                  <input type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300 text-cyan-600" checked={quantityModel} onChange={e => { setEdit(true); setForm(applyQuantityMode(form, e.target.checked)); }} />
+                  <span>
+                    Tryb ewidencji: Sprzęt ilościowy
+                    <span className="mt-1 block text-xs font-bold text-slate-500">Zaznacz dla drobnicy, kabli i balastów wydawanych na sztuki bez indywidualnych numerów S/N.</span>
+                  </span>
+                </label>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Nazwa modelu"><input disabled={!edit} className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} /></Field>
-                <Field label="Kategoria"><select disabled={!edit} className={inputClass} value={form.id_kategorii || ''} onChange={e => setForm({ ...form, id_kategorii: e.target.value })}><option value="">Brak</option>{categories.map((k: any) => <option key={k.id} value={k.id}>{k.nazwa}</option>)}</select></Field>
-                <Field label="Producent"><input disabled={!edit} className={inputClass} value={form.producent || ''} onChange={e => setForm({ ...form, producent: e.target.value })} /></Field>
-                <Field label="Typ"><select disabled={!edit} className={inputClass} value={form.typ_sprzetu || 'sprzet'} onChange={e => setForm({ ...form, typ_sprzetu: e.target.value })}><option value="sprzet">Sprzęt</option><option value="opakowanie">Opakowanie</option><option value="zestaw">Zestaw</option></select></Field>
-                
-                <div className="md:col-span-2 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                  <label className="flex cursor-pointer items-start gap-3 text-sm font-black text-slate-800">
-                    <input type="checkbox" className="mt-1 h-4 w-4" checked={quantityModel} onChange={e => { setEdit(true); setForm(applyQuantityMode(form, e.target.checked)); }} />
-                    <span>
-                      Sprzęt ilościowy
-                      <span className="mt-1 block text-xs font-bold text-slate-500">Zaznaczone = jedna pozycja modelu na sztuki, bez numerów/SN. Odznaczone = fizyczne egzemplarze z własnym numerem, kodem i numerem seryjnym. Zmiana automatycznie włącza edycję – potem kliknij 'Zapisz model'.</span>
-                    </span>
-                  </label>
-                </div>
-
-                {quantityModel && <>
+              {quantityModel && (
+                <>
                   <Field label="Stan ilościowy"><input disabled={!edit} type="number" step="1" min="0" className={inputClass} value={form.ilosc_magazynowa ?? 0} onChange={e => setForm({ ...form, ilosc_magazynowa: e.target.value })} /></Field>
                   <Field label="Jednostka"><input disabled={!edit} className={inputClass} value={form.jednostka || 'szt.'} onChange={e => setForm({ ...form, jednostka: e.target.value })} /></Field>
                   <div className="md:col-span-2">
-                    <Field label="Kod kreskowy modelu – wymagany dla sprzętu ilościowego"><input disabled={!edit} required={quantityModel} className={inputClass} value={form.kod_kreskowy || ''} onChange={e => setForm({ ...form, kod_kreskowy: e.target.value })} placeholder="Np. kod z etykiety balastu / kabla / drobnicy" /></Field>
-                    <p className="mt-1 text-xs font-bold text-amber-700">Ten kod jest widoczny tylko przy sprzęcie ilościowym. Po skanie przy WZ/PZ system zapyta, ile sztuk wydać albo przyjąć.</p>
+                    <Field label="Kod kreskowy modelu (Wymagany do skanowania WZ/PZ)">
+                      <input disabled={!edit} required={quantityModel} className={inputClass} value={form.kod_kreskowy || ''} onChange={e => setForm({ ...form, kod_kreskowy: e.target.value })} placeholder="Kod kreskowy do skanera..." />
+                    </Field>
                   </div>
-                </>}
+                </>
+              )}
 
-                <Field label="Cena / wartość domyślna"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.wartosc_domyslna_egzemplarza || ''} onChange={e => setForm({ ...form, wartosc_domyslna_egzemplarza: e.target.value, wartosc: e.target.value })} /></Field>
-                <Field label="Miejsce w magazynie"><input disabled={!edit} className={inputClass} value={form.miejsce_w_mag || ''} onChange={e => setForm({ ...form, miejsce_w_mag: e.target.value })} /></Field>
-                <Field label="Szerokość"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.szerokosc || ''} onChange={e => setForm({ ...form, szerokosc: e.target.value })} /></Field>
-                <Field label="Wysokość"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.wysokosc || ''} onChange={e => setForm({ ...form, wysokosc: e.target.value })} /></Field>
-                <Field label="Głębokość"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.glebokosc || ''} onChange={e => setForm({ ...form, glebokosc: e.target.value })} /></Field>
-                <Field label="Waga"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.waga || ''} onChange={e => setForm({ ...form, waga: e.target.value })} /></Field>
-                <Field label="Objętość"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.objetosc || ''} onChange={e => setForm({ ...form, objetosc: e.target.value })} /></Field>
-                <Field label="Pobór prądu"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.pobor_pradu || ''} onChange={e => setForm({ ...form, pobor_pradu: e.target.value })} /></Field>
-              </div>
+              <Field label="Wartość domyślna / cena (PLN)"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.wartosc_domyslna_egzemplarza || ''} onChange={e => setForm({ ...form, wartosc_domyslna_egzemplarza: e.target.value, wartosc: e.target.value })} /></Field>
+              <Field label="Miejsce w magazynie"><input disabled={!edit} className={inputClass} value={form.miejsce_w_mag || ''} onChange={e => setForm({ ...form, miejsce_w_mag: e.target.value })} placeholder="np. Regał A-3" /></Field>
+              <Field label="Szerokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.szerokosc || ''} onChange={e => setForm({ ...form, szerokosc: e.target.value })} /></Field>
+              <Field label="Wysokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.wysokosc || ''} onChange={e => setForm({ ...form, wysokosc: e.target.value })} /></Field>
+              <Field label="Głębokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.glebokosc || ''} onChange={e => setForm({ ...form, glebokosc: e.target.value })} /></Field>
+              <Field label="Waga [kg]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.waga || ''} onChange={e => setForm({ ...form, waga: e.target.value })} /></Field>
+              <Field label="Objętość [m³]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.objetosc || ''} onChange={e => setForm({ ...form, objetosc: e.target.value })} /></Field>
+              <Field label="Pobór prądu [W]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.pobor_pradu || ''} onChange={e => setForm({ ...form, pobor_pradu: e.target.value })} /></Field>
             </div>
             
-            <Field label="Opis"><textarea disabled={!edit} className={inputClass} value={form.opis || ''} onChange={e => setForm({ ...form, opis: e.target.value })} /></Field>
-            <Field label="Notatka wewnętrzna"><textarea disabled={!edit} className={inputClass} value={form.notatki_wewnetrzne || ''} onChange={e => setForm({ ...form, notatki_wewnetrzne: e.target.value })} /></Field>
+            <Field label="Opis"><textarea disabled={!edit} className={`${inputClass} min-h-[70px] resize-none`} value={form.opis || ''} onChange={e => setForm({ ...form, opis: e.target.value })} /></Field>
+            <Field label="Notatka wewnętrzna"><textarea disabled={!edit} className={`${inputClass} min-h-[70px] resize-none`} value={form.notatki_wewnetrzne || ''} onChange={e => setForm({ ...form, notatki_wewnetrzne: e.target.value })} /></Field>
             
-            {edit && <div className="flex flex-wrap justify-between gap-2 border-t pt-4">
-              <div className="flex gap-2">
-                <Button variant="secondary" type="button" onClick={() => router.back()}><ArrowLeft size={16} className="inline" /> Powrót</Button>
-                <Button variant="danger" type="button" onClick={removeModel}><Trash2 size={16} className="inline" /> Usuń model</Button>
+            {edit && (
+              <div className="flex flex-wrap justify-between gap-2 border-t border-slate-100 pt-4 dark:border-white/10">
+                <div className="flex gap-2">
+                  <Button variant="secondary" type="button" onClick={() => { setEdit(false); setForm(normalizeForm(model)); }}><ArrowLeft size={16} className="inline" /> Anuluj</Button>
+                  <Button variant="danger" type="button" onClick={removeModel}><Trash2 size={16} className="inline" /> Usuń model</Button>
+                </div>
+                <Button type="submit"><Check size={16} className="inline" /> Zapisz model</Button>
               </div>
-              <Button type="submit"><Check size={16} className="inline" /> Zapisz model</Button>
-            </div>}
+            )}
           </form>
         </Card>
 
+        {/* PRAWA KOLUMNA: LISTA EGZEMPLARZY LUB ZAŁĄCZNIKI */}
         <div className="flex flex-col gap-4">
-          <div className="flex gap-2 border-b border-slate-200 pb-2">
+          <div className="flex gap-2 border-b border-slate-200 pb-2 dark:border-white/10">
             <button 
               onClick={() => setActiveTab('egzemplarze')} 
-              className={`px-5 py-2.5 font-black text-sm rounded-xl transition ${activeTab === 'egzemplarze' ? 'bg-cyan-600 text-white shadow-sm' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'}`}
+              className={`px-5 py-2.5 font-black text-sm rounded-xl transition ${activeTab === 'egzemplarze' ? 'bg-cyan-600 text-white shadow-sm' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200 dark:bg-slate-900 dark:border-white/10'}`}
             >
-              Ewidencja i stany
+              Ewidencja sztuk fizycznych
             </button>
             <button 
               onClick={() => setActiveTab('zalaczniki')} 
-              className={`px-5 py-2.5 font-black text-sm rounded-xl transition ${activeTab === 'zalaczniki' ? 'bg-cyan-600 text-white shadow-sm' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'}`}
+              className={`px-5 py-2.5 font-black text-sm rounded-xl transition ${activeTab === 'zalaczniki' ? 'bg-cyan-600 text-white shadow-sm' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200 dark:bg-slate-900 dark:border-white/10'}`}
             >
-              Załączniki i Instrukcje
+              Załączniki i Instrukcje (S3)
             </button>
           </div>
           
           {activeTab === 'egzemplarze' && (
             <Card>
               {quantityModel ? (
-                <div className="space-y-5">
+                <div className="space-y-5 p-4">
                   <div>
-                    <h2 className="text-lg font-black">Sprzęt ilościowy</h2>
-                    <p className="text-sm font-bold text-slate-400">Ten model jest ewidencjonowany na sztuki. Nie tworzymy egzemplarzy z numerem/SN.</p>
+                    <h2 className="text-lg font-black text-slate-900 dark:text-white">Sprzęt ilościowy na stanie</h2>
+                    <p className="text-sm font-bold text-slate-400">Ten model jest ewidencjonowany na sztuki. Skanowanie kodu modelu w oknie WZ/PZ pyta magazyniera o liczbę sztuk.</p>
                   </div>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <div className="rounded-2xl bg-cyan-50 p-5"><div className="text-xs font-black uppercase text-cyan-700">Stan</div><div className="text-4xl font-black text-slate-900">{Number(form.ilosc_magazynowa || 0)}</div><div className="text-sm font-bold text-slate-500">{form.jednostka || 'szt.'}</div></div>
-                    <div className="rounded-2xl bg-slate-50 p-5"><div className="text-xs font-black uppercase text-slate-500">Kod skanowania modelu</div><div className={`break-all text-lg font-black ${form.kod_kreskowy ? 'text-slate-900' : 'text-red-600'}`}>{form.kod_kreskowy || 'BRAK KODU – uzupełnij przed wydaniem'}</div></div>
-                    <div className="rounded-2xl bg-amber-50 p-5"><div className="text-xs font-black uppercase text-amber-700">Wydanie/PZ</div><div className="text-sm font-bold text-slate-600">Po skanie system pyta ile sztuk wydać albo przyjąć.</div></div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="rounded-2xl bg-cyan-50 p-5 dark:bg-cyan-900/20 border border-cyan-100 dark:border-cyan-500/30">
+                      <div className="text-xs font-black uppercase text-cyan-700 dark:text-[#04e0ff]">Aktualny stan magazynowy</div>
+                      <div className="text-4xl font-black text-slate-900 dark:text-white mt-1">{Number(form.ilosc_magazynowa || 0)} <span className="text-base font-bold text-slate-400">{form.jednostka || 'szt.'}</span></div>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 p-5 dark:bg-black/20 border border-slate-200 dark:border-white/10">
+                      <div className="text-xs font-black uppercase text-slate-400">Kod kreskowy modelu</div>
+                      <div className={`break-all text-lg font-black mt-1 ${form.kod_kreskowy ? 'text-slate-900 dark:text-white' : 'text-red-500'}`}>
+                        {form.kod_kreskowy || 'BRAK KODU'}
+                      </div>
+                    </div>
                   </div>
-                  <div className="rounded-2xl border border-dashed p-4 text-sm font-bold text-slate-500">Aby wrócić do pracy na egzemplarzach, wyłącz opcję „Sprzęt ilościowy” i zapisz model. Wtedy można dodawać fizyczne egzemplarze z kodem, numerem i S/N.</div>
                 </div>
               ) : (
                 <>
                   <div className="mb-4 flex items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-black">Egzemplarze modelu</h2>
-                      <p className="text-sm font-bold text-slate-400">Tutaj są fizyczne sztuki z kodami kreskowymi, QR i numerami seryjnymi.</p>
+                      <h2 className="text-lg font-black text-slate-900 dark:text-white">Fizyczne egzemplarze ({egzemplarze.length} szt.)</h2>
+                      <p className="text-sm font-bold text-slate-400">Każda sztuka posiada unikalny numer boczny, kod kreskowy i numer seryjny.</p>
                     </div>
                     <Button onClick={openAdd}><Plus size={16} className="inline" /> Dodaj egzemplarz</Button>
                   </div>
-                  <DataTable rows={egzemplarze} onRowClick={(r: any) => router.push(`/dashboard/warehouse/items/${r.id}`)} columns={[
-                    { key: 'nazwa', label: 'Nazwa egzemplarza', value: (r: any) => <b>{r.nazwa || model.nazwa}</b> },
-                    { key: 'numer', label: 'Numer', value: (r: any) => r.numer_egzemplarza || r.numer_urzadzenia || '-' },
-                    { key: 'sn', label: 'S/N' },
-                    { key: 'kod_kreskowy', label: 'Kod kreskowy' },
-                    { key: 'qr_kod', label: 'QR' },
-                    { key: 'status', label: 'Status', value: (r: any) => r.status_serwisowy || '-' },
-                    { key: 'case', label: 'Case', value: (r: any) => r.case?.nazwa || '-' },
-                  ]} />
+                  <DataTable 
+                    rows={egzemplarze} 
+                    onRowClick={(r: any) => router.push(`/dashboard/warehouse/items/${r.id}`)} 
+                    columns={[
+                      { key: 'nazwa', label: 'Nazwa egzemplarza', value: (r: any) => <b>{r.nazwa || model.nazwa}</b> },
+                      { key: 'numer', label: 'Numer', value: (r: any) => r.numer_egzemplarza || r.numer_urzadzenia || '-' },
+                      { key: 'sn', label: 'S/N' },
+                      { key: 'kod_kreskowy', label: 'Kod kreskowy' },
+                      { key: 'status', label: 'Status', value: (r: any) => (
+                        <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${r.status_serwisowy === 'Wydany' ? 'bg-cyan-100 text-cyan-800' : r.status_serwisowy === 'Działa' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {r.status_serwisowy || 'Działa'}
+                        </span>
+                      )},
+                      { key: 'case', label: 'Przypisana skrzynia', value: (r: any) => r.case?.nazwa || '-' },
+                    ]} 
+                  />
                 </>
               )}
             </Card>
@@ -304,49 +358,56 @@ export default function ModelDetailsPage() {
         </div>
       </div>
 
-      {showAdd && <SimpleModal title="Dodaj egzemplarz" onClose={() => setShowAdd(false)}>
-        <form onSubmit={saveItem} className="space-y-6">
-          <section><h3 className="mb-3 text-lg font-black">Identyfikacja</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Nazwa egzemplarza"><input className={inputClass} value={itemForm.nazwa || ''} onChange={e => setItemForm({ ...itemForm, nazwa: e.target.value })} /></Field>
-              <Field label="Numer egzemplarza"><input className={inputClass} value={itemForm.numer_egzemplarza || ''} onChange={e => setItemForm({ ...itemForm, numer_egzemplarza: e.target.value, numer_urzadzenia: e.target.value })} /></Field>
-              <Field label="Numer seryjny"><input className={inputClass} value={itemForm.sn || ''} onChange={e => setItemForm({ ...itemForm, sn: e.target.value })} /></Field>
-              <Field label="Data produkcji"><input type="date" className={inputClass} value={itemForm.data_produkcji || ''} onChange={e => setItemForm({ ...itemForm, data_produkcji: e.target.value })} /></Field>
+      {showAdd && (
+        <SimpleModal title="Dodaj fizyczny egzemplarz" onClose={() => setShowAdd(false)}>
+          <form onSubmit={saveItem} className="space-y-6">
+            <section>
+              <h3 className="mb-3 text-lg font-black">Identyfikacja</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Nazwa egzemplarza"><input className={inputClass} value={itemForm.nazwa || ''} onChange={e => setItemForm({ ...itemForm, nazwa: e.target.value })} /></Field>
+                <Field label="Numer egzemplarza"><input className={inputClass} value={itemForm.numer_egzemplarza || ''} onChange={e => setItemForm({ ...itemForm, numer_egzemplarza: e.target.value, numer_urzadzenia: e.target.value })} /></Field>
+                <Field label="Numer seryjny (S/N)"><input className={inputClass} value={itemForm.sn || ''} onChange={e => setItemForm({ ...itemForm, sn: e.target.value })} /></Field>
+                <Field label="Data produkcji"><input type="date" className={inputClass} value={itemForm.data_produkcji || ''} onChange={e => setItemForm({ ...itemForm, data_produkcji: e.target.value })} /></Field>
+              </div>
+            </section>
+            
+            <section>
+              <h3 className="mb-3 text-lg font-black">Znakowanie i wycena</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Zewnętrzny kod kreskowy"><input className={inputClass} value={itemForm.zewnetrzny_kod_kreskowy || ''} onChange={e => setItemForm({ ...itemForm, zewnetrzny_kod_kreskowy: e.target.value, kod_kreskowy: e.target.value })} /></Field>
+                <Field label="Cena wynajmu"><input type="number" step="0.01" className={inputClass} value={itemForm.wartosc || ''} onChange={e => setItemForm({ ...itemForm, wartosc: e.target.value })} /></Field>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="mb-3 text-lg font-black">Logistyka</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Magazyn"><select className={inputClass} value={itemForm.id_magazynu || ''} onChange={e => setItemForm({ ...itemForm, id_magazynu: e.target.value })}><option value="">Brak</option>{magazyny.map((m: any) => <option key={m.id} value={m.id}>{m.nazwa}</option>)}</select></Field>
+                <Field label="Miejsce na regale"><input className={inputClass} value={itemForm.miejsce_w_mag || ''} onChange={e => setItemForm({ ...itemForm, miejsce_w_mag: e.target.value })} /></Field>
+              </div>
+            </section>
+
+            <div className="flex justify-end gap-2 border-t pt-4">
+              <Button variant="secondary" onClick={() => setShowAdd(false)}>Anuluj</Button>
+              <Button type="submit">Zapisz egzemplarz</Button>
             </div>
-          </section>
-          
-          <section><h3 className="mb-3 text-lg font-black">Znakowanie i wycena</h3>
-            <label className="mb-3 flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={!!itemForm.rozroznij_kod_qr} onChange={e => setItemForm({ ...itemForm, rozroznij_kod_qr: e.target.checked, zewnetrzny_qr_kod: e.target.checked ? itemForm.zewnetrzny_qr_kod : itemForm.zewnetrzny_kod_kreskowy })} /> Rozróżnij zewnętrzny kod kreskowy i zewnętrzny kod QR</label>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Zewnętrzny kod kreskowy"><input className={inputClass} value={itemForm.zewnetrzny_kod_kreskowy || ''} onChange={e => setItemForm({ ...itemForm, zewnetrzny_kod_kreskowy: e.target.value, zewnetrzny_qr_kod: itemForm.rozroznij_kod_qr ? itemForm.zewnetrzny_qr_kod : e.target.value, kod_kreskowy: e.target.value })} /></Field>
-              <Field label="Zewnętrzny kod QR"><input className={inputClass} disabled={!itemForm.rozroznij_kod_qr} value={itemForm.zewnetrzny_qr_kod || ''} onChange={e => setItemForm({ ...itemForm, zewnetrzny_qr_kod: e.target.value, qr_kod: e.target.value })} /></Field>
-              <Field label="Wartość egzemplarza"><input type="number" step="0.01" className={inputClass} value={itemForm.wartosc || ''} onChange={e => setItemForm({ ...itemForm, wartosc: e.target.value })} /></Field>
-              <Field label="Cena zakupu"><input type="number" step="0.01" className={inputClass} value={itemForm.cena_zakupu || ''} onChange={e => setItemForm({ ...itemForm, cena_zakupu: e.target.value })} /></Field>
-            </div>
-          </section>
+          </form>
+        </SimpleModal>
+      )}
 
-          <section><h3 className="mb-3 text-lg font-black">Logistyka i magazyn</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Magazyn"><select className={inputClass} value={itemForm.id_magazynu || ''} onChange={e => setItemForm({ ...itemForm, id_magazynu: e.target.value })}><option value="">Brak</option>{magazyny.map((m: any) => <option key={m.id} value={m.id}>{m.nazwa}</option>)}</select></Field>
-              <Field label="Miejsce w magazynie"><input className={inputClass} value={itemForm.miejsce_w_mag || ''} onChange={e => setItemForm({ ...itemForm, miejsce_w_mag: e.target.value })} /></Field>
-              <Field label="Status serwisowy"><select className={inputClass} value={itemForm.status_serwisowy || 'Działa'} onChange={e => setItemForm({ ...itemForm, status_serwisowy: e.target.value })}><option>Działa</option><option>Wymaga serwisu (działa)</option><option>Wymaga serwisu (nie działa)</option><option>W serwisie</option><option>Naprawiony</option></select></Field>
-            </div>
-          </section>
-
-          <section><h3 className="mb-3 text-lg font-black">Notatki i uwagi</h3>
-            <Field label="Uwagi"><textarea className={inputClass} value={itemForm.opis || ''} onChange={e => setItemForm({ ...itemForm, opis: e.target.value })} /></Field>
-          </section>
-
-          <div className="flex justify-end gap-2"><Button variant="secondary" onClick={() => setShowAdd(false)}>Anuluj</Button><Button type="submit">Zapisz egzemplarz</Button></div>
-        </form>
-      </SimpleModal>}
-
-      {showCalendar && <SimpleModal title="Kalendarz dostępności modelu" onClose={() => setShowCalendar(false)}>
-        <div className="space-y-3">
-          {busy.map((b: any) => <div key={b.id} className="rounded-2xl border p-3"><b>{b.tytul}</b><p className="text-sm text-slate-500">{b.start ? new Date(b.start).toLocaleDateString('pl-PL') : '-'} - {b.koniec ? new Date(b.koniec).toLocaleDateString('pl-PL') : '-'} · {b.kontrahent || '-'}</p></div>)}
-          {busy.length === 0 && <p className="font-bold text-slate-400">Brak zajętości.</p>}
-        </div>
-      </SimpleModal>}
+      {showCalendar && (
+        <SimpleModal title="Kalendarz dostępności modelu" onClose={() => setShowCalendar(false)}>
+          <div className="space-y-3">
+            {busy.map((b: any) => (
+              <div key={b.id} className="rounded-2xl border p-3">
+                <b>{b.tytul}</b>
+                <p className="text-sm text-slate-500">{b.start ? new Date(b.start).toLocaleDateString('pl-PL') : '-'} - {b.koniec ? new Date(b.koniec).toLocaleDateString('pl-PL') : '-'} · {b.kontrahent || '-'}</p>
+              </div>
+            ))}
+            {busy.length === 0 && <p className="font-bold text-slate-400">Brak zajętości w kalendarzu.</p>}
+          </div>
+        </SimpleModal>
+      )}
     </div>
   );
 }
@@ -368,9 +429,6 @@ function defaultItemForm(model: any, nextNumber = 1) {
   };
 }
 
-// -------------------------------------------------------------
-// PANEL ZAŁĄCZNIKÓW (Wsparcie dla S3 / MinIO)
-// -------------------------------------------------------------
 function AttachmentsPanel({ modelId, zalaczniki, reloadModel }: any) {
   const [form, setForm] = useState<any>({});
   const [file, setFile] = useState<File | null>(null);
@@ -380,25 +438,15 @@ function AttachmentsPanel({ modelId, zalaczniki, reloadModel }: any) {
   async function saveFile(e: any) {
     e.preventDefault();
     if (!file) return alert('Wybierz plik!');
-
     setUploading(true);
     try {
-      // Zamiast JSON, tworzymy obiekt FormData
       const formData = new FormData();
       formData.append('file', file);
       if (form.nazwa) formData.append('nazwa', form.nazwa);
-
-      await api.post(`/api/magazyn/modele/${modelId}/zalaczniki`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      setForm({}); 
-      setFile(null);
-      setAdding(false); 
-      reloadModel();
+      await api.post(`/api/magazyn/modele/${modelId}/zalaczniki`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setForm({}); setFile(null); setAdding(false); reloadModel();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Nie udało się wgrać pliku na serwer obiektów.');
-      console.error(error);
+      alert(error.response?.data?.message || 'Nie udało się wgrać pliku na serwer.');
     } finally {
       setUploading(false);
     }
@@ -406,23 +454,10 @@ function AttachmentsPanel({ modelId, zalaczniki, reloadModel }: any) {
 
   async function handleDownload(z: any) {
     try {
-      if (z.sciezka?.startsWith('data:')) {
-        // Fallback dla starych plików zapisanych czystym Base64 w testach
-        const link = document.createElement('a');
-        link.href = z.sciezka;
-        link.download = z.nazwa_pliku || 'pobrany-zalacznik';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        // Nowa, właściwa ścieżka S3 - generowanie wygasającego linku z naszego API
-        const res = await api.get(`/api/storage/download/${z.id}`);
-        if (res.data?.url) {
-          window.open(res.data.url, '_blank');
-        }
-      }
+      const res = await api.get(`/api/storage/download/${z.id}`);
+      if (res.data?.url) window.open(res.data.url, '_blank');
     } catch (err: any) {
-      alert(err?.response?.data?.message || 'Nie udało się uzyskać bezpiecznego linku pobierania.');
+      alert(err?.response?.data?.message || 'Nie udało się uzyskać bezpiecznego linku.');
     }
   }
 
@@ -430,52 +465,46 @@ function AttachmentsPanel({ modelId, zalaczniki, reloadModel }: any) {
     <Card className="space-y-4">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="font-black text-xl text-slate-900 dark:text-white">Pliki i Dokumentacja</h3>
-          <p className="text-sm font-bold text-slate-500">Bezpieczny magazyn chmurowy (Object Storage).</p>
+          <h3 className="font-black text-xl text-slate-900 dark:text-white">Dokumentacja i załączniki S3</h3>
+          <p className="text-sm font-bold text-slate-500">Karty DTR, instrukcje, certyfikaty bezpieczeństwa.</p>
         </div>
         <Button onClick={() => setAdding(true)} disabled={uploading}><Paperclip size={16} className="inline mr-1"/> Dodaj plik</Button>
       </div>
 
-      {adding && <div className="mb-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[24px] p-5">
-        <form onSubmit={saveFile} className="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
-          <Field label="Nazwa wyświetlana (Opcjonalnie)">
-            <input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} placeholder="np. Karta DTR"/>
-          </Field>
-          <Field label="Wybierz Plik z Dysku">
-            <input 
-              required 
-              type="file" 
-              className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-4 file:py-2.5 file:font-black file:text-white hover:file:bg-cyan-700 transition cursor-pointer" 
-              onChange={(e) => setFile(e.target.files?.[0] || null)} 
-            />
-          </Field>
-          <div className="flex gap-2">
-            <Button variant="secondary" type="button" onClick={() => {setAdding(false); setForm({}); setFile(null);}} disabled={uploading}>Anuluj</Button>
-            <Button type="submit" disabled={uploading || !file}>{uploading ? 'Wysyłanie...' : 'Wgraj na serwer'}</Button>
-          </div>
-        </form>
-      </div>}
+      {adding && (
+        <div className="mb-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-[24px] p-5">
+          <form onSubmit={saveFile} className="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+            <Field label="Nazwa wyświetlana">
+              <input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} placeholder="np. Karta DTR"/>
+            </Field>
+            <Field label="Wybierz Plik z Dysku">
+              <input required type="file" className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-4 file:py-2.5 file:font-black file:text-white hover:file:bg-cyan-700 transition cursor-pointer" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+            </Field>
+            <div className="flex gap-2">
+              <Button variant="secondary" type="button" onClick={() => {setAdding(false); setForm({}); setFile(null);}} disabled={uploading}>Anuluj</Button>
+              <Button type="submit" disabled={uploading || !file}>{uploading ? 'Wysyłanie...' : 'Wgraj na serwer'}</Button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
-         {zalaczniki.map((z: any) => <div key={z.id} className="rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:border-cyan-300 dark:hover:border-cyan-500/50 transition-colors">
-            <div className="flex items-center gap-4 min-w-0">
-               <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20"><FileText size={24} strokeWidth={1.5}/></div>
-               <div className="min-w-0 pr-2">
-                  <p className="font-black text-[15px] text-slate-900 dark:text-white truncate">{z.nazwa || z.nazwa_pliku}</p>
-                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 truncate">{z.nazwa_pliku} · {((z.rozmiar_bajtow || 0) / 1024 / 1024).toFixed(2)} MB</p>
-                  <p className="text-[10px] font-semibold text-slate-400 mt-1">Dodał: {z.dodal?.imie || 'System'} · {new Date(z.data_utworzenia).toLocaleDateString()}</p>
-               </div>
-            </div>
-            <div className="flex flex-col gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button type="button" onClick={() => handleDownload(z)} className="p-2 text-[#04e0ff] hover:bg-cyan-50 dark:hover:bg-white/5 rounded-xl transition" title="Podgląd / Pobierz bezpiecznie">
-                <Download size={18}/>
-              </button>
-              <button type="button" onClick={async () => { if(confirm('Zarówno plik na serwerze jak i powiązanie z systemem zostaną usunięte. Kontynuować?')) { await api.delete(`/api/magazyn/modele/${modelId}/zalaczniki/${z.id}`); reloadModel(); } }} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition" title="Usuń z S3 i Bazy">
-                <Trash2 size={18}/>
-              </button>
-            </div>
-         </div>)}
-         {zalaczniki.length === 0 && !adding && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak wgranych plików do tego modelu. Dodaj instrukcje, certyfikaty lub dokumentację.</div>}
+         {zalaczniki.map((z: any) => (
+           <div key={z.id} className="rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:border-cyan-300 transition-colors">
+              <div className="flex items-center gap-4 min-w-0">
+                 <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20"><FileText size={24} strokeWidth={1.5}/></div>
+                 <div className="min-w-0 pr-2">
+                    <p className="font-black text-[15px] text-slate-900 dark:text-white truncate">{z.nazwa || z.nazwa_pliku}</p>
+                    <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 truncate">{z.nazwa_pliku} · {((z.rozmiar_bajtow || 0) / 1024 / 1024).toFixed(2)} MB</p>
+                 </div>
+              </div>
+              <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button type="button" onClick={() => handleDownload(z)} className="p-2 text-[#04e0ff] hover:bg-cyan-50 rounded-xl transition"><Download size={18}/></button>
+                <button type="button" onClick={async () => { if(confirm('Usunąć ten załącznik?')) { await api.delete(`/api/magazyn/modele/${modelId}/zalaczniki/${z.id}`); reloadModel(); } }} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition"><Trash2 size={18}/></button>
+              </div>
+           </div>
+         ))}
+         {zalaczniki.length === 0 && !adding && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak wgranych plików do tego modelu.</div>}
       </div>
     </Card>
   );

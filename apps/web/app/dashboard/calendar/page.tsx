@@ -38,7 +38,7 @@ const typeLabels: Record<string, string> = {
 const typeFallbackColor: Record<string, string> = {
   wydarzenie: '#0891B2',
   wypozyczenie: '#F97316',
-  urlop: '#020617',
+  urlop: '#363a36',
   flota: '#22C55E',
 };
 
