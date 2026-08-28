@@ -157,17 +157,18 @@ export default function ModelsPage() {
   const { byId } = useMemo(() => buildCategoryTree(categories), [categories]);
 
   const rows = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return items
-      .filter((x: any) => view === 'wszystkie' || (view === 'opakowanie' ? ['opakowanie', 'rack'].includes(x.typ_sprzetu) : x.typ_sprzetu === view))
-      .filter((x: any) => !categoryId || String(x.id_kategorii || x.kategoria?.id || '') === categoryId)
-      .filter((x: any) => {
-        if (!query) return true;
-        return [x.nazwa, x.producent, x.kategoria?.nazwa, x.kategoria_nazwa, x.miejsce_w_mag, x.uwagi]
-          .filter(Boolean)
-          .some((v: any) => String(v).toLowerCase().includes(query));
-      });
-  }, [items, view, categoryId, search]);
+  const query = search.trim().toLowerCase();
+  return items
+    .filter((x: any) => view === 'wszystkie' || x.typ_sprzetu === view)
+    .filter((x: any) => !categoryId || String(x.id_kategorii || x.kategoria?.id || '') === categoryId)
+    .filter((x: any) => {
+      if (!query) return true;
+      const tagsStr = Array.isArray(x.tagi) ? x.tagi.join(' ') : '';
+      return [x.nazwa, x.producent, x.kategoria?.nazwa, x.kategoria_nazwa, x.miejsce_w_mag, x.uwagi, tagsStr]
+        .filter(Boolean)
+        .some((v: any) => String(v).toLowerCase().includes(query));
+    });
+}, [items, view, categoryId, search]);
 
   return (
     <div className="mx-auto max-w-[1900px] space-y-5">

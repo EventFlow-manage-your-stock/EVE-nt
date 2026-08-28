@@ -322,6 +322,7 @@ model ModelSprzetu {
   id_kategorii                 Int?
   nazwa                        String    @db.VarChar(200)
   producent                    String?   @db.VarChar(100)
+  tagi                         String[]  @default([])
   miejsce_w_mag                String?   @db.VarChar(200)
   opis                         String?   @db.Text
   notatki_wewnetrzne           String?   @db.Text

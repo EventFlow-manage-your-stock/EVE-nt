@@ -207,6 +207,7 @@ export default function InternalWarehousePage() {
       const catId = modelCategoryId(model);
       if (activeCategory && !activeCategoryIds.has(catId)) return false;
       if (!q) return true;
+      const tagsStr = (model.tagi || []).join(' ');
       const haystack = [
         model.nazwa,
         model.kategoria?.nazwa,
@@ -216,6 +217,7 @@ export default function InternalWarehousePage() {
         model.magazyn,
         model.kod,
         model.sku,
+        ...(model.tagi || []),
       ].join(' ').toLowerCase();
       return haystack.includes(q);
     });

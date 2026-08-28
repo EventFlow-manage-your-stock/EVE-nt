@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, CalendarDays, Check, ImageIcon, Pencil, Plus, QrCode, Trash2, X, Download, FileText, Paperclip, Box, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Check, ImageIcon, Pencil, Plus, QrCode, Trash2, X, Download, FileText, Paperclip, Box, AlertTriangle, ShieldAlert, Tag as TagIcon } from 'lucide-react';
 import { api } from '../../../../../lib/api';
 import { Button, Card, Field, inputClass, PageTitle } from '../../../../../components/ProductUI';
 import { DataTable } from '../../../../../components/DataTable';
@@ -26,6 +26,7 @@ function normalizeModelPayload(form: any) {
   const quantity = isQuantityModel(form);
   return {
     ...form,
+    tagi: Array.isArray(form.tagi) ? form.tagi : [],
     sprzet_ilosciowy: quantity,
     tryb_ewidencji: quantity ? 'ilosciowe' : 'egzemplarze',
     ilosc_magazynowa: quantity ? Number(form.ilosc_magazynowa || 0) : 0,
@@ -51,6 +52,7 @@ function normalizeForm(model: any) {
     nazwa: model?.nazwa || '',
     id_kategorii: model?.id_kategorii || model?.kategoria?.id || '',
     producent: model?.producent || '',
+    tagi: Array.isArray(model?.tagi) ? model.tagi : [],
     typ_sprzetu: model?.typ_sprzetu || 'sprzet',
     wartosc_domyslna_egzemplarza: model?.wartosc_domyslna_egzemplarza || model?.wartosc || '',
     wartosc: model?.wartosc_domyslna_egzemplarza || model?.wartosc || '',
@@ -85,6 +87,7 @@ export default function ModelDetailsPage() {
   const [itemForm, setItemForm] = useState<any>({});
   const [edit, setEdit] = useState(searchParams?.get('edit') === '1');
   const [form, setForm] = useState<any>({});
+  const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'egzemplarze' | 'zalaczniki'>('egzemplarze');
 
@@ -110,7 +113,6 @@ export default function ModelDetailsPage() {
 
   const egzemplarze = model?.egzemplarze || [];
   
-  // Statystyki magazynowe
   const stockStats = useMemo(() => {
     if (!model) return { total: 0, available: 0, issued: 0, service: 0 };
     const quantity = isQuantityModel(model);
@@ -140,6 +142,20 @@ export default function ModelDetailsPage() {
     await api.post(`/api/magazyn/modele/${id}/egzemplarze`, itemForm);
     setShowAdd(false);
     await load();
+  }
+
+  function handleAddTag() {
+    const t = tagInput.trim().toLowerCase();
+    if (!t) return;
+    const currentTags = form.tagi || [];
+    if (!currentTags.includes(t)) {
+      setForm({ ...form, tagi: [...currentTags, t] });
+    }
+    setTagInput('');
+  }
+
+  function handleRemoveTag(tagToRemove: string) {
+    setForm({ ...form, tagi: (form.tagi || []).filter((t: string) => t !== tagToRemove) });
   }
 
   async function saveModel(e?: any) {
@@ -214,7 +230,6 @@ export default function ModelDetailsPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.35fr]">
-        {/* LEWA KOLUMNA: EDYCJA DANYCH MODELU */}
         <Card>
           <div className="mb-4 flex items-center justify-between gap-4">
             <h2 className="text-lg font-black text-slate-900 dark:text-white">Parametry i dane modelu</h2>
@@ -230,43 +245,91 @@ export default function ModelDetailsPage() {
                 {edit && <input type="file" accept="image/*" onChange={e => onPhoto(e.target.files?.[0])} className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-3 file:py-2 file:font-black file:text-white" />}
                 {edit && form.zdjecie && <button type="button" onClick={() => setForm({ ...form, zdjecie: '' })} className="text-xs font-black text-red-500">Usuń zdjęcie</button>}
               </div>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Nazwa modelu"><input disabled={!edit} className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} /></Field>
-              <Field label="Kategoria"><select disabled={!edit} className={inputClass} value={form.id_kategorii || ''} onChange={e => setForm({ ...form, id_kategorii: e.target.value })}><option value="">Brak</option>{categories.map((k: any) => <option key={k.id} value={k.id}>{k.nazwa}</option>)}</select></Field>
-              <Field label="Producent"><input disabled={!edit} className={inputClass} value={form.producent || ''} onChange={e => setForm({ ...form, producent: e.target.value })} /></Field>
-              <Field label="Typ"><select disabled={!edit} className={inputClass} value={form.typ_sprzetu || 'sprzet'} onChange={e => setForm({ ...form, typ_sprzetu: e.target.value })}><option value="sprzet">Sprzęt</option><option value="opakowanie">Opakowanie (Case)</option><option value="zestaw">Zestaw (Rack)</option></select></Field>
-              
-              <div className="md:col-span-2 rounded-2xl border border-cyan-100 bg-cyan-50/50 p-4 dark:border-cyan-500/20 dark:bg-cyan-900/10">
-                <label className="flex cursor-pointer items-start gap-3 text-sm font-black text-slate-800 dark:text-slate-200">
-                  <input type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300 text-cyan-600" checked={quantityModel} onChange={e => { setEdit(true); setForm(applyQuantityMode(form, e.target.checked)); }} />
-                  <span>
-                    Tryb ewidencji: Sprzęt ilościowy
-                    <span className="mt-1 block text-xs font-bold text-slate-500">Zaznacz dla drobnicy, kabli i balastów wydawanych na sztuki bez indywidualnych numerów S/N.</span>
-                  </span>
-                </label>
-              </div>
 
-              {quantityModel && (
-                <>
-                  <Field label="Stan ilościowy"><input disabled={!edit} type="number" step="1" min="0" className={inputClass} value={form.ilosc_magazynowa ?? 0} onChange={e => setForm({ ...form, ilosc_magazynowa: e.target.value })} /></Field>
-                  <Field label="Jednostka"><input disabled={!edit} className={inputClass} value={form.jednostka || 'szt.'} onChange={e => setForm({ ...form, jednostka: e.target.value })} /></Field>
-                  <div className="md:col-span-2">
-                    <Field label="Kod kreskowy modelu (Wymagany do skanowania WZ/PZ)">
-                      <input disabled={!edit} required={quantityModel} className={inputClass} value={form.kod_kreskowy || ''} onChange={e => setForm({ ...form, kod_kreskowy: e.target.value })} placeholder="Kod kreskowy do skanera..." />
-                    </Field>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Nazwa modelu"><input disabled={!edit} className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} /></Field>
+                <Field label="Kategoria"><select disabled={!edit} className={inputClass} value={form.id_kategorii || ''} onChange={e => setForm({ ...form, id_kategorii: e.target.value })}><option value="">Brak</option>{categories.map((k: any) => <option key={k.id} value={k.id}>{k.nazwa}</option>)}</select></Field>
+                <Field label="Producent"><input disabled={!edit} className={inputClass} value={form.producent || ''} onChange={e => setForm({ ...form, producent: e.target.value })} /></Field>
+                <Field label="Typ"><select disabled={!edit} className={inputClass} value={form.typ_sprzetu || 'sprzet'} onChange={e => setForm({ ...form, typ_sprzetu: e.target.value })}><option value="sprzet">Sprzęt</option><option value="opakowanie">Opakowanie (Case)</option><option value="zestaw">Zestaw (Rack)</option></select></Field>
+
+                {/* OBSŁUGA TAGÓW */}
+                <div className="md:col-span-2 space-y-2">
+                  <Field label="Tagi wyszukiwania (Słowa kluczowe)">
+                    {edit ? (
+                      <div className="flex gap-2">
+                        <input
+                          className={inputClass}
+                          placeholder="Dodaj tag (np. audio, mikser, plener, bezprzewodowy)..."
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ',') {
+                              e.preventDefault();
+                              handleAddTag();
+                            }
+                          }}
+                        />
+                        <Button variant="secondary" onClick={handleAddTag} disabled={!tagInput.trim()}>
+                          Dodaj
+                        </Button>
+                      </div>
+                    ) : null}
+                  </Field>
+                  <div className="flex flex-wrap gap-1.5 min-h-[32px] items-center">
+                    {(form.tagi || []).map((tag: string) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-50 px-2.5 py-1 text-xs font-black text-cyan-800 border border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-500/30"
+                      >
+                        <TagIcon size={12} /> #{tag}
+                        {edit && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTag(tag)}
+                            className="text-cyan-600 hover:text-red-500 transition"
+                          >
+                            <X size={13} />
+                          </button>
+                        )}
+                      </span>
+                    ))}
+                    {(!form.tagi || form.tagi.length === 0) && !edit && (
+                      <span className="text-xs font-bold text-slate-400">Brak przypisanych tagów.</span>
+                    )}
                   </div>
-                </>
-              )}
+                </div>
 
-              <Field label="Wartość domyślna / cena (PLN)"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.wartosc_domyslna_egzemplarza || ''} onChange={e => setForm({ ...form, wartosc_domyslna_egzemplarza: e.target.value, wartosc: e.target.value })} /></Field>
-              <Field label="Miejsce w magazynie"><input disabled={!edit} className={inputClass} value={form.miejsce_w_mag || ''} onChange={e => setForm({ ...form, miejsce_w_mag: e.target.value })} placeholder="np. Regał A-3" /></Field>
-              <Field label="Szerokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.szerokosc || ''} onChange={e => setForm({ ...form, szerokosc: e.target.value })} /></Field>
-              <Field label="Wysokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.wysokosc || ''} onChange={e => setForm({ ...form, wysokosc: e.target.value })} /></Field>
-              <Field label="Głębokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.glebokosc || ''} onChange={e => setForm({ ...form, glebokosc: e.target.value })} /></Field>
-              <Field label="Waga [kg]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.waga || ''} onChange={e => setForm({ ...form, waga: e.target.value })} /></Field>
-              <Field label="Objętość [m³]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.objetosc || ''} onChange={e => setForm({ ...form, objetosc: e.target.value })} /></Field>
-              <Field label="Pobór prądu [W]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.pobor_pradu || ''} onChange={e => setForm({ ...form, pobor_pradu: e.target.value })} /></Field>
+                <div className="md:col-span-2 rounded-2xl border border-cyan-100 bg-cyan-50/50 p-4 dark:border-cyan-500/20 dark:bg-cyan-900/10">
+                  <label className="flex cursor-pointer items-start gap-3 text-sm font-black text-slate-800 dark:text-slate-200">
+                    <input type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300 text-cyan-600" checked={quantityModel} onChange={e => { setEdit(true); setForm(applyQuantityMode(form, e.target.checked)); }} />
+                    <span>
+                      Tryb ewidencji: Sprzęt ilościowy
+                      <span className="mt-1 block text-xs font-bold text-slate-500">Zaznacz dla drobnicy, kabli i balastów wydawanych na sztuki bez indywidualnych numerów S/N.</span>
+                    </span>
+                  </label>
+                </div>
+
+                {quantityModel && (
+                  <>
+                    <Field label="Stan ilościowy"><input disabled={!edit} type="number" step="1" min="0" className={inputClass} value={form.ilosc_magazynowa ?? 0} onChange={e => setForm({ ...form, ilosc_magazynowa: e.target.value })} /></Field>
+                    <Field label="Jednostka"><input disabled={!edit} className={inputClass} value={form.jednostka || 'szt.'} onChange={e => setForm({ ...form, jednostka: e.target.value })} /></Field>
+                    <div className="md:col-span-2">
+                      <Field label="Kod kreskowy modelu (Wymagany do skanowania WZ/PZ)">
+                        <input disabled={!edit} required={quantityModel} className={inputClass} value={form.kod_kreskowy || ''} onChange={e => setForm({ ...form, kod_kreskowy: e.target.value })} placeholder="Kod kreskowy do skanera..." />
+                      </Field>
+                    </div>
+                  </>
+                )}
+
+                <Field label="Wartość domyślna / cena (PLN)"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.wartosc_domyslna_egzemplarza || ''} onChange={e => setForm({ ...form, wartosc_domyslna_egzemplarza: e.target.value, wartosc: e.target.value })} /></Field>
+                <Field label="Miejsce w magazynie"><input disabled={!edit} className={inputClass} value={form.miejsce_w_mag || ''} onChange={e => setForm({ ...form, miejsce_w_mag: e.target.value })} placeholder="np. Regał A-3" /></Field>
+                <Field label="Szerokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.szerokosc || ''} onChange={e => setForm({ ...form, szerokosc: e.target.value })} /></Field>
+                <Field label="Wysokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.wysokosc || ''} onChange={e => setForm({ ...form, wysokosc: e.target.value })} /></Field>
+                <Field label="Głębokość [cm]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.glebokosc || ''} onChange={e => setForm({ ...form, glebokosc: e.target.value })} /></Field>
+                <Field label="Waga [kg]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.waga || ''} onChange={e => setForm({ ...form, waga: e.target.value })} /></Field>
+                <Field label="Objętość [m³]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.objetosc || ''} onChange={e => setForm({ ...form, objetosc: e.target.value })} /></Field>
+                <Field label="Pobór prądu [W]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.pobor_pradu || ''} onChange={e => setForm({ ...form, pobor_pradu: e.target.value })} /></Field>
+              </div>
             </div>
             
             <Field label="Opis"><textarea disabled={!edit} className={`${inputClass} min-h-[70px] resize-none`} value={form.opis || ''} onChange={e => setForm({ ...form, opis: e.target.value })} /></Field>
@@ -375,7 +438,7 @@ export default function ModelDetailsPage() {
               <h3 className="mb-3 text-lg font-black">Znakowanie i wycena</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Zewnętrzny kod kreskowy"><input className={inputClass} value={itemForm.zewnetrzny_kod_kreskowy || ''} onChange={e => setItemForm({ ...itemForm, zewnetrzny_kod_kreskowy: e.target.value, kod_kreskowy: e.target.value })} /></Field>
-                <Field label="Cena wynajmu"><input type="number" step="0.01" className={inputClass} value={itemForm.wartosc || ''} onChange={e => setItemForm({ ...itemForm, wartosc: e.target.value })} /></Field>
+                <Field label="Wartość odtworzeniowa"><input type="number" step="0.01" className={inputClass} value={itemForm.wartosc || ''} onChange={e => setItemForm({ ...itemForm, wartosc: e.target.value })} /></Field>
               </div>
             </section>
 
@@ -499,8 +562,12 @@ function AttachmentsPanel({ modelId, zalaczniki, reloadModel }: any) {
                  </div>
               </div>
               <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button type="button" onClick={() => handleDownload(z)} className="p-2 text-[#04e0ff] hover:bg-cyan-50 rounded-xl transition"><Download size={18}/></button>
-                <button type="button" onClick={async () => { if(confirm('Usunąć ten załącznik?')) { await api.delete(`/api/magazyn/modele/${modelId}/zalaczniki/${z.id}`); reloadModel(); } }} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition"><Trash2 size={18}/></button>
+                <button type="button" onClick={() => handleDownload(z)} className="p-2 text-[#04e0ff] hover:bg-cyan-50 rounded-xl transition" title="Podgląd / Pobierz bezpiecznie">
+                  <Download size={18}/>
+                </button>
+                <button type="button" onClick={async () => { if(confirm('Usunąć ten załącznik?')) { await api.delete(`/api/magazyn/modele/${modelId}/zalaczniki/${z.id}`); reloadModel(); } }} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition" title="Usuń z S3 i Bazy">
+                  <Trash2 size={18}/>
+                </button>
               </div>
            </div>
          ))}

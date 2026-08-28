@@ -605,7 +605,8 @@ export default function OfferDetailsPage() {
     return models.filter((m: any) => {
         const catId = modelCategoryId(m);
         const matchesCategory = !selectedIds || selectedIds.has(catId);
-        const matchesQuery = !q || m.nazwa.toLowerCase().includes(q) || m.kod_kreskowy?.toLowerCase().includes(q);
+        const tagsStr = (m.tagi || []).join(' ');
+        const matchesQuery = !q || [m.nazwa, m.typ_sprzetu, m.kod_kreskowy, tagsStr].filter(Boolean).join(' ').toLowerCase().includes(q);
         return matchesCategory && matchesQuery;
       }).slice(0, 100);
   }, [models, equipmentSearch, equipmentRoot, equipmentSub, equipmentCategoryById]);

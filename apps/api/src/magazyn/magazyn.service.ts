@@ -352,6 +352,17 @@ export class MagazynService {
     return {};
   }
 
+  private normalizeTags(tagsInput: any): string[] {
+    if (!tagsInput) return [];
+    if (Array.isArray(tagsInput)) {
+      return Array.from(new Set(tagsInput.map(t => String(t || '').trim().toLowerCase()).filter(Boolean)));
+    }
+    if (typeof tagsInput === 'string') {
+      return Array.from(new Set(tagsInput.split(/[,\s]+/).map(t => t.trim().toLowerCase()).filter(Boolean)));
+    }
+    return [];
+  }
+
   // --- PRECYZYJNY SKANER (Reguła 5 i 6) ---
 
   async znajdzSprzetPoKodzie(kodRaw: string, id_organizacji: number) {
@@ -507,13 +518,13 @@ export class MagazynService {
     const limit = filters.limit ? parseInt(filters.limit) : 1000;
     const skip = (page - 1) * limit;
     const where: any = { id_organizacji, aktywny: true };
-
     if (filters.kategoriaId) where.id_kategorii = Number(filters.kategoriaId);
     if (filters.search) {
       where.OR = [
         { nazwa: { contains: filters.search, mode: 'insensitive' } },
         { producent: { contains: filters.search, mode: 'insensitive' } },
         { kod_kreskowy: { contains: filters.search, mode: 'insensitive' } },
+        { tagi: { has: filters.search.trim().toLowerCase() } }, // Wyszukiwanie po tagach
       ];
     }
     if (filters.widocznyWMag) {
@@ -522,7 +533,6 @@ export class MagazynService {
     if (filters.widocznyWOfercie) {
       where.widoczny_w_ofercie = filters.widocznyWOfercie === 'TAK';
     }
-
     const modele = await this.prisma.extendedClient.modelSprzetu.findMany({
       where,
       skip,
@@ -535,65 +545,30 @@ export class MagazynService {
         },
         egzemplarze: {
           where: { aktywny: true },
-          select: { 
-            id: true, 
-            id_statusu_egzemplarza: true, 
-            status_serwisowy: true,
-            // Pobieramy podsumowanie wydań, żeby wiedzieć, czy sprzęt zjechał już na magazyn
-            pozycje_wydan: {
-              where: { aktywny: true, wydanie: { aktywny: true, typ: { in: ['wydanie', 'przyjecie'] } } },
-              select: { ilosc: true, wydanie: { select: { typ: true } } }
-            }
-          }
+          select: { id_statusu_egzemplarza: true, status_serwisowy: true }
         }
       },
       orderBy: { nazwa: 'asc' },
     });
-
     return modele.map(model => {
       const ilosciowy = model.tryb_ewidencji === 'ilosciowe' || model.typ_sprzetu === 'ilosciowe';
-      
-      let wMagazynieCount = 0;
-      let wSerwisieCount = 0;
-      let wTerenieCount = 0;
-
-      if (!ilosciowy) {
-         model.egzemplarze.forEach((e: any) => {
-             // Jeżeli uszkodzony, od razu odrzucamy z dostępnych
-             if (e.status_serwisowy?.includes('Wymaga') || e.status_serwisowy === 'W serwisie') {
-                 wSerwisieCount++;
-                 return;
-             }
-             
-             // Badamy balans wyjazdów: WZ (minus) oraz PZ (plus)
-             let wydano = 0;
-             let przyjeto = 0;
-             (e.pozycje_wydan || []).forEach((pw: any) => {
-                 if (pw.wydanie?.typ === 'wydanie') wydano += Number(pw.ilosc || 1);
-                 if (pw.wydanie?.typ === 'przyjecie') przyjeto += Number(pw.ilosc || 1);
-             });
-             
-             if (wydano - przyjeto > 0) {
-                 wTerenieCount++; // Sprzęt leży na eventach
-             } else {
-                 wMagazynieCount++; // Sprzęt jest fizycznie dostępny na półce
-             }
-         });
-      }
-
       const totalStanie = ilosciowy ? Number(model.ilosc_magazynowa || 0) : model.egzemplarze.length;
-
+      const wMagazynie = ilosciowy ? Number(model.ilosc_magazynowa || 0) : model.egzemplarze.filter(e => e.status_serwisowy === 'Działa' || e.status_serwisowy === 'Naprawiony').length;
+      const wSerwisie = ilosciowy ? 0 : model.egzemplarze.filter(e => e.status_serwisowy?.includes('Wymaga') || e.status_serwisowy === 'W serwisie').length;
+      const naEventach = totalStanie - wMagazynie - wSerwisie;
       return {
         id: model.id,
         nazwa: model.nazwa,
+        producent: model.producent,
+        tagi: model.tagi || [],
         typ_sprzetu: model.typ_sprzetu,
         tryb_ewidencji: model.tryb_ewidencji,
-        sprzet_ilosciowy: ilosciowy,
+        sprzet_ilosciowy: model.tryb_ewidencji === 'ilosciowe' || model.typ_sprzetu === 'ilosciowe',
         ilosc_magazynowa: model.ilosc_magazynowa,
         jednostka: model.jednostka,
         kategoria_nazwa: model.kategoria?.nazwa || '-',
         kategoria: model.kategoria,
-        kod_kreskowy: ilosciowy ? model.kod_kreskowy : null,
+        kod_kreskowy: (model.tryb_ewidencji === 'ilosciowe' || model.typ_sprzetu === 'ilosciowe') ? model.kod_kreskowy : null,
         ulubiony: model.ulubiony,
         udostepniony_crn: model.udostepniony_crn,
         widoczny_w_mag: model.widoczny_w_mag,
@@ -604,12 +579,12 @@ export class MagazynService {
         _count: { egzemplarze: totalStanie },
         stan: {
           total: totalStanie,
-          magazyn: ilosciowy ? totalStanie : wMagazynieCount,
-          eventy: ilosciowy ? 0 : wTerenieCount,
-          serwis: wSerwisieCount,
-          rack: 0 
+          magazyn: wMagazynie,
+          eventy: naEventach > 0 ? naEventach : 0,
+          serwis: wSerwisie,
+          rack: 0
         },
-        dostepnych: ilosciowy ? totalStanie : wMagazynieCount
+        dostepnych: wMagazynie
       };
     });
   }
@@ -620,6 +595,8 @@ export class MagazynService {
       data: {
         id_organizacji,
         nazwa: this.cleanString(dto.nazwa),
+        producent: this.cleanString(dto.producent),
+        tagi: this.normalizeTags(dto.tagi),
         typ_sprzetu: this.cleanString(dto.typ_sprzetu) || 'sprzet',
         tryb_ewidencji: ilosciowy ? 'ilosciowe' : 'egzemplarze',
         ilosc_magazynowa: ilosciowy ? (this.cleanNumber(dto.ilosc_magazynowa) ?? 0) : 0,
@@ -714,12 +691,13 @@ export class MagazynService {
       where: { id },
       data: {
         nazwa: this.cleanString(dto.nazwa),
+        producent: this.cleanString(dto.producent),
+        tagi: dto.tagi !== undefined ? this.normalizeTags(dto.tagi) : undefined,
         typ_sprzetu: this.cleanString(dto.typ_sprzetu),
         tryb_ewidencji: ilosciowy ? 'ilosciowe' : 'egzemplarze',
         ilosc_magazynowa: ilosciowy ? (this.cleanNumber(dto.ilosc_magazynowa) ?? 0) : 0,
         jednostka: this.cleanString(dto.jednostka) || 'szt.',
         id_kategorii: this.cleanNumber(dto.id_kategorii),
-        producent: this.cleanString(dto.producent),
         szerokosc: this.cleanNumber(dto.szerokosc),
         wysokosc: this.cleanNumber(dto.wysokosc),
         glebokosc: this.cleanNumber(dto.glebokosc),
