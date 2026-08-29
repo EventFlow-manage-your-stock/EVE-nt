@@ -8,7 +8,7 @@ import {
   FileArchive, FileText, History, Loader2, MapPin, MessageSquare, Plus, Save,
   Search, Trash2, Truck, Users, Wrench, Calendar, Send, Download, Paperclip, 
   CheckCircle2, Car, X, Clock, Layers, RotateCcw, Home, MailCheck, Edit2,
-  ArrowRight
+  ArrowRight, UserCheck, UserPlus
 } from 'lucide-react';
 import { api } from '../../../../lib/api';
 import { Button, Card, Field, inputClass, SearchableSelect } from '../../../../components/ProductUI';
@@ -34,6 +34,19 @@ const TABS = [
   { id: 'chat', label: 'Chat Grupowy', icon: MessageSquare },
   { id: 'zalaczniki', label: 'Załączniki', icon: FileArchive },
   { id: 'historia', label: 'Historia Zmian', icon: History },
+];
+
+const PREDEFINED_ROLES = [
+  'Obsługa techniczna',
+  'Główny realizator',
+  'Realizator Dźwięku (FOH)',
+  'Realizator Monitorów (MON)',
+  'Realizator Światła (LD)',
+  'Technik Sceny / Stagehand',
+  'Realizator Video / Multimedia',
+  'Kierownik Techniczny / Szef Ekipy',
+  'Kierowca / Logistyk',
+  'Inne (Wpisz własną...)',
 ];
 
 function toSelect(v: any) { return v === null || v === undefined ? '' : String(v); }
@@ -119,10 +132,6 @@ function modelNameOf(row: any) { return row?.nazwa_modelu || row?.model?.nazwa |
 function modelCategoryIdOf(row: any) { return row?.id_kategorii || row?.model?.id_kategorii || row?.model?.kategoria?.id || row?.egzemplarz?.model?.id_kategorii || row?.egzemplarz?.model?.kategoria?.id || modelCategoryId(row?.model || row); }
 function numberOf(row: any) { const egz = row?.egzemplarz || row; return egz?.numer_egzemplarza || egz?.numer_urzadzenia || egz?.sn || egz?.kod_kreskowy || ''; }
 
-// ============================================================================
-// KOMPONENT GŁÓWNY (Szczegóły Wydarzenia)
-// ============================================================================
-
 export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -142,7 +151,6 @@ export default function EventDetailsPage() {
   const [duplicateTarget, setDuplicateTarget] = useState<any>(null);
   const [crmModalMode, setCrmModalMode] = useState<'kontrahent' | 'kontakt' | null>(null);
 
-  // States for Modals
   const [showManagerModal, setShowManagerModal] = useState(false);
   const [selectedManagerId, setSelectedManagerId] = useState('');
   
@@ -183,9 +191,6 @@ export default function EventDetailsPage() {
       const e = res.data;
       setEventData(e);
 
-      // Synchronizujemy aktualnie otwarty modal etapu z najnowszymi danymi.
-      // Dzięki temu po dodaniu/usunięciu technika lub pojazdu licznik
-      // na karcie harmonogramu od razu pokazuje faktyczną wartość.
       setEtapToManage((currentEtap: any) => {
         if (!currentEtap?.id) return currentEtap;
         return e?.etapy?.find((etap: any) => etap.id === currentEtap.id) || currentEtap;
@@ -572,7 +577,19 @@ export default function EventDetailsPage() {
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 border-t-0 rounded-b-3xl shadow-sm min-h-[500px]">
           {activeTab === 'chat' && <EventChatPanel eventId={eventIdAsNumber} historia={eventData?.historia || []} reloadEvent={loadEvent} />}
           {activeTab === 'zadania' && <EventTasksPanel eventId={eventIdAsNumber} zadania={eventData?.zadania || []} dict={dict} reloadEvent={loadEvent} tabQuery={tabSearchQuery} />}
-          {activeTab === 'ekipa' && <EventCrewPanel eventId={eventIdAsNumber} ekipa={eventData?.ekipa || []} etapy={eventData?.etapy || []} powiadomienia={eventData?.powiadomienia || []} dict={dict} tabQuery={tabSearchQuery} reloadEvent={loadEvent} onMassAssign={(u: any) => setShowMassAssign({type: 'user', obj: u})} />}
+          {activeTab === 'ekipa' && (
+            <EventCrewPanel 
+              eventId={eventIdAsNumber} 
+              ekipa={eventData?.ekipa || []} 
+              etapy={eventData?.etapy || []} 
+              powiadomienia={eventData?.powiadomienia || []} 
+              dict={dict} 
+              tabQuery={tabSearchQuery} 
+              reloadEvent={loadEvent} 
+              reloadDictionaries={loadDictionaries}
+              onMassAssign={(u: any) => setShowMassAssign({type: 'user', obj: u})} 
+            />
+          )}
           {activeTab === 'podsumowanie_ekipy' && <EventCrewSummaryPanel ekipa={eventData?.ekipa || []} />}
           {activeTab === 'flota' && <EventFleetPanel eventId={eventIdAsNumber} pojazdy={eventData?.pojazdy || []} etapy={eventData?.etapy || []} dict={dict} tabQuery={tabSearchQuery} reloadEvent={loadEvent} onMassAssign={(v: any) => setShowMassAssign({type: 'vehicle', obj: v})} />}
           {activeTab === 'nocleg' && <EventNoclegiPanel eventId={eventIdAsNumber} noclegi={eventData?.noclegi || []} reloadEvent={loadEvent} />}
@@ -593,7 +610,7 @@ export default function EventDetailsPage() {
           <div className="space-y-4">
             <Field label="Wybierz osobę z zespołu">
               <SearchableSelect 
-                options={dict.uzytkownicy.map((u:any)=>({value:String(u.id), label:`${u.imie} ${u.nazwisko}`}))} 
+                options={dict.uzytkownicy.filter((u: any) => u.stanowisko !== 'Współpracownik Zewnętrzny').map((u:any)=>({value:String(u.id), label:`${u.imie} ${u.nazwisko}`}))} 
                 onChange={(v) => setSelectedManagerId(v)} 
                 value={selectedManagerId} 
                 placeholder="Szukaj osoby..."
@@ -666,33 +683,61 @@ function EtapManagementModal({ etap, ekipa, pojazdy, eventId, onClose, reloadEve
   const [isProcessing, setIsProcessing] = useState(false);
 
   async function assignPerson(id_uzytkownika: number) {
-    if(isProcessing) return;
+    if (isProcessing) return;
     setIsProcessing(true);
-    try { await api.post(`/api/wydarzenia/${eventId}/etapy/${etap.id}/ekipa`, { id_uzytkownika }); await reloadEvent(); }
-    catch(e) { console.error(e); } finally { setIsProcessing(false); }
+    try {
+      await api.post(`/api/wydarzenia/${eventId}/etapy/${etap.id}/ekipa`, { id_uzytkownika });
+      await reloadEvent();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
   }
+
   async function removePerson(przypisanieId: number) {
-    if(isProcessing) return;
+    if (isProcessing) return;
     setIsProcessing(true);
-    try { await api.delete(`/api/wydarzenia/${eventId}/etapy/ekipa/${przypisanieId}`); await reloadEvent(); }
-    catch(e) { console.error(e); } finally { setIsProcessing(false); }
+    try {
+      await api.delete(`/api/wydarzenia/${eventId}/etapy/ekipa/${przypisanieId}`);
+      await reloadEvent();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   async function assignVehicle(id_pojazdu: number | null, customName: string | null = null) {
-    if(isProcessing) return;
+    if (isProcessing) return;
     setIsProcessing(true);
-    try { await api.post(`/api/wydarzenia/${eventId}/etapy/${etap.id}/flota`, { id_pojazdu, pojazd_zewnetrzny: customName }); await reloadEvent(); }
-    catch(e) { console.error(e); } finally { setIsProcessing(false); }
-  }
-  async function removeVehicle(przypisanieId: number) {
-    if(isProcessing) return;
-    setIsProcessing(true);
-    try { await api.delete(`/api/wydarzenia/${eventId}/etapy/flota/${przypisanieId}`); await reloadEvent(); }
-    catch(e) { console.error(e); } finally { setIsProcessing(false); }
+    try {
+      await api.post(`/api/wydarzenia/${eventId}/etapy/${etap.id}/flota`, {
+        id_pojazdu: id_pojazdu || null,
+        pojazd_zewnetrzny: customName || null,
+      });
+      await reloadEvent();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
-  const assignedUsers = new Set(etap.przypisani_uzytkownicy?.map((p:any)=>p.id_uzytkownika));
-  const assignedVehicles = new Set(etap.przypisane_pojazdy?.map((p:any)=>p.id_pojazdu));
+  async function removeVehicle(przypisanieId: number) {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await api.delete(`/api/wydarzenia/${eventId}/etapy/flota/${przypisanieId}`);
+      await reloadEvent();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  const assignedUsers = new Set(etap.przypisani_uzytkownicy?.map((p: any) => p.id_uzytkownika));
 
   return (
     <SimpleModal title={`Przydział do etapu: ${etap.nazwa}`} className="max-w-4xl" onClose={onClose}>
@@ -702,11 +747,11 @@ function EtapManagementModal({ etap, ekipa, pojazdy, eventId, onClose, reloadEve
           <div className="space-y-2 max-h-[400px] overflow-auto custom-scrollbar pr-2">
             {ekipa.map((e: any) => {
               const isAssigned = assignedUsers.has(e.id_uzytkownika);
-              const p_id = etap.przypisani_uzytkownicy?.find((x:any)=>x.id_uzytkownika === e.id_uzytkownika)?.id;
+              const p_id = etap.przypisani_uzytkownicy?.find((x: any) => x.id_uzytkownika === e.id_uzytkownika)?.id;
               return (
                 <div key={e.id} className={`flex items-center justify-between p-3 border rounded-xl ${isAssigned ? 'border-cyan-300 bg-cyan-50 dark:bg-cyan-900/20' : 'border-slate-100 bg-slate-50 dark:bg-white/5'} ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div>
-                    <p className="font-bold text-sm text-slate-900 dark:text-white">{e.uzytkownik.imie} {e.uzytkownik.nazwisko}</p>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">{e.uzytkownik?.imie} {e.uzytkownik?.nazwisko}</p>
                     <p className="text-[10px] text-slate-500">{e.rola_w_wydarzeniu}</p>
                   </div>
                   {isAssigned ? (
@@ -715,38 +760,47 @@ function EtapManagementModal({ etap, ekipa, pojazdy, eventId, onClose, reloadEve
                     <button onClick={() => assignPerson(e.id_uzytkownika)} className="text-xs font-black text-cyan-700 hover:text-cyan-900 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-cyan-100 dark:border-cyan-900/30">Przypisz</button>
                   )}
                 </div>
-              )
+              );
             })}
             {ekipa.length === 0 && <p className="text-xs text-slate-500 font-bold">Brak ekipy przypisanej do wydarzenia ogółem.</p>}
           </div>
         </div>
+
         <div>
           <h3 className="text-lg font-black mb-4 text-indigo-700 border-b border-slate-100 dark:border-white/10 pb-2">Pojazdy na tym etapie</h3>
           <div className="space-y-2 max-h-[400px] overflow-auto custom-scrollbar pr-2">
             {pojazdy.map((v: any) => {
-              const isAssigned = assignedVehicles.has(v.id_pojazdu);
-              const p_id = etap.przypisane_pojazdy?.find((x:any)=>x.id_pojazdu === v.id_pojazdu)?.id;
+              const assignedItem = etap.przypisane_pojazdy?.find((x: any) =>
+                (v.id_pojazdu && x.id_pojazdu === v.id_pojazdu) ||
+                (v.pojazd_zewnetrzny && x.pojazd_zewnetrzny === v.pojazd_zewnetrzny)
+              );
+              const isAssigned = Boolean(assignedItem);
+              const name = v.pojazd?.nazwa || v.pojazd_zewnetrzny || 'Pojazd zewnętrzny';
+              const sub = v.pojazd?.nr_rejestracyjny || 'Auto spoza bazy';
+
               return (
                 <div key={v.id} className={`flex items-center justify-between p-3 border rounded-xl ${isAssigned ? 'border-indigo-300 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-100 bg-slate-50 dark:bg-white/5'} ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
                   <div>
-                    <p className="font-bold text-sm text-slate-900 dark:text-white">{v.pojazd.nazwa}</p>
-                    <p className="text-[10px] text-slate-500">{v.pojazd.nr_rejestracyjny}</p>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">{name}</p>
+                    <p className="text-[10px] text-slate-500">{sub}</p>
                   </div>
                   {isAssigned ? (
-                    <button onClick={() => removeVehicle(p_id)} className="text-xs font-black text-red-500 hover:text-red-700 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-red-100 dark:border-red-900/30">Odłącz</button>
+                    <button onClick={() => removeVehicle(assignedItem.id)} className="text-xs font-black text-red-500 hover:text-red-700 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-red-100 dark:border-red-900/30">Odłącz</button>
                   ) : (
-                    <button onClick={() => assignVehicle(v.id_pojazdu)} className="text-xs font-black text-indigo-700 hover:text-indigo-900 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-indigo-100 dark:border-indigo-900/30">Przypisz</button>
+                    <button onClick={() => assignVehicle(v.id_pojazdu, v.pojazd_zewnetrzny)} className="text-xs font-black text-indigo-700 hover:text-indigo-900 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-indigo-100 dark:border-indigo-900/30">Przypisz</button>
                   )}
                 </div>
-              )
+              );
             })}
-             {pojazdy.length === 0 && <p className="text-xs text-slate-500 font-bold">Brak pojazdów przypisanych do wydarzenia ogółem.</p>}
+            {pojazdy.length === 0 && <p className="text-xs text-slate-500 font-bold">Brak pojazdów przypisanych do wydarzenia ogółem.</p>}
           </div>
         </div>
       </div>
-      <div className="flex justify-end pt-6 border-t border-slate-100 dark:border-white/10 mt-6"><Button onClick={onClose} disabled={isProcessing}>Zamknij</Button></div>
+      <div className="flex justify-end pt-6 border-t border-slate-100 dark:border-white/10 mt-6">
+        <Button onClick={onClose} disabled={isProcessing}>Zamknij</Button>
+      </div>
     </SimpleModal>
-  )
+  );
 }
 
 // ============================================================================
@@ -754,21 +808,27 @@ function EtapManagementModal({ etap, ekipa, pojazdy, eventId, onClose, reloadEve
 // ============================================================================
 function MassAssignModal({ data, eventId, etapy, onClose, reloadEvent }: any) {
   const isUser = data.type === 'user';
-  const targetId = isUser ? data.obj.id_uzytkownika : data.obj.id_pojazdu;
-  const name = isUser ? `${data.obj.uzytkownik.imie} ${data.obj.uzytkownik.nazwisko}` : data.obj.pojazd.nazwa;
+  const targetId = isUser ? data.obj.id_uzytkownika : (data.obj.id_pojazdu || null);
+  const externalName = !isUser ? data.obj.pojazd_zewnetrzny : null;
+  const name = isUser 
+    ? `${data.obj.uzytkownik?.imie} ${data.obj.uzytkownik?.nazwisko}` 
+    : (data.obj.pojazd?.nazwa || data.obj.pojazd_zewnetrzny || 'Pojazd');
 
   const [selectedStages, setSelectedStages] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const current = etapy.filter((etap: any) => {
-      if (isUser) return etap.przypisani_uzytkownicy?.some((u:any) => u.id_uzytkownika === targetId);
-      return etap.przypisane_pojazdy?.some((p:any) => p.id_pojazdu === targetId);
+      if (isUser) return etap.przypisani_uzytkownicy?.some((u: any) => u.id_uzytkownika === targetId);
+      return etap.przypisane_pojazdy?.some((p: any) =>
+        (targetId && p.id_pojazdu === targetId) ||
+        (externalName && p.pojazd_zewnetrzny === externalName)
+      );
     }).map((e: any) => e.id);
     setSelectedStages(current);
-  }, []);
+  }, [etapy, isUser, targetId, externalName]);
 
-  const toggle = (id: number) => setSelectedStages(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+  const toggle = (id: number) => setSelectedStages((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
 
   async function save() {
     setSaving(true);
@@ -776,25 +836,33 @@ function MassAssignModal({ data, eventId, etapy, onClose, reloadEvent }: any) {
       if (isUser) {
         await api.post(`/api/wydarzenia/${eventId}/ekipa/${targetId}/etapy`, { stageIds: selectedStages });
       } else {
-        await api.post(`/api/wydarzenia/${eventId}/flota/${targetId}/etapy`, { stageIds: selectedStages });
+        await api.post(`/api/wydarzenia/${eventId}/flota/etapy-przypisanie`, {
+          id_pojazdu: targetId,
+          pojazd_zewnetrzny: externalName,
+          stageIds: selectedStages,
+        });
       }
       await reloadEvent();
       onClose();
-    } catch(e) { alert('Wystąpił błąd zapisu.'); } finally { setSaving(false); }
+    } catch {
+      alert('Wystąpił błąd zapisu etapów.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <SimpleModal title={`Przypisz do etapów: ${name}`} onClose={onClose}>
-      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Zaznacz wszystkie etapy wydarzenia, w których ta osoba/pojazd ma wziąć udział.</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Zaznacz wszystkie etapy wydarzenia, w których ta jednostka bierze udział.</p>
       <div className="space-y-2 mb-6 max-h-[400px] overflow-y-auto custom-scrollbar">
         {etapy.map((etap: any) => (
-           <label key={etap.id} className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${selectedStages.includes(etap.id) ? 'border-cyan-400 bg-cyan-50 dark:bg-cyan-900/20' : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-white/5'} ${saving ? 'opacity-50 pointer-events-none' : ''}`}>
-             <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-600" checked={selectedStages.includes(etap.id)} onChange={() => toggle(etap.id)} disabled={saving} />
-             <div>
-               <p className="font-black text-slate-900 dark:text-white">{etap.nazwa}</p>
-               <p className="text-xs text-slate-500 dark:text-slate-400">{dateTime(etap.data_start)} → {dateTime(etap.data_koniec)}</p>
-             </div>
-           </label>
+          <label key={etap.id} className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${selectedStages.includes(etap.id) ? 'border-cyan-400 bg-cyan-50 dark:bg-cyan-900/20' : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 hover:bg-slate-50'} ${saving ? 'opacity-50 pointer-events-none' : ''}`}>
+            <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-cyan-600" checked={selectedStages.includes(etap.id)} onChange={() => toggle(etap.id)} disabled={saving} />
+            <div>
+              <p className="font-black text-slate-900 dark:text-white">{etap.nazwa}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{dateTime(etap.data_start)} → {dateTime(etap.data_koniec)}</p>
+            </div>
+          </label>
         ))}
         {etapy.length === 0 && <p className="text-red-500 font-bold">Wydarzenie nie ma zdefiniowanych etapów!</p>}
       </div>
@@ -803,7 +871,7 @@ function MassAssignModal({ data, eventId, etapy, onClose, reloadEvent }: any) {
         <Button onClick={save} disabled={saving}>{saving ? 'Zapisywanie...' : 'Zapisz harmonogram'}</Button>
       </div>
     </SimpleModal>
-  )
+  );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
@@ -825,61 +893,134 @@ function Info({ label, value }: { label: string; value: string }) {
 }
 
 // -------------------------------------------------------------
-// NOCLEGI
+// NOCLEGI (Z PEŁNĄ EDYCJĄ I PODGLĄDEM OPISU)
 // -------------------------------------------------------------
 function EventNoclegiPanel({ eventId, noclegi, reloadEvent }: any) {
-  const [adding, setAdding] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editingNocleg, setEditingNocleg] = useState<any>(null);
   const [form, setForm] = useState<any>({});
   const [isProcessing, setIsProcessing] = useState(false);
+
+  function openAdd() {
+    setEditingNocleg(null);
+    setForm({
+      nazwa_obiektu: '',
+      adres: '',
+      data_zameldowania: '',
+      data_wymeldowania: '',
+      liczba_osob: '',
+      opis: ''
+    });
+    setShowModal(true);
+  }
+
+  function openEdit(n: any) {
+    setEditingNocleg(n);
+    setForm({
+      nazwa_obiektu: n.nazwa_obiektu || '',
+      adres: n.adres || '',
+      data_zameldowania: toDateInput(n.data_zameldowania),
+      data_wymeldowania: toDateInput(n.data_wymeldowania),
+      liczba_osob: n.liczba_osob || '',
+      opis: n.opis || ''
+    });
+    setShowModal(true);
+  }
 
   async function saveNocleg(e: any) {
     e.preventDefault();
     if(isProcessing) return;
     setIsProcessing(true);
     try {
-      await api.post(`/api/wydarzenia/${eventId}/noclegi`, form);
-      setForm({}); setAdding(false); await reloadEvent();
-    } catch(err) { console.error(err); } finally { setIsProcessing(false); }
+      if (editingNocleg) {
+        await api.put(`/api/wydarzenia/${eventId}/noclegi/${editingNocleg.id}`, form);
+      } else {
+        await api.post(`/api/wydarzenia/${eventId}/noclegi`, form);
+      }
+      setForm({});
+      setShowModal(false);
+      setEditingNocleg(null);
+      await reloadEvent();
+    } catch(err) { 
+      alert('Nie udało się zapisać danych rezerwacji noclegu.');
+    } finally { 
+      setIsProcessing(false); 
+    }
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-black text-xl text-slate-900 dark:text-white">Rezerwacje Hotelowe i Noclegi</h3>
-        <Button onClick={() => setAdding(true)} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Zarezerwuj nocleg</Button>
+        <Button onClick={openAdd} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Zarezerwuj nocleg</Button>
       </div>
 
-      {adding && (
-        <Card className="mb-6 bg-slate-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-[24px]">
-          <form onSubmit={saveNocleg} className="grid grid-cols-2 gap-4 items-end">
-            <Field label="Nazwa obiektu (Hotel, Apartament)"><input required className={inputClass} disabled={isProcessing} value={form.nazwa_obiektu||''} onChange={e=>setForm({...form, nazwa_obiektu: e.target.value})} /></Field>
-            <Field label="Adres"><input className={inputClass} disabled={isProcessing} value={form.adres||''} onChange={e=>setForm({...form, adres: e.target.value})} /></Field>
-            <Field label="Data zameldowania"><input type="datetime-local" disabled={isProcessing} className={inputClass} value={form.data_zameldowania||''} onChange={e=>setForm({...form, data_zameldowania: e.target.value})} /></Field>
-            <Field label="Data wymeldowania"><input type="datetime-local" disabled={isProcessing} className={inputClass} value={form.data_wymeldowania||''} onChange={e=>setForm({...form, data_wymeldowania: e.target.value})} /></Field>
-            <Field label="Liczba osób"><input type="number" className={inputClass} disabled={isProcessing} value={form.liczba_osob||''} onChange={e=>setForm({...form, liczba_osob: e.target.value})} /></Field>
-            <Field label="Opis / Wytyczne"><input className={inputClass} disabled={isProcessing} value={form.opis||''} onChange={e=>setForm({...form, opis: e.target.value})} /></Field>
-            <div className="col-span-2 flex justify-end gap-2 mt-4">
-              <Button variant="secondary" type="button" onClick={() => setAdding(false)} disabled={isProcessing}>Anuluj</Button>
-              <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : 'Zapisz Nocleg'}</Button>
+      {showModal && (
+        <SimpleModal 
+          title={editingNocleg ? `Edycja rezerwacji: ${editingNocleg.nazwa_obiektu}` : "Nowa rezerwacja hotelowa / nocleg"} 
+          onClose={() => { setShowModal(false); setEditingNocleg(null); }}
+        >
+          <form onSubmit={saveNocleg} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Nazwa obiektu (Hotel, Apartament) *">
+                <input required className={inputClass} disabled={isProcessing} value={form.nazwa_obiektu || ''} onChange={e => setForm({...form, nazwa_obiektu: e.target.value})} placeholder="np. Hotel Mercure Poznań" />
+              </Field>
+              <Field label="Adres obiektu">
+                <input className={inputClass} disabled={isProcessing} value={form.adres || ''} onChange={e => setForm({...form, adres: e.target.value})} placeholder="np. ul. Roosevelta 20, Poznań" />
+              </Field>
+              <Field label="Data zameldowania (Check-in)">
+                <input type="datetime-local" disabled={isProcessing} className={inputClass} value={form.data_zameldowania || ''} onChange={e => setForm({...form, data_zameldowania: e.target.value})} />
+              </Field>
+              <Field label="Data wymeldowania (Check-out)">
+                <input type="datetime-local" disabled={isProcessing} className={inputClass} value={form.data_wymeldowania || ''} onChange={e => setForm({...form, data_wymeldowania: e.target.value})} />
+              </Field>
+              <Field label="Liczba zarezerwowanych miejsc / osób">
+                <input type="number" min="1" className={inputClass} disabled={isProcessing} value={form.liczba_osob || ''} onChange={e => setForm({...form, liczba_osob: e.target.value})} placeholder="np. 4" />
+              </Field>
+            </div>
+
+            <Field label="Opis / Wytyczne i podział pokoi">
+              <textarea className={`${inputClass} resize-none min-h-[90px]`} disabled={isProcessing} value={form.opis || ''} onChange={e => setForm({...form, opis: e.target.value})} placeholder="np. Pokoje 2-osobowe z osobnymi łóżkami. Rezerwacja opłacona kartą firmową. Numer rezerwacji: #882193" />
+            </Field>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
+              <Button variant="secondary" type="button" onClick={() => { setShowModal(false); setEditingNocleg(null); }} disabled={isProcessing}>Anuluj</Button>
+              <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : editingNocleg ? 'Zapisz zmiany' : 'Zapisz nocleg'}</Button>
             </div>
           </form>
-        </Card>
+        </SimpleModal>
       )}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {noclegi.map((n: any) => (
           <div key={n.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex flex-col group hover:shadow-md transition ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <p className="font-black text-slate-900 dark:text-white text-lg flex items-center gap-2"><Home size={18} className="text-[#04e0ff]"/> {n.nazwa_obiektu}</p>
-                <p className="text-xs font-bold text-slate-500 mt-1">{n.adres}</p>
+            <div className="flex justify-between items-start mb-2">
+              <div className="min-w-0 pr-2">
+                <p className="font-black text-slate-900 dark:text-white text-lg flex items-center gap-2 truncate">
+                  <Home size={18} className="text-[#04e0ff] shrink-0"/> {n.nazwa_obiektu}
+                </p>
+                <p className="text-xs font-bold text-slate-500 mt-0.5 truncate">{n.adres || 'Brak podanego adresu'}</p>
               </div>
-              <button onClick={async () => { 
-                if(isProcessing || !confirm('Odwołać/Usunąć ten nocleg?')) return; 
-                setIsProcessing(true);
-                try { await api.delete(`/api/wydarzenia/${eventId}/noclegi/${n.id}`); await reloadEvent(); } catch(e) {} finally { setIsProcessing(false); }
-              }} className="p-2 text-slate-300 hover:text-red-500 bg-slate-50 hover:bg-red-50 dark:bg-white/5 rounded-xl transition opacity-0 group-hover:opacity-100"><Trash2 size={16}/></button>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => openEdit(n)} className="p-1.5 text-slate-400 hover:text-[#04e0ff] hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg transition" title="Edytuj dane noclegu">
+                  <Edit2 size={16} />
+                </button>
+                <button onClick={async () => { 
+                  if(isProcessing || !confirm('Odwołać/Usunąć ten nocleg?')) return; 
+                  setIsProcessing(true);
+                  try { await api.delete(`/api/wydarzenia/${eventId}/noclegi/${n.id}`); await reloadEvent(); } catch(e) {} finally { setIsProcessing(false); }
+                }} className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition" title="Usuń nocleg">
+                  <Trash2 size={16}/>
+                </button>
+              </div>
             </div>
+
+            {n.opis && (
+              <p className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-black/20 p-2.5 rounded-xl border border-slate-100 dark:border-white/5 my-2 leading-relaxed">
+                {n.opis}
+              </p>
+            )}
+
             <div className="mt-auto pt-3 border-t border-slate-100 dark:border-white/5 grid grid-cols-2 gap-2 text-xs font-bold">
               <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg"><span className="text-slate-400 block mb-0.5">Zamel.</span>{n.data_zameldowania ? new Date(n.data_zameldowania).toLocaleDateString() : '-'}</div>
               <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg"><span className="text-slate-400 block mb-0.5">Wymel.</span>{n.data_wymeldowania ? new Date(n.data_wymeldowania).toLocaleDateString() : '-'}</div>
@@ -887,7 +1028,7 @@ function EventNoclegiPanel({ eventId, noclegi, reloadEvent }: any) {
             </div>
           </div>
         ))}
-        {noclegi.length === 0 && !adding && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak zaplanowanych noclegów dla tego wyjazdu.</div>}
+        {noclegi.length === 0 && !showModal && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak zaplanowanych noclegów dla tego wyjazdu.</div>}
       </div>
     </div>
   )
@@ -1109,33 +1250,145 @@ function EventTasksPanel({ eventId, zadania, dict, reloadEvent, tabQuery = '' }:
 }
 
 // -------------------------------------------------------------
-// EKIPA
+// EKIPA (ROZDZIELENIE PRACOWNIKÓW I FREELANCERÓW + EDYCJA RÓL)
 // -------------------------------------------------------------
-function EventCrewPanel({ eventId, ekipa, etapy = [], powiadomienia, dict, tabQuery = '', reloadEvent, onMassAssign }: any) {
-  const [form, setForm] = useState<any>({ isExternal: false, rola: 'Obsługa techniczna' });
+function EventCrewPanel({ eventId, ekipa, etapy = [], powiadomienia, dict, tabQuery = '', reloadEvent, onMassAssign, reloadDictionaries }: any) {
   const [adding, setAdding] = useState(false);
+  const [editingCrew, setEditingCrew] = useState<any>(null);
   const [sendingMails, setSendingMails] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [form, setForm] = useState<any>({ 
+    isExternal: false, 
+    freelancerMode: 'existing',
+    id_uzytkownika: '',
+    selectedRole: 'Obsługa techniczna',
+    customRole: '',
+    imie: '',
+    nazwisko: '',
+    email: '',
+    telefon: ''
+  });
+
+  // Osoby już przypisane do tego wydarzenia
+  const assignedUserIds = useMemo(() => {
+    return new Set((ekipa || []).map((e: any) => Number(e.id_uzytkownika)));
+  }, [ekipa]);
+
+  // Tylko pracownicy etatowi, którzy nie są jeszcze na tym wydarzeniu
+  const internalUsers = useMemo(() => {
+    return (dict.uzytkownicy || [])
+      .filter((u: any) => u.stanowisko !== 'Współpracownik Zewnętrzny')
+      .filter((u: any) => !assignedUserIds.has(Number(u.id)));
+  }, [dict.uzytkownicy, assignedUserIds]);
+
+  // Tylko zapisani freelancerzy, którzy nie są jeszcze na tym wydarzeniu
+  const existingFreelancers = useMemo(() => {
+    return (dict.uzytkownicy || [])
+      .filter((u: any) => u.stanowisko === 'Współpracownik Zewnętrzny')
+      .filter((u: any) => !assignedUserIds.has(Number(u.id)));
+  }, [dict.uzytkownicy, assignedUserIds]);
 
   const filtered = useMemo(() => {
     if (!tabQuery) return ekipa;
     const q = tabQuery.toLowerCase();
-    return ekipa.filter((p:any) => `${p.uzytkownik?.imie || ''} ${p.uzytkownik?.nazwisko || ''} ${p.rola_w_wydarzeniu || ''}`.toLowerCase().includes(q));
+    return ekipa.filter((p: any) => `${p.uzytkownik?.imie || ''} ${p.uzytkownik?.nazwisko || ''} ${p.rola_w_wydarzeniu || ''}`.toLowerCase().includes(q));
   }, [ekipa, tabQuery]);
+
+  function openAddModal() {
+    setEditingCrew(null);
+    setForm({ 
+      isExternal: false, 
+      freelancerMode: 'existing',
+      id_uzytkownika: '',
+      selectedRole: 'Obsługa techniczna',
+      customRole: '',
+      imie: '',
+      nazwisko: '',
+      email: '',
+      telefon: ''
+    });
+    setAdding(true);
+  }
+
+  function openEditModal(p: any) {
+    setEditingCrew(p);
+    const isPredefined = PREDEFINED_ROLES.includes(p.rola_w_wydarzeniu);
+    setForm({
+      isExternal: p.uzytkownik?.stanowisko === 'Współpracownik Zewnętrzny',
+      selectedRole: isPredefined ? p.rola_w_wydarzeniu : 'Inne (Wpisz własną...)',
+      customRole: isPredefined ? '' : (p.rola_w_wydarzeniu || ''),
+      imie: p.uzytkownik?.imie || '',
+      nazwisko: p.uzytkownik?.nazwisko || '',
+      email: p.uzytkownik?.email && !p.uzytkownik.email.includes('@temp.eventflow.pl') ? p.uzytkownik.email : '',
+      telefon: p.uzytkownik?.telefon || ''
+    });
+    setAdding(true);
+  }
 
   async function saveCrew(e: any) {
     e.preventDefault();
     if(isProcessing) return;
     setIsProcessing(true);
+
+    const finalRole = form.selectedRole === 'Inne (Wpisz własną...)' 
+      ? (form.customRole?.trim() || 'Obsługa techniczna')
+      : form.selectedRole;
+
     try {
-      await api.post(`/api/wydarzenia/${eventId}/ekipa`, form);
-      setForm({ isExternal: false, rola: 'Obsługa techniczna' }); setAdding(false); await reloadEvent();
-    } catch(err) { console.error(err); } finally { setIsProcessing(false); }
+      if (editingCrew) {
+        await api.put(`/api/wydarzenia/${eventId}/ekipa/${editingCrew.id}`, {
+          rola: finalRole,
+          imie: form.imie,
+          nazwisko: form.nazwisko,
+          email: form.email || null,
+          telefon: form.telefon || null
+        });
+      } else {
+        const payload: any = {
+          isExternal: form.isExternal && form.freelancerMode === 'new',
+          rola: finalRole
+        };
+
+        if (form.isExternal) {
+          if (form.freelancerMode === 'existing') {
+            if (!form.id_uzytkownika) {
+              alert('Wybierz freelancera z listy!');
+              setIsProcessing(false);
+              return;
+            }
+            payload.id_uzytkownika = Number(form.id_uzytkownika);
+          } else {
+            payload.imie = form.imie;
+            payload.nazwisko = form.nazwisko;
+            payload.email = form.email;
+            payload.telefon = form.telefon;
+          }
+        } else {
+          if (!form.id_uzytkownika) {
+            alert('Wybierz pracownika z zespołu!');
+            setIsProcessing(false);
+            return;
+          }
+          payload.id_uzytkownika = Number(form.id_uzytkownika);
+        }
+
+        await api.post(`/api/wydarzenia/${eventId}/ekipa`, payload);
+      }
+
+      setAdding(false);
+      setEditingCrew(null);
+      await Promise.all([reloadEvent(), reloadDictionaries?.()]);
+    } catch(err: any) { 
+      alert(err?.response?.data?.message || 'Nie udało się zapisać przypisania.');
+    } finally { 
+      setIsProcessing(false); 
+    }
   }
 
   async function handleSendMails() {
     if(!ekipa.length) return alert('Brak ekipy do powiadomienia.');
-    if(!confirm('Na pewno wysłać powiadomienia e-mail do wszystkich przypisanych członków ekipy (wewnętrznych i zewnętrznych)? System odłoży ślad w historii.')) return;
+    if(!confirm('Na pewno wysłać powiadomienia e-mail do wszystkich przypisanych członków ekipy?')) return;
     
     setSendingMails(true);
     try {
@@ -1150,119 +1403,231 @@ function EventCrewPanel({ eventId, ekipa, etapy = [], powiadomienia, dict, tabQu
     }
   }
 
-  return <div className="space-y-4">
-    <div className="flex justify-between items-center mb-6">
-      <h3 className="font-black text-xl text-slate-900 dark:text-white">Personel i Ekipa Techniczna</h3>
-      <div className="flex gap-2">
-        <Button variant="secondary" disabled={sendingMails || isProcessing} onClick={handleSendMails}>
-           {sendingMails ? <Loader2 size={16} className="animate-spin inline mr-1"/> : <Send size={16} className="inline mr-1"/>} Wyślij maile do ekipy
-        </Button>
-        <Button onClick={() => setAdding(true)} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Przypisz osobę</Button>
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-black text-xl text-slate-900 dark:text-white">Personel i Ekipa Techniczna</h3>
+        <div className="flex gap-2">
+          <Button variant="secondary" disabled={sendingMails || isProcessing} onClick={handleSendMails}>
+             {sendingMails ? <Loader2 size={16} className="animate-spin inline mr-1"/> : <Send size={16} className="inline mr-1"/>} Wyślij maile do ekipy
+          </Button>
+          <Button onClick={openAddModal} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Przypisz osobę</Button>
+        </div>
       </div>
-    </div>
 
-    {adding && <SimpleModal title="Dodaj osobę do obsługi eventu" onClose={() => setAdding(false)}>
-      <form onSubmit={saveCrew} className="space-y-5">
-        <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-black/30 rounded-xl border border-slate-200 dark:border-white/5">
-          <button type="button" onClick={()=>setForm({...form, isExternal: false})} className={`flex-1 py-2.5 text-sm font-black rounded-lg transition ${!form.isExternal ? 'bg-white dark:bg-white/10 shadow-sm text-cyan-700 dark:text-[#04e0ff]' : 'text-slate-500'}`}>Z zespołu (Konto Systemowe)</button>
-          <button type="button" onClick={()=>setForm({...form, isExternal: true})} className={`flex-1 py-2.5 text-sm font-black rounded-lg transition ${form.isExternal ? 'bg-white dark:bg-white/10 shadow-sm text-cyan-700 dark:text-[#04e0ff]' : 'text-slate-500'}`}>Freelancer (Z zewnątrz)</button>
-        </div>
-
-        {!form.isExternal ? (
-           <Field label="Wybierz pracownika z bazy">
-             <SearchableSelect value={form.id_uzytkownika} onChange={(v) => setForm({...form, id_uzytkownika: v})} options={dict.uzytkownicy.map((u:any)=>({value: String(u.id), label: `${u.imie} ${u.nazwisko}`}))} placeholder="Wybierz osobę..." />
-           </Field>
-        ) : (
-           <div className="grid grid-cols-2 gap-4">
-             <Field label="Imię *"><input required className={inputClass} value={form.imie || ''} onChange={e => setForm({...form, imie: e.target.value})} /></Field>
-             <Field label="Nazwisko *"><input required className={inputClass} value={form.nazwisko || ''} onChange={e => setForm({...form, nazwisko: e.target.value})} /></Field>
-             <Field label="Adres e-mail"><input type="email" className={inputClass} value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} placeholder="Do opcjonalnych powiadomień" /></Field>
-             <Field label="Numer telefonu"><input type="tel" className={inputClass} value={form.telefon || ''} onChange={e => setForm({...form, telefon: e.target.value})} /></Field>
-             <div className="col-span-2 text-xs font-bold text-amber-700 bg-amber-50 p-4 rounded-xl border border-amber-200">
-               Osoba zostanie dodana w module HR jako zablokowany zasób zewnętrzny (Brak loginu i hasła). Będzie można ją łatwo wybrać przy kolejnych wydarzeniach normalnie z listy zespołu!
-             </div>
-           </div>
-        )}
-
-        <Field label="Rola na tym wydarzeniu">
-          <input required className={inputClass} value={form.rola || ''} onChange={e => setForm({...form, rola: e.target.value})} placeholder="np. Główny realizator, Kierowca, Technik..." />
-        </Field>
-
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
-          <Button variant="secondary" type="button" onClick={()=>setAdding(false)} disabled={isProcessing}>Anuluj</Button>
-          <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : 'Zapisz przypisanie'}</Button>
-        </div>
-      </form>
-    </SimpleModal>}
-
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {filtered.map((p: any) => {
-         const hasBeenNotified = powiadomienia?.some((pow:any) => pow.id_uzytkownika === p.id_uzytkownika);
-         return (
-          <div key={p.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-black text-slate-500 dark:text-slate-300 text-lg border border-slate-200 dark:border-white/10 relative">
-                {initials(p.uzytkownik)}
-                {hasBeenNotified && <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5" title="Wysłano powiadomienie email"><MailCheck size={10}/></div>}
+      {adding && (
+        <SimpleModal 
+          title={editingCrew ? `Edycja przypisania: ${editingCrew.uzytkownik?.imie} ${editingCrew.uzytkownik?.nazwisko}` : "Dodaj osobę do obsługi eventu"} 
+          onClose={() => { setAdding(false); setEditingCrew(null); }}
+        >
+          <form onSubmit={saveCrew} className="space-y-5">
+            {!editingCrew && (
+              <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-black/30 rounded-xl border border-slate-200 dark:border-white/5">
+                <button 
+                  type="button" 
+                  onClick={()=>setForm({...form, isExternal: false, id_uzytkownika: ''})} 
+                  className={`flex-1 py-2.5 text-sm font-black rounded-lg transition ${!form.isExternal ? 'bg-white dark:bg-white/10 shadow-sm text-cyan-700 dark:text-[#04e0ff]' : 'text-slate-500'}`}
+                >
+                  Z zespołu (Konto Systemowe)
+                </button>
+                <button 
+                  type="button" 
+                  onClick={()=>setForm({...form, isExternal: true, id_uzytkownika: ''})} 
+                  className={`flex-1 py-2.5 text-sm font-black rounded-lg transition ${form.isExternal ? 'bg-white dark:bg-white/10 shadow-sm text-cyan-700 dark:text-[#04e0ff]' : 'text-slate-500'}`}
+                >
+                  Freelancer (Z zewnątrz)
+                </button>
               </div>
-              <div>
-                <p className="font-black text-slate-900 dark:text-white text-[15px]">{p.uzytkownik?.imie} {p.uzytkownik?.nazwisko}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <p className="text-[11px] font-bold text-[#04e0ff] bg-cyan-50 dark:bg-[#04e0ff]/10 px-2 py-0.5 rounded-md inline-block uppercase tracking-wider">{p.rola_w_wydarzeniu || 'Obsługa'}</p>
-                  {hasBeenNotified && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-md">Powiadomiono</span>}
+            )}
+
+            {!editingCrew && !form.isExternal ? (
+               <Field label="Wybierz pracownika z zespołu">
+                 <SearchableSelect 
+                   value={form.id_uzytkownika} 
+                   onChange={(v) => setForm({...form, id_uzytkownika: v})} 
+                   options={internalUsers.map((u: any)=>({value: String(u.id), label: `${u.imie} ${u.nazwisko} (${u.email})`}))} 
+                   placeholder={internalUsers.length ? "Wybierz osobę z firmy..." : "Wszyscy pracownicy etatowi są już przypisani do wydarzenia"} 
+                 />
+               </Field>
+            ) : !editingCrew ? (
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, freelancerMode: 'existing', id_uzytkownika: '' })}
+                    className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg border transition ${form.freelancerMode === 'existing' ? 'bg-cyan-50 dark:bg-cyan-900/30 border-cyan-300 text-cyan-800 dark:text-cyan-300 font-black' : 'border-slate-200 text-slate-500'}`}
+                  >
+                    <UserCheck size={14} className="inline mr-1.5" /> Wybierz z zapisanych ({existingFreelancers.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, freelancerMode: 'new', id_uzytkownika: '' })}
+                    className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg border transition ${form.freelancerMode === 'new' ? 'bg-cyan-50 dark:bg-cyan-900/30 border-cyan-300 text-cyan-800 dark:text-cyan-300 font-black' : 'border-slate-200 text-slate-500'}`}
+                  >
+                    <UserPlus size={14} className="inline mr-1.5" /> Dodaj nowego freelancera
+                  </button>
+                </div>
+
+                {form.freelancerMode === 'existing' ? (
+                  <Field label="Wybierz wcześniej dodanego freelancera">
+                    <SearchableSelect 
+                      value={form.id_uzytkownika} 
+                      onChange={(v) => setForm({...form, id_uzytkownika: v})} 
+                      options={existingFreelancers.map((u: any)=>({value: String(u.id), label: `${u.imie} ${u.nazwisko} ${u.telefon ? `(${u.telefon})` : ''}`}))} 
+                      placeholder={existingFreelancers.length ? "Wybierz freelancera z bazy..." : "Brak wolnych freelancerów - dodaj nowego"} 
+                    />
+                  </Field>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Imię *"><input required className={inputClass} value={form.imie || ''} onChange={e => setForm({...form, imie: e.target.value})} placeholder="Imię..." /></Field>
+                    <Field label="Nazwisko *"><input required className={inputClass} value={form.nazwisko || ''} onChange={e => setForm({...form, nazwisko: e.target.value})} placeholder="Nazwisko..." /></Field>
+                    <Field label="Adres e-mail"><input type="email" className={inputClass} value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} placeholder="Do opcjonalnych powiadomień" /></Field>
+                    <Field label="Numer telefonu"><input type="tel" className={inputClass} value={form.telefon || ''} onChange={e => setForm({...form, telefon: e.target.value})} placeholder="+48..." /></Field>
+                    <div className="col-span-2 text-xs font-bold text-amber-700 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                      Osoba zostanie zapisana w bazie jako współpracownik i będzie dostępna przy kolejnych eventach.
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : editingCrew?.uzytkownik?.stanowisko === 'Współpracownik Zewnętrzny' ? (
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Imię"><input className={inputClass} value={form.imie || ''} onChange={e => setForm({...form, imie: e.target.value})} /></Field>
+                <Field label="Nazwisko"><input className={inputClass} value={form.nazwisko || ''} onChange={e => setForm({...form, nazwisko: e.target.value})} /></Field>
+                <Field label="Adres e-mail"><input type="email" className={inputClass} value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} /></Field>
+                <Field label="Numer telefonu"><input type="tel" className={inputClass} value={form.telefon || ''} onChange={e => setForm({...form, telefon: e.target.value})} /></Field>
+              </div>
+            ) : null}
+
+            <div className="space-y-2">
+              <Field label="Rola na tym wydarzeniu *">
+                <select 
+                  className={inputClass} 
+                  value={form.selectedRole} 
+                  onChange={(e) => setForm({...form, selectedRole: e.target.value})}
+                >
+                  {PREDEFINED_ROLES.map((r: string) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </Field>
+
+              {form.selectedRole === 'Inne (Wpisz własną...)' && (
+                <Field label="Wpisz nazwę własnej roli">
+                  <input 
+                    required 
+                    className={inputClass} 
+                    value={form.customRole || ''} 
+                    onChange={e => setForm({...form, customRole: e.target.value})} 
+                    placeholder="np. Operator Drona, Tłumacz..." 
+                  />
+                </Field>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
+              <Button variant="secondary" type="button" onClick={()=>{ setAdding(false); setEditingCrew(null); }} disabled={isProcessing}>Anuluj</Button>
+              <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : editingCrew ? 'Zapisz zmiany' : 'Zapisz przypisanie'}</Button>
+            </div>
+          </form>
+        </SimpleModal>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {filtered.map((p: any) => {
+           const hasBeenNotified = powiadomienia?.some((pow: any) => pow.id_uzytkownika === p.id_uzytkownika);
+           return (
+            <div key={p.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-black text-slate-500 dark:text-slate-300 text-lg border border-slate-200 dark:border-white/10 relative">
+                  {initials(p.uzytkownik)}
+                  {hasBeenNotified && <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5" title="Wysłano powiadomienie email"><MailCheck size={10}/></div>}
+                </div>
+                <div>
+                  <p className="font-black text-slate-900 dark:text-white text-[15px]">{p.uzytkownik?.imie} {p.uzytkownik?.nazwisko}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[11px] font-bold text-[#04e0ff] bg-cyan-50 dark:bg-[#04e0ff]/10 px-2 py-0.5 rounded-md inline-block uppercase tracking-wider">{p.rola_w_wydarzeniu || 'Obsługa'}</p>
+                    {p.uzytkownik?.stanowisko === 'Współpracownik Zewnętrzny' && <span className="text-[9px] font-bold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800">Freelancer</span>}
+                  </div>
                 </div>
               </div>
+              
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button title="Edytuj dane i rolę" onClick={() => openEditModal(p)} className="p-2 text-slate-500 hover:text-cyan-600 bg-slate-50 hover:bg-cyan-50 dark:bg-white/5 rounded-xl transition"><Edit2 size={16}/></button>
+                <button title="Przypisz do etapów" onClick={() => onMassAssign(p)} className="p-2 text-cyan-600 bg-cyan-50 dark:bg-[#04e0ff]/10 hover:bg-cyan-100 rounded-xl transition"><Clock size={16}/></button>
+                <button title="Odłącz od wydarzenia" onClick={async () => { 
+                  if(confirm('Odpiąć osobę od wydarzenia?')) { 
+                    setIsProcessing(true);
+                    try {
+                      await api.post(`/api/wydarzenia/${eventId}/ekipa/${p.id_uzytkownika}/etapy`, { stageIds: [] });
+                      await api.delete(`/api/wydarzenia/${eventId}/ekipa/${p.id}`);
+                      await Promise.all([reloadEvent(), reloadDictionaries?.()]);
+                    } catch(e) {
+                      alert('Nie udało się usunąć osoby.');
+                    } finally { setIsProcessing(false); }
+                  } 
+                }} className="p-2 text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
+              </div>
             </div>
-            
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button title="Przypisz osobę do etapów wydarzenia" onClick={() => onMassAssign(p)} className="p-2 text-cyan-600 bg-cyan-50 dark:bg-[#04e0ff]/10 hover:bg-cyan-100 rounded-xl transition"><Clock size={16}/></button>
-              <button title="Odłącz od wydarzenia" onClick={async () => { 
-                if(confirm('Odpiąć osobę od wydarzenia?')) { 
-                  setIsProcessing(true);
-                  try {
-                    // Najpierw usuwamy wszystkie przypisania tej osoby do etapów,
-                    // aby liczniki harmonogramu odpowiadały faktycznemu stanowi.
-                    await api.post(`/api/wydarzenia/${eventId}/ekipa/${p.id_uzytkownika}/etapy`, { stageIds: [] });
-                    await api.delete(`/api/wydarzenia/${eventId}/ekipa/${p.id}`);
-                    await reloadEvent();
-                  } catch(e) {
-                    console.error('Nie udało się usunąć osoby z wydarzenia i etapów:', e);
-                    alert('Nie udało się usunąć osoby. Spróbuj ponownie.');
-                  } finally { setIsProcessing(false); }
-                } 
-              }} className="p-2 text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
-            </div>
-          </div>
-         )
-      })}
-      {filtered.length === 0 && ekipa.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak osób pasujących do wyszukiwania.</div>}
-      {ekipa.length === 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak przypisanej ekipy do wydarzenia.</div>}
+           );
+        })}
+        {filtered.length === 0 && ekipa.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak osób pasujących do wyszukiwania.</div>}
+        {ekipa.length === 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak przypisanej ekipy do wydarzenia.</div>}
+      </div>
     </div>
-  </div>
+  );
 }
 
 // -------------------------------------------------------------
-// FLOTA
+// FLOTA (Z OBSŁUGĄ POJAZDÓW Z BAZY ORAZ SPOZA BAZY)
 // -------------------------------------------------------------
 function EventFleetPanel({ eventId, pojazdy, etapy = [], dict, tabQuery = '', reloadEvent, onMassAssign }: any) {
-  const [form, setForm] = useState<any>({ rola: 'Transport sprzętu' });
+  const [form, setForm] = useState<any>({ 
+    isExternal: false, 
+    id_pojazdu: '', 
+    pojazd_zewnetrzny: '', 
+    rola: 'Transport sprzętu' 
+  });
   const [adding, setAdding] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const filtered = useMemo(() => {
     if (!tabQuery) return pojazdy;
     const q = tabQuery.toLowerCase();
-    return pojazdy.filter((v:any) => `${v.pojazd?.nazwa || ''} ${v.pojazd?.nr_rejestracyjny || ''} ${v.rola_pojazdu || ''}`.toLowerCase().includes(q));
+    return pojazdy.filter((v:any) => `${v.pojazd?.nazwa || v.pojazd_zewnetrzny || ''} ${v.pojazd?.nr_rejestracyjny || ''} ${v.rola_pojazdu || ''}`.toLowerCase().includes(q));
   }, [pojazdy, tabQuery]);
 
   async function saveFleet(e: any) {
     e.preventDefault();
     if(isProcessing) return;
     setIsProcessing(true);
+
+    const payload = {
+      id_pojazdu: form.isExternal ? null : (form.id_pojazdu ? Number(form.id_pojazdu) : null),
+      pojazd_zewnetrzny: form.isExternal ? form.pojazd_zewnetrzny : null,
+      rola: form.rola
+    };
+
+    if (!form.isExternal && !payload.id_pojazdu) {
+      alert('Wybierz auto z bazy floty!');
+      setIsProcessing(false);
+      return;
+    }
+    if (form.isExternal && !payload.pojazd_zewnetrzny) {
+      alert('Wpisz nazwę/opis pojazdu zewnętrznego!');
+      setIsProcessing(false);
+      return;
+    }
+
     try {
-      await api.post(`/api/wydarzenia/${eventId}/flota`, form);
-      setForm({ rola: 'Transport sprzętu' }); setAdding(false); await reloadEvent();
-    } catch(err) { console.error(err); } finally { setIsProcessing(false); }
+      await api.post(`/api/wydarzenia/${eventId}/flota`, payload);
+      setForm({ isExternal: false, id_pojazdu: '', pojazd_zewnetrzny: '', rola: 'Transport sprzętu' }); 
+      setAdding(false); 
+      await reloadEvent();
+    } catch(err: any) { 
+      alert(err?.response?.data?.message || 'Nie udało się przypisać pojazdu.');
+    } finally { 
+      setIsProcessing(false); 
+    }
   }
 
   return <div className="space-y-4">
@@ -1273,12 +1638,48 @@ function EventFleetPanel({ eventId, pojazdy, etapy = [], dict, tabQuery = '', re
 
     {adding && <SimpleModal title="Zarezerwuj pojazd na wydarzenie" onClose={() => setAdding(false)}>
       <form onSubmit={saveFleet} className="space-y-4">
-        <Field label="Pojazd z bazy">
-          <SearchableSelect value={form.id_pojazdu} onChange={(v) => setForm({...form, id_pojazdu: v})} options={dict.pojazdy.map((p:any)=>({value: String(p.id), label: `${p.nazwa} (${p.nr_rejestracyjny})`}))} placeholder="Wybierz auto..." />
-        </Field>
+        <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-black/30 rounded-xl border border-slate-200 dark:border-white/5">
+          <button 
+            type="button" 
+            onClick={()=>setForm({...form, isExternal: false, pojazd_zewnetrzny: ''})} 
+            className={`flex-1 py-2.5 text-sm font-black rounded-lg transition ${!form.isExternal ? 'bg-white dark:bg-white/10 shadow-sm text-cyan-700 dark:text-[#04e0ff]' : 'text-slate-500'}`}
+          >
+            Z floty firmowej (Baza)
+          </button>
+          <button 
+            type="button" 
+            onClick={()=>setForm({...form, isExternal: true, id_pojazdu: ''})} 
+            className={`flex-1 py-2.5 text-sm font-black rounded-lg transition ${form.isExternal ? 'bg-white dark:bg-white/10 shadow-sm text-cyan-700 dark:text-[#04e0ff]' : 'text-slate-500'}`}
+          >
+            Pojazd spoza bazy (Zewnętrzny)
+          </button>
+        </div>
+
+        {!form.isExternal ? (
+          <Field label="Pojazd z bazy floty">
+            <SearchableSelect 
+              value={form.id_pojazdu} 
+              onChange={(v) => setForm({...form, id_pojazdu: v})} 
+              options={dict.pojazdy.map((p:any)=>({value: String(p.id), label: `${p.nazwa} (${p.nr_rejestracyjny})`}))} 
+              placeholder="Wybierz auto firmowe..." 
+            />
+          </Field>
+        ) : (
+          <Field label="Nazwa i dane pojazdu spoza bazy *">
+            <input 
+              required 
+              className={inputClass} 
+              value={form.pojazd_zewnetrzny || ''} 
+              onChange={e => setForm({...form, pojazd_zewnetrzny: e.target.value})} 
+              placeholder="np. Iveco Daily 35S18 (Wynajem PANEK) / Prywatne auto realizatora" 
+            />
+          </Field>
+        )}
+
         <Field label="Rola pojazdu na wyjeździe">
           <input required className={inputClass} value={form.rola || ''} onChange={e => setForm({...form, rola: e.target.value})} placeholder="np. Transport główny, Auto dla realizatorów..." />
         </Field>
+
         <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
           <Button variant="secondary" type="button" onClick={()=>setAdding(false)} disabled={isProcessing}>Anuluj</Button>
           <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : 'Zapisz rezerwację'}</Button>
@@ -1287,31 +1688,44 @@ function EventFleetPanel({ eventId, pojazdy, etapy = [], dict, tabQuery = '', re
     </SimpleModal>}
 
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {filtered.map((v: any) => <div key={v.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:shadow-md transition ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
-        <div>
-           <p className="font-black text-slate-900 dark:text-white text-[15px] flex items-center gap-2 mb-2"><Car size={16} className="text-[#04e0ff]"/> {v.pojazd?.nazwa || 'Pojazd'}</p>
-           <p className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center"><span className="text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-white/10 px-2 py-1 rounded-md uppercase tracking-widest text-[10px] mr-2">{v.pojazd?.nr_rejestracyjny || '-'}</span> {v.rola_pojazdu || 'Rezerwacja'}</p>
-        </div>
-        
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-           <button title="Przypisz auto do etapów wydarzenia" onClick={() => onMassAssign(v)} className="p-2 text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 rounded-xl transition"><Clock size={16}/></button>
-           <button title="Usuń z wyjazdu" onClick={async () => { 
-             if(confirm('Zwolnić rezerwację pojazdu?')) { 
-               setIsProcessing(true);
-               try {
-                 // Najpierw usuwamy wszystkie przypisania tego pojazdu do etapów,
-                 // aby liczniki harmonogramu odpowiadały faktycznemu stanowi.
-                 await api.post(`/api/wydarzenia/${eventId}/flota/${v.id_pojazdu}/etapy`, { stageIds: [] });
-                 await api.delete(`/api/wydarzenia/${eventId}/flota/${v.id}`);
-                 await reloadEvent();
-               } catch(e) {
-                 console.error('Nie udało się usunąć pojazdu z wydarzenia i etapów:', e);
-                 alert('Nie udało się usunąć pojazdu. Spróbuj ponownie.');
-               } finally { setIsProcessing(false); }
-             } 
-           }} className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
-        </div>
-      </div>)}
+      {filtered.map((v: any) => {
+        const vehicleName = v.pojazd?.nazwa || v.pojazd_zewnetrzny || 'Pojazd zewnętrzny';
+        const vehiclePlate = v.pojazd?.nr_rejestracyjny || 'Spoza bazy';
+
+        return (
+          <div key={v.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:shadow-md transition ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div>
+              <p className="font-black text-slate-900 dark:text-white text-[15px] flex items-center gap-2 mb-2">
+                <Car size={16} className="text-[#04e0ff]"/> {vehicleName}
+              </p>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center">
+                <span className="text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-white/10 px-2 py-1 rounded-md uppercase tracking-widest text-[10px] mr-2">
+                  {vehiclePlate}
+                </span> 
+                {v.rola_pojazdu || 'Rezerwacja'}
+              </p>
+            </div>
+            
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button title="Przypisz auto do etapów wydarzenia" onClick={() => onMassAssign(v)} className="p-2 text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 rounded-xl transition"><Clock size={16}/></button>
+              <button title="Usuń z wyjazdu" onClick={async () => { 
+                if(confirm('Zwolnić rezerwację pojazdu?')) { 
+                  setIsProcessing(true);
+                  try {
+                    const targetKey = v.id_pojazdu || v.id;
+                    await api.post(`/api/wydarzenia/${eventId}/flota/${targetKey}/etapy`, { stageIds: [] });
+                    await api.delete(`/api/wydarzenia/${eventId}/flota/${v.id}`);
+                    await reloadEvent();
+                  } catch(e) {
+                    console.error('Nie udało się usunąć pojazdu z wydarzenia i etapów:', e);
+                    alert('Nie udało się usunąć pojazdu. Spróbuj ponownie.');
+                  } finally { setIsProcessing(false); }
+                } 
+              }} className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
+            </div>
+          </div>
+        );
+      })}
       {filtered.length === 0 && pojazdy.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak aut pasujących do wyszukiwania.</div>}
       {pojazdy.length === 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak zarezerwowanych aut dla tego wydarzenia.</div>}
     </div>
@@ -1394,20 +1808,169 @@ function AttachmentsPanel({ eventId, zalaczniki, tabQuery = '', reloadEvent }: a
       </Card>}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-         {filtered.map((z: any) => <div key={z.id} className="rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between group hover:border-cyan-300 dark:hover:border-cyan-500/50 transition-colors">
-            <div className="flex items-center gap-4 min-w-0">
-               <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20"><FileText size={24} strokeWidth={1.5}/></div>
-               <div className="min-w-0 pr-2">
-                  <p className="font-black text-[15px] text-slate-900 dark:text-white truncate">{z.nazwa || z.nazwa_pliku}</p>
-                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 truncate">{z.nazwa_pliku} · {((z.rozmiar_bajtow||0) / 1024 / 1024).toFixed(2)} MB</p>
-                  <p className="text-[10px] font-semibold text-slate-400 mt-1">Dodał: {z.dodal?.imie || 'System'} · {new Date(z.data_utworzenia).toLocaleDateString()}</p>
-               </div>
-            </div>
-            <div className="flex flex-col gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button type="button" onClick={() => handleDownload(z)} className="p-2 text-[#04e0ff] hover:bg-cyan-50 dark:hover:bg-white/5 rounded-xl transition" title="Pobierz bezpiecznie"><Download size={18}/></button>
-              <button type="button" onClick={async () => { if(confirm('Usunąć załącznik z serwera?')) { await api.delete(`/api/wydarzenia/${eventId}/zalaczniki/${z.id}`); reloadEvent(); } }} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition" title="Usuń"><Trash2 size={18}/></button>
-            </div>
-         </div>)}
+         {filtered.map((z: any) => <div
+  key={z.id}
+  onClick={() => handleDownload(z)}
+  className="
+    group relative flex items-center justify-between gap-4
+    w-full p-4
+    rounded-2xl
+    border border-slate-200/80 dark:border-white/[0.08]
+    bg-white dark:bg-slate-900/80
+    shadow-sm
+    cursor-pointer
+    transition-all duration-200 ease-out
+    hover:-translate-y-[1px]
+    hover:border-cyan-300/70
+    hover:shadow-lg hover:shadow-cyan-500/5
+    dark:hover:border-cyan-400/30
+    dark:hover:bg-slate-900
+  "
+>
+  {/* Lewa część */}
+  <div className="flex items-center gap-4 min-w-0 flex-1">
+
+    {/* Ikona */}
+    <div
+      className="
+        relative flex items-center justify-center shrink-0
+        w-12 h-12
+        rounded-2xl
+        bg-indigo-50 dark:bg-indigo-500/[0.10]
+        text-indigo-500 dark:text-indigo-400
+        border border-indigo-100 dark:border-indigo-500/20
+        transition-all duration-200
+        group-hover:bg-cyan-50
+        group-hover:text-cyan-500
+        group-hover:border-cyan-200
+        dark:group-hover:bg-cyan-500/10
+        dark:group-hover:text-cyan-400
+        dark:group-hover:border-cyan-500/20
+      "
+    >
+      <FileText size={23} strokeWidth={1.6} />
+    </div>
+
+    {/* Informacje */}
+    <div className="min-w-0 flex-1">
+
+      <p
+        className="
+          font-semibold text-[14px]
+          text-slate-900 dark:text-white
+          truncate
+          transition-colors
+          group-hover:text-cyan-600
+          dark:group-hover:text-cyan-400
+        "
+      >
+        {z.nazwa || z.nazwa_pliku}
+      </p>
+
+      <div className="flex items-center gap-2 mt-1.5 min-w-0">
+        <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">
+          {z.nazwa_pliku}
+        </p>
+
+        <span className="text-slate-300 dark:text-slate-700 shrink-0">
+          •
+        </span>
+
+        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">
+          {((z.rozmiar_bajtow || 0) / 1024 / 1024).toFixed(2)} MB
+        </span>
+      </div>
+
+      <div className="flex items-center gap-1.5 mt-1.5">
+        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+          Dodał:
+        </span>
+
+        <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+          {z.dodal?.imie || 'System'}
+        </span>
+
+        <span className="text-slate-300 dark:text-slate-700">
+          •
+        </span>
+
+        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+          {new Date(z.data_utworzenia).toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {/* Akcje */}
+  <div
+    className="
+      flex items-center gap-1 shrink-0
+      opacity-60
+      group-hover:opacity-100
+      transition-opacity duration-200
+    "
+    onClick={(e) => e.stopPropagation()}
+  >
+    {/* Pobierz */}
+    <button
+      type="button"
+      onClick={() => handleDownload(z)}
+      className="
+        flex items-center justify-center
+        w-9 h-9
+        rounded-xl
+        text-slate-400 dark:text-slate-500
+        hover:text-cyan-500
+        hover:bg-cyan-50
+        dark:hover:text-cyan-400
+        dark:hover:bg-cyan-500/10
+        transition-all duration-150
+        cursor-pointer
+      "
+      title="Pobierz bezpiecznie"
+    >
+      <Download size={17} strokeWidth={1.8} />
+    </button>
+
+    {/* Usuń */}
+    <button
+      type="button"
+      onClick={async () => {
+        if (confirm('Usunąć załącznik z serwera?')) {
+          await api.delete(
+            `/api/wydarzenia/${eventId}/zalaczniki/${z.id}`
+          );
+          reloadEvent();
+        }
+      }}
+      className="
+        flex items-center justify-center
+        w-9 h-9
+        rounded-xl
+        text-slate-400 dark:text-slate-500
+        hover:text-red-500
+        hover:bg-red-50
+        dark:hover:text-red-400
+        dark:hover:bg-red-500/10
+        transition-all duration-150
+        cursor-pointer
+      "
+      title="Usuń"
+    >
+      <Trash2 size={17} strokeWidth={1.8} />
+    </button>
+  </div>
+
+  {/* Delikatny efekt poświaty */}
+  <div
+    className="
+      pointer-events-none absolute inset-0 rounded-2xl
+      opacity-0 group-hover:opacity-100
+      transition-opacity duration-300
+      ring-1 ring-inset ring-cyan-400/10
+    "
+  />
+</div>)}
          {filtered.length === 0 && zalaczniki.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak plików pasujących do wyszukiwania.</div>}
          {zalaczniki.length === 0 && !adding && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak wgranych plików do tego wydarzenia. Pamiętaj by załączyć tu skan podpisanej umowy!</div>}
       </div>
@@ -1738,7 +2301,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
   const activeRootObj = useMemo(() => activeRoot && activeRoot !== 'all' ? equipmentCategoryById.get(String(activeRoot)) : null, [activeRoot, equipmentCategoryById]);
 
-  // PUNKT 4: Wykluczenie case'ów z planowania
   const visibleModels = useMemo(() => {
     const q = query.trim().toLowerCase();
     return models
@@ -1753,11 +2315,9 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       .sort((a: any, b: any) => String(a.kategoria_nazwa || '').localeCompare(String(b.kategoria_nazwa || ''), 'pl') || String(a.nazwa || '').localeCompare(String(b.nazwa || ''), 'pl'));
   }, [models, activeRoot, activeCategoryIds, query, equipmentCategoryById]);
 
-  // PUNKT 2: Połączenie egzemplarzy i sprzętu ilościowego w wyszukiwarce WZ/PZ
   const visibleInstancesAndQuantity = useMemo(() => {
     const q = query.trim().toLowerCase();
 
-    // 1. Egzemplarze fizyczne
     let physicalList = items
       .filter((x: any) => (isEquipmentInstance(x) || isZestawRow(x)) && x.model?.typ_sprzetu !== 'opakowanie')
       .map((x: any) => ({
@@ -1769,7 +2329,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
         kod: x.kod_kreskowy || x.zewnetrzny_kod_kreskowy || x.zewnetrzny_qr_kod || x.qr_kod || x.sn || '',
       }));
 
-    // 2. Modele ilościowe
     const quantityList = models
       .filter((m: any) => isQuantityOnly(m))
       .map((m: any) => ({
@@ -1784,14 +2343,12 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
     let combined = [...physicalList, ...quantityList];
 
-    // Filtrowanie kontekstowe dla PZ:
     if (mode === 'przyjecie') {
       combined = combined.filter((x: any) => {
         if (x.isQuantity) {
           const pl = plannedRows.find((r: any) => r.id_modelu === x.id);
           return pl ? (pl.wydane - pl.przyjete) > 0 : false;
         }
-        // Pozwalamy na wyświetlenie egzemplarzy z innych eventów (PUNKT 3), ale oznaczamy
         return true;
       });
     }
@@ -1887,7 +2444,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     };
   }
 
-  // PUNKT 1 & 3: Dodawanie ze sprawdzaniem duplikatów i cross-event return
   function addDocumentItemsBulk(rows: any[], source: 'scan' | 'manual' = 'manual', sourceLabel = '', scannedContainer: any = null) {
     const normalized = rows
       .map((row: any) => {
@@ -1902,7 +2458,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       return;
     }
 
-    // PUNKT 1: Walidacja przy WYDANIU (WZ)
     if (mode === 'wydanie') {
       const alreadyIssuedOnThisEvent = normalized.filter(item => item.id_egzemplarza && eventInstanceStatus.currentlyInFieldIds.has(Number(item.id_egzemplarza)));
       if (alreadyIssuedOnThisEvent.length > 0) {
@@ -1911,7 +2466,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       }
     }
 
-    // PUNKT 3: Komunikat informacyjny przy PZ z innego wydarzenia
     if (mode === 'przyjecie') {
       for (const item of normalized) {
         if (item.id_egzemplarza && !eventInstanceStatus.issuedMap.has(Number(item.id_egzemplarza))) {
@@ -2558,7 +3112,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                   </div>
                 </div>
 
-                {/* PUNKT 2: Zintegrowana wyszukiwarka egzemplarzy i sprzętu ilościowego */}
                 <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
                   <Field label={mode === 'wydanie' ? "Wyszukaj egzemplarz lub model ilościowy" : "Wyszukaj zwracany sprzęt"}>
                     <div className="relative min-w-0">

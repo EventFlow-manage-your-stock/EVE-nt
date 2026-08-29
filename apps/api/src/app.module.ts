@@ -26,6 +26,7 @@ import { UstawieniaModule } from './ustawienia/ustawienia.module';
 import { ZapytaniaModule } from './zapytania/zapytania.module';
 import { UzytkownicyModule } from './uzytkownicy/uzytkownicy.module';
 import { StorageModule } from './storage/storage.module';
+import { PowiadomieniaModule } from './powiadomienia/powiadomienia.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { StorageModule } from './storage/storage.module';
     ZapytaniaModule,
     UzytkownicyModule,
     StorageModule,
+    PowiadomieniaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

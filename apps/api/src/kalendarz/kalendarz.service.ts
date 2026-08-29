@@ -13,45 +13,87 @@ export class KalendarzService {
 
   private range(query: any) {
     const today = new Date();
-    const from = this.dateOrNull(query.od) ?? new Date(today.getFullYear(), today.getMonth(), 1);
-    const to = this.dateOrNull(query.do) ?? new Date(today.getFullYear(), today.getMonth() + 1, 7);
+    const from = this.dateOrNull(query.od) ?? new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const to = this.dateOrNull(query.do) ?? new Date(today.getFullYear(), today.getMonth() + 2, 0);
     return { from, to };
   }
 
   async findAll(id_organizacji: number, query: any) {
     const { from, to } = this.range(query);
 
-    const [wydarzenia, wynajmy, urlopy, pojazdy, pojazdyInfo, przegladyPojazdow] = await Promise.all([
+    const [
+      wydarzenia,
+      wynajmy,
+      urlopy,
+      serwisy,
+      pojazdy,
+      pojazdyInfo,
+      serwisyPojazdow,
+      przegladyPojazdow,
+      zadania,
+    ] = await Promise.all([
+      // 1. Wydarzenia
       this.prisma.extendedClient.wydarzenie.findMany({
-        where: { id_organizacji, aktywny: true, data_start: { lte: to }, data_koniec: { gte: from } },
-        include: { typ: true, status: true, status_magazynowy: true, status_ksiegowy: true, miejsce: true, kontrahent: true },
-        orderBy: { data_start: 'asc' },
-      }),
-      this.prisma.extendedClient.wynajem.findMany({
-        // EVENTFLOW_PRODUCT_POLISH_V18:
-        // Wynajmy powiązane z wydarzeniem nie dostają osobnego paska w kalendarzu.
-        // Samo wydarzenie jest widoczne jako główny pasek, a wynajem/sprzęt obsługujemy w panelu wydarzenia.
         where: {
           id_organizacji,
           aktywny: true,
-          // EVENTFLOW_PRODUCT_POLISH_V28: wynajem jest osobnym bytem. Stare powiązania z wydarzeniem są czyszczone skryptem SQL w komendach V28.
+          data_start: { lte: to },
+          data_koniec: { gte: from },
+        },
+        include: {
+          typ: true,
+          status: true,
+          status_magazynowy: true,
+          status_ksiegowy: true,
+          miejsce: true,
+          kontrahent: true,
+        },
+        orderBy: { data_start: 'asc' },
+      }),
+
+      // 2. Wynajmy
+      this.prisma.extendedClient.wynajem.findMany({
+        where: {
+          id_organizacji,
+          aktywny: true,
           data_wydania: { lte: to },
           data_zwrotu_planowana: { gte: from },
         },
         include: { status: true, kontrahent: true },
         orderBy: { data_wydania: 'asc' },
       }),
+
+      // 3. Urlopy i nieobecności
       this.prisma.extendedClient.nieobecnosc.findMany({
-        where: { id_organizacji, aktywny: true, data_od: { lte: to }, data_do: { gte: from } },
+        where: {
+          id_organizacji,
+          aktywny: true,
+          data_od: { lte: to },
+          data_do: { gte: from },
+        },
         include: { uzytkownik: true },
         orderBy: { data_od: 'asc' },
       }),
+
+      // 4. Serwis sprzętu
+      this.prisma.extendedClient.serwisSprzetu.findMany({
+        where: { id_organizacji, aktywny: true, data_zgloszenia: { lte: to } },
+        include: { status: true, egzemplarz: { include: { model: true } } },
+        take: 100,
+        orderBy: { data_zgloszenia: 'desc' },
+      }),
+
+      // 5. Przypisania floty do wydarzeń (z bazy i z zewnątrz)
       this.prisma.extendedClient.wydarzeniePojazd.findMany({
-        where: { id_organizacji, aktywny: true, wydarzenie: { data_start: { lte: to }, data_koniec: { gte: from } } },
+        where: {
+          id_organizacji,
+          aktywny: true,
+          wydarzenie: { data_start: { lte: to }, data_koniec: { gte: from } },
+        },
         include: { pojazd: true, wydarzenie: true },
       }),
-      // EVENTFLOW_PRODUCT_POLISH_V7: daty OC i przeglądu z karty pojazdu pokazujemy jako wpisy informacyjne.
-      // EVENTFLOW_PRODUCT_POLISH_V11: wpisy floty mają ikonę auta w kalendarzu ogólnym i kalendarzu floty.
+
+      // 6. Daty badań technicznych i polis OC z kart aut
       this.prisma.extendedClient.pojazd.findMany({
         where: {
           id_organizacji,
@@ -62,15 +104,36 @@ export class KalendarzService {
           ],
         },
       }),
+
+      // 7. Zgłoszenia serwisowe floty
+      this.prisma.extendedClient.serwisPojazdu.findMany({
+        where: { id_organizacji, aktywny: true, data_serwisu: { gte: from, lte: to } },
+        include: { pojazd: true },
+        orderBy: { data_serwisu: 'asc' },
+      }),
+
+      // 8. Przeglądy okresowe floty
       this.prisma.extendedClient.przegladPojazdu.findMany({
         where: { id_organizacji, aktywny: true, data_przegladu: { gte: from, lte: to } },
         include: { pojazd: true },
         orderBy: { data_przegladu: 'asc' },
       }),
+
+      // 9. Zadania z datami
+      this.prisma.extendedClient.zadanie.findMany({
+        where: {
+          id_organizacji,
+          aktywny: true,
+          data_start: { lte: to },
+          data_koniec: { gte: from },
+        },
+        include: { przypisani_uzytkownicy: { include: { uzytkownik: true } } },
+      }),
     ]);
 
     const items = [
-      ...wydarzenia.map((w) => ({
+      // Wydarzenia
+      ...wydarzenia.map((w: any) => ({
         id: `wydarzenie-${w.id}`,
         sourceId: w.id,
         typ: 'wydarzenie',
@@ -78,16 +141,18 @@ export class KalendarzService {
         start: w.data_start,
         koniec: w.data_koniec,
         kolor: w.typ?.kolor ?? '#06B6D4',
-        ikona: (w.status as any)?.ikona ?? '•',
+        ikona: w.status?.ikona ?? '●',
         status: w.status?.nazwa ?? 'Bez statusu',
         statusMagazynowy: w.status_magazynowy?.nazwa ?? '',
         statusKsiegowy: w.status_ksiegowy?.nazwa ?? '',
-        ikonaMagazynowa: (w.status_magazynowy as any)?.ikona ?? '',
-        ikonaKsiegowa: (w.status_ksiegowy as any)?.ikona ?? '',
-        miejsce: w.miejsce?.nazwa ?? (w as any).miejsce_reczne ?? '',
+        ikonaMagazynowa: w.status_magazynowy?.ikona ?? '',
+        ikonaKsiegowa: w.status_ksiegowy?.ikona ?? '',
+        miejsce: w.miejsce?.nazwa ?? w.miejsce_reczne ?? '',
         opis: w.opis,
       })),
-      ...wynajmy.map((w) => ({
+
+      // Wynajmy
+      ...wynajmy.map((w: any) => ({
         id: `wynajem-${w.id}`,
         sourceId: w.id,
         typ: 'wypozyczenie',
@@ -95,74 +160,135 @@ export class KalendarzService {
         start: w.data_wydania,
         koniec: w.data_zwrotu_planowana,
         kolor: '#F97316',
-        ikona: '•',
+        ikona: '📦',
         status: w.status?.nazwa ?? 'Wynajem',
         miejsce: w.kontrahent?.nazwa ?? '',
       })),
-      ...urlopy.map((u) => ({
+
+      // Urlopy
+      ...urlopy.map((u: any) => ({
         id: `urlop-${u.id}`,
         sourceId: u.id,
         typ: 'urlop',
-        tytul: `${u.typ}: ${u.uzytkownik.imie} ${u.uzytkownik.nazwisko}`,
+        tytul: `${u.typ || 'Urlop'}: ${u.uzytkownik?.imie || ''} ${u.uzytkownik?.nazwisko || ''}`.trim(),
         start: u.data_od,
         koniec: u.data_do,
-        kolor: '#22C55E',
-        ikona: '•',
+        kolor: '#242527',
+        ikona: '🌴',
         status: 'Nieobecność',
         miejsce: '',
       })),
-      ...pojazdyInfo.flatMap((p) => [
-        p.data_przegladu ? {
-          id: `flota-przeglad-${p.id}`,
-          sourceId: p.id,
-          typ: 'flota',
-          tytul: `Przegląd techniczny: ${p.nazwa}`,
-          start: p.data_przegladu,
-          koniec: p.data_przegladu,
-          kolor: '#0EA5E9',
-          ikona: '•',
-          status: 'Wpis informacyjny - przegląd',
-          miejsce: p.nr_rejestracyjny,
-          editable: false,
-        } : null,
-        p.data_oc ? {
-          id: `flota-oc-${p.id}`,
-          sourceId: p.id,
-          typ: 'flota',
-          tytul: `OC: ${p.nazwa}`,
-          start: p.data_oc,
-          koniec: p.data_oc,
-          kolor: '#6366F1',
-          ikona: '•',
-          status: 'Wpis informacyjny - OC',
-          miejsce: p.nr_rejestracyjny,
-          editable: false,
-        } : null,
+
+      // Serwisy sprzętu
+      ...serwisy.map((s: any) => ({
+        id: `serwis-${s.id}`,
+        sourceId: s.id,
+        typ: 'serwis',
+        tytul: `Serwis: ${s.egzemplarz?.model?.nazwa ?? s.tytul}`,
+        start: s.data_zgloszenia,
+        koniec: s.data_rozwiazania,
+        kolor: s.status?.kolor ?? '#EF4444',
+        ikona: '🔧',
+        status: s.status?.nazwa ?? 'Serwis',
+        miejsce: s.egzemplarz?.nazwa ?? '',
+      })),
+
+      // Informacyjne wpisy floty (SKP / OC)
+      ...pojazdyInfo.flatMap((p: any) => [
+        p.data_przegladu
+          ? {
+              id: `flota-przeglad-${p.id}`,
+              sourceId: p.id,
+              typ: 'flota',
+              tytul: `Przegląd techniczny SKP: ${p.nazwa}`,
+              start: p.data_przegladu,
+              koniec: p.data_przegladu,
+              kolor: '#0EA5E9',
+              ikona: '🚗',
+              status: 'Wpis informacyjny - przegląd',
+              miejsce: p.nr_rejestracyjny,
+              editable: false,
+            }
+          : null,
+        p.data_oc
+          ? {
+              id: `flota-oc-${p.id}`,
+              sourceId: p.id,
+              typ: 'flota',
+              tytul: `Ważność OC: ${p.nazwa}`,
+              start: p.data_oc,
+              koniec: p.data_oc,
+              kolor: '#6366F1',
+              ikona: '🛡️',
+              status: 'Wpis informacyjny - OC',
+              miejsce: p.nr_rejestracyjny,
+              editable: false,
+            }
+          : null,
       ].filter(Boolean)),
-      ...przegladyPojazdow.map((p) => ({
+
+      // Serwisy aut
+      ...serwisyPojazdow.map((s: any) => ({
+        id: `flota-serwis-${s.id}`,
+        sourceId: s.id,
+        typ: 'flota',
+        tytul: `Serwis pojazdu: ${s.pojazd?.nazwa || 'Pojazd'}`,
+        start: s.data_serwisu,
+        koniec: s.data_serwisu,
+        kolor: '#F59E0B',
+        ikona: '🔧',
+        status: 'Serwis pojazdu',
+        miejsce: s.pojazd?.nr_rejestracyjny || '',
+        editable: false,
+      })),
+
+      // Przeglądy okresowe aut
+      ...przegladyPojazdow.map((p: any) => ({
         id: `flota-przeglad-hist-${p.id}`,
         sourceId: p.id,
         typ: 'flota',
-        tytul: `Przegląd ${p.typ}: ${p.pojazd?.nazwa ?? ''}`,
+        tytul: `Przegląd ${p.typ}: ${p.pojazd?.nazwa || 'Pojazd'}`,
         start: p.data_przegladu,
         koniec: p.data_przegladu,
         kolor: '#2563EB',
-        ikona: '•',
-        status: 'Wpis informacyjny - przegląd floty',
-        miejsce: p.pojazd?.nr_rejestracyjny ?? '',
+        ikona: '🚗',
+        status: 'Przegląd floty',
+        miejsce: p.pojazd?.nr_rejestracyjny || '',
         editable: false,
       })),
-      ...pojazdy.map((p) => ({
-        id: `flota-${p.id}`,
-        sourceId: p.id,
-        typ: 'flota',
-        tytul: `${p.pojazd.nazwa} - ${p.wydarzenie.nazwa}`,
-        start: p.wydarzenie.data_start,
-        koniec: p.wydarzenie.data_koniec,
-        kolor: '#3B82F6',
-        ikona: '•',
-        status: p.rola_pojazdu ?? 'Rezerwacja auta',
-        miejsce: p.pojazd.nr_rejestracyjny,
+
+      // Przypisania aut do wydarzeń (ZABEZPIECZENIE POJAZDÓW Z BAZY I Z ZEWNĄTRZ)
+      ...pojazdy.map((p: any) => {
+        const vehicleName = p.pojazd?.nazwa || p.pojazd_zewnetrzny || 'Pojazd zewnętrzny';
+        const vehiclePlate = p.pojazd?.nr_rejestracyjny || 'Spoza bazy';
+        const eventName = p.wydarzenie?.nazwa || 'Wydarzenie';
+
+        return {
+          id: `flota-${p.id}`,
+          sourceId: p.id,
+          typ: 'flota',
+          tytul: `${vehicleName} · ${eventName}`,
+          start: p.wydarzenie?.data_start,
+          koniec: p.wydarzenie?.data_koniec,
+          kolor: '#3B82F6',
+          ikona: '🚗',
+          status: p.rola_pojazdu || 'Transport sprzętu',
+          miejsce: vehiclePlate,
+        };
+      }),
+
+      // Zadania
+      ...zadania.map((z: any) => ({
+        id: `zadanie-${z.id}`,
+        sourceId: z.id,
+        typ: 'zadanie',
+        tytul: z.tytul,
+        start: z.data_start,
+        koniec: z.data_koniec,
+        kolor: '#8B5CF6',
+        ikona: '📋',
+        status: z.status || 'nowe',
+        miejsce: z.przypisani_uzytkownicy?.map((u: any) => u.uzytkownik?.imie).filter(Boolean).join(', ') || '',
       })),
     ].filter((item) => item.start);
 
@@ -199,7 +325,6 @@ export class KalendarzService {
       });
     }
 
-    // Spotkanie i wydarzenie prywatne trzymamy jako wydarzenia z odpowiednim typem.
     return this.prisma.extendedClient.wydarzenie.create({
       data: {
         id_organizacji,

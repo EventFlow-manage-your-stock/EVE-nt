@@ -96,7 +96,7 @@ export default function CrmPage() {
       />
 
       <Card>
-        <div className="mb-4 relative max-w-md">
+        {/* <div className="mb-4 relative max-w-md">
            <Search size={16} className="absolute left-3 top-3 text-slate-400" />
            <input 
              className={`${inputClass} pl-9`} 
@@ -104,7 +104,7 @@ export default function CrmPage() {
              onChange={(e) => setSearch(e.target.value)} 
              placeholder="Szukaj po nazwie, NIP lub emailu..." 
            />
-        </div>
+        </div> */}
 
         {loading ? (
           <p className="p-8 text-center font-bold text-slate-400">Ładowanie kontrahentów...</p>

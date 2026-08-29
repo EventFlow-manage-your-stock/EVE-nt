@@ -117,14 +117,40 @@ export class WydarzeniaController {
     return this.wydarzeniaService.removeEtapPojazd(przypisanieId, Number((req.user as any).id_organizacji));
   }
 
+  @Post(':id/flota/etapy-przypisanie')
+  assignVehicleToStagesBody(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { id_pojazdu?: number | null; pojazd_zewnetrzny?: string | null; stageIds: number[] },
+    @Req() req: Request,
+  ) {
+    const id_organizacji = Number((req.user as any).id_organizacji);
+    return this.wydarzeniaService.assignVehicleToStages(
+      id,
+      dto.id_pojazdu ?? dto.pojazd_zewnetrzny ?? '',
+      dto.stageIds || [],
+      id_organizacji,
+    );
+  }
+
+  @Post(':id/flota/:pojazdKey/etapy')
+  assignVehicleToStages(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('pojazdKey') pojazdKey: string,
+    @Body() dto: any,
+    @Req() req: Request,
+  ) {
+    const id_organizacji = Number((req.user as any).id_organizacji);
+    return this.wydarzeniaService.assignVehicleToStages(
+      id,
+      pojazdKey,
+      dto.stageIds || [],
+      id_organizacji,
+    );
+  }
+
   @Post(':id/ekipa/:uzytkownikId/etapy')
   assignUserToStages(@Param('id', ParseIntPipe) id: number, @Param('uzytkownikId', ParseIntPipe) uzytkownikId: number, @Body() dto: any, @Req() req: Request) {
     return this.wydarzeniaService.assignUserToStages(id, uzytkownikId, dto.stageIds, Number((req.user as any).id_organizacji));
-  }
-
-  @Post(':id/flota/:pojazdId/etapy')
-  assignVehicleToStages(@Param('id', ParseIntPipe) id: number, @Param('pojazdId', ParseIntPipe) pojazdId: number, @Body() dto: any, @Req() req: Request) {
-    return this.wydarzeniaService.assignVehicleToStages(id, pojazdId, dto.stageIds, Number((req.user as any).id_organizacji));
   }
 
   // ===================================================================
@@ -192,5 +218,24 @@ export class WydarzeniaController {
   @Delete(':id/zalaczniki/:zalacznikId')
   async removeZalacznik(@Param('id', ParseIntPipe) id: number, @Param('zalacznikId', ParseIntPipe) zalacznikId: number, @Req() req: Request) {
     return this.wydarzeniaService.removeZalacznik(zalacznikId, Number((req.user as any).id_organizacji));
+  }
+
+  @Put(':id/noclegi/:noclegId')
+  updateNocleg(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('noclegId', ParseIntPipe) noclegId: number,
+    @Body() dto: any,
+    @Req() req: Request,
+  ) {
+    return this.wydarzeniaService.updateNocleg(noclegId, dto, Number((req.user as any).id_organizacji));
+  }
+  @Put(':id/ekipa/:ekipaId')
+  updateEkipa(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('ekipaId', ParseIntPipe) ekipaId: number,
+    @Body() dto: any,
+    @Req() req: Request
+  ) {
+    return this.wydarzeniaService.updateEkipa(ekipaId, dto, Number((req.user as any).id_organizacji));
   }
 }

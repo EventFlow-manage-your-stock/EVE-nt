@@ -80,9 +80,10 @@ export class OfertyService {
         data: { id_organizacji, id_oferty: oferta.id, numer_wersji: 1, nazwa: oferta.nazwa, id_uzytkownika_utworzyl: id_uzytkownika },
       });
       
-      await tx.sekcjaOferty.create({ data: { id_organizacji, id_wersji_oferty: wersja.id, nazwa: 'Sprzęt', kolejnosc: 1 } });
-      await tx.sekcjaOferty.create({ data: { id_organizacji, id_wersji_oferty: wersja.id, nazwa: 'Usługi', kolejnosc: 2 } });
-      await tx.sekcjaOferty.create({ data: { id_organizacji, id_wersji_oferty: wersja.id, nazwa: 'Transport', kolejnosc: 3 } });
+      await tx.sekcjaOferty.create({ data: { id_organizacji, id_wersji_oferty: wersja.id, nazwa: 'Obsługa', kolejnosc: 1 } });
+      await tx.sekcjaOferty.create({ data: { id_organizacji, id_wersji_oferty: wersja.id, nazwa: 'Sprzęt', kolejnosc: 2 } });
+      await tx.sekcjaOferty.create({ data: { id_organizacji, id_wersji_oferty: wersja.id, nazwa: 'Usługi', kolejnosc: 3 } });
+      await tx.sekcjaOferty.create({ data: { id_organizacji, id_wersji_oferty: wersja.id, nazwa: 'Transport', kolejnosc: 4 } });
 
       return oferta;
     });

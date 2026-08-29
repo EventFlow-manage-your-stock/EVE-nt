@@ -8,7 +8,7 @@ import {
   Calendar, CheckSquare, Home, Users, Box, Wrench, Truck, Settings, FileText, 
   ChevronDown, LogOut, Star, Phone, Tags, Shield, Car, Palmtree, Palette, 
   ShieldAlert, Menu, Bell, Search, Sun, Moon, PanelLeftClose, PanelLeftOpen, Plus, Layers, Loader2, ArrowRight,
-  FileArchive, UserCircle
+  FileArchive, UserCircle, AlertTriangle, CheckCircle2, X
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { Button } from '../../components/ProductUI';
@@ -58,6 +58,7 @@ const menuConfig: MenuItem[] = [
   ]},
   { icon: FileText, label: 'Oferty', requiredPermission: 'offers:view', href: '/dashboard/offers' },
   { icon: FileText, label: 'Zapytanie ofertowe', requiredPermission: 'offers:view', href: '/dashboard/zapytania' },
+  { label: 'Powiadomienia i Komunikaty', href: '/dashboard/notifications', icon: Bell },
   { label: 'Globalne Załączniki', href: '/dashboard/attachments', icon: FileArchive },
   { icon: Settings, label: 'Ustawienia', requiredPermission: 'settings:view', children: [
     { label: 'Personalizacja systemu', href: '/dashboard/settings', icon: Settings },
@@ -68,6 +69,46 @@ const menuConfig: MenuItem[] = [
   { icon: Users, label: 'Użytkownicy', requiredPermission: 'users:manage', href: '/dashboard/users' },
 ];
 
+// Generator subtelnego dźwięku powiadomienia (Web Audio API)
+function playNotificationChime(priority: string = 'normalny') {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const now = ctx.currentTime;
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    const isHigh = priority === 'wysoki' || priority === 'krytyczny';
+    osc1.type = 'sine';
+    osc2.type = 'triangle';
+
+    osc1.frequency.setValueAtTime(isHigh ? 880 : 587.33, now);
+    osc1.frequency.exponentialRampToValueAtTime(isHigh ? 1318.51 : 880, now + 0.15);
+
+    osc2.frequency.setValueAtTime(isHigh ? 440 : 293.66, now);
+    osc2.frequency.exponentialRampToValueAtTime(isHigh ? 659.25 : 440, now + 0.15);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.1, now + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 0.36);
+    osc2.stop(now + 0.36);
+  } catch {
+    // Brak zgody użytkownika na autoplay audio
+  }
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({ Magazyn: true, Wydarzenia: true });
   const [isMounted, setIsMounted] = useState(false);
@@ -76,16 +117,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   
-  // WYSZUKIWARKA I POWIADOMIENIA
+  // WYSZUKIWARKA
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [dbSearchResults, setDbSearchResults] = useState<any[]>([]);
   const [isSearchingDb, setIsSearchingDb] = useState(false);
+
+  // POWIADOMIENIA
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [hasUnreadNotif, setHasUnreadNotif] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [toastNotification, setToastNotification] = useState<any | null>(null);
+  const seenNotifIdsRef = useRef<Set<number>>(new Set());
 
-  // TOP BAR (Ukrywanie)
+  // TOP BAR
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const lastScrollY = useRef(0);
   
@@ -107,6 +152,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return u.rola?.nazwa || u.role || u.rola || u.role_name || 'Użytkownik';
   }, [user]);
 
+  const fetchNotifications = useCallback(async (isInitial = false) => {
+    try {
+      const res = await api.get('/api/powiadomienia?limit=15');
+      const data = res.data?.items || [];
+      const count = res.data?.unreadCount || 0;
+      setNotifications(data);
+      setUnreadCount(count);
+
+      // Wykrywanie nowego powiadomienia i odtworzenie dźwięku
+      if (!isInitial && data.length > 0) {
+        const newest = data[0];
+        if (!newest.przeczytane && !seenNotifIdsRef.current.has(newest.id)) {
+          seenNotifIdsRef.current.add(newest.id);
+          setToastNotification(newest);
+          playNotificationChime(newest.priorytet);
+        }
+      }
+
+      data.forEach((n: any) => seenNotifIdsRef.current.add(n.id));
+    } catch {
+      // Fallback
+    }
+  }, []);
+
   useEffect(() => { 
     setIsMounted(true); 
     if (!user) {
@@ -126,15 +195,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
     }
 
-    // Pobranie powiadomień startowych
-    api.get('/api/dashboard/notifications').then(res => {
-      setNotifications(res.data || []);
-      if (res.data?.length > 0) setHasUnreadNotif(true);
-    }).catch(console.error);
+    fetchNotifications(true);
+    const interval = setInterval(() => fetchNotifications(false), 20000);
+    return () => clearInterval(interval);
+  }, [user, router, fetchNotifications]);
 
-  }, [user, router]);
+  // Automatyczne zamykanie toastu po 6 sekundach
+  useEffect(() => {
+    if (!toastNotification) return;
+    const timer = setTimeout(() => setToastNotification(null), 6000);
+    return () => clearTimeout(timer);
+  }, [toastNotification]);
 
-  // Wyszukiwarka bazy (Zastosowano Debounce by nie przeciążać bazy na każdą literę)
+  // Globalna wyszukiwarka z obsługą tagów (Debounce 400ms)
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
       setDbSearchResults([]);
@@ -147,7 +220,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .then(res => setDbSearchResults(res.data || []))
         .catch(console.error)
         .finally(() => setIsSearchingDb(false));
-    }, 400); // 400ms opóźnienia
+    }, 400);
     
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
@@ -206,7 +279,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return true;
     }), [userPermissions]);
 
-  // Lokalne filtrowanie nawigacji dla wyszukiwarki
   const menuSearchResults = useMemo(() => {
     if (searchQuery.length < 2) return [];
     const results: { label: string; href: string; icon: any }[] = [];
@@ -245,6 +317,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.push(item.href!);
       setIsMobileOpen(false);
     }
+  };
+
+  const handleNotificationClick = async (n: any) => {
+    try {
+      if (!n.przeczytane) {
+        await api.patch(`/api/powiadomienia/${n.id}/read`);
+        fetchNotifications(true);
+      }
+    } catch {}
+    setIsNotifOpen(false);
+    if (n.link) router.push(n.link);
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.patch('/api/powiadomienia/read-all');
+      fetchNotifications(true);
+    } catch {}
   };
 
   const getTimeAgo = (dateStr: string) => {
@@ -354,18 +444,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* MAIN CONTENT WRAPPER */}
       <div className={`flex flex-col flex-1 min-w-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'lg:ml-[112px]' : 'lg:ml-[312px]'}`}>
         
-        {/* TOP BAR WYSPA - CHOWAJĄCA SIĘ PRZY SCROLLU */}
+        {/* TOP BAR WYSPA */}
         <header className={`sticky z-30 mx-4 lg:mx-8 mb-8 flex h-16 shrink-0 items-center justify-between rounded-2xl border border-slate-200 bg-white/80 px-4 backdrop-blur-xl dark:border-white/5 dark:bg-slate-900/80 sm:px-6 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isTopBarVisible ? 'top-4 translate-y-0 opacity-100' : 'top-4 -translate-y-[150%] opacity-0 pointer-events-none'}`}>
           <div className="flex items-center gap-4">
-            {/* Przycisk Menu Mobilnego */}
             <button className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition" onClick={() => setIsMobileOpen(true)}>
               <Menu size={24} />
             </button>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            
-            {/* GLOBALNA WYSZUKIWARKA */}
+            {/* GLOBALNA WYSZUKIWARKA (NAZWA, KOD, TAGI) */}
             <div className="hidden sm:flex items-center relative group" ref={searchRef}>
               <Search size={16} className="absolute left-4 text-slate-400 group-focus-within:text-[#04e0ff] transition-colors" />
               <input 
@@ -373,19 +461,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
-                placeholder="Szukaj danych w systemie..." 
+                placeholder="Szukaj danych, kodów lub #tagów..." 
                 className="pl-11 pr-4 py-2.5 bg-slate-100 dark:bg-[#02080a] border border-transparent rounded-full text-sm font-semibold outline-none focus:bg-white focus:border-[#04e0ff]/50 focus:ring-4 focus:ring-[#04e0ff]/10 dark:focus:bg-[#02080a] dark:focus:border-[#04e0ff]/30 transition-all w-48 xl:w-[360px]" 
               />
               
-              {/* Otwarty panel z wynikami */}
               {isSearchFocused && searchQuery.length >= 2 && (
                 <div className="absolute top-full right-0 lg:left-0 mt-3 w-[400px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden py-3 z-50 animate-fade-in-up flex flex-col max-h-[70vh]">
-                  
                   {isSearchingDb && <div className="flex justify-center p-3"><Loader2 className="w-5 h-5 animate-spin text-[#04e0ff]"/></div>}
-                  
                   <div className="flex-1 overflow-y-auto custom-scrollbar px-2">
-                    
-                    {/* Wyniki Nawigacyjne */}
                     {menuSearchResults.length > 0 && (
                       <div className="mb-4">
                         <p className="px-3 mb-1 text-[10px] font-black uppercase text-slate-400 tracking-wider">Zakładki Systemowe</p>
@@ -397,7 +480,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       </div>
                     )}
 
-                    {/* Wyniki z Bazy Danych */}
                     {dbSearchResults.length > 0 && (
                       <div>
                         <p className="px-3 mb-1 text-[10px] font-black uppercase text-slate-400 tracking-wider">Wyniki z bazy</p>
@@ -421,7 +503,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     )}
 
                     {!isSearchingDb && menuSearchResults.length === 0 && dbSearchResults.length === 0 && (
-                       <p className="p-6 text-center text-sm font-bold text-slate-400 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl mx-2">Brak wyników w systemie.</p>
+                      <p className="p-6 text-center text-sm font-bold text-slate-400 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl mx-2">Brak wyników w systemie.</p>
                     )}
                   </div>
                 </div>
@@ -430,54 +512,102 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <div className="h-6 w-px bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block"></div>
 
-            {/* Motyw (Dark/Light) */}
             <button onClick={toggleTheme} className="p-2.5 text-slate-500 hover:text-[#04e0ff] transition-colors rounded-full hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-amber-400">
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            {/* Powiadomienia Dropdown */}
+            {/* DROPDOWN POWIADOMIEŃ */}
             <div className="relative" ref={notifRef}>
-              <button onClick={() => { setIsNotifOpen(!isNotifOpen); setHasUnreadNotif(false); }} className={`relative p-2.5 transition-colors rounded-full ${isNotifOpen ? 'bg-cyan-50 text-[#04e0ff] dark:bg-white/5' : 'text-slate-500 hover:text-[#04e0ff] hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white'}`}>
+              <button 
+                onClick={() => { setIsNotifOpen(!isNotifOpen); }} 
+                className={`relative p-2.5 transition-colors rounded-full ${isNotifOpen ? 'bg-cyan-50 text-[#04e0ff] dark:bg-white/5' : 'text-slate-500 hover:text-[#04e0ff] hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white'}`}
+              >
                 <Bell size={20} />
-                {hasUnreadNotif && <span className="absolute top-2.5 right-3 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900"></span>}
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white border-2 border-white dark:border-slate-900 animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
               
               {isNotifOpen && (
-                <div className="absolute right-0 top-full mt-3 w-[360px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden z-50 animate-fade-in-up origin-top-right">
-                  <div className="p-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-transparent">
-                    <h3 className="font-black text-slate-900 dark:text-white text-base">Powiadomienia operacyjne</h3>
+                <div className="absolute right-0 top-full mt-3 w-[390px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden z-50 animate-fade-in-up origin-top-right">
+                  <div className="p-4 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-transparent">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-slate-900 dark:text-white text-sm">Powiadomienia operacyjne</h3>
+                      {unreadCount > 0 && (
+                        <span className="rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-[#04e0ff] px-2 py-0.5 text-[10px] font-black">
+                          {unreadCount} nowe
+                        </span>
+                      )}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button onClick={handleMarkAllRead} className="text-[11px] font-bold text-cyan-600 hover:underline">
+                        Oznacz przeczytane
+                      </button>
+                    )}
                   </div>
-                  <div className="p-2 max-h-[400px] overflow-y-auto custom-scrollbar">
-                    {notifications.length > 0 ? notifications.map((n: any) => (
-                      <div key={n.id} onClick={() => { router.push(n.url); setIsNotifOpen(false); }} className="p-4 rounded-2xl hover:bg-cyan-50 dark:hover:bg-white/5 transition cursor-pointer mb-1 group">
-                        <div className="flex items-start gap-3">
-                          <div className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${n.type === 'alert' ? 'bg-rose-500 shadow-[0_0_8px_#f43f5e]' : 'bg-[#04e0ff] shadow-[0_0_8px_#04e0ff]'}`}></div>
-                          <div>
-                            <p className="text-sm font-black text-slate-800 dark:text-slate-200 leading-snug group-hover:text-cyan-600 transition-colors">{n.title}</p>
-                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{n.message}</p>
-                            <p className="text-[10px] font-black text-slate-400 mt-2 uppercase tracking-wider">{getTimeAgo(n.time)}</p>
+
+                  <div className="p-2 max-h-[380px] overflow-y-auto custom-scrollbar space-y-1">
+                    {notifications.length > 0 ? notifications.map((n: any) => {
+                      const isCritical = n.priorytet === 'krytyczny' || n.priorytet === 'wysoki';
+                      return (
+                        <div 
+                          key={n.id} 
+                          onClick={() => handleNotificationClick(n)} 
+                          className={`p-3.5 rounded-2xl transition cursor-pointer flex items-start gap-3 group ${
+                            !n.przeczytane 
+                              ? 'bg-cyan-50/60 dark:bg-cyan-950/20 border border-cyan-100 dark:border-cyan-800/40' 
+                              : 'hover:bg-slate-50 dark:hover:bg-white/5'
+                          }`}
+                        >
+                          <div className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${
+                            isCritical ? 'bg-rose-500 shadow-[0_0_8px_#f43f5e]' : 'bg-[#04e0ff]'
+                          }`} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <p className="text-xs font-black text-slate-800 dark:text-slate-200 truncate group-hover:text-cyan-600 transition-colors">
+                                {n.tytul}
+                              </p>
+                              <span className="text-[9px] font-bold text-slate-400 shrink-0">
+                                {getTimeAgo(n.data_utworzenia)}
+                              </span>
+                            </div>
+                            <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                              {n.tresc}
+                            </p>
                           </div>
                         </div>
-                      </div>
-                    )) : (
+                      );
+                    }) : (
                       <div className="p-8 text-center">
-                        <CheckCircle2 size={32} className="mx-auto text-emerald-400 mb-3" />
-                        <p className="text-sm font-bold text-slate-500">Brak nowych powiadomień. Możesz spokojnie pracować!</p>
+                        <CheckCircle2 size={32} className="mx-auto text-emerald-400 mb-2" />
+                        <p className="text-xs font-bold text-slate-500">Brak nowych powiadomień.</p>
                       </div>
                     )}
+                  </div>
+
+                  {/* PRZEJŚCIE DO PEŁNEGO CENTRUM POWIADOMIEŃ */}
+                  <div className="p-3 border-t border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-slate-950/50">
+                    <button
+                      onClick={() => { setIsNotifOpen(false); router.push('/dashboard/notifications'); }}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-black text-slate-800 dark:text-white transition shadow-sm"
+                    >
+                      <Bell size={14} className="text-[#04e0ff]" />
+                      Wszystkie powiadomienia i historia
+                    </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Szybki Wpis do Kalendarza */}
             <Button className="hidden sm:flex ml-1 shadow-md shadow-[#04e0ff]/20" onClick={() => router.push('/dashboard/calendar')}>
               <Plus size={16} className="mr-1 inline" /> Szybki wpis
             </Button>
           </div>
         </header>
 
-        {/* MAIN PAGE CONTENT */}
+        {/* GŁÓWNA ZAWARTOŚĆ STRONY Z OBSŁUGĄ ACL */}
         <main className="px-4 lg:px-8 pb-8 flex-1 overflow-x-hidden">
           {!isAllowedToAccessCurrentRoute ? (
             <div className="flex flex-col items-center justify-center h-[70vh] text-center animate-fade-in-up">
@@ -486,7 +616,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                </div>
                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3">Dostęp zabroniony</h2>
                <p className="text-base font-bold text-slate-500 dark:text-slate-400 max-w-md mb-8 leading-relaxed">
-                 Twoje konto, nałożone blokady lub przypisana rola nie posiada wystarczających uprawnień, aby uzyskać dostęp do tego modułu. Jeśli to błąd, skontaktuj się z administratorem.
+                 Twoje konto lub przypisana rola nie posiada wystarczających uprawnień, aby uzyskać dostęp do tego modułu. Jeśli to błąd, skontaktuj się z administratorem.
                </p>
                <Button onClick={() => router.push('/dashboard')}>Wróć na Bezpieczny Kokpit</Button>
             </div>
@@ -495,6 +625,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
         </main>
 
+        {/* ANIMOWANY TOAST POPUP (DOLNY PRAWY RÓG) */}
+        {toastNotification && (
+          <aside 
+            aria-label="Powiadomienie systemowe"
+            className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-white dark:bg-slate-900 border border-cyan-200 dark:border-cyan-500/30 rounded-2xl shadow-2xl p-4 transition-all duration-300 animate-fade-in-up flex items-start gap-3"
+          >
+            <div className={`p-2 rounded-xl shrink-0 ${
+              toastNotification.priorytet === 'krytyczny' || toastNotification.priorytet === 'wysoki'
+                ? 'bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                : 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/40 dark:text-[#04e0ff]'
+            }`}>
+              {toastNotification.priorytet === 'krytyczny' ? <AlertTriangle size={18} /> : <Bell size={18} />}
+            </div>
+
+            <div className="min-w-0 flex-1 cursor-pointer" onClick={() => handleNotificationClick(toastNotification)}>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className={`px-1.5 py-0.2 rounded text-[8px] font-black uppercase tracking-wider ${
+                  toastNotification.priorytet === 'krytyczny' ? 'bg-rose-600 text-white' : 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-[#04e0ff]'
+                }`}>
+                  {toastNotification.priorytet}
+                </span>
+                <p className="text-xs font-black text-slate-900 dark:text-white truncate">
+                  {toastNotification.tytul}
+                </p>
+              </div>
+              <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                {toastNotification.tresc}
+              </p>
+              <span className="text-[9px] font-bold text-cyan-600 dark:text-[#04e0ff] mt-1 inline-block">
+                Kliknij, aby otworzyć →
+              </span>
+            </div>
+
+            <button 
+              onClick={(e) => { e.stopPropagation(); setToastNotification(null); }} 
+              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
+            >
+              <X size={14} />
+            </button>
+          </aside>
+        )}
       </div>
     </div>
   );

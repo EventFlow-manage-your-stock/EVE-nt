@@ -144,7 +144,7 @@ export class SlownikiService {
   async getUzytkownicy(id_organizacji: number) {
     return this.prisma.extendedClient.uzytkownik.findMany({
       where: { id_organizacji, aktywny: true },
-      select: { id: true, imie: true, nazwisko: true, email: true },
+      select: { id: true, imie: true, nazwisko: true, email: true, stanowisko: true, telefon: true },
       orderBy: { nazwisko: 'asc' },
     });
   }

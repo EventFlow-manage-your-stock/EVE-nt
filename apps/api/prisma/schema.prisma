@@ -89,6 +89,8 @@ model Organizacja {
   etapy_pojazdy              EtapPojazd[]
   wydarzenia_noclegi         WydarzenieNocleg[]
   powiadomienia_ekipa        PowiadomienieEkipa[]
+  powiadomienia              Powiadomienie[]
+  powiadomienia_cykliczne    PowiadomienieCykliczne[]
 
   @@map("organizacje")
 }
@@ -154,6 +156,10 @@ model Uzytkownik {
   wydarzenia_manager           WydarzenieManager[]
   etapy_przypisania            EtapUzytkownik[]
   powiadomienia_ekipa          PowiadomienieEkipa[]
+  nadzorowane_serwisy_pojazdow SerwisPojazdu[] @relation("NadzorcaSerwisuPojazdu")
+  otrzymane_powiadomienia      Powiadomienie[] @relation("OdbiorcaPowiadomienia")
+  wyslane_powiadomienia        Powiadomienie[] @relation("NadawcaPowiadomienia")
+  utworzone_cykliczne          PowiadomienieCykliczne[]
 
   @@unique([id_organizacji, email])
   @@map("uzytkownicy")
@@ -698,6 +704,9 @@ model EtapPojazd {
   id_pojazdu        Int? // Null jeśli auto z zewnątrz
   pojazd_zewnetrzny String? @db.VarChar(255)
   aktywny           Boolean @default(true)
+  data_utworzenia   DateTime  @default(now())
+  data_aktualizacji DateTime @default(now()) @updatedAt
+  data_usuniecia    DateTime?
 
   organizacja Organizacja    @relation(fields: [id_organizacji], references: [id])
   etap        EtapWydarzenia @relation(fields: [id_etapu], references: [id], onDelete: Cascade)
@@ -1251,6 +1260,7 @@ model Pojazd {
   vin               String?   @db.VarChar(50)
   przebieg_km       Int?
   data_przegladu    DateTime? @db.Date
+  status            String    @default("Dostępny")
   data_oc           DateTime? @db.Date
   numer_polisy_oc   String?   @db.VarChar(100)
   ubezpieczyciel    String?   @db.VarChar(150)
@@ -1277,22 +1287,32 @@ model Pojazd {
 }
 
 model SerwisPojazdu {
-  id                Int       @id @default(autoincrement())
-  id_organizacji    Int
-  id_pojazdu        Int
-  data_serwisu      DateTime  @db.Date
-  przebieg_km       Int?
-  opis              String?   @db.Text
-  koszt_netto       Decimal?  @db.Decimal(12, 2)
-  aktywny           Boolean   @default(true)
-  data_utworzenia   DateTime  @default(now())
-  data_aktualizacji DateTime  @updatedAt
-  data_usuniecia    DateTime?
+  id                    Int       @id @default(autoincrement())
+  id_organizacji        Int
+  id_pojazdu            Int
+  id_nadzorcy           Int?
+  typ_serwisu           String    @default("usterka") @db.VarChar(50) // techniczny, olejowy, usterka, opony, blacharka, inne
+  status                String    @default("w_trakcie") @db.VarChar(50) // w_trakcie, zakonczony, oczekuje_na_czesci, anulowany
+  miejsce_serwisu       String?   @db.VarChar(200) // Nazwa warsztatu / ASO / Serwis własny
+  data_serwisu          DateTime  @db.Date // Data rozpoczęcia
+  data_zakonczenia      DateTime? @db.Date // Data odebrania auta
+  przebieg_km           Int?
+  opis                  String?   @db.Text
+  zalecenia             String?   @db.Text
+  koszt_netto           Decimal?  @db.Decimal(12, 2)
+  koszt_brutto          Decimal?  @db.Decimal(12, 2)
+  zmieniono_status_auta Boolean   @default(false)
+  aktywny               Boolean   @default(true)
+  data_utworzenia       DateTime  @default(now())
+  data_aktualizacji     DateTime  @updatedAt
+  data_usuniecia        DateTime?
 
   organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
   pojazd      Pojazd      @relation(fields: [id_pojazdu], references: [id])
+  nadzorca    Uzytkownik? @relation("NadzorcaSerwisuPojazdu", fields: [id_nadzorcy], references: [id])
 
   @@index([id_pojazdu])
+  @@index([id_nadzorcy])
   @@map("serwisy_pojazdow")
 }
 
@@ -1321,8 +1341,9 @@ model WydarzeniePojazd {
   id                Int       @id @default(autoincrement())
   id_organizacji    Int
   id_wydarzenia     Int
-  id_pojazdu        Int
-  rola_pojazdu      String?   @db.VarChar(100) // np. transport glowny
+  id_pojazdu        Int?
+  pojazd_zewnetrzny String?   @db.VarChar(200)
+  rola_pojazdu      String?   @db.VarChar(100)
   aktywny           Boolean   @default(true)
   data_utworzenia   DateTime  @default(now())
   data_aktualizacji DateTime  @updatedAt
@@ -1330,9 +1351,8 @@ model WydarzeniePojazd {
 
   organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
   wydarzenie  Wydarzenie  @relation(fields: [id_wydarzenia], references: [id])
-  pojazd      Pojazd      @relation(fields: [id_pojazdu], references: [id])
+  pojazd      Pojazd?     @relation(fields: [id_pojazdu], references: [id]) // <-- Relacja opcjonalna Pojazd?
 
-  @@unique([id_wydarzenia, id_pojazdu])
   @@map("wydarzenia_pojazdy")
 }
 
@@ -1466,4 +1486,55 @@ model PozycjaPakietu {
   egzemplarz Egzemplarz?   @relation(fields: [id_egzemplarza], references: [id])
 
   @@map("pozycje_pakietow")
+}
+
+
+model Powiadomienie {
+  id              Int       @id @default(autoincrement())
+  id_organizacji  Int
+  id_odbiorcy     Int?      // null = powiadomienie ogólne dla wszystkich uprawnionych
+  id_nadawcy      Int?      // null = generowane automatycznie przez system
+  tytul           String    @db.VarChar(200)
+  tresc           String    @db.Text
+  typ             String    @default("system") @db.VarChar(50) // event, service, fleet, task, crm, manual, cyclic
+  priorytet       String    @default("normalny") @db.VarChar(30) // niski, normalny, wysoki, krytyczny
+  link            String?   @db.VarChar(300)
+  przeczytane     Boolean   @default(false)
+  data_odczytania DateTime?
+  wymagane_uprawnienie String? @db.VarChar(100) // filtrowanie według uprawnień ACL
+  aktywny         Boolean   @default(true)
+  data_utworzenia DateTime  @default(now())
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id], onDelete: Cascade)
+  odbiorca    Uzytkownik? @relation("OdbiorcaPowiadomienia", fields: [id_odbiorcy], references: [id], onDelete: Cascade)
+  nadawca     Uzytkownik? @relation("NadawcaPowiadomienia", fields: [id_nadawcy], references: [id], onDelete: SetNull)
+
+  @@index([id_organizacji, id_odbiorcy, przeczytane])
+  @@index([data_utworzenia])
+  @@map("powiadomienia_systemowe")
+}
+
+model PowiadomienieCykliczne {
+  id              Int       @id @default(autoincrement())
+  id_organizacji  Int
+  id_tworcy       Int
+  tytul           String    @db.VarChar(200)
+  tresc           String    @db.Text
+  priorytet       String    @default("normalny") @db.VarChar(30) // niski, normalny, wysoki, krytyczny
+  cykl            String    @db.VarChar(50) // codziennie, co_tydzien, co_miesiac
+  godzina         String    @default("08:00") @db.VarChar(10)
+  dni_tygodnia    Int[]     @default([]) // 1-7 (pon-ndz)
+  dzien_miesiaca  Int?      // 1-31
+  dla_wszystkich  Boolean   @default(true)
+  odbiorcy_ids    Int[]     @default([])
+  wymagane_uprawnienie String? @db.VarChar(100)
+  ostatnie_uruchomienie DateTime?
+  aktywny         Boolean   @default(true)
+  data_utworzenia DateTime  @default(now())
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id], onDelete: Cascade)
+  tworca      Uzytkownik  @relation(fields: [id_tworcy], references: [id], onDelete: Cascade)
+
+  @@index([id_organizacji, aktywny])
+  @@map("powiadomienia_cykliczne")
 }
