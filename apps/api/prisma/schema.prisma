@@ -286,14 +286,20 @@ model Magazyn {
   id                Int       @id @default(autoincrement())
   id_organizacji    Int
   nazwa             String    @db.VarChar(100)
+  kod               String?   @db.VarChar(50) // np. WMS-POZ, WMS-WAW
+  adres             String?   @db.VarChar(255)
+  miasto            String?   @db.VarChar(100)
+  kod_pocztowy      String?   @db.VarChar(10)
   opis              String?   @db.Text
+  domyslny          Boolean   @default(false)
   aktywny           Boolean   @default(true)
   data_utworzenia   DateTime  @default(now())
   data_aktualizacji DateTime  @updatedAt
   data_usuniecia    DateTime?
 
-  organizacja Organizacja  @relation(fields: [id_organizacji], references: [id])
-  egzemplarze Egzemplarz[]
+  organizacja          Organizacja         @relation(fields: [id_organizacji], references: [id])
+  egzemplarze          Egzemplarz[]
+  wydania_magazynowe   WydanieMagazynowe[] @relation("MagazynDocelowyWydania")
 
   @@unique([id_organizacji, nazwa])
   @@map("magazyny")
@@ -365,6 +371,7 @@ model ModelSprzetu {
   pobor_pradu              Decimal?                     @db.Decimal(10, 2)
   stawki                   CenaModelu[]                 @relation("ModelStawki")
   pozycje_pakietow         PozycjaPakietu[]
+  
 
   @@index([id_kategorii])
   @@index([nazwa])
@@ -380,7 +387,7 @@ model Egzemplarz {
   sn                     String?   @db.VarChar(200)
   qr_kod                 String?   @db.VarChar(255)
   kod_kreskowy           String?   @db.VarChar(100)
-  miejsce_w_mag          String?   @db.VarChar(200)
+  miejsce_w_mag          String?   @db.VarChar(200) // np. Hala A Regał 3 Półka B
   id_case                Int?
   id_statusu_egzemplarza Int?
   szerokosc              Decimal?  @db.Decimal(10, 2)
@@ -396,7 +403,7 @@ model Egzemplarz {
   data_aktualizacji      DateTime  @updatedAt
   data_usuniecia         DateTime?
 
-  numer_urzadzenia        String?   @db.VarChar(100) // historycznie; UI używa nazwy numer_egzemplarza
+  numer_urzadzenia        String?   @db.VarChar(100)
   numer_egzemplarza       String?   @db.VarChar(100)
   zewnetrzny_kod_kreskowy String?   @db.VarChar(150)
   zewnetrzny_qr_kod       String?   @db.VarChar(150)
@@ -414,11 +421,12 @@ model Egzemplarz {
   zawartosc_case   Egzemplarz[]                 @relation("CaseToEgzemplarz")
   pozycje_wynajmu  PozycjaWynajmu[]
   serwisy          SerwisSprzetu[]
-  zadania          Zadanie[] // Dodano relację odwrotną
+  zadania          Zadanie[]
   pozycje_wydan    PozycjaWydaniaMagazynowego[]
   pozycje_pakietow PozycjaPakietu[]
 
   @@index([id_modelu])
+  @@index([id_magazynu])
   @@index([sn])
   @@index([qr_kod])
   @@index([kod_kreskowy])
@@ -1081,8 +1089,9 @@ model WydanieMagazynowe {
   id_organizacji          Int
   id_wydarzenia           Int?
   id_wynajmu              Int?
+  id_magazynu_docelowego  Int?      // <-- Wybrany magazyn dla WZ / PZ
   id_uzytkownika_utworzyl Int?
-  typ                     String    @default("wydanie") @db.VarChar(30) // wydanie, przyjecie, plan
+  typ                     String    @default("wydanie") @db.VarChar(30)
   numer                   String    @db.VarChar(100)
   data_operacji           DateTime  @default(now())
   osoba_odbierajaca       String?   @db.VarChar(200)
@@ -1093,14 +1102,16 @@ model WydanieMagazynowe {
   data_aktualizacji       DateTime  @updatedAt
   data_usuniecia          DateTime?
 
-  organizacja Organizacja                  @relation(fields: [id_organizacji], references: [id])
-  wydarzenie  Wydarzenie?                  @relation(fields: [id_wydarzenia], references: [id])
-  wynajem     Wynajem?                     @relation(fields: [id_wynajmu], references: [id])
-  utworzyl    Uzytkownik?                  @relation("UtworzylWydanieMagazynowe", fields: [id_uzytkownika_utworzyl], references: [id])
-  pozycje     PozycjaWydaniaMagazynowego[]
+  organizacja        Organizacja                  @relation(fields: [id_organizacji], references: [id])
+  wydarzenie         Wydarzenie?                  @relation(fields: [id_wydarzenia], references: [id])
+  wynajem            Wynajem?                     @relation(fields: [id_wynajmu], references: [id])
+  magazyn_docelowy   Magazyn?                     @relation("MagazynDocelowyWydania", fields: [id_magazynu_docelowego], references: [id])
+  utworzyl           Uzytkownik?                  @relation("UtworzylWydanieMagazynowe", fields: [id_uzytkownika_utworzyl], references: [id])
+  pozycje            PozycjaWydaniaMagazynowego[]
 
   @@index([id_wydarzenia])
   @@index([id_wynajmu])
+  @@index([id_magazynu_docelowego])
   @@index([typ])
   @@map("wydania_magazynowe")
 }

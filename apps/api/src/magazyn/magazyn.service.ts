@@ -1,16 +1,16 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { StorageService } from 'src/storage/storage.service';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class MagazynService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly storage: StorageService // <-- To naprawi Twój błąd TS2339!
+    private readonly storage: StorageService,
   ) {}
 
   private cleanNumber(val: any): number | null {
-    if (val === "" || val === null || val === undefined) return null;
+    if (val === '' || val === null || val === undefined) return null;
     const parsed = Number(val);
     return isNaN(parsed) ? null : parsed;
   }
@@ -18,11 +18,11 @@ export class MagazynService {
   private cleanString(val: any): string | null {
     if (val === null || val === undefined) return null;
     const str = String(val).trim();
-    return str === "" ? null : str;
+    return str === '' ? null : str;
   }
 
   private cleanDate(val: any): Date | null {
-    if (!val || val === "") return null;
+    if (!val || val === '') return null;
     const d = new Date(val);
     return isNaN(d.getTime()) ? null : d;
   }
@@ -74,7 +74,17 @@ export class MagazynService {
     return code;
   }
 
-  // Utrzymanie starych form helperów (zgodnie z poleceniem zachowania 100% funkcji)
+  private normalizeTags(tagsInput: any): string[] {
+    if (!tagsInput) return [];
+    if (Array.isArray(tagsInput)) {
+      return Array.from(new Set(tagsInput.map((t) => String(t || '').trim().toLowerCase()).filter(Boolean)));
+    }
+    if (typeof tagsInput === 'string') {
+      return Array.from(new Set(tagsInput.split(/[,\s]+/).map((t) => t.trim().toLowerCase()).filter(Boolean)));
+    }
+    return [];
+  }
+
   private caseScanMeta(caseRow: any) {
     if (!caseRow) return null;
     return {
@@ -101,207 +111,33 @@ export class MagazynService {
     return [userUwagi, marker].filter(Boolean).join(' | ') || null;
   }
 
-  // --- GŁÓWNY SILNIK DOKUMENTÓW WZ/PZ (LOGIKA ROZPAKOWYWANIA I REGUŁ) ---
-
-  async createDokumentMagazynowy(dto: any, id_organizacji: number, id_uzytkownika: number | null) {
-    const typ = this.cleanString(dto.typ) || 'wydanie';
-    const prefix = typ === 'przyjecie' ? 'PZ' : typ === 'plan' ? 'PLAN' : 'WZ';
-    const pozycje = Array.isArray(dto.pozycje) ? dto.pozycje : [];
-    const id_wydarzenia = this.cleanNumber(dto.id_wydarzenia);
-    const id_wynajmu = this.cleanNumber(dto.id_wynajmu);
-
-    return this.prisma.extendedClient.$transaction(async (tx) => {
-      const expandedPozycje: any[] = [];
-      const instancesToUpdateStatus: { id: number; targetStatus: string }[] = [];
-
-      for (const p of pozycje) {
-        const id_egzemplarza = this.cleanNumber(p.id_egzemplarza);
-
-        // --- OBSŁUGA SPRZĘTU ILOŚCIOWEGO ---
-        if (!id_egzemplarza) {
-          const id_modelu = this.cleanNumber(p.id_modelu);
-          const modelIlosciowy = id_modelu ? await tx.modelSprzetu.findFirst({
-            where: { id: id_modelu, id_organizacji, aktywny: true },
-            include: { kategoria: true },
-          }) : null;
-
-          if (modelIlosciowy && (modelIlosciowy.tryb_ewidencji === 'ilosciowe' || modelIlosciowy.typ_sprzetu === 'ilosciowe')) {
-            const qty = Number(p.ilosc || 0);
-            if (!qty || qty <= 0) {
-              throw new BadRequestException(`Podaj prawidłową ilość dla sprzętu ilościowego: ${modelIlosciowy.nazwa}.`);
-            }
-
-            if (typ === 'wydanie') {
-              const availableQty = Number(modelIlosciowy.ilosc_magazynowa || 0);
-              if (qty > availableQty) {
-                throw new BadRequestException(`Brak wystarczającej ilości w magazynie dla "${modelIlosciowy.nazwa}". Dostępne: ${availableQty} ${modelIlosciowy.jednostka || 'szt.'}, próba wydania: ${qty}.`);
-              }
-            }
-
-            expandedPozycje.push({
-              ...p,
-              id_modelu: modelIlosciowy.id,
-              id_egzemplarza: null,
-              nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || modelIlosciowy.nazwa,
-              ilosc: qty,
-              uwagi: [this.cleanString(p.uwagi), 'Sprzęt ilościowy bez egzemplarzy'].filter(Boolean).join(' | '),
-            });
-            continue;
-          }
-          throw new BadRequestException('Pozycja dokumentu musi zawierać konkretny egzemplarz albo model ilościowy.');
-        }
-
-        // --- OBSŁUGA FIZYCZNYCH EGZEMPLARZY ---
-        const egz = await tx.egzemplarz.findFirst({
-          where: { id: id_egzemplarza, id_organizacji, aktywny: true },
-          include: {
-            model: { include: { kategoria: true } },
-            zawartosc_case: {
-              where: { aktywny: true },
-              include: { model: { include: { kategoria: true } } },
-              orderBy: [{ id_modelu: 'asc' }, { numer_egzemplarza: 'asc' }, { id: 'asc' }],
-            },
-          },
-        });
-
-        if (!egz) {
-          throw new BadRequestException(`Nie znaleziono egzemplarza #${id_egzemplarza}.`);
-        }
-
-        const isCase = egz.model?.typ_sprzetu === 'opakowanie' || (egz.zawartosc_case?.length || 0) > 0;
-        if (isCase) {
-          const contents = (egz.zawartosc_case || []).filter((child: any) => child.model?.typ_sprzetu !== 'opakowanie');
-          if (!contents.length) {
-            throw new BadRequestException(`Zeskanowany case "${egz.nazwa || egz.model?.nazwa}" jest pusty.`);
-          }
-          const meta = this.caseScanMeta(egz);
-          for (const child of contents) {
-            const validation = await this.validateInstanceMovement(tx, child.id, child.nazwa || child.model?.nazwa, typ, id_wydarzenia, id_organizacji);
-            expandedPozycje.push({
-              ...p,
-              system_case_scan: meta,
-              id_zeskanowanego_case: meta?.id || egz.id,
-              nazwa_zeskanowanego_case: meta?.nazwa || egz.nazwa || egz.model?.nazwa || 'Case',
-              id_modelu: child.id_modelu,
-              id_egzemplarza: child.id,
-              nazwa: this.cleanString(child.nazwa) || this.cleanString(child.model?.nazwa) || 'Egzemplarz z case',
-              ilosc: 1,
-              uwagi: validation.crossEventNote ? [this.cleanString(p.uwagi), validation.crossEventNote].filter(Boolean).join(' | ') : p.uwagi,
-            });
-            instancesToUpdateStatus.push({ id: child.id, targetStatus: typ === 'wydanie' ? 'Wydany' : 'Działa' });
-          }
-          continue;
-        }
-
-        if (egz.model?.typ_sprzetu === 'opakowanie') {
-          throw new BadRequestException('Opakowanie/case nie może być samodzielną pozycją dokumentu WZ/PZ.');
-        }
-
-        const validation = await this.validateInstanceMovement(tx, egz.id, egz.nazwa || egz.model?.nazwa, typ, id_wydarzenia, id_organizacji);
-
-        expandedPozycje.push({
-          ...p,
-          id_modelu: egz.id_modelu,
-          id_egzemplarza: egz.id,
-          nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || this.cleanString(egz.nazwa) || this.cleanString(egz.model?.nazwa) || 'Egzemplarz sprzętu',
-          ilosc: 1,
-          uwagi: validation.crossEventNote ? [this.cleanString(p.uwagi), validation.crossEventNote].filter(Boolean).join(' | ') : p.uwagi,
-        });
-        instancesToUpdateStatus.push({ id: egz.id, targetStatus: typ === 'wydanie' ? 'Wydany' : 'Działa' });
-      }
-
-      if (id_wynajmu && typ === 'wydanie' && !this.cleanString(dto.osoba_odbierajaca)) {
-        throw new BadRequestException('Przy wydaniu do wynajmu wymagane jest podanie osoby odbierającej.');
-      }
-
-      const doc = await tx.wydanieMagazynowe.create({
-        data: {
-          id_organizacji,
-          id_wydarzenia,
-          id_wynajmu,
-          id_uzytkownika_utworzyl: isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika),
-          typ,
-          numer: this.cleanString(dto.numer) || this.nextDocumentNumber(prefix),
-          data_operacji: this.cleanDate(dto.data_operacji) || new Date(),
-          osoba_odbierajaca: this.cleanString(dto.osoba_odbierajaca),
-          podpis_odbierajacego: this.cleanString(dto.podpis_odbierajacego),
-          uwagi: this.cleanString(dto.uwagi),
-          pozycje: {
-            create: expandedPozycje.map((p: any) => ({
-              id_organizacji,
-              id_modelu: this.cleanNumber(p.id_modelu),
-              id_egzemplarza: this.cleanNumber(p.id_egzemplarza),
-              nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || this.cleanString(p.model?.nazwa) || this.cleanString(p.egzemplarz?.nazwa) || 'Pozycja sprzętu',
-              ilosc: this.cleanNumber(p.ilosc) || 1,
-              status: this.cleanString(p.status) || (typ === 'przyjecie' ? 'przyjety' : typ === 'plan' ? 'plan' : 'wydany'),
-              uwagi: this.buildDocumentUwagi(p),
-            })),
-          },
-        },
-        include: { pozycje: true },
-      });
-
-      // ZMIANA STATUSU FIZYCZNEGO EGZEMPLARZA (PUNKT 4)
-      for (const item of instancesToUpdateStatus) {
-        await tx.egzemplarz.update({
-          where: { id: item.id },
-          data: { status_serwisowy: item.targetStatus },
-        });
-      }
-
-      // Aktualizacja stanów ilościowych
-      if (typ === 'wydanie' || typ === 'przyjecie') {
-        const deltas = new Map<number, number>();
-        for (const p of expandedPozycje) {
-          const modelId = this.cleanNumber(p.id_modelu);
-          const egzId = this.cleanNumber(p.id_egzemplarza);
-          if (!modelId || egzId) continue;
-          const qty = Number(p.ilosc || 0);
-          if (!qty) continue;
-          deltas.set(modelId, (deltas.get(modelId) || 0) + (typ === 'wydanie' ? -qty : qty));
-        }
-        for (const [modelId, delta] of deltas.entries()) {
-          await tx.modelSprzetu.update({
-            where: { id: modelId },
-            data: { ilosc_magazynowa: { increment: delta } },
-          });
-        }
-      }
-
-      await tx.logZmian.create({
-        data: {
-          id_organizacji,
-          id_uzytkownika: isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika),
-          typ_obiektu: 'WydanieMagazynowe',
-          id_obiektu: doc.id,
-          akcja: typ.toUpperCase(),
-          nowa_wartosc: JSON.stringify({ ...dto, pozycje_count: expandedPozycje.length }),
-        },
-      });
-
-      return doc;
-    });
+  private nextDocumentNumber(prefix: string) {
+    const now = new Date();
+    return `${prefix}/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${Date.now().toString().slice(-6)}`;
   }
+
+  // --- WALIDACJA RUCHU SPRZĘTU (ZABEZPIECZENIA OPERACYJNE) ---
+
   private async validateInstanceMovement(
     tx: any,
     idEgzemplarza: number,
     name: string,
     typ: string,
     idWydarzenia: number | null,
-    idOrganizacji: number
+    idOrganizacji: number,
   ): Promise<{ crossEventNote?: string }> {
     const allHistory = await tx.pozycjaWydaniaMagazynowego.findMany({
       where: {
         id_organizacji: idOrganizacji,
         id_egzemplarza: idEgzemplarza,
         aktywny: true,
-        wydanie: { aktywny: true }
+        wydanie: { aktywny: true },
       },
       select: {
         ilosc: true,
-        wydanie: { select: { typ: true, id_wydarzenia: true, numer: true, wydarzenie: { select: { nazwa: true } } } }
+        wydanie: { select: { typ: true, id_wydarzenia: true, numer: true, wydarzenie: { select: { nazwa: true } } } },
       },
-      orderBy: { data_utworzenia: 'desc' }
+      orderBy: { data_utworzenia: 'desc' },
     });
 
     let globalWydane = 0;
@@ -309,14 +145,12 @@ export class MagazynService {
     let eventWydane = 0;
     let eventPrzyjete = 0;
     let lastIssuingEventName: string | null = null;
-    let lastIssuingEventId: number | null = null;
 
     for (const h of allHistory) {
       if (h.wydanie.typ === 'wydanie') {
         globalWydane += Number(h.ilosc || 1);
         if (!lastIssuingEventName && h.wydanie.wydarzenie?.nazwa) {
           lastIssuingEventName = h.wydanie.wydarzenie.nazwa;
-          lastIssuingEventId = h.wydanie.id_wydarzenia;
         }
         if (idWydarzenia && h.wydanie.id_wydarzenia === idWydarzenia) eventWydane += Number(h.ilosc || 1);
       }
@@ -326,7 +160,7 @@ export class MagazynService {
       }
     }
 
-    // PUNKT 1: Zabezpieczenie przed podwójnym wydaniem (WZ)
+    // Zabezpieczenie przed podwójnym wydaniem (WZ)
     if (typ === 'wydanie') {
       if (idWydarzenia && eventWydane > eventPrzyjete) {
         throw new BadRequestException(`Egzemplarz "${name}" (ID #${idEgzemplarza}) został już wydany na to wydarzenie.`);
@@ -336,13 +170,11 @@ export class MagazynService {
       }
     }
 
-    // PUNKT 3: Inteligentne przyjęcie (PZ)
+    // Inteligentne przyjęcie (PZ)
     if (typ === 'przyjecie') {
       if (globalWydane <= globalPrzyjete) {
         throw new BadRequestException(`Egzemplarz "${name}" (ID #${idEgzemplarza}) znajduje się już na magazynie.`);
       }
-
-      // Jeśli sprzęt był wydany na inne wydarzenie, zezwalamy, ale odnotowujemy to
       if (idWydarzenia && (eventWydane === 0 || eventWydane <= eventPrzyjete)) {
         const fromWhere = lastIssuingEventName ? `wydarzenia "${lastIssuingEventName}"` : `innego zlecenia`;
         return { crossEventNote: `Przyjęto ze zwrotu z ${fromWhere}` };
@@ -352,106 +184,97 @@ export class MagazynService {
     return {};
   }
 
-  private normalizeTags(tagsInput: any): string[] {
-    if (!tagsInput) return [];
-    if (Array.isArray(tagsInput)) {
-      return Array.from(new Set(tagsInput.map(t => String(t || '').trim().toLowerCase()).filter(Boolean)));
-    }
-    if (typeof tagsInput === 'string') {
-      return Array.from(new Set(tagsInput.split(/[,\s]+/).map(t => t.trim().toLowerCase()).filter(Boolean)));
-    }
-    return [];
+  // --- CRUD STRUKTURY MAGAZYNÓW (MULTI-WAREHOUSE) ---
+
+  async getMagazyny(id_organizacji: number) {
+    return this.prisma.extendedClient.magazyn.findMany({
+      where: { id_organizacji, aktywny: true },
+      orderBy: [{ domyslny: 'desc' }, { nazwa: 'asc' }],
+    });
   }
 
-  // --- PRECYZYJNY SKANER (Reguła 5 i 6) ---
-
-  async znajdzSprzetPoKodzie(kodRaw: string, id_organizacji: number) {
-    const kod = this.cleanString(kodRaw)?.toLowerCase();
-    if (!kod) throw new NotFoundException('Brak kodu.');
-
-    // 1. Sprawdzamy czy to nie jest sprzęt ilościowy po kodzie modelu (Reguła 6)
-    const modelIlosciowy = await this.prisma.extendedClient.modelSprzetu.findFirst({
-      where: { id_organizacji, aktywny: true, kod_kreskowy: { equals: kod, mode: 'insensitive' } },
-      include: { kategoria: true }
-    });
-
-    if (modelIlosciowy && this.isSprzetIlosciowy(modelIlosciowy)) {
-      return {
-        rowType: 'ilosciowy_model',
-        quantityOnly: true,
-        id_modelu: modelIlosciowy.id,
-        nazwa: modelIlosciowy.nazwa,
-        kod: modelIlosciowy.kod_kreskowy || kod,
-        ilosc_dostepna: Number(modelIlosciowy.ilosc_magazynowa || 0),
-        jednostka: modelIlosciowy.jednostka || 'szt.',
-        message: `Zeskanowano sprzęt ilościowy. Potwierdź ilość ręcznie.`,
-      };
-    }
-
-    // 2. Szukamy dokładnego dopasowania fizycznego egzemplarza
-    const egzemplarz = await this.prisma.extendedClient.egzemplarz.findFirst({
-      where: {
-        id_organizacji, aktywny: true,
-        OR: [
-          { kod_kreskowy: { equals: kod, mode: 'insensitive' } },
-          { sn: { equals: kod, mode: 'insensitive' } },
-          { zewnetrzny_kod_kreskowy: { equals: kod, mode: 'insensitive' } },
-          { zewnetrzny_qr_kod: { equals: kod, mode: 'insensitive' } },
-          { qr_kod: { equals: kod, mode: 'insensitive' } },
-          { numer_egzemplarza: { equals: kod, mode: 'insensitive' } }
-        ]
+  async getMagazynyFull(id_organizacji: number) {
+    return this.prisma.extendedClient.magazyn.findMany({
+      where: { id_organizacji, aktywny: true },
+      include: {
+        _count: {
+          select: { egzemplarze: { where: { aktywny: true } } },
+        },
       },
-      include: { model: { include: { kategoria: true } }, zawartosc_case: { include: { model: { include: { kategoria: true } } } } }
+      orderBy: [{ domyslny: 'desc' }, { nazwa: 'asc' }],
     });
-
-    if (!egzemplarz) {
-      throw new NotFoundException(`Nie znaleziono sprzętu o kodzie: ${kodRaw}`);
-    }
-
-    // Standardowy ładunek bazowy
-    const basePayload = {
-      id_egzemplarza: egzemplarz.id,
-      id_modelu: egzemplarz.id_modelu,
-      nazwa: egzemplarz.nazwa || egzemplarz.model.nazwa,
-      kod: this.getEquipmentCode(egzemplarz),
-      kategoria: egzemplarz.model.kategoria?.nazwa || 'Brak',
-      numer_egzemplarza: egzemplarz.numer_egzemplarza || egzemplarz.numer_urzadzenia,
-      sn: egzemplarz.sn
-    };
-
-    // Zestaw (Reguła 3)
-    if (this.isZestaw(egzemplarz)) {
-      return { ...basePayload, rowType: 'zestaw', isZestaw: true, message: 'Zeskanowano Zestaw (idzie w całości).' };
-    }
-
-    // Case (Reguła 2 - Ale tylko jeśli użytkownik zeskanował dokładnie naklejkę z samego Case'a, a nie element w środku!)
-    if (this.isOpakowanie(egzemplarz)) {
-      const contents = egzemplarz.zawartosc_case.map(c => ({
-        id_egzemplarza: c.id,
-        id_modelu: c.id_modelu,
-        nazwa: c.nazwa || c.model?.nazwa,
-        kategoria: c.model?.kategoria?.nazwa || 'Brak',
-        kod: this.getEquipmentCode(c),
-        ilosc: 1
-      }));
-      return { ...basePayload, rowType: 'case', isCase: true, contents, zawartosc_case: contents, message: 'Zeskanowano Opakowanie. Zostanie automatycznie rozpakowane.' };
-    }
-
-    // Pojedynczy Egzemplarz (Reguła 1 oraz Reguła 5 - jeśli zeskanowano dziecko siedzące w Case, zignoruje Case'a nadrzędnego)
-    return { ...basePayload, rowType: 'egzemplarz', message: 'Dodano Egzemplarz.' };
   }
 
-  async znajdzSprzetDlaWydawkiPoKodzie(kod: string, id_organizacji: number) {
-    return this.znajdzSprzetPoKodzie(kod, id_organizacji);
+  async getMagazynById(id: number, id_organizacji: number) {
+    const mag = await this.prisma.extendedClient.magazyn.findFirst({
+      where: { id, id_organizacji, aktywny: true },
+      include: {
+        egzemplarze: {
+          where: { aktywny: true },
+          include: { model: { include: { kategoria: true } } },
+        },
+      },
+    });
+    if (!mag) throw new NotFoundException('Nie znaleziono magazynu');
+    return mag;
   }
 
-  private nextDocumentNumber(prefix: string) {
-    const now = new Date();
-    return `${prefix}/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${Date.now().toString().slice(-6)}`;
+  async createMagazyn(dto: any, id_organizacji: number) {
+    if (!dto.nazwa || !dto.nazwa.trim()) throw new BadRequestException('Nazwa magazynu jest wymagana');
+    if (dto.domyslny) {
+      await this.prisma.extendedClient.magazyn.updateMany({
+        where: { id_organizacji },
+        data: { domyslny: false },
+      });
+    }
+    return this.prisma.extendedClient.magazyn.create({
+      data: {
+        id_organizacji,
+        nazwa: this.cleanString(dto.nazwa)!,
+        kod: this.cleanString(dto.kod),
+        adres: this.cleanString(dto.adres),
+        miasto: this.cleanString(dto.miasto),
+        kod_pocztowy: this.cleanString(dto.kod_pocztowy),
+        opis: this.cleanString(dto.opis),
+        domyslny: Boolean(dto.domyslny),
+      },
+    });
   }
 
+  async updateMagazyn(id: number, dto: any, id_organizacji: number) {
+    await this.getMagazynById(id, id_organizacji);
+    if (dto.domyslny) {
+      await this.prisma.extendedClient.magazyn.updateMany({
+        where: { id_organizacji, id: { not: id } },
+        data: { domyslny: false },
+      });
+    }
+    return this.prisma.extendedClient.magazyn.update({
+      where: { id },
+      data: {
+        nazwa: this.cleanString(dto.nazwa),
+        kod: this.cleanString(dto.kod),
+        adres: this.cleanString(dto.adres),
+        miasto: this.cleanString(dto.miasto),
+        kod_pocztowy: this.cleanString(dto.kod_pocztowy),
+        opis: this.cleanString(dto.opis),
+        domyslny: dto.domyslny !== undefined ? Boolean(dto.domyslny) : undefined,
+      },
+    });
+  }
 
-  // --- POZOSTAŁE METODY CRUD, KATEGORIE, CENNIKI (KOMPLETNE I NIEZMIENIONE) ---
+  async deleteMagazyn(id: number, id_organizacji: number) {
+    const mag = await this.getMagazynById(id, id_organizacji);
+    if (mag.egzemplarze.length > 0) {
+      throw new BadRequestException(`Nie można usunąć magazynu "${mag.nazwa}", ponieważ przypisanych jest do niego ${mag.egzemplarze.length} egzemplarzy sprzętu. Przenieś sprzęt przed usunięciem.`);
+    }
+    return this.prisma.extendedClient.magazyn.update({
+      where: { id },
+      data: { aktywny: false, data_usuniecia: new Date() },
+    });
+  }
+
+  // --- KATEGORIE SPRZĘTU ---
 
   async getKategorie(id_organizacji: number) {
     return this.prisma.extendedClient.kategoria.findMany({
@@ -459,8 +282,8 @@ export class MagazynService {
       include: {
         dzieci: {
           where: { aktywny: true },
-          orderBy: { kolejnosc: 'asc' }
-        }
+          orderBy: { kolejnosc: 'asc' },
+        },
       },
       orderBy: { kolejnosc: 'asc' },
     });
@@ -491,7 +314,7 @@ export class MagazynService {
         kolor: this.cleanString(dto.kolor) || '#06B6D4',
         id_rodzica: this.cleanNumber(dto.id_rodzica),
         kolejnosc: this.cleanNumber(dto.kolejnosc) || 0,
-      }
+      },
     });
   }
 
@@ -505,34 +328,37 @@ export class MagazynService {
         id_rodzica: this.cleanNumber(dto.id_rodzica),
         kolejnosc: this.cleanNumber(dto.kolejnosc) || 0,
         aktywny: dto.aktywny ?? true,
-      }
+      },
     });
   }
 
   async deleteKategoria(id: number, id_organizacji: number) {
-    return this.prisma.extendedClient.kategoria.update({ where: { id }, data: { aktywny: false, data_usuniecia: new Date() } });
+    return this.prisma.extendedClient.kategoria.update({
+      where: { id },
+      data: { aktywny: false, data_usuniecia: new Date() },
+    });
   }
+
+  // --- MODELE SPRZĘTU ---
 
   async getModeleSprzetu(id_organizacji: number, filters: any = {}) {
     const page = filters.page ? parseInt(filters.page) : 1;
     const limit = filters.limit ? parseInt(filters.limit) : 1000;
     const skip = (page - 1) * limit;
     const where: any = { id_organizacji, aktywny: true };
+
     if (filters.kategoriaId) where.id_kategorii = Number(filters.kategoriaId);
     if (filters.search) {
       where.OR = [
         { nazwa: { contains: filters.search, mode: 'insensitive' } },
         { producent: { contains: filters.search, mode: 'insensitive' } },
         { kod_kreskowy: { contains: filters.search, mode: 'insensitive' } },
-        { tagi: { has: filters.search.trim().toLowerCase() } }, // Wyszukiwanie po tagach
+        { tagi: { has: filters.search.trim().toLowerCase() } },
       ];
     }
-    if (filters.widocznyWMag) {
-      where.widoczny_w_mag = filters.widocznyWMag === 'TAK';
-    }
-    if (filters.widocznyWOfercie) {
-      where.widoczny_w_ofercie = filters.widocznyWOfercie === 'TAK';
-    }
+    if (filters.widocznyWMag) where.widoczny_w_mag = filters.widocznyWMag === 'TAK';
+    if (filters.widocznyWOfercie) where.widoczny_w_ofercie = filters.widocznyWOfercie === 'TAK';
+
     const modele = await this.prisma.extendedClient.modelSprzetu.findMany({
       where,
       skip,
@@ -541,21 +367,27 @@ export class MagazynService {
         kategoria: true,
         stawki: {
           where: { aktywny: true, nazwa_stawki: 'Podstawowa (PLN)' },
-          take: 1
+          take: 1,
         },
         egzemplarze: {
           where: { aktywny: true },
-          select: { id_statusu_egzemplarza: true, status_serwisowy: true }
-        }
+          select: { id_statusu_egzemplarza: true, status_serwisowy: true },
+        },
       },
       orderBy: { nazwa: 'asc' },
     });
-    return modele.map(model => {
+
+    return modele.map((model: any) => {
       const ilosciowy = model.tryb_ewidencji === 'ilosciowe' || model.typ_sprzetu === 'ilosciowe';
       const totalStanie = ilosciowy ? Number(model.ilosc_magazynowa || 0) : model.egzemplarze.length;
-      const wMagazynie = ilosciowy ? Number(model.ilosc_magazynowa || 0) : model.egzemplarze.filter(e => e.status_serwisowy === 'Działa' || e.status_serwisowy === 'Naprawiony').length;
-      const wSerwisie = ilosciowy ? 0 : model.egzemplarze.filter(e => e.status_serwisowy?.includes('Wymaga') || e.status_serwisowy === 'W serwisie').length;
+      const wMagazynie = ilosciowy
+        ? Number(model.ilosc_magazynowa || 0)
+        : model.egzemplarze.filter((e: any) => e.status_serwisowy === 'Działa' || e.status_serwisowy === 'Naprawiony').length;
+      const wSerwisie = ilosciowy
+        ? 0
+        : model.egzemplarze.filter((e: any) => e.status_serwisowy?.includes('Wymaga') || e.status_serwisowy === 'W serwisie').length;
       const naEventach = totalStanie - wMagazynie - wSerwisie;
+
       return {
         id: model.id,
         nazwa: model.nazwa,
@@ -563,12 +395,12 @@ export class MagazynService {
         tagi: model.tagi || [],
         typ_sprzetu: model.typ_sprzetu,
         tryb_ewidencji: model.tryb_ewidencji,
-        sprzet_ilosciowy: model.tryb_ewidencji === 'ilosciowe' || model.typ_sprzetu === 'ilosciowe',
+        sprzet_ilosciowy: ilosciowy,
         ilosc_magazynowa: model.ilosc_magazynowa,
         jednostka: model.jednostka,
         kategoria_nazwa: model.kategoria?.nazwa || '-',
         kategoria: model.kategoria,
-        kod_kreskowy: (model.tryb_ewidencji === 'ilosciowe' || model.typ_sprzetu === 'ilosciowe') ? model.kod_kreskowy : null,
+        kod_kreskowy: ilosciowy ? model.kod_kreskowy : null,
         ulubiony: model.ulubiony,
         udostepniony_crn: model.udostepniony_crn,
         widoczny_w_mag: model.widoczny_w_mag,
@@ -582,9 +414,9 @@ export class MagazynService {
           magazyn: wMagazynie,
           eventy: naEventach > 0 ? naEventach : 0,
           serwis: wSerwisie,
-          rack: 0
+          rack: 0,
         },
-        dostepnych: wMagazynie
+        dostepnych: wMagazynie,
       };
     });
   }
@@ -594,7 +426,7 @@ export class MagazynService {
     return this.prisma.extendedClient.modelSprzetu.create({
       data: {
         id_organizacji,
-        nazwa: this.cleanString(dto.nazwa),
+        nazwa: this.cleanString(dto.nazwa)!,
         producent: this.cleanString(dto.producent),
         tagi: this.normalizeTags(dto.tagi),
         typ_sprzetu: this.cleanString(dto.typ_sprzetu) || 'sprzet',
@@ -616,7 +448,7 @@ export class MagazynService {
         zdjecie: this.cleanString(dto.zdjecie),
         widoczny_w_ofercie: true,
         widoczny_w_mag: true,
-      }
+      },
     });
   }
 
@@ -629,15 +461,15 @@ export class MagazynService {
         egzemplarze: {
           where: { aktywny: true },
           orderBy: { id: 'asc' },
-          include: { 
-             magazyn: true,
-             case: { select: { id: true, nazwa: true, numer_urzadzenia: true, model: { select: { nazwa: true } } } },
-             _count: { select: { zawartosc_case: { where: { aktywny: true } } } }
-          }
-        }
-      }
+          include: {
+            magazyn: true,
+            case: { select: { id: true, nazwa: true, numer_urzadzenia: true, model: { select: { nazwa: true } } } },
+            _count: { select: { zawartosc_case: { where: { aktywny: true } } } },
+          },
+        },
+      },
     });
-    
+
     if (!model) throw new NotFoundException('Nie znaleziono modelu');
 
     const zalaczniki = await this.prisma.extendedClient.zalacznik.findMany({
@@ -649,48 +481,12 @@ export class MagazynService {
     return { ...model, zalaczniki };
   }
 
-  // --- Nowe funkcje dla załączników modelu ---
-  async addZalacznik(id_modelu: number, dto: any, file: Express.Multer.File, id_organizacji: number, id_uzytkownika: number) {
-    // 1. Zapis pliku fizycznego do MinIO/S3 (zwraca krótki klucz np. org_1/zalaczniki/123.pdf)
-    const objectKey = await this.storage.uploadFile(file, id_organizacji, 'modele_zalaczniki');
-
-    // 2. Zapis krótkiego klucza w PostgreSQL
-    return this.prisma.extendedClient.zalacznik.create({
-      data: {
-        id_organizacji,
-        typ_obiektu: 'ModelSprzetu',
-        id_obiektu: id_modelu,
-        nazwa: dto.nazwa || file.originalname,
-        nazwa_pliku: file.originalname,
-        rozmiar_bajtow: file.size,
-        mime: file.mimetype,
-        sciezka: objectKey, // Oszczędność kilkunastu megabajtów na wierszu bazy
-        id_uzytkownika_dodal: id_uzytkownika
-      }
-    });
-  }
-
-  async removeZalacznik(id: number, id_organizacji: number) {
-    const zalacznik = await this.prisma.extendedClient.zalacznik.findFirst({
-      where: { id, id_organizacji }
-    });
-
-    if (zalacznik && zalacznik.sciezka && !zalacznik.sciezka.startsWith('data:')) {
-      await this.storage.deleteFile(zalacznik.sciezka);
-    }
-
-    return this.prisma.extendedClient.zalacznik.update({
-      where: { id, id_organizacji },
-      data: { aktywny: false }
-    });
-  }
-
   async updateModel(id: number, dto: any, id_organizacji: number) {
     const ilosciowy = this.isSprzetIlosciowy(dto);
     return this.prisma.extendedClient.modelSprzetu.update({
       where: { id },
       data: {
-        nazwa: this.cleanString(dto.nazwa),
+        nazwa: this.cleanString(dto.nazwa)!,
         producent: this.cleanString(dto.producent),
         tagi: dto.tagi !== undefined ? this.normalizeTags(dto.tagi) : undefined,
         typ_sprzetu: this.cleanString(dto.typ_sprzetu),
@@ -709,8 +505,8 @@ export class MagazynService {
         miejsce_w_mag: this.cleanString(dto.miejsce_w_mag),
         zdjecie: this.cleanString(dto.zdjecie),
         kod_kreskowy: this.normalizeKodKreskowyModelu(dto, ilosciowy),
-        notatki_wewnetrzne: this.cleanString(dto.notatki_wewnetrzne)
-      }
+        notatki_wewnetrzne: this.cleanString(dto.notatki_wewnetrzne),
+      },
     });
   }
 
@@ -719,7 +515,7 @@ export class MagazynService {
     return this.prisma.extendedClient.$transaction(async (tx) => {
       const model = await tx.modelSprzetu.update({
         where: { id },
-        data: { aktywny: false, data_usuniecia: new Date() }
+        data: { aktywny: false, data_usuniecia: new Date() },
       });
       await tx.logZmian.create({
         data: {
@@ -734,12 +530,54 @@ export class MagazynService {
     });
   }
 
-  async getMagazyny(id_organizacji: number) {
-    return this.prisma.extendedClient.magazyn.findMany({
-      where: { id_organizacji, aktywny: true },
-      orderBy: { nazwa: 'asc' },
+  // --- OBSŁUGA ZAŁĄCZNIKÓW S3 / MINIO DLA MODELI ---
+
+  async addZalacznik(id_modelu: number, dto: any, file: Express.Multer.File, id_organizacji: number, id_uzytkownika: number) {
+    const objectKey = await this.storage.uploadFile(file, id_organizacji, 'modele_zalaczniki');
+    return this.prisma.extendedClient.zalacznik.create({
+      data: {
+        id_organizacji,
+        typ_obiektu: 'ModelSprzetu',
+        id_obiektu: id_modelu,
+        nazwa: dto.nazwa || file.originalname,
+        nazwa_pliku: file.originalname,
+        rozmiar_bajtow: file.size,
+        mime: file.mimetype,
+        sciezka: objectKey,
+        id_uzytkownika_dodal: id_uzytkownika,
+      },
     });
   }
+
+  async addZalacznikWithS3(id_modelu: number, dto: any, file: Express.Multer.File, id_organizacji: number, id_uzytkownika: number) {
+    return this.addZalacznik(id_modelu, dto, file, id_organizacji, id_uzytkownika);
+  }
+
+  async removeZalacznik(id: number, id_organizacji: number) {
+    const zalacznik = await this.prisma.extendedClient.zalacznik.findFirst({
+      where: { id, id_organizacji },
+    });
+    if (zalacznik && zalacznik.sciezka && !zalacznik.sciezka.startsWith('data:')) {
+      await this.storage.deleteFile(zalacznik.sciezka);
+    }
+    return this.prisma.extendedClient.zalacznik.update({
+      where: { id, id_organizacji },
+      data: { aktywny: false },
+    });
+  }
+
+  async getDownloadUrl(id_zalacznika: number, id_organizacji: number) {
+    const zalacznik = await this.prisma.extendedClient.zalacznik.findFirst({
+      where: { id: id_zalacznika, id_organizacji, aktywny: true },
+    });
+    if (!zalacznik || !zalacznik.sciezka) {
+      throw new NotFoundException('Załącznik nie istnieje lub brakuje pliku fizycznego.');
+    }
+    const url = await this.storage.getPresignedDownloadUrl(zalacznik.sciezka);
+    return { url };
+  }
+
+  // --- EGZEMPLARZE FIZYCZNE ---
 
   async createEgzemplarz(id_modelu: number, dto: any, id_organizacji: number, id_uzytkownika: number | null) {
     const safeUserId = isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika);
@@ -759,7 +597,7 @@ export class MagazynService {
           pakowany_pojedynczo: false,
           cena_zakupu: this.cleanNumber(dto.cena_zakupu),
           id_case: this.cleanNumber(dto.id_case),
-          status_serwisowy: this.cleanString(dto.status_serwisowy) || "Działa",
+          status_serwisowy: this.cleanString(dto.status_serwisowy) || 'Działa',
           kod_kreskowy: this.cleanString(dto.kod_kreskowy || dto.zewnetrzny_kod_kreskowy) || `SN-${Date.now()}`,
           zewnetrzny_kod_kreskowy: this.cleanString(dto.zewnetrzny_kod_kreskowy || dto.kod_kreskowy),
           zewnetrzny_qr_kod: this.cleanString(dto.zewnetrzny_qr_kod || dto.qr_kod || dto.zewnetrzny_kod_kreskowy || dto.kod_kreskowy),
@@ -771,8 +609,8 @@ export class MagazynService {
           objetosc: this.cleanNumber(dto.objetosc),
           wartosc: this.cleanNumber(dto.wartosc),
           qr_kod: this.cleanString(dto.qr_kod || dto.zewnetrzny_qr_kod || dto.zewnetrzny_kod_kreskowy),
-          notatki_wewnetrzne: this.cleanString(dto.notatki_wewnetrzne)
-        }
+          notatki_wewnetrzne: this.cleanString(dto.notatki_wewnetrzne),
+        },
       });
 
       await tx.logZmian.create({
@@ -794,8 +632,8 @@ export class MagazynService {
             id_statusu_serwisu: this.cleanNumber(dto.id_statusu_serwisu)!,
             id_uzytkownika_zglosil: safeUserId,
             tytul: this.cleanString(dto.tytul_usterki)!,
-            opis: this.cleanString(dto.opis_usterki)
-          }
+            opis: this.cleanString(dto.opis_usterki),
+          },
         });
       }
 
@@ -820,7 +658,7 @@ export class MagazynService {
           pakowany_pojedynczo: false,
           cena_zakupu: this.cleanNumber(dto.cena_zakupu),
           id_case: this.cleanNumber(dto.id_case),
-          status_serwisowy: this.cleanString(dto.status_serwisowy) || "Działa",
+          status_serwisowy: this.cleanString(dto.status_serwisowy) || 'Działa',
           kod_kreskowy: this.cleanString(dto.kod_kreskowy || dto.zewnetrzny_kod_kreskowy),
           zewnetrzny_kod_kreskowy: this.cleanString(dto.zewnetrzny_kod_kreskowy || dto.kod_kreskowy),
           zewnetrzny_qr_kod: this.cleanString(dto.zewnetrzny_qr_kod || dto.qr_kod || dto.zewnetrzny_kod_kreskowy || dto.kod_kreskowy),
@@ -832,8 +670,8 @@ export class MagazynService {
           objetosc: this.cleanNumber(dto.objetosc),
           wartosc: this.cleanNumber(dto.wartosc),
           qr_kod: this.cleanString(dto.qr_kod || dto.zewnetrzny_qr_kod || dto.zewnetrzny_kod_kreskowy),
-          notatki_wewnetrzne: this.cleanString(dto.notatki_wewnetrzne)
-        }
+          notatki_wewnetrzne: this.cleanString(dto.notatki_wewnetrzne),
+        },
       });
 
       await tx.logZmian.create({
@@ -855,8 +693,8 @@ export class MagazynService {
             id_statusu_serwisu: this.cleanNumber(dto.id_statusu_serwisu)!,
             id_uzytkownika_zglosil: safeUserId,
             tytul: this.cleanString(dto.tytul_usterki)!,
-            opis: this.cleanString(dto.opis_usterki)
-          }
+            opis: this.cleanString(dto.opis_usterki),
+          },
         });
       }
 
@@ -869,7 +707,7 @@ export class MagazynService {
     return this.prisma.extendedClient.$transaction(async (tx) => {
       const egzemplarz = await tx.egzemplarz.update({
         where: { id },
-        data: { aktywny: false }
+        data: { aktywny: false },
       });
       await tx.logZmian.create({
         data: {
@@ -877,25 +715,61 @@ export class MagazynService {
           id_uzytkownika: safeUserId,
           typ_obiektu: 'Egzemplarz',
           id_obiektu: id,
-          akcja: 'USUNIECIE'
+          akcja: 'USUNIECIE',
         },
       });
       return egzemplarz;
     });
   }
 
+  async getWszystkieEgzemplarze(id_organizacji: number, filters: any = {}) {
+    const where: any = { id_organizacji, aktywny: true };
+
+    if (filters.searchItem) {
+      where.OR = [
+        { nazwa: { contains: filters.searchItem, mode: 'insensitive' } },
+        { sn: { contains: filters.searchItem, mode: 'insensitive' } },
+        { kod_kreskowy: { contains: filters.searchItem, mode: 'insensitive' } },
+        { numer_urzadzenia: { contains: filters.searchItem, mode: 'insensitive' } },
+        { numer_egzemplarza: { contains: filters.searchItem, mode: 'insensitive' } },
+        { zewnetrzny_kod_kreskowy: { contains: filters.searchItem, mode: 'insensitive' } },
+        { zewnetrzny_qr_kod: { contains: filters.searchItem, mode: 'insensitive' } },
+      ];
+    }
+    if (filters.searchModel) {
+      where.model = { nazwa: { contains: filters.searchModel, mode: 'insensitive' } };
+    }
+    if (filters.searchCategory) {
+      where.model = {
+        ...where.model,
+        kategoria: { nazwa: { contains: filters.searchCategory, mode: 'insensitive' } },
+      };
+    }
+
+    return this.prisma.extendedClient.egzemplarz.findMany({
+      where,
+      include: {
+        model: {
+          include: { kategoria: true },
+        },
+        magazyn: true,
+      },
+      orderBy: { data_utworzenia: 'desc' },
+    });
+  }
+
   async getFizyczneCase(id_organizacji: number) {
     return this.prisma.extendedClient.egzemplarz.findMany({
-      where: { 
-         id_organizacji, 
-         aktywny: true,
-         model: { typ_sprzetu: { in: ['opakowanie', 'rack', 'zestaw'] } } 
-       },
+      where: {
+        id_organizacji,
+        aktywny: true,
+        model: { typ_sprzetu: { in: ['opakowanie', 'rack', 'zestaw'] } },
+      },
       include: {
         model: { select: { nazwa: true } },
-        _count: { select: { zawartosc_case: { where: { aktywny: true } } } }
+        _count: { select: { zawartosc_case: { where: { aktywny: true } } } },
       },
-      orderBy: { nazwa: 'asc' }
+      orderBy: { nazwa: 'asc' },
     });
   }
 
@@ -909,26 +783,26 @@ export class MagazynService {
         zawartosc_case: {
           where: { aktywny: true },
           include: { model: true, magazyn: true },
-          orderBy: { nazwa: 'asc' }
+          orderBy: { nazwa: 'asc' },
         },
         serwisy: {
           include: { status: true, zglosil: true, rozwiazal: true },
-          orderBy: { data_zgloszenia: 'desc' }
+          orderBy: { data_zgloszenia: 'desc' },
         },
         pozycje_wydan: {
           where: { aktywny: true, wydanie: { aktywny: true, id_wydarzenia: { not: null } } },
-          include: { 
-            wydanie: { 
-              include: { 
-                wydarzenie: { 
-                  include: { status: true, typ: true, kontrahent: true } 
-                } 
-              } 
-            } 
+          include: {
+            wydanie: {
+              include: {
+                wydarzenie: {
+                  include: { status: true, typ: true, kontrahent: true },
+                },
+              },
+            },
           },
-          orderBy: { data_utworzenia: 'desc' }
-        }
-      }
+          orderBy: { data_utworzenia: 'desc' },
+        },
+      },
     });
   }
 
@@ -939,10 +813,10 @@ export class MagazynService {
         aktywny: true,
         id_case: null,
         id: { not: id_case },
-        model: { typ_sprzetu: 'sprzet' } 
-       },
+        model: { typ_sprzetu: 'sprzet' },
+      },
       include: { model: true },
-      orderBy: { nazwa: 'asc' }
+      orderBy: { nazwa: 'asc' },
     });
   }
 
@@ -950,13 +824,13 @@ export class MagazynService {
     const safeUserId = isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika);
     return this.prisma.extendedClient.$transaction(async (tx) => {
       const skrzynia = await tx.egzemplarz.findFirst({
-        where: { id: id_case, id_organizacji, aktywny: true }
+        where: { id: id_case, id_organizacji, aktywny: true },
       });
       if (!skrzynia) throw new NotFoundException('Nie znaleziono skrzyni');
 
       await tx.egzemplarz.updateMany({
         where: { id: { in: itemIds }, id_organizacji },
-        data: { id_case: akcja === 'add' ? id_case : null }
+        data: { id_case: akcja === 'add' ? id_case : null },
       });
 
       for (const itemId of itemIds) {
@@ -980,23 +854,23 @@ export class MagazynService {
       where: {
         id_organizacji,
         aktywny: true,
-        model: { typ_sprzetu: { in: ['opakowanie', 'rack', 'zestaw'] } }
+        model: { typ_sprzetu: { in: ['opakowanie', 'rack', 'zestaw'] } },
       },
       include: {
         model: {
-          include: { kategoria: true }
+          include: { kategoria: true },
         },
         magazyn: true,
         zawartosc_case: {
           where: { aktywny: true },
           include: {
             model: true,
-            magazyn: true
+            magazyn: true,
           },
-          orderBy: { nazwa: 'asc' }
-        }
+          orderBy: { nazwa: 'asc' },
+        },
       },
-      orderBy: { nazwa: 'asc' }
+      orderBy: { nazwa: 'asc' },
     });
   }
 
@@ -1016,7 +890,7 @@ export class MagazynService {
   async createOpakowanie(dto: any, id_organizacji: number, id_uzytkownika: number | null) {
     const safeUserId = isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika);
     const nazwa = this.cleanString(dto.nazwa) || 'Nowe opakowanie';
-    
+
     return this.prisma.extendedClient.$transaction(async (tx) => {
       const model = dto.id_modelu
         ? await tx.modelSprzetu.findFirst({ where: { id: Number(dto.id_modelu), id_organizacji, aktywny: true } })
@@ -1055,7 +929,7 @@ export class MagazynService {
           objetosc: this.cleanNumber(dto.objetosc),
           wartosc: this.cleanNumber(dto.wartosc),
           opis: this.cleanString(dto.opis),
-          status_serwisowy: 'Działa'
+          status_serwisowy: 'Działa',
         },
       });
 
@@ -1076,13 +950,13 @@ export class MagazynService {
     });
   }
 
+  // --- CENNIKI I STAWKI ---
+
   async getCennikGlobalny(id_organizacji: number, kategoriaId?: number, search?: string) {
     const where: any = { id_organizacji, aktywny: true };
     if (kategoriaId) where.id_kategorii = kategoriaId;
     if (search) {
-      where.OR = [
-        { nazwa: { contains: search, mode: 'insensitive' } },
-      ];
+      where.OR = [{ nazwa: { contains: search, mode: 'insensitive' } }];
     }
     return this.prisma.extendedClient.modelSprzetu.findMany({
       where,
@@ -1090,24 +964,24 @@ export class MagazynService {
         kategoria: true,
         stawki: {
           where: { aktywny: true, nazwa_stawki: 'Podstawowa (PLN)' },
-          take: 1
-        }
+          take: 1,
+        },
       },
-      orderBy: { nazwa: 'asc' }
+      orderBy: { nazwa: 'asc' },
     });
   }
 
-  async updateCenyMasowo(updates: { id_modelu: number, cena: number | null }[], id_organizacji: number) {
+  async updateCenyMasowo(updates: { id_modelu: number; cena: number | null }[], id_organizacji: number) {
     return this.prisma.extendedClient.$transaction(async (tx) => {
       let zaktualizowano = 0;
       for (const update of updates) {
         const istniejaca = await tx.cenaModelu.findFirst({
-          where: { id_modelu: update.id_modelu, id_organizacji, nazwa_stawki: 'Podstawowa (PLN)', aktywny: true }
+          where: { id_modelu: update.id_modelu, id_organizacji, nazwa_stawki: 'Podstawowa (PLN)', aktywny: true },
         });
         if (istniejaca) {
           await tx.cenaModelu.update({
             where: { id: istniejaca.id },
-            data: { cena_netto: update.cena }
+            data: { cena_netto: update.cena },
           });
         } else {
           await tx.cenaModelu.create({
@@ -1115,8 +989,8 @@ export class MagazynService {
               id_organizacji,
               id_modelu: update.id_modelu,
               nazwa_stawki: 'Podstawowa (PLN)',
-              cena_netto: update.cena
-            }
+              cena_netto: update.cena,
+            },
           });
         }
         zaktualizowano++;
@@ -1134,8 +1008,8 @@ export class MagazynService {
         cena_netto: this.cleanNumber(dto.cena_netto),
         koszt: this.cleanNumber(dto.koszt),
         nazwa_kosztu: this.cleanString(dto.nazwa_kosztu),
-        mnoz_koszt: this.cleanBoolean(dto.mnoz_koszt)
-      }
+        mnoz_koszt: this.cleanBoolean(dto.mnoz_koszt),
+      },
     });
   }
 
@@ -1147,51 +1021,15 @@ export class MagazynService {
         cena_netto: this.cleanNumber(dto.cena_netto),
         koszt: this.cleanNumber(dto.koszt),
         nazwa_kosztu: this.cleanString(dto.nazwa_kosztu),
-        mnoz_koszt: this.cleanBoolean(dto.mnoz_koszt)
-      }
+        mnoz_koszt: this.cleanBoolean(dto.mnoz_koszt),
+      },
     });
   }
 
   async deleteStawka(id: number, id_organizacji: number) {
     return this.prisma.extendedClient.cenaModelu.update({
       where: { id },
-      data: { aktywny: false }
-    });
-  }
-
-  async getWszystkieEgzemplarze(id_organizacji: number, filters: any = {}) {
-    const where: any = { id_organizacji, aktywny: true };
-
-    if (filters.searchItem) {
-      where.OR = [
-        { nazwa: { contains: filters.searchItem, mode: 'insensitive' } },
-        { sn: { contains: filters.searchItem, mode: 'insensitive' } },
-        { kod_kreskowy: { contains: filters.searchItem, mode: 'insensitive' } },
-        { numer_urzadzenia: { contains: filters.searchItem, mode: 'insensitive' } },
-        { numer_egzemplarza: { contains: filters.searchItem, mode: 'insensitive' } },
-        { zewnetrzny_kod_kreskowy: { contains: filters.searchItem, mode: 'insensitive' } },
-        { zewnetrzny_qr_kod: { contains: filters.searchItem, mode: 'insensitive' } },
-      ];
-    }
-    if (filters.searchModel) {
-      where.model = { nazwa: { contains: filters.searchModel, mode: 'insensitive' } };
-    }
-    if (filters.searchCategory) {
-      where.model = {
-        ...where.model,
-        kategoria: { nazwa: { contains: filters.searchCategory, mode: 'insensitive' } }
-      };
-    }
-
-    return this.prisma.extendedClient.egzemplarz.findMany({
-      where,
-      include: {
-        model: {
-          include: { kategoria: true }
-        },
-        magazyn: true
-      },
-      orderBy: { data_utworzenia: 'desc' }
+      data: { aktywny: false },
     });
   }
 
@@ -1214,6 +1052,187 @@ export class MagazynService {
     }));
   }
 
+  // --- SKANER KODÓW (PRECYZYJNA LOGIKA CASE I MODELI ILOŚCIOWYCH) ---
+
+  async znajdzSprzetPoKodzie(kodRaw: string, id_organizacji: number) {
+    const kod = this.cleanString(kodRaw);
+    if (!kod) throw new NotFoundException('Podaj kod kreskowy, QR albo numer seryjny');
+
+    const codeOr = [
+      { kod_kreskowy: kod },
+      { zewnetrzny_kod_kreskowy: kod },
+      { zewnetrzny_qr_kod: kod },
+      { qr_kod: kod },
+      { sn: kod },
+      { numer_urzadzenia: kod },
+      { numer_egzemplarza: kod },
+    ];
+
+    const includeForScan: any = {
+      model: { include: { kategoria: true } },
+      magazyn: true,
+      case: {
+        include: {
+          model: true,
+          zawartosc_case: {
+            where: { aktywny: true },
+            include: { model: { include: { kategoria: true } }, magazyn: true },
+            orderBy: [{ id_modelu: 'asc' }, { numer_egzemplarza: 'asc' }, { id: 'asc' }],
+          },
+        },
+      },
+      zawartosc_case: {
+        where: { aktywny: true },
+        include: { model: { include: { kategoria: true } }, magazyn: true },
+        orderBy: [{ id_modelu: 'asc' }, { numer_egzemplarza: 'asc' }, { id: 'asc' }],
+      },
+    };
+
+    // Jeśli ten sam kod występuje na case i w środku, case ma pierwszeństwo
+    const caseEgzemplarz = await this.prisma.extendedClient.egzemplarz.findFirst({
+      where: {
+        id_organizacji,
+        aktywny: true,
+        OR: [
+          { AND: [{ OR: codeOr }, { model: { typ_sprzetu: 'opakowanie' } }] },
+          { AND: [{ OR: codeOr }, { zawartosc_case: { some: { aktywny: true } } }] },
+        ],
+      },
+      include: includeForScan,
+      orderBy: [{ id: 'asc' }],
+    });
+
+    const egzemplarz = caseEgzemplarz || (await this.prisma.extendedClient.egzemplarz.findFirst({
+      where: {
+        id_organizacji,
+        aktywny: true,
+        OR: codeOr,
+      },
+      include: includeForScan,
+      orderBy: [{ id: 'asc' }],
+    }));
+
+    if (!egzemplarz) {
+      // Sprzęt ilościowy na modelu
+      const modelIlosciowy = await this.prisma.extendedClient.modelSprzetu.findFirst({
+        where: {
+          id_organizacji,
+          aktywny: true,
+          OR: [{ kod_kreskowy: { equals: kod, mode: 'insensitive' } }],
+        },
+        include: { kategoria: true, egzemplarze: { where: { aktywny: true }, take: 1 } },
+      });
+
+      if (modelIlosciowy && (this.isSprzetIlosciowy(modelIlosciowy) || (modelIlosciowy.egzemplarze || []).length === 0)) {
+        return {
+          rowType: 'ilosciowy_model',
+          quantityOnly: true,
+          id_modelu: modelIlosciowy.id,
+          nazwa: modelIlosciowy.nazwa,
+          nazwa_modelu: modelIlosciowy.nazwa,
+          kategoria: modelIlosciowy.kategoria?.nazwa || 'Bez kategorii',
+          kod: modelIlosciowy.kod_kreskowy || kod,
+          kod_kreskowy: modelIlosciowy.kod_kreskowy || kod,
+          ilosc_dostepna: Number(modelIlosciowy.ilosc_magazynowa || 0),
+          ilosc_magazynowa: Number(modelIlosciowy.ilosc_magazynowa || 0),
+          jednostka: modelIlosciowy.jednostka || 'szt.',
+          message: `Zeskanowano model ilościowy: ${modelIlosciowy.nazwa}. Podaj ilość sztuk.`,
+        };
+      }
+      throw new NotFoundException(`Nie znaleziono sprzętu dla kodu: ${kod}`);
+    }
+
+    const normalize = (e: any) => ({
+      rowType: 'egzemplarz',
+      id: e.id,
+      id_egzemplarza: e.id,
+      id_modelu: e.id_modelu,
+      nazwa: e.nazwa || e.model?.nazwa,
+      nazwa_modelu: e.model?.nazwa,
+      numer_egzemplarza: e.numer_egzemplarza || e.numer_urzadzenia,
+      kategoria: e.model?.kategoria?.nazwa || 'Bez kategorii',
+      kod: this.getEquipmentCode(e),
+      kod_kreskowy: this.getEquipmentCode(e),
+      sn: e.sn,
+      status_serwisowy: e.status_serwisowy,
+      id_magazynu: e.id_magazynu ? Number(e.id_magazynu) : null,
+      magazyn_id: e.id_magazynu ? Number(e.id_magazynu) : null,
+      magazyn_nazwa: e.magazyn?.nazwa || 'Brak przypisanego magazynu',
+      magazyn: e.magazyn?.nazwa || 'Brak przypisanego magazynu',
+      miejsce_w_mag: e.miejsce_w_mag || '',
+      ilosc: 1,
+    });
+
+    const makeCasePayload = (caseRow: any, reason = 'case') => {
+      const meta = this.caseScanMeta(caseRow);
+      const contents = (caseRow.zawartosc_case || [])
+        .filter((e: any) => e.aktywny !== false && e.model?.typ_sprzetu !== 'opakowanie')
+        .map((child: any) => ({
+          ...normalize(child),
+          system_case_scan: meta,
+          id_zeskanowanego_case: meta?.id || caseRow.id,
+          nazwa_zeskanowanego_case: meta?.nazwa || caseRow.nazwa || caseRow.model?.nazwa || 'Case',
+        }));
+
+      if (!contents.length) throw new NotFoundException(`Case/opakowanie ${kod} jest puste albo nie zawiera aktywnych egzemplarzy.`);
+      return {
+        rowType: 'case',
+        isCase: true,
+        id: caseRow.id,
+        id_egzemplarza: caseRow.id,
+        nazwa: caseRow.nazwa || caseRow.model?.nazwa || 'Case',
+        nazwa_modelu: caseRow.model?.nazwa,
+        kod: this.getEquipmentCode(caseRow) || kod,
+        kod_kreskowy: this.getEquipmentCode(caseRow) || kod,
+        kategoria: caseRow.model?.kategoria?.nazwa || 'Opakowania',
+        ilosc: contents.length,
+        contents,
+        message: `Zeskanowano case. Dodano ${contents.length} egzemplarzy z wnętrza case.`,
+        scan_reason: reason,
+      };
+    };
+
+    if (this.isZestaw(egzemplarz)) {
+      return {
+        ...normalize(egzemplarz),
+        rowType: 'zestaw',
+        isZestaw: true,
+        message: 'Zeskanowano zestaw (idzie w całości).',
+      };
+    }
+
+    const isDirectCase = this.isOpakowanie(egzemplarz) || (egzemplarz.zawartosc_case?.length || 0) > 0;
+    if (isDirectCase) {
+      return makeCasePayload(egzemplarz, 'direct_case_scan');
+    }
+
+    const parentCase = egzemplarz.case;
+    const parentCaseCodes = [
+      parentCase?.kod_kreskowy,
+      parentCase?.zewnetrzny_kod_kreskowy,
+      parentCase?.zewnetrzny_qr_kod,
+      parentCase?.qr_kod,
+      parentCase?.sn,
+      parentCase?.numer_urzadzenia,
+      parentCase?.numer_egzemplarza,
+    ].filter(Boolean).map((v: any) => String(v));
+
+    if (parentCase && parentCaseCodes.includes(String(kod)) && (parentCase.zawartosc_case?.length || 0) > 0) {
+      return makeCasePayload(parentCase, 'parent_case_code_matched');
+    }
+
+    return {
+      ...normalize(egzemplarz),
+      case: egzemplarz.case ? `${egzemplarz.case.model?.nazwa || ''} ${egzemplarz.case.nazwa || ''}`.trim() : null,
+    };
+  }
+
+  async znajdzSprzetDlaWydawkiPoKodzie(kod: string, id_organizacji: number) {
+    return this.znajdzSprzetPoKodzie(kod, id_organizacji);
+  }
+
+  // --- DOKUMENTY MAGAZYNOWE (WZ, PZ, PLAN, RELOKACJA) ---
+
   async getDokumentyMagazynowe(id_organizacji: number, query: any = {}) {
     const where: any = { id_organizacji, aktywny: true };
     if (query.typ) where.typ = String(query.typ);
@@ -1224,99 +1243,269 @@ export class MagazynService {
       include: {
         wydarzenie: { select: { id: true, nazwa: true, numer: true } },
         wynajem: { select: { id: true, numer: true } },
+        magazyn_docelowy: true,
         utworzyl: { select: { id: true, imie: true, nazwisko: true, email: true } },
-        pozycje: { where: { aktywny: true }, include: { model: { include: { kategoria: true } }, egzemplarz: { include: { model: { include: { kategoria: true } }, case: { include: { model: true } } } } } },
+        pozycje: {
+          where: { aktywny: true },
+          include: {
+            model: { include: { kategoria: true } },
+            egzemplarz: {
+              include: {
+                model: { include: { kategoria: true } },
+                case: { include: { model: true } },
+              },
+            },
+          },
+        },
       },
       orderBy: { data_operacji: 'desc' },
     });
   }
 
- async getDokumentMagazynowyById(id: number, id_organizacji: number) {
-  const doc = await this.prisma.extendedClient.wydanieMagazynowe.findFirst({
-    where: {
-      id,
-      id_organizacji,
-      aktywny: true,
-    },
-
-    include: {
-      organizacja: true,
-
-      wydarzenie: {
-        include: {
-          kontrahent: true,
-          typ: true,
-          status: true,
-        },
-      },
-
-      wynajem: {
-        include: {
-          kontrahent: true,
-        },
-      },
-
-      utworzyl: {
-        select: {
-          id: true,
-          imie: true,
-          nazwisko: true,
-          email: true,
-        },
-      },
-
-      pozycje: {
-        where: {
-          aktywny: true,
-        },
-
-        include: {
-          model: {
-            include: {
-              kategoria: {
-                include: {
-                  rodzic: true,
-                },
+  async getDokumentMagazynowyById(id: number, id_organizacji: number) {
+    const doc = await this.prisma.extendedClient.wydanieMagazynowe.findFirst({
+      where: { id, id_organizacji, aktywny: true },
+      include: {
+        organizacja: true,
+        wydarzenie: { include: { kontrahent: true, typ: true, status: true } },
+        wynajem: { include: { kontrahent: true } },
+        magazyn_docelowy: true,
+        utworzyl: { select: { id: true, imie: true, nazwisko: true, email: true } },
+        pozycje: {
+          where: { aktywny: true },
+          include: {
+            model: { include: { kategoria: { include: { rodzic: true } } } },
+            egzemplarz: {
+              include: {
+                model: { include: { kategoria: { include: { rodzic: true } } } },
+                magazyn: true,
+                case: { include: { model: true } },
               },
             },
           },
-
-          egzemplarz: {
-            include: {
-              model: {
-                include: {
-                  kategoria: {
-                    include: {
-                      rodzic: true,
-                    },
-                  },
-                },
-              },
-
-              magazyn: true,
-
-              case: {
-                include: {
-                  model: true,
-                },
-              },
-            },
-          },
-        },
-
-        orderBy: {
-          id: 'asc',
+          orderBy: { id: 'asc' },
         },
       },
-    },
-  });
-
-  if (!doc) {
-    throw new NotFoundException('Nie znaleziono dokumentu magazynowego');
+    });
+    if (!doc) throw new NotFoundException('Nie znaleziono dokumentu magazynowego');
+    return doc;
   }
 
-  return doc;
-}
+  async createDokumentMagazynowy(dto: any, id_organizacji: number, id_uzytkownika: number | null) {
+    const typ = this.cleanString(dto.typ) || 'wydanie';
+    const prefix = typ === 'przyjecie' ? 'PZ' : typ === 'plan' ? 'PLAN' : 'WZ';
+    const pozycje = Array.isArray(dto.pozycje) ? dto.pozycje : [];
+    const id_wydarzenia = this.cleanNumber(dto.id_wydarzenia);
+    const id_wynajmu = this.cleanNumber(dto.id_wynajmu);
+    const id_magazynu_docelowego = this.cleanNumber(dto.id_magazynu_docelowego);
+
+    return this.prisma.extendedClient.$transaction(async (tx) => {
+      const expandedPozycje: any[] = [];
+      const instancesToUpdate: { id: number; targetStatus: string; id_magazynu?: number | null; miejsce_w_mag?: string | null }[] = [];
+
+      for (const p of pozycje) {
+        const id_egzemplarza = this.cleanNumber(p.id_egzemplarza);
+
+        if (!id_egzemplarza) {
+          const id_modelu = this.cleanNumber(p.id_modelu);
+          const modelIlosciowy = id_modelu
+            ? await tx.modelSprzetu.findFirst({
+                where: { id: id_modelu, id_organizacji, aktywny: true },
+                include: { kategoria: true },
+              })
+            : null;
+
+          if (modelIlosciowy && this.isSprzetIlosciowy(modelIlosciowy)) {
+            const qty = Number(p.ilosc || 0);
+            if (!qty || qty <= 0) {
+              throw new BadRequestException(`Podaj prawidłową ilość dla sprzętu ilościowego: ${modelIlosciowy.nazwa}.`);
+            }
+            const availableQty = Number(modelIlosciowy.ilosc_magazynowa || 0);
+            if (typ === 'wydanie' && qty > availableQty) {
+              throw new BadRequestException(
+                `Brak wystarczającej ilości: ${modelIlosciowy.nazwa}. Dostępne ${availableQty} ${modelIlosciowy.jednostka || 'szt.'}, próba wydania ${qty}.`,
+              );
+            }
+            expandedPozycje.push({
+              ...p,
+              id_modelu: modelIlosciowy.id,
+              id_egzemplarza: null,
+              nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || modelIlosciowy.nazwa,
+              ilosc: qty,
+              uwagi: [this.cleanString(p.uwagi), 'Sprzęt ilościowy bez egzemplarzy'].filter(Boolean).join(' | '),
+            });
+            continue;
+          }
+          throw new BadRequestException('Pozycja dokumentu musi zawierać konkretny egzemplarz albo model ilościowy.');
+        }
+
+        const egz = await tx.egzemplarz.findFirst({
+          where: { id: id_egzemplarza, id_organizacji, aktywny: true },
+          include: {
+            model: { include: { kategoria: true } },
+            magazyn: true,
+            zawartosc_case: {
+              where: { aktywny: true },
+              include: { model: { include: { kategoria: true } }, magazyn: true },
+              orderBy: [{ id_modelu: 'asc' }, { numer_egzemplarza: 'asc' }, { id: 'asc' }],
+            },
+          },
+        });
+
+        if (!egz) throw new BadRequestException(`Nie znaleziono egzemplarza #${id_egzemplarza}.`);
+
+        const isCaseInstance = this.isOpakowanie(egz) || (egz.zawartosc_case?.length || 0) > 0;
+        if (isCaseInstance) {
+          const contents = (egz.zawartosc_case || []).filter((child: any) => !this.isOpakowanie(child));
+          if (!contents.length) {
+            throw new BadRequestException(`Zeskanowany case "${egz.nazwa || egz.model?.nazwa}" jest pusty.`);
+          }
+          const meta = this.caseScanMeta(egz);
+          for (const child of contents) {
+            const validation = await this.validateInstanceMovement(tx, child.id, child.nazwa || child.model?.nazwa, typ, id_wydarzenia, id_organizacji);
+            expandedPozycje.push({
+              ...p,
+              system_case_scan: meta,
+              id_zeskanowanego_case: meta?.id || egz.id,
+              nazwa_zeskanowanego_case: meta?.nazwa || egz.nazwa || egz.model?.nazwa || 'Case',
+              id_modelu: child.id_modelu,
+              id_egzemplarza: child.id,
+              nazwa:
+                this.cleanString((p.nazwy_egzemplarzy || {})?.[child.id]) ||
+                this.cleanString(child.nazwa) ||
+                this.cleanString(child.model?.nazwa) ||
+                'Egzemplarz z case',
+              ilosc: 1,
+              uwagi: validation.crossEventNote ? [this.cleanString(p.uwagi), validation.crossEventNote].filter(Boolean).join(' | ') : p.uwagi,
+            });
+
+            const itemUpdate: any = { id: child.id, targetStatus: typ === 'wydanie' ? 'Wydany' : 'Działa' };
+            if (typ === 'przyjecie' && (p.zmien_magazyn || p.forceWarehouseChange) && id_magazynu_docelowego) {
+              itemUpdate.id_magazynu = id_magazynu_docelowego;
+              if (p.nowe_miejsce_w_mag !== undefined) itemUpdate.miejsce_w_mag = this.cleanString(p.nowe_miejsce_w_mag);
+            }
+            instancesToUpdate.push(itemUpdate);
+          }
+          continue;
+        }
+
+        if (this.isOpakowanie(egz)) {
+          throw new BadRequestException('Opakowanie/case nie może być samodzielną pozycją dokumentu WZ/PZ.');
+        }
+
+        const validation = await this.validateInstanceMovement(tx, egz.id, egz.nazwa || egz.model?.nazwa, typ, id_wydarzenia, id_organizacji);
+
+        expandedPozycje.push({
+          ...p,
+          id_modelu: egz.id_modelu,
+          id_egzemplarza: egz.id,
+          nazwa:
+            this.cleanString(p.nazwa_na_dokumencie || p.nazwa) ||
+            this.cleanString(egz.nazwa) ||
+            this.cleanString(egz.model?.nazwa) ||
+            'Egzemplarz sprzętu',
+          ilosc: 1,
+          uwagi: validation.crossEventNote ? [this.cleanString(p.uwagi), validation.crossEventNote].filter(Boolean).join(' | ') : p.uwagi,
+        });
+
+        const itemUpdate: any = { id: egz.id, targetStatus: typ === 'wydanie' ? 'Wydany' : 'Działa' };
+        if (typ === 'przyjecie' && (p.zmien_magazyn || p.forceWarehouseChange) && id_magazynu_docelowego) {
+          itemUpdate.id_magazynu = id_magazynu_docelowego;
+          if (p.nowe_miejsce_w_mag !== undefined) itemUpdate.miejsce_w_mag = this.cleanString(p.nowe_miejsce_w_mag);
+        }
+        instancesToUpdate.push(itemUpdate);
+      }
+
+      if (id_wynajmu && typ === 'wydanie' && !this.cleanString(dto.osoba_odbierajaca)) {
+        throw new BadRequestException('Przy wydaniu do wynajmu wymagane jest podanie osoby odbierającej.');
+      }
+
+      const doc = await tx.wydanieMagazynowe.create({
+        data: {
+          id_organizacji,
+          id_wydarzenia,
+          id_wynajmu,
+          id_magazynu_docelowego,
+          id_uzytkownika_utworzyl: isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika),
+          typ,
+          numer: this.cleanString(dto.numer) || this.nextDocumentNumber(prefix),
+          data_operacji: this.cleanDate(dto.data_operacji) || new Date(),
+          osoba_odbierajaca: this.cleanString(dto.osoba_odbierajaca),
+          podpis_odbierajacego: this.cleanString(dto.podpis_odbierajacego),
+          uwagi: this.cleanString(dto.uwagi),
+          pozycje: {
+            create: expandedPozycje.map((p: any) => ({
+              id_organizacji,
+              id_modelu: this.cleanNumber(p.id_modelu),
+              id_egzemplarza: this.cleanNumber(p.id_egzemplarza),
+              nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || this.cleanString(p.model?.nazwa) || this.cleanString(p.egzemplarz?.nazwa) || 'Pozycja sprzętu',
+              ilosc: this.cleanNumber(p.ilosc) || 1,
+              status: this.cleanString(p.status) || (typ === 'przyjecie' ? 'przyjety' : typ === 'plan' ? 'plan' : 'wydany'),
+              uwagi: this.buildDocumentUwagi(p),
+            })),
+          },
+        },
+        include: { pozycje: true },
+      });
+
+      if (typ === 'wydanie' || typ === 'przyjecie') {
+        const deltas = new Map<number, number>();
+        for (const p of expandedPozycje) {
+          const modelId = this.cleanNumber(p.id_modelu);
+          const egzId = this.cleanNumber(p.id_egzemplarza);
+          if (!modelId || egzId) continue;
+          const qty = Number(p.ilosc || 0);
+          if (!qty) continue;
+          deltas.set(modelId, (deltas.get(modelId) || 0) + (typ === 'wydanie' ? -qty : qty));
+        }
+        for (const [modelId, delta] of deltas.entries()) {
+          await tx.modelSprzetu.update({
+            where: { id: modelId },
+            data: { ilosc_magazynowa: { increment: delta } },
+          });
+        }
+      }
+
+      for (const item of instancesToUpdate) {
+        const updateData: any = { status_serwisowy: item.targetStatus };
+        if (item.id_magazynu !== undefined) updateData.id_magazynu = item.id_magazynu;
+        if (item.miejsce_w_mag !== undefined) updateData.miejsce_w_mag = item.miejsce_w_mag;
+
+        await tx.egzemplarz.update({
+          where: { id: item.id },
+          data: updateData,
+        });
+
+        if (item.id_magazynu) {
+          await tx.logZmian.create({
+            data: {
+              id_organizacji,
+              id_uzytkownika: isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika),
+              typ_obiektu: 'Egzemplarz',
+              id_obiektu: item.id,
+              akcja: 'PRZENIESIENIE_MAGAZYN_PZ',
+              nowa_wartosc: JSON.stringify({ id_magazynu: item.id_magazynu, miejsce_w_mag: item.miejsce_w_mag }),
+            },
+          });
+        }
+      }
+
+      await tx.logZmian.create({
+        data: {
+          id_organizacji,
+          id_uzytkownika: isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika),
+          typ_obiektu: 'WydanieMagazynowe',
+          id_obiektu: doc.id,
+          akcja: typ.toUpperCase(),
+          nowa_wartosc: JSON.stringify({ ...dto, pozycje_count: expandedPozycje.length, case_expanded: expandedPozycje.length !== pozycje.length }),
+        },
+      });
+
+      return doc;
+    });
+  }
+
+  // --- SPRZĘT WYDARZENIA & PACKLISTA ---
 
   async getSprzetWydarzenia(id_wydarzenia: number, id_organizacji: number) {
     const [wydarzenie, planPozycje, dokumenty, wszystkieEgzemplarze] = await Promise.all([
@@ -1334,6 +1523,7 @@ export class MagazynService {
       this.prisma.extendedClient.wydanieMagazynowe.findMany({
         where: { id_organizacji, id_wydarzenia, aktywny: true },
         include: {
+          magazyn_docelowy: true,
           pozycje: {
             where: { aktywny: true },
             include: {
@@ -1355,7 +1545,7 @@ export class MagazynService {
     const keyFor = (p: any) => String(p.id_modelu || p.model?.id || p.egzemplarz?.id_modelu || p.egzemplarz?.model?.id || p.nazwa);
     const nameFor = (p: any) => p.nazwa || p.model?.nazwa || p.egzemplarz?.model?.nazwa || p.egzemplarz?.nazwa || 'Pozycja sprzętu';
     const categoryFor = (p: any) => p.model?.kategoria?.nazwa || p.egzemplarz?.model?.kategoria?.nazwa || 'Bez kategorii';
-    const codeFor = (p: any) => p.egzemplarz?.kod_kreskowy || p.egzemplarz?.zewnetrzny_kod_kreskowy || p.egzemplarz?.zewnetrzny_qr_kod || p.egzemplarz?.qr_kod || p.egzemplarz?.sn || p.model?.kod_kreskowy || '';
+    const codeFor = (p: any) => this.getEquipmentCode(p.egzemplarz) || p.model?.kod_kreskowy || '';
 
     const planowane = planPozycje.map((p: any) => ({
       ...p,
@@ -1378,7 +1568,7 @@ export class MagazynService {
         kategoria: categoryFor(p),
         kod: codeFor(p),
         ilosc: toNumber(p.ilosc || 1),
-      }))
+      })),
     );
 
     const summary = new Map<string, any>();
@@ -1402,19 +1592,21 @@ export class MagazynService {
       stan_operacyjny: toNumber(p.wydana_ilosc) > toNumber(p.przyjeta_ilosc) ? 'wydany' : toNumber(p.planowana_ilosc) > 0 ? 'zaplanowany' : 'dodatkowy',
     }));
 
-    const kategorie = pozycje.reduce((acc: any[], p: any) => {
-      const nazwa = p.kategoria || 'Bez kategorii';
-      let group = acc.find((g) => g.nazwa === nazwa);
-      if (!group) {
-        group = { nazwa, pozycje: [], planowana_ilosc: 0, wydana_ilosc: 0, przyjeta_ilosc: 0 };
-        acc.push(group);
-      }
-      group.pozycje.push(p);
-      group.planowana_ilosc += toNumber(p.planowana_ilosc);
-      group.wydana_ilosc += toNumber(p.wydana_ilosc);
-      group.przyjeta_ilosc += toNumber(p.przyjeta_ilosc);
-      return acc;
-    }, []).sort((a: any, b: any) => a.nazwa.localeCompare(b.nazwa, 'pl'));
+    const kategorie = pozycje
+      .reduce((acc: any[], p: any) => {
+        const nazwa = p.kategoria || 'Bez kategorii';
+        let group = acc.find((g) => g.nazwa === nazwa);
+        if (!group) {
+          group = { nazwa, pozycje: [], planowana_ilosc: 0, wydana_ilosc: 0, przyjeta_ilosc: 0 };
+          acc.push(group);
+        }
+        group.pozycje.push(p);
+        group.planowana_ilosc += toNumber(p.planowana_ilosc);
+        group.wydana_ilosc += toNumber(p.wydana_ilosc);
+        group.przyjeta_ilosc += toNumber(p.przyjeta_ilosc);
+        return acc;
+      }, [])
+      .sort((a: any, b: any) => a.nazwa.localeCompare(b.nazwa, 'pl'));
 
     return {
       wydarzenie,
@@ -1439,14 +1631,14 @@ export class MagazynService {
       if (!wydarzenie) throw new NotFoundException('Nie znaleziono wydarzenia');
 
       if (Object.prototype.hasOwnProperty.call(dto, 'uwagi_packlista')) {
-  await tx.wydarzenie.update({
-    where: { id: id_wydarzenia },
-    data: {
-      uwagi_packlista: this.cleanString(dto.uwagi_packlista),
-    },
-  });
-}
-      
+        await tx.wydarzenie.update({
+          where: { id: id_wydarzenia },
+          data: {
+            uwagi_packlista: this.cleanString(dto.uwagi_packlista),
+          },
+        });
+      }
+
       if (dto?.replace === true) {
         await tx.pozycjaSprzetuWydarzenia.updateMany({
           where: { id_organizacji, id_wydarzenia, aktywny: true },
@@ -1459,7 +1651,7 @@ export class MagazynService {
         let id_modelu = this.cleanNumber(p.id_modelu);
         const id_egzemplarza = this.cleanNumber(p.id_egzemplarza);
         const ilosc = this.cleanNumber(p.ilosc) || 0;
-        
+
         if (ilosc <= 0) continue;
 
         if (!id_modelu && id_egzemplarza) {
@@ -1468,7 +1660,7 @@ export class MagazynService {
         }
 
         if (!id_modelu) continue;
-        
+
         const existing = byModel.get(id_modelu) || { ilosc: 0, uwagi: this.cleanString(p.uwagi), kolejnosc: byModel.size + 1 };
         existing.ilosc += ilosc;
         byModel.set(id_modelu, existing);
@@ -1512,6 +1704,52 @@ export class MagazynService {
     });
   }
 
+  async updatePacklistaUwagi(id_wydarzenia: number, dto: any, id_organizacji: number) {
+    const pozycje = Array.isArray(dto?.pozycje) ? dto.pozycje : [];
+
+    return this.prisma.extendedClient.$transaction(async (tx) => {
+      const wydarzenie = await tx.wydarzenie.findFirst({
+        where: {
+          id: id_wydarzenia,
+          id_organizacji,
+          aktywny: true,
+        },
+      });
+
+      if (!wydarzenie) {
+        throw new NotFoundException('Nie znaleziono wydarzenia');
+      }
+
+      await tx.wydarzenie.update({
+        where: { id: id_wydarzenia },
+        data: {
+          uwagi_packlista: this.cleanString(dto?.uwagi_packlista),
+        },
+      });
+
+      for (const p of pozycje) {
+        const id_modelu = this.cleanNumber(p.id_modelu);
+        if (!id_modelu) continue;
+
+        await tx.pozycjaSprzetuWydarzenia.updateMany({
+          where: {
+            id_organizacji,
+            id_wydarzenia,
+            id_modelu,
+            aktywny: true,
+          },
+          data: {
+            uwagi: this.cleanString(p.uwagi),
+          },
+        });
+      }
+
+      return { ok: true };
+    });
+  }
+
+  // --- SPRZĘT WYNAJMU ---
+
   async getSprzetWynajmu(id_wynajmu: number, id_organizacji: number) {
     const [wynajem, planPozycje, dokumenty] = await Promise.all([
       this.prisma.extendedClient.wynajem.findFirst({
@@ -1546,7 +1784,7 @@ export class MagazynService {
     const keyFor = (p: any) => String(p.id_modelu || p.model?.id || p.egzemplarz?.id_modelu || p.egzemplarz?.model?.id || p.nazwa);
     const nameFor = (p: any) => p.nazwa || p.model?.nazwa || p.egzemplarz?.model?.nazwa || p.egzemplarz?.nazwa || 'Pozycja sprzętu';
     const categoryFor = (p: any) => p.model?.kategoria?.nazwa || p.egzemplarz?.model?.kategoria?.nazwa || 'Bez kategorii';
-    const codeFor = (p: any) => p.egzemplarz?.kod_kreskowy || p.egzemplarz?.zewnetrzny_kod_kreskowy || p.egzemplarz?.zewnetrzny_qr_kod || p.egzemplarz?.qr_kod || p.egzemplarz?.sn || p.model?.kod_kreskowy || '';
+    const codeFor = (p: any) => this.getEquipmentCode(p.egzemplarz) || p.model?.kod_kreskowy || '';
 
     const planowane = planPozycje.map((p: any) => ({
       ...p,
@@ -1555,7 +1793,7 @@ export class MagazynService {
       nazwa: nameFor(p),
       kategoria: categoryFor(p),
       kod: '',
-      ilosc: toNumber(p.ilosc || 1), 
+      ilosc: toNumber(p.ilosc || 1),
     }));
 
     const dokumentowe = dokumenty.flatMap((d: any) =>
@@ -1569,7 +1807,7 @@ export class MagazynService {
         kategoria: categoryFor(p),
         kod: codeFor(p),
         ilosc: toNumber(p.ilosc || 1),
-      }))
+      })),
     );
 
     const summary = new Map<string, any>();
@@ -1593,19 +1831,21 @@ export class MagazynService {
       stan_operacyjny: toNumber(p.wydana_ilosc) > toNumber(p.przyjeta_ilosc) ? 'wydany' : toNumber(p.planowana_ilosc) > 0 ? 'zaplanowany' : 'dodatkowy',
     }));
 
-    const kategorie = pozycje.reduce((acc: any[], p: any) => {
-      const nazwa = p.kategoria || 'Bez kategorii';
-      let group = acc.find((g) => g.nazwa === nazwa);
-      if (!group) {
-        group = { nazwa, pozycje: [], planowana_ilosc: 0, wydana_ilosc: 0, przyjeta_ilosc: 0 };
-        acc.push(group);
-      }
-      group.pozycje.push(p);
-      group.planowana_ilosc += toNumber(p.planowana_ilosc);
-      group.wydana_ilosc += toNumber(p.wydana_ilosc);
-      group.przyjeta_ilosc += toNumber(p.przyjeta_ilosc);
-      return acc;
-    }, []).sort((a: any, b: any) => a.nazwa.localeCompare(b.nazwa, 'pl'));
+    const kategorie = pozycje
+      .reduce((acc: any[], p: any) => {
+        const nazwa = p.kategoria || 'Bez kategorii';
+        let group = acc.find((g) => g.nazwa === nazwa);
+        if (!group) {
+          group = { nazwa, pozycje: [], planowana_ilosc: 0, wydana_ilosc: 0, przyjeta_ilosc: 0 };
+          acc.push(group);
+        }
+        group.pozycje.push(p);
+        group.planowana_ilosc += toNumber(p.planowana_ilosc);
+        group.wydana_ilosc += toNumber(p.wydana_ilosc);
+        group.przyjeta_ilosc += toNumber(p.przyjeta_ilosc);
+        return acc;
+      }, [])
+      .sort((a: any, b: any) => a.nazwa.localeCompare(b.nazwa, 'pl'));
 
     return {
       wynajem,
@@ -1641,7 +1881,7 @@ export class MagazynService {
         let id_modelu = this.cleanNumber(p.id_modelu);
         const id_egzemplarza = this.cleanNumber(p.id_egzemplarza);
         const ilosc = this.cleanNumber(p.ilosc) || 0;
-        
+
         if (ilosc <= 0) continue;
 
         if (!id_modelu && id_egzemplarza) {
@@ -1692,18 +1932,20 @@ export class MagazynService {
     });
   }
 
+  // --- KONTROLA ZWROTÓW (NIEZWRÓCONY SPRZĘT) ---
+
   async getNiezwrocone(id_organizacji: number) {
     const dokumenty = await this.prisma.extendedClient.wydanieMagazynowe.findMany({
-      where: { 
-        id_organizacji, 
-        aktywny: true, 
-        typ: { in: ['wydanie', 'przyjecie'] } 
+      where: {
+        id_organizacji,
+        aktywny: true,
+        typ: { in: ['wydanie', 'przyjecie'] },
       },
       include: {
         pozycje: { where: { aktywny: true } },
         wydarzenie: { include: { kontrahent: true, status: true } },
-        wynajem: { include: { kontrahent: true, status: true } }
-      }
+        wynajem: { include: { kontrahent: true, status: true } },
+      },
     });
 
     const map = new Map<string, any>();
@@ -1719,7 +1961,7 @@ export class MagazynService {
         map.set(key, {
           id: isWynajem ? doc.id_wynajmu : doc.id_wydarzenia,
           typ_kontekstu: isWynajem ? 'wynajem' : 'wydarzenie',
-          numer: isWynajem ? (doc.wynajem?.numer || `#${doc.id_wynajmu}`) : (doc.wydarzenie?.numer || `#${doc.id_wydarzenia}`),
+          numer: isWynajem ? doc.wynajem?.numer || `#${doc.id_wynajmu}` : doc.wydarzenie?.numer || `#${doc.id_wydarzenia}`,
           nazwa: isWynajem ? `Wynajem ${doc.wynajem?.numer || '#' + doc.id_wynajmu}` : doc.wydarzenie?.nazwa,
           kontrahent: isWynajem ? doc.wynajem?.kontrahent : doc.wydarzenie?.kontrahent,
           status_obj: isWynajem ? doc.wynajem?.status : doc.wydarzenie?.status,
@@ -1739,14 +1981,16 @@ export class MagazynService {
     }
 
     return Array.from(map.values())
-      .map(x => ({ ...x, niezwrocone_szt: Math.max(0, x.wydano_szt - x.przyjeto_szt) }))
-      .filter(x => x.niezwrocone_szt > 0)
+      .map((x) => ({ ...x, niezwrocone_szt: Math.max(0, x.wydano_szt - x.przyjeto_szt) }))
+      .filter((x) => x.niezwrocone_szt > 0)
       .sort((a, b) => {
         const dateA = a.data_koniec ? new Date(a.data_koniec).getTime() : 0;
         const dateB = b.data_koniec ? new Date(b.data_koniec).getTime() : 0;
         return dateA - dateB;
       });
   }
+
+  // --- TRANSFER BEZPOŚREDNI MIĘDZY WYDARZENIAMI ---
 
   async transferMiedzyWydarzeniami(dto: any, id_organizacji: number, id_uzytkownika: number | null) {
     if (!dto.sourceEventId || !dto.targetEventId || !dto.items || dto.items.length === 0) {
@@ -1770,10 +2014,10 @@ export class MagazynService {
               nazwa: i.nazwa,
               ilosc: Number(i.ilosc_transfer || 1),
               status: 'przyjety',
-              uwagi: 'Transfer między-wydarzeniowy'
-            }))
-          }
-        }
+              uwagi: 'Transfer między-wydarzeniowy',
+            })),
+          },
+        },
       });
 
       const wz = await tx.wydanieMagazynowe.create({
@@ -1792,10 +2036,10 @@ export class MagazynService {
               nazwa: i.nazwa,
               ilosc: Number(i.ilosc_transfer || 1),
               status: 'wydany',
-              uwagi: 'Transfer między-wydarzeniowy'
-            }))
-          }
-        }
+              uwagi: 'Transfer między-wydarzeniowy',
+            })),
+          },
+        },
       });
 
       if (dto.task && (dto.task.przypisani?.length > 0 || dto.task.id_pojazdu)) {
@@ -1810,7 +2054,7 @@ export class MagazynService {
             data_start: dto.task.data_start ? new Date(dto.task.data_start) : null,
             id_wydarzenia: Number(dto.targetEventId),
             id_pojazdu: dto.task.id_pojazdu ? Number(dto.task.id_pojazdu) : null,
-          }
+          },
         });
 
         if (dto.task.przypisani?.length > 0) {
@@ -1818,8 +2062,8 @@ export class MagazynService {
             data: dto.task.przypisani.map((uid: string | number) => ({
               id_organizacji,
               id_zadania: zadanie.id,
-              id_uzytkownika: Number(uid)
-            }))
+              id_uzytkownika: Number(uid),
+            })),
           });
         }
       }
@@ -1831,92 +2075,10 @@ export class MagazynService {
           typ_obiektu: 'Magazyn',
           akcja: 'TRANSFER_MIEDZY_EVENTOWY',
           nowa_wartosc: JSON.stringify({ z: dto.sourceEventId, do: dto.targetEventId, pozycji: dto.items.length }),
-        }
+        },
       });
 
       return { success: true, pzId: pz.id, wzId: wz.id };
     });
-  }
-  async updatePacklistaUwagi(
-  id_wydarzenia: number,
-  dto: any,
-  id_organizacji: number
-) {
-  const pozycje = Array.isArray(dto?.pozycje) ? dto.pozycje : [];
-
-  return this.prisma.extendedClient.$transaction(async (tx) => {
-    const wydarzenie = await tx.wydarzenie.findFirst({
-      where: {
-        id: id_wydarzenia,
-        id_organizacji,
-        aktywny: true,
-      },
-    });
-
-    if (!wydarzenie) {
-      throw new NotFoundException('Nie znaleziono wydarzenia');
-    }
-
-    await tx.wydarzenie.update({
-      where: { id: id_wydarzenia },
-      data: {
-        uwagi_packlista: this.cleanString(dto?.uwagi_packlista),
-      },
-    });
-
-    for (const p of pozycje) {
-      const id_modelu = this.cleanNumber(p.id_modelu);
-
-      if (!id_modelu) continue;
-
-      await tx.pozycjaSprzetuWydarzenia.updateMany({
-        where: {
-          id_organizacji,
-          id_wydarzenia,
-          id_modelu,
-          aktywny: true,
-        },
-        data: {
-          uwagi: this.cleanString(p.uwagi),
-        },
-      });
-    }
-
-    return { ok: true };
-  });
-}
-
-async addZalacznikWithS3(id_modelu: number, dto: any, file: Express.Multer.File, id_organizacji: number, id_uzytkownika: number) {
-    // 1. Wrzucamy plik na MinIO (ścieżka np: org_1/modele_zalaczniki/...)
-    const objectKey = await this.storage.uploadFile(file, id_organizacji, 'modele_zalaczniki');
-
-    // 2. Zapisujemy zwięzły klucz (ObjectKey) w bazie danych
-    return this.prisma.extendedClient.zalacznik.create({
-      data: {
-        id_organizacji,
-        typ_obiektu: 'ModelSprzetu',
-        id_obiektu: id_modelu,
-        nazwa: dto.nazwa || file.originalname,
-        nazwa_pliku: file.originalname,
-        rozmiar_bajtow: file.size,
-        mime: file.mimetype,
-        sciezka: objectKey, // Tu siedzi teraz czysty, krótki klucz obiektu z S3, a nie tona tekstu!
-        id_uzytkownika_dodal: id_uzytkownika
-      }
-    });
-  }
-
-  async getDownloadUrl(id_zalacznika: number, id_organizacji: number) {
-    const zalacznik = await this.prisma.extendedClient.zalacznik.findFirst({
-      where: { id: id_zalacznika, id_organizacji, aktywny: true }
-    });
-    
-    if (!zalacznik || !zalacznik.sciezka) {
-      throw new NotFoundException('Zalącznik nie istnieje lub brakuje pliku fizycznego.');
-    }
-
-    // W locie generujemy jednorazowy, ważny 5 minut link
-    const url = await this.storage.getPresignedDownloadUrl(zalacznik.sciezka);
-    return { url };
   }
 }

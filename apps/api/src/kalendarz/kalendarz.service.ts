@@ -26,7 +26,6 @@ export class KalendarzService {
       wynajmy,
       urlopy,
       serwisy,
-      pojazdy,
       pojazdyInfo,
       serwisyPojazdow,
       przegladyPojazdow,
@@ -83,17 +82,7 @@ export class KalendarzService {
         orderBy: { data_zgloszenia: 'desc' },
       }),
 
-      // 5. Przypisania floty do wydarzeń (z bazy i z zewnątrz)
-      this.prisma.extendedClient.wydarzeniePojazd.findMany({
-        where: {
-          id_organizacji,
-          aktywny: true,
-          wydarzenie: { data_start: { lte: to }, data_koniec: { gte: from } },
-        },
-        include: { pojazd: true, wydarzenie: true },
-      }),
-
-      // 6. Daty badań technicznych i polis OC z kart aut
+      // 5. Daty badań technicznych (SKP) i polis OC z kart aut
       this.prisma.extendedClient.pojazd.findMany({
         where: {
           id_organizacji,
@@ -105,21 +94,21 @@ export class KalendarzService {
         },
       }),
 
-      // 7. Zgłoszenia serwisowe floty
+      // 6. Zgłoszenia serwisowe floty (naprawy, awarie)
       this.prisma.extendedClient.serwisPojazdu.findMany({
         where: { id_organizacji, aktywny: true, data_serwisu: { gte: from, lte: to } },
         include: { pojazd: true },
         orderBy: { data_serwisu: 'asc' },
       }),
 
-      // 8. Przeglądy okresowe floty
+      // 7. Przeglądy okresowe floty
       this.prisma.extendedClient.przegladPojazdu.findMany({
         where: { id_organizacji, aktywny: true, data_przegladu: { gte: from, lte: to } },
         include: { pojazd: true },
         orderBy: { data_przegladu: 'asc' },
       }),
 
-      // 9. Zadania z datami
+      // 8. Zadania
       this.prisma.extendedClient.zadanie.findMany({
         where: {
           id_organizacji,
@@ -227,7 +216,7 @@ export class KalendarzService {
           : null,
       ].filter(Boolean)),
 
-      // Serwisy aut
+      // Zgłoszenia serwisowe floty (naprawy, usterki)
       ...serwisyPojazdow.map((s: any) => ({
         id: `flota-serwis-${s.id}`,
         sourceId: s.id,
@@ -242,7 +231,7 @@ export class KalendarzService {
         editable: false,
       })),
 
-      // Przeglądy okresowe aut
+      // Przeglądy okresowe floty
       ...przegladyPojazdow.map((p: any) => ({
         id: `flota-przeglad-hist-${p.id}`,
         sourceId: p.id,
@@ -256,26 +245,6 @@ export class KalendarzService {
         miejsce: p.pojazd?.nr_rejestracyjny || '',
         editable: false,
       })),
-
-      // Przypisania aut do wydarzeń (ZABEZPIECZENIE POJAZDÓW Z BAZY I Z ZEWNĄTRZ)
-      ...pojazdy.map((p: any) => {
-        const vehicleName = p.pojazd?.nazwa || p.pojazd_zewnetrzny || 'Pojazd zewnętrzny';
-        const vehiclePlate = p.pojazd?.nr_rejestracyjny || 'Spoza bazy';
-        const eventName = p.wydarzenie?.nazwa || 'Wydarzenie';
-
-        return {
-          id: `flota-${p.id}`,
-          sourceId: p.id,
-          typ: 'flota',
-          tytul: `${vehicleName} · ${eventName}`,
-          start: p.wydarzenie?.data_start,
-          koniec: p.wydarzenie?.data_koniec,
-          kolor: '#3B82F6',
-          ikona: '🚗',
-          status: p.rola_pojazdu || 'Transport sprzętu',
-          miejsce: vehiclePlate,
-        };
-      }),
 
       // Zadania
       ...zadania.map((z: any) => ({

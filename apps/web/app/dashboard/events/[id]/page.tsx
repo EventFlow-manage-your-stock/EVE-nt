@@ -8,7 +8,7 @@ import {
   FileArchive, FileText, History, Loader2, MapPin, MessageSquare, Plus, Save,
   Search, Trash2, Truck, Users, Wrench, Calendar, Send, Download, Paperclip, 
   CheckCircle2, Car, X, Clock, Layers, RotateCcw, Home, MailCheck, Edit2,
-  ArrowRight, UserCheck, UserPlus
+  ArrowRight, UserCheck, UserPlus, Building2
 } from 'lucide-react';
 import { api } from '../../../../lib/api';
 import { Button, Card, Field, inputClass, SearchableSelect } from '../../../../components/ProductUI';
@@ -90,7 +90,7 @@ function buildCategoryTree(categories: any[]) {
     else roots.push(cat);
   }
   const sortByOrder = (items: any[]) => {
-    items.sort((a, b) => numberOrZero(a.kolejnosc) - numberOrZero(b.kolejnosc) || String(a.nazwa || '').localeCompare(String(b.nazwa || ''), 'pl'));
+    items.sort((a, b) => numberOrZero(a.kolejnosc) - numberOrZero(b.kolejnosc) || String(a.nazwa || '').localeCompare(String(a.nazwa || ''), 'pl'));
     items.forEach((item) => sortByOrder(item.dzieci || []));
   };
   sortByOrder(roots);
@@ -1270,19 +1270,16 @@ function EventCrewPanel({ eventId, ekipa, etapy = [], powiadomienia, dict, tabQu
     telefon: ''
   });
 
-  // Osoby już przypisane do tego wydarzenia
   const assignedUserIds = useMemo(() => {
     return new Set((ekipa || []).map((e: any) => Number(e.id_uzytkownika)));
   }, [ekipa]);
 
-  // Tylko pracownicy etatowi, którzy nie są jeszcze na tym wydarzeniu
   const internalUsers = useMemo(() => {
     return (dict.uzytkownicy || [])
       .filter((u: any) => u.stanowisko !== 'Współpracownik Zewnętrzny')
       .filter((u: any) => !assignedUserIds.has(Number(u.id)));
   }, [dict.uzytkownicy, assignedUserIds]);
 
-  // Tylko zapisani freelancerzy, którzy nie są jeszcze na tym wydarzeniu
   const existingFreelancers = useMemo(() => {
     return (dict.uzytkownicy || [])
       .filter((u: any) => u.stanowisko === 'Współpracownik Zewnętrzny')
@@ -1808,169 +1805,44 @@ function AttachmentsPanel({ eventId, zalaczniki, tabQuery = '', reloadEvent }: a
       </Card>}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-         {filtered.map((z: any) => <div
-  key={z.id}
-  onClick={() => handleDownload(z)}
-  className="
-    group relative flex items-center justify-between gap-4
-    w-full p-4
-    rounded-2xl
-    border border-slate-200/80 dark:border-white/[0.08]
-    bg-white dark:bg-slate-900/80
-    shadow-sm
-    cursor-pointer
-    transition-all duration-200 ease-out
-    hover:-translate-y-[1px]
-    hover:border-cyan-300/70
-    hover:shadow-lg hover:shadow-cyan-500/5
-    dark:hover:border-cyan-400/30
-    dark:hover:bg-slate-900
-  "
->
-  {/* Lewa część */}
-  <div className="flex items-center gap-4 min-w-0 flex-1">
-
-    {/* Ikona */}
-    <div
-      className="
-        relative flex items-center justify-center shrink-0
-        w-12 h-12
-        rounded-2xl
-        bg-indigo-50 dark:bg-indigo-500/[0.10]
-        text-indigo-500 dark:text-indigo-400
-        border border-indigo-100 dark:border-indigo-500/20
-        transition-all duration-200
-        group-hover:bg-cyan-50
-        group-hover:text-cyan-500
-        group-hover:border-cyan-200
-        dark:group-hover:bg-cyan-500/10
-        dark:group-hover:text-cyan-400
-        dark:group-hover:border-cyan-500/20
-      "
-    >
-      <FileText size={23} strokeWidth={1.6} />
-    </div>
-
-    {/* Informacje */}
-    <div className="min-w-0 flex-1">
-
-      <p
-        className="
-          font-semibold text-[14px]
-          text-slate-900 dark:text-white
-          truncate
-          transition-colors
-          group-hover:text-cyan-600
-          dark:group-hover:text-cyan-400
-        "
-      >
-        {z.nazwa || z.nazwa_pliku}
-      </p>
-
-      <div className="flex items-center gap-2 mt-1.5 min-w-0">
-        <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">
-          {z.nazwa_pliku}
-        </p>
-
-        <span className="text-slate-300 dark:text-slate-700 shrink-0">
-          •
-        </span>
-
-        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">
-          {((z.rozmiar_bajtow || 0) / 1024 / 1024).toFixed(2)} MB
-        </span>
-      </div>
-
-      <div className="flex items-center gap-1.5 mt-1.5">
-        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
-          Dodał:
-        </span>
-
-        <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-          {z.dodal?.imie || 'System'}
-        </span>
-
-        <span className="text-slate-300 dark:text-slate-700">
-          •
-        </span>
-
-        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
-          {new Date(z.data_utworzenia).toLocaleDateString()}
-        </span>
-      </div>
-    </div>
-  </div>
-
-  {/* Akcje */}
-  <div
-    className="
-      flex items-center gap-1 shrink-0
-      opacity-60
-      group-hover:opacity-100
-      transition-opacity duration-200
-    "
-    onClick={(e) => e.stopPropagation()}
-  >
-    {/* Pobierz */}
-    <button
-      type="button"
-      onClick={() => handleDownload(z)}
-      className="
-        flex items-center justify-center
-        w-9 h-9
-        rounded-xl
-        text-slate-400 dark:text-slate-500
-        hover:text-cyan-500
-        hover:bg-cyan-50
-        dark:hover:text-cyan-400
-        dark:hover:bg-cyan-500/10
-        transition-all duration-150
-        cursor-pointer
-      "
-      title="Pobierz bezpiecznie"
-    >
-      <Download size={17} strokeWidth={1.8} />
-    </button>
-
-    {/* Usuń */}
-    <button
-      type="button"
-      onClick={async () => {
-        if (confirm('Usunąć załącznik z serwera?')) {
-          await api.delete(
-            `/api/wydarzenia/${eventId}/zalaczniki/${z.id}`
-          );
-          reloadEvent();
-        }
-      }}
-      className="
-        flex items-center justify-center
-        w-9 h-9
-        rounded-xl
-        text-slate-400 dark:text-slate-500
-        hover:text-red-500
-        hover:bg-red-50
-        dark:hover:text-red-400
-        dark:hover:bg-red-500/10
-        transition-all duration-150
-        cursor-pointer
-      "
-      title="Usuń"
-    >
-      <Trash2 size={17} strokeWidth={1.8} />
-    </button>
-  </div>
-
-  {/* Delikatny efekt poświaty */}
-  <div
-    className="
-      pointer-events-none absolute inset-0 rounded-2xl
-      opacity-0 group-hover:opacity-100
-      transition-opacity duration-300
-      ring-1 ring-inset ring-cyan-400/10
-    "
-  />
-</div>)}
+         {filtered.map((z: any) => (
+          <div
+            key={z.id}
+            onClick={() => handleDownload(z)}
+            className="group relative flex items-center justify-between gap-4 w-full p-4 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-slate-900/80 shadow-sm cursor-pointer transition-all duration-200 ease-out hover:-translate-y-[1px] hover:border-cyan-300/70 hover:shadow-lg hover:shadow-cyan-500/5 dark:hover:border-cyan-400/30 dark:hover:bg-slate-900"
+          >
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div className="relative flex items-center justify-center shrink-0 w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/[0.10] text-indigo-500 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 transition-all duration-200 group-hover:bg-cyan-50 group-hover:text-cyan-500 group-hover:border-cyan-200 dark:group-hover:bg-cyan-500/10 dark:group-hover:text-cyan-400 dark:group-hover:border-cyan-500/20">
+                <FileText size={23} strokeWidth={1.6} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-[14px] text-slate-900 dark:text-white truncate transition-colors group-hover:text-cyan-600 dark:group-hover:text-cyan-400">
+                  {z.nazwa || z.nazwa_pliku}
+                </p>
+                <div className="flex items-center gap-2 mt-1.5 min-w-0">
+                  <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{z.nazwa_pliku}</p>
+                  <span className="text-slate-300 dark:text-slate-700 shrink-0">•</span>
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">{((z.rozmiar_bajtow || 0) / 1024 / 1024).toFixed(2)} MB</span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">Dodał:</span>
+                  <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{z.dodal?.imie || 'System'}</span>
+                  <span className="text-slate-300 dark:text-slate-700">•</span>
+                  <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{new Date(z.data_utworzenia).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
+              <button type="button" onClick={() => handleDownload(z)} className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-400 dark:text-slate-500 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:text-cyan-400 dark:hover:bg-cyan-500/10 transition-all duration-150 cursor-pointer" title="Pobierz bezpiecznie">
+                <Download size={17} strokeWidth={1.8} />
+              </button>
+              <button type="button" onClick={async () => { if (confirm('Usunąć załącznik z serwera?')) { await api.delete(`/api/wydarzenia/${eventId}/zalaczniki/${z.id}`); reloadEvent(); } }} className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-500/10 transition-all duration-150 cursor-pointer" title="Usuń">
+                <Trash2 size={17} strokeWidth={1.8} />
+              </button>
+            </div>
+            <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ring-1 ring-inset ring-cyan-400/10" />
+          </div>
+        ))}
          {filtered.length === 0 && zalaczniki.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak plików pasujących do wyszukiwania.</div>}
          {zalaczniki.length === 0 && !adding && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak wgranych plików do tego wydarzenia. Pamiętaj by załączyć tu skan podpisanej umowy!</div>}
       </div>
@@ -2015,7 +1887,7 @@ function HistoryPanel({ history, tabQuery = '' }: { history: any[], tabQuery?: s
 }
 
 // -------------------------------------------------------------
-// SPRZĘT (EquipmentPanel - Zaawansowana obsługa WMS)
+// SPRZĘT (EquipmentPanel - Zaawansowana obsługa WMS i Multi-Warehouse)
 // -------------------------------------------------------------
 function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: string }) {
   const router = useRouter();
@@ -2053,13 +1925,23 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
   const [instanceModalModel, setInstanceModalModel] = useState<any>(null);
 
+  // MULTI-WAREHOUSE STATE
+  const [targetWarehouseId, setTargetWarehouseId] = useState<string>('');
+  const [warehousesList, setWarehousesList] = useState<any[]>([]);
+  const [locationConflict, setLocationConflict] = useState<{
+    item: any;
+    currentWarehouseName: string;
+    targetWarehouseName: string;
+  } | null>(null);
+
   async function load() {
-    const [gear, i, m, k, b] = await Promise.all([
+    const [gear, i, m, k, b, mags] = await Promise.all([
       api.get(`/api/magazyn/wydarzenia/${eventId}/sprzet`).catch(() => ({ data: { planowane: [], pozycje_dokumentow: [], kategorie: [], dokumenty: [], podsumowanie: {} } })),
       api.get('/api/magazyn/wszystkie-egzemplarze').catch(() => ({ data: [] })),
       api.get('/api/magazyn/modele').catch(() => ({ data: [] })),
       api.get('/api/magazyn/kategorie').catch(() => ({ data: [] })),
       api.get('/api/pakiety').catch(() => ({ data: [] })),
+      api.get('/api/magazyn/magazyny').catch(() => api.get('/api/magazyn/slowniki/magazyny').catch(() => ({ data: [] }))),
     ]);
 
     const gearData = gear.data || { planowane: [], pozycje_dokumentow: [], kategorie: [], dokumenty: [], podsumowanie: {} };
@@ -2079,6 +1961,12 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     setModels(m.data || []);
     setEquipmentCategories(k.data || gearData.kategorie || []);
     setBundles(b.data || []);
+    setWarehousesList(mags.data || []);
+
+    if (mags.data && mags.data.length > 0 && !targetWarehouseId) {
+      const def = mags.data.find((w: any) => w.domyslny) || mags.data[0];
+      if (def) setTargetWarehouseId(String(def.id));
+    }
 
     const nextQty: Record<string, string> = {};
     (gearData.planowane || []).forEach((p: any) => {
@@ -2326,6 +2214,9 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
         isQuantity: false,
         nazwa_wiersza: x.nazwa || x.model?.nazwa,
         kategoria_nazwa: x.model?.kategoria?.nazwa || 'Bez kategorii',
+        magazyn_nazwa: x.magazyn?.nazwa || 'Brak',
+        id_magazynu: x.id_magazynu,
+        miejsce_w_mag: x.miejsce_w_mag || '',
         kod: x.kod_kreskowy || x.zewnetrzny_kod_kreskowy || x.zewnetrzny_qr_kod || x.qr_kod || x.sn || '',
       }));
 
@@ -2434,6 +2325,11 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       rowType: 'egzemplarz',
       id_modelu: row.id_modelu || model?.id || egz.id_modelu,
       id_egzemplarza: row.id_egzemplarza || egz.id,
+      id_magazynu: row.id_magazynu || egz.id_magazynu,
+      magazyn_nazwa: row.magazyn_nazwa || egz.magazyn?.nazwa || 'Brak',
+      miejsce_w_mag: row.miejsce_w_mag || egz.miejsce_w_mag || '',
+      zmien_magazyn: Boolean(row.zmien_magazyn),
+      nowe_miejsce_w_mag: row.nowe_miejsce_w_mag || '',
       nazwa: [isZestawRow(row) ? `[ZESTAW] ${baseName}` : baseName, egz.nazwa && egz.nazwa !== model?.nazwa ? egz.nazwa : null, instanceNo ? `nr ${instanceNo}` : null].filter(Boolean).join(' · '),
       nazwa_modelu: baseName,
       numer_egzemplarza: instanceNo,
@@ -2576,6 +2472,21 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
   function addDocumentItem(row: any, source: 'scan' | 'manual' = 'manual') {
     setError('');
     setNotice('');
+
+    // WERYFIKACJA RELOKACJI MAGAZYNU PRZY PZ
+    if (mode === 'przyjecie' && targetWarehouseId && isEquipmentInstance(row) && !isQuantityOnly(row) && !isZestawRow(row) && !isCaseRow(row)) {
+      const itemMagId = row.id_magazynu || row.egzemplarz?.id_magazynu;
+      if (itemMagId && String(itemMagId) !== String(targetWarehouseId) && !row.zmien_magazyn) {
+        const currentMagName = row.magazyn_nazwa || row.egzemplarz?.magazyn?.nazwa || 'Inny magazyn';
+        const targetMag = warehousesList.find(m => String(m.id) === String(targetWarehouseId));
+        setLocationConflict({
+          item: row,
+          currentWarehouseName: currentMagName,
+          targetWarehouseName: targetMag?.nazwa || 'Wybrany magazyn docelowy'
+        });
+        return;
+      }
+    }
     
     if (isQuantityOnly(row) || row.isQuantity) { 
       addQuantityDocumentItem(row, source); 
@@ -2604,6 +2515,18 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     }
     
     addDocumentItemsBulk([row], source);
+  }
+
+  function confirmRelocation(newPlace: string) {
+    if (!locationConflict) return;
+    const modified = {
+      ...locationConflict.item,
+      zmien_magazyn: true,
+      nowe_miejsce_w_mag: newPlace || locationConflict.item.miejsce_w_mag || '',
+      id_magazynu: Number(targetWarehouseId),
+    };
+    setLocationConflict(null);
+    addDocumentItem(modified, 'scan');
   }
 
   function focusScanInput() {
@@ -2644,13 +2567,16 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       const response = await api.post('/api/magazyn/dokumenty', {
         typ: type,
         id_wydarzenia: eventId,
+        id_magazynu_docelowego: targetWarehouseId ? Number(targetWarehouseId) : null,
         osoba_odbierajaca: docForm.osoba_odbierajaca,
         podpis_odbierajacego: docForm.podpis_odbierajacego,
         uwagi: docForm.uwagi || `Dokument ${type === 'wydanie' ? 'wydania' : 'przyjęcia'} dla wydarzenia: ${eventName}`,
         pozycje: docItems.map((p) => ({ 
           ...p, 
           ilosc: Number(p.ilosc || 1), 
-          status: type === 'wydanie' ? 'wydany' : 'przyjety' 
+          status: type === 'wydanie' ? 'wydany' : 'przyjety',
+          zmien_magazyn: Boolean(p.zmien_magazyn),
+          nowe_miejsce_w_mag: p.nowe_miejsce_w_mag,
         })),
       });
 
@@ -2797,7 +2723,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm">
-                    <div className="mb-4 flex items-center justify-between"><p className="font-black text-slate-900 dark:text-white">Koszyk Planu</p><span className="rounded-full bg-cyan-100 dark:bg-cyan-500/10 px-3 py-1 text-[11px] font-black text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/20">{Object.values(planQty).filter((v) => Number(v) > 0).length} modeli</span></div>
+                    <div className="mb-4 flex items-center justify-between"><p className="font-black text-slate-900 dark:text-white">Koszyk Planu</p><span className="rounded-full bg-cyan-100 dark:bg-cyan-500/10 px-3 py-1 text-[11px] font-black text-cyan-700 dark:text-[#04e0ff] border border-cyan-200 dark:border-cyan-500/20">{Object.values(planQty).filter((v) => Number(v) > 0).length} modeli</span></div>
                     <div className="max-h-[180px] space-y-2 overflow-y-auto pr-2 custom-scrollbar">
                       {Object.entries(planQty).filter(([, qty]) => Number(qty) > 0).map(([id, qty]) => {
                         const model = models.find((m: any) => String(m.id) === String(id));
@@ -3054,6 +2980,28 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
             <div className="border-l border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/20 p-6 shadow-inner min-w-0 flex flex-col">
               <div className="sticky top-4 space-y-5 min-w-0">
                 <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
+                  <h4 className="mb-3 text-lg font-black text-slate-900 dark:text-white">Lokalizacja operacji & Skaner</h4>
+                  
+                  {/* WYBÓR MAGAZYNU DLA DOKUMENTU WZ/PZ */}
+                  <div className="mb-4">
+                    <Field label="Magazyn docelowy operacji">
+                      <div className="relative">
+                        <Building2 size={16} className="absolute left-3 top-3 text-slate-400" />
+                        <select
+                          className={`${inputClass} pl-9 font-bold`}
+                          value={targetWarehouseId}
+                          onChange={(e) => setTargetWarehouseId(e.target.value)}
+                        >
+                          {warehousesList.map((m: any) => (
+                            <option key={m.id} value={m.id}>
+                              {m.nazwa} {m.miasto ? `(${m.miasto})` : ''} {m.domyslny ? '– Domyślny' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </Field>
+                  </div>
+
                   <Field label="Skanuj kod kreskowy / QR / SN / Case">
                     <div className="flex gap-2">
                       <input
@@ -3093,7 +3041,13 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                           <b className="text-[13px] text-slate-900 dark:text-white block truncate">{p.nazwa}</b>
                           <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
                             {p.kategoria} · {isQuantityOnly(p) ? <span className="text-[#04e0ff]">{p.ilosc || 1} {p.jednostka || 'szt.'}</span> : `${p.nazwa_zeskanowanego_case ? `w: ${p.nazwa_zeskanowanego_case} · ` : ''}${p.kod || '-'}` }
+                            {p.magazyn_nazwa && !isQuantityOnly(p) ? ` · Magazyn: ${p.magazyn_nazwa}` : ''}
                           </p>
+                          {p.zmien_magazyn && (
+                            <span className="mt-1 inline-block text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+                              Relokacja ➔ Nowe miejsce: {p.nowe_miejsce_w_mag || 'Domyślne'}
+                            </span>
+                          )}
                         </div>
                         <button
                           onClick={() => setDocItems((s) => s.filter((_, i) => i !== idx))}
@@ -3129,7 +3083,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                       >
                         <b className="text-[13px] text-slate-900 dark:text-white block truncate">{r.nazwa_wiersza || r.nazwa}</b>
                         <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
-                          {r.kategoria_nazwa} {r.kod ? `· Kod/SN: ${r.kod}` : ''} {r.isQuantity ? `· [STAN: ${r.ilosc_magazynowa || 0} ${r.jednostka || 'szt.'}]` : ''}
+                          {r.kategoria_nazwa} {r.kod ? `· Kod/SN: ${r.kod}` : ''} {r.isQuantity ? `· [STAN: ${r.ilosc_magazynowa || 0} ${r.jednostka || 'szt.'}]` : `· Mag: ${r.magazyn_nazwa || '-'}`}
                         </p>
                       </button>
                     ))}
@@ -3222,7 +3176,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                       <div>
                         <p className="font-black text-slate-900 dark:text-white">{egz.nazwa || `Egzemplarz #${egz.id}`}</p>
                         <p className="text-xs font-bold text-slate-400">
-                          Nr: {egz.numer_egzemplarza || egz.numer_urzadzenia || '-'} · S/N: {egz.sn || '-'} · Kod: {egz.kod_kreskowy || '-'}
+                          Nr: {egz.numer_egzemplarza || egz.numer_urzadzenia || '-'} · S/N: {egz.sn || '-'} · Kod: {egz.kod_kreskowy || '-'} · Magazyn: {egz.magazyn?.nazwa || 'Brak'} ({egz.miejsce_w_mag || 'Brak miejsca'})
                         </p>
                       </div>
                       <Button
@@ -3243,6 +3197,45 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
             </div>
             <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-white/10">
               <Button variant="secondary" onClick={() => setInstanceModalModel(null)}>Zamknij</Button>
+            </div>
+          </div>
+        </SimpleModal>
+      )}
+
+      {/* MODAL KONFLIKTU MAGAZYNOWEGO PRZY PRZYJĘCIU (PZ) */}
+      {locationConflict && (
+        <SimpleModal title="⚠️ Niezgodność magazynu zwrotu sprzętu" onClose={() => setLocationConflict(null)}>
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900">
+              <p className="font-bold text-sm">
+                Egzemplarz <b>{locationConflict.item.nazwa}</b> (S/N: {locationConflict.item.sn || locationConflict.item.kod}) 
+                jest obecnie przypisany do magazynu: <b>{locationConflict.currentWarehouseName}</b> (Lokalizacja: {locationConflict.item.miejsce_w_mag || 'Brak'}).
+              </p>
+              <p className="mt-2 text-xs">
+                Przyjmujesz sprzęt do magazynu: <b>{locationConflict.targetWarehouseName}</b>. 
+                Czy chcesz zaktualizować jego stałą lokalizację magazynową?
+              </p>
+            </div>
+
+            <Field label="Nowe miejsce w tym magazynie (np. Hala A, Regał B-4)">
+              <input 
+                id="conflictLocationInput"
+                className={inputClass} 
+                defaultValue={locationConflict.item.miejsce_w_mag || ''} 
+                placeholder="Wpisz nowe miejsce..." 
+              />
+            </Field>
+
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="secondary" onClick={() => setLocationConflict(null)}>
+                Anuluj skanowanie
+              </Button>
+              <Button onClick={() => {
+                const el = document.getElementById('conflictLocationInput') as HTMLInputElement;
+                confirmRelocation(el?.value || '');
+              }}>
+                Zmień magazyn i przyjmij sprzęt
+              </Button>
             </div>
           </div>
         </SimpleModal>

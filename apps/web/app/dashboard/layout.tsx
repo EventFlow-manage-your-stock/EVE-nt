@@ -8,7 +8,8 @@ import {
   Calendar, CheckSquare, Home, Users, Box, Wrench, Truck, Settings, FileText, 
   ChevronDown, LogOut, Star, Phone, Tags, Shield, Car, Palmtree, Palette, 
   ShieldAlert, Menu, Bell, Search, Sun, Moon, PanelLeftClose, PanelLeftOpen, Plus, Layers, Loader2, ArrowRight,
-  FileArchive, UserCircle, AlertTriangle, CheckCircle2, X
+  FileArchive, UserCircle, AlertTriangle, CheckCircle2, X,
+  Building2
 } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
 import { Button } from '../../components/ProductUI';
@@ -39,6 +40,7 @@ const menuConfig: MenuItem[] = [
   ]},
   { icon: Box, label: 'Magazyn', requiredPermission: 'warehouse:view', children: [
     { label: 'Magazyn wewnętrzny', href: '/dashboard/warehouse', icon: Box },
+    { label: 'Magazyny (Lokalizacje)', href: '/dashboard/warehouse/warehouses', icon: Building2 },
     { label: 'Modele', href: '/dashboard/warehouse/models', icon: Box },
     { label: 'Egzemplarze', href: '/dashboard/warehouse/items', icon: Box },
     { label: 'Opakowania', href: '/dashboard/warehouse/packages', icon: Box },
