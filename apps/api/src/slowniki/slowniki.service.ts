@@ -16,7 +16,7 @@ export class SlownikiService {
   async getTypyWydarzen(id_organizacji: number) {
     return this.prisma.extendedClient.typWydarzenia.findMany({
       where: { id_organizacji, aktywny: true },
-      select: { id: true, nazwa: true, kolor: true, kolejnosc: true },
+      select: { id: true, nazwa: true, kolor: true, kategoria_glowna: true, kolejnosc: true },
       orderBy: { kolejnosc: 'asc' },
     });
   }
@@ -164,12 +164,12 @@ export class SlownikiService {
       orderBy: { kolejnosc: 'desc' },
       select: { kolejnosc: true },
     });
-
     return this.prisma.extendedClient.typWydarzenia.create({
       data: {
         id_organizacji,
         nazwa: String(dto.nazwa || '').trim() || 'Nowy typ wydarzenia',
         kolor: dto.kolor || '#0891B2',
+        kategoria_glowna: dto.kategoria_glowna || 'wydarzenie',
         kolejnosc: dto.kolejnosc !== undefined ? Number(dto.kolejnosc) : (last?.kolejnosc ?? 0) + 1,
       },
     });
@@ -181,6 +181,7 @@ export class SlownikiService {
       data: {
         ...(dto.nazwa !== undefined ? { nazwa: String(dto.nazwa).trim() || 'Typ wydarzenia' } : {}),
         ...(dto.kolor !== undefined ? { kolor: dto.kolor || '#0891B2' } : {}),
+        ...(dto.kategoria_glowna !== undefined ? { kategoria_glowna: dto.kategoria_glowna } : {}),
         ...(dto.kolejnosc !== undefined ? { kolejnosc: Number(dto.kolejnosc) } : {}),
         ...(dto.aktywny !== undefined ? { aktywny: Boolean(dto.aktywny) } : {}),
       },

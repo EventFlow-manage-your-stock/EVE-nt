@@ -99,47 +99,96 @@ const tableInputClass = "w-full border border-transparent bg-transparent hover:b
 // ============================================================================
 // WYSZUKIWARKA SPRZĘTU INLINE
 // ============================================================================
-function InlineEquipmentAdder({ sectionId, models, onAdd }: { sectionId: number, models: any[], onAdd: (model: any) => void }) {
+function InlineEquipmentAdder({ 
+  sectionId, 
+  models, 
+  onAdd, 
+  onAddCustom 
+}: { 
+  sectionId: number; 
+  models: any[]; 
+  onAdd: (model: any) => void;
+  onAddCustom: (name: string) => void;
+}) {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return models.filter((m: any) => 
-      `${m.nazwa} ${m.kod_kreskowy || ''}`.toLowerCase().includes(q)
-    ).slice(0, 10);
+    return models.filter((m: any) => {
+      const tagsStr = Array.isArray(m.tagi) ? m.tagi.join(' ') : (m.tagi || '');
+      const serialsStr = Array.isArray(m.egzemplarze) 
+        ? m.egzemplarze.map((e: any) => `${e.numer_egzemplarza || ''} ${e.sn || ''} ${e.kod_kreskowy || ''}`).join(' ')
+        : '';
+      const fullSearch = `${m.nazwa || ''} ${m.kod_kreskowy || ''} ${tagsStr} ${serialsStr} ${m.producent || ''}`.toLowerCase();
+      return fullSearch.includes(q);
+    }).slice(0, 10);
   }, [query, models]);
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const trimmed = query.trim();
+      if (!trimmed) return;
+
+      if (filtered.length > 0) {
+        onAdd(filtered[0]);
+      } else {
+        onAddCustom(trimmed);
+      }
+      setQuery('');
+      setIsFocused(false);
+    }
+  }
+
   return (
-    <div className="relative p-2 border-t border-slate-100 bg-slate-50/50 flex items-center gap-2">
-      <div className="relative flex-1 max-w-sm">
-        <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+    <div className="relative p-3 border-t border-slate-100 bg-slate-50/70 flex items-center gap-2 overflow-visible">
+      <div className="relative flex-1 max-w-md">
+        <Search size={15} className="absolute left-3 top-2.5 text-slate-400" />
         <input 
           type="text" 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-          placeholder="Wyszukaj sprzęt i naciśnij Enter..." 
-          className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm font-semibold focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none"
+          onBlur={() => setTimeout(() => setIsFocused(false), 250)}
+          onKeyDown={handleKeyDown}
+          placeholder="Wyszukaj sprzęt lub wpisz nazwę i naciśnij Enter..." 
+          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm font-semibold focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none shadow-sm transition"
         />
-        {isFocused && filtered.length > 0 && (
-          <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden">
-            {filtered.map(m => (
-              <button 
-                key={m.id} 
-                className="w-full text-left px-4 py-2 text-sm font-semibold hover:bg-cyan-50 hover:text-cyan-700 transition border-b border-slate-100 last:border-0 flex justify-between items-center"
-                onClick={() => { onAdd(m); setQuery(''); }}
+        {isFocused && query.trim().length > 0 && (
+          <div className="absolute z-[100] left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {filtered.length > 0 ? (
+              <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                {filtered.map((m) => (
+                  <button 
+                    key={m.id} 
+                    type="button"
+                    className="w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-cyan-50 hover:text-cyan-800 transition flex justify-between items-center group"
+                    onMouseDown={(e) => { e.preventDefault(); onAdd(m); setQuery(''); setIsFocused(false); }}
+                  >
+                    <div>
+                      <span className="text-slate-800 font-bold group-hover:text-cyan-900">{m.nazwa}</span>
+                      {m.kod_kreskowy && <span className="ml-2 text-[11px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{m.kod_kreskowy}</span>}
+                    </div>
+                    <span className="text-xs font-black text-cyan-600 shrink-0 ml-2">
+                      {money(m.cena_podstawowa || m.cena_netto || m.wartosc_domyslna_egzemplarza || 0)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div 
+                className="p-3.5 text-xs font-bold text-slate-500 bg-slate-50 flex items-center justify-between cursor-pointer hover:bg-cyan-50 hover:text-cyan-800 transition"
+                onMouseDown={(e) => { e.preventDefault(); onAddCustom(query.trim()); setQuery(''); setIsFocused(false); }}
               >
-                <span>{m.nazwa}</span>
-                <span className="text-xs text-slate-400">{money(m.cena_podstawowa || m.cena_netto || m.wartosc_domyslna_egzemplarza)}</span>
-              </button>
-            ))}
+                <span>Brak w bazie. Naciśnij <b>Enter</b> lub kliknij, aby dodać pozycję ręczną: <b>"{query.trim()}"</b></span>
+                <Plus size={14} className="text-cyan-600 shrink-0 ml-2" />
+              </div>
+            )}
           </div>
         )}
       </div>
-      {query && filtered.length === 0 && <span className="text-xs font-bold text-slate-400">Brak wyników w bazie.</span>}
     </div>
   );
 }
@@ -445,7 +494,27 @@ export default function OfferDetailsPage() {
     }
   }
 
-  // Dodawanie pozycji ręcznej
+  // Dodawanie pozycji ręcznej ze stringa wpisanego w wyszukiwarkę inline
+  async function handleInlineAddCustom(sectionId: number, name: string) {
+    try {
+      await api.post(`/api/oferty/${id}/pozycje`, {
+        id_sekcji: sectionId,
+        typ_pozycji: 'sprzet',
+        nazwa: name,
+        cena_netto: 0,
+        ilosc: 1,
+        dni_pracy: 1,
+        rabat_proc: 0,
+        vat: 23,
+        widoczna_w_pdf: true,
+      });
+      load();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Dodawanie pozycji ręcznej przez modal
   function openAddItem(section: any) {
     setShowItem(section);
     setForm({
@@ -654,16 +723,19 @@ export default function OfferDetailsPage() {
               <input className={inputClass} value={offerMetaForm.nazwa || ''} onChange={e => handleMetaChange('nazwa', e.target.value)} />
             </Field>
             <Field label="Status oferty">
-              <select className={inputClass} value={offerMetaForm.id_statusu_oferty || ''} onChange={e => handleMetaChange('id_statusu_oferty', e.target.value)}>
-                <option value="">Wybierz...</option>
-                {dict.statusy.map((s:any) => <option key={s.id} value={s.id}>{s.nazwa}</option>)}
-              </select>
+              <SearchableSelect 
+                value={offerMetaForm.id_statusu_oferty || ''} 
+                onChange={val => handleMetaChange('id_statusu_oferty', val)} 
+                options={dict.statusy.map((s: any) => ({ value: String(s.id), label: s.nazwa }))} 
+                placeholder="Wybierz status..."
+              />
             </Field>
             <Field label="Klient z bazy (CRM)">
               <SearchableSelect 
                 value={offerMetaForm.id_kontrahenta || ''} 
                 onChange={val => handleMetaChange('id_kontrahenta', val)} 
-                options={dict.kontrahenci.map((k:any) => ({ value: String(k.id), label: k.nazwa }))} 
+                options={dict.kontrahenci.map((k: any) => ({ value: String(k.id), label: k.nazwa }))} 
+                placeholder="Wybierz klienta..."
               />
             </Field>
             <Field label="Termin płatności (Dni)">
@@ -711,16 +783,20 @@ export default function OfferDetailsPage() {
           <h2 className="text-lg font-black text-slate-800 mb-4">Powiązanie operacyjne</h2>
           <div className="flex-1 space-y-4">
             <Field label="Przypisane wydarzenie (zmieniaj ostrożnie)">
-              <select className={inputClass} value={offerMetaForm.id_wydarzenia || ''} onChange={e => { handleMetaChange('id_wydarzenia', e.target.value); handleMetaChange('id_wynajmu', ''); }}>
-                <option value="">Brak / Wolna oferta</option>
-                {events.map((ev: any) => <option key={ev.id} value={ev.id}>{ev.numer ? `${ev.numer} - ` : ''}{ev.nazwa}</option>)}
-              </select>
+              <SearchableSelect 
+                value={offerMetaForm.id_wydarzenia || ''} 
+                onChange={val => { handleMetaChange('id_wydarzenia', val); handleMetaChange('id_wynajmu', ''); }} 
+                options={[{ value: '', label: 'Brak / Wolna oferta' }, ...events.map((ev: any) => ({ value: String(ev.id), label: `${ev.numer ? `${ev.numer} - ` : ''}${ev.nazwa}` }))]} 
+                placeholder="Wybierz wydarzenie..."
+              />
             </Field>
             <Field label="Lub przypisany wynajem (zmieniaj ostrożnie)">
-              <select className={inputClass} value={offerMetaForm.id_wynajmu || ''} onChange={e => { handleMetaChange('id_wynajmu', e.target.value); handleMetaChange('id_wydarzenia', ''); }}>
-                <option value="">Brak / Wolna oferta</option>
-                {rentals.map((r: any) => <option key={r.id} value={r.id}>{r.numer || `Wynajem #${r.id}`}</option>)}
-              </select>
+              <SearchableSelect 
+                value={offerMetaForm.id_wynajmu || ''} 
+                onChange={val => { handleMetaChange('id_wynajmu', val); handleMetaChange('id_wydarzenia', ''); }} 
+                options={[{ value: '', label: 'Brak / Wolna oferta' }, ...rentals.map((r: any) => ({ value: String(r.id), label: r.numer || `Wynajem #${r.id}` }))]} 
+                placeholder="Wybierz wynajem..."
+              />
             </Field>
 
             <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2">
@@ -752,8 +828,8 @@ export default function OfferDetailsPage() {
 
         <div className="space-y-6">
           {localSections.map((section: any) => (
-            <div key={section.id} className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-hidden flex flex-col">
-              <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-white relative overflow-hidden" style={{ backgroundColor: section.kolor || '#0891B2' }}>
+            <div key={section.id} className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-visible flex flex-col">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-white rounded-t-2xl relative overflow-hidden" style={{ backgroundColor: section.kolor || '#0891B2' }}>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none" />
                 <div className="flex items-center gap-4 z-10">
                   <div>
@@ -772,29 +848,36 @@ export default function OfferDetailsPage() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto bg-white">
-                <table className="w-full min-w-[950px] text-sm text-left">
-                  <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                    <tr>
-                      <th className="px-3 py-3 w-[25%]">Nazwa i Parametry</th>
-                      <th className="px-3 py-3 w-[20%]">Uwagi do pozycji</th>
-                      <th className="px-3 py-3 w-[10%] text-right">Cena PLN</th>
-                      <th className="px-3 py-3 w-[10%] text-center">Ilość</th>
-                      <th className="px-3 py-3 w-[9%] text-center">Dni</th>
-                      <th className="px-3 py-3 w-[8%] text-center">Rabat %</th>
-                      <th className="px-3 py-3 w-[7%] text-center">VAT %</th>
-                      <th className="px-2 py-3 w-[5%] text-center"><FileText size={14} className="mx-auto"/></th>
-                      <th className="px-3 py-3 text-right w-[10%]">Razem netto</th>
-                      <th className="px-3 py-3 w-[4%]"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {(section.pozycje || []).map((p: any) => (
-                      <OfferPositionRow key={p.id} item={p} onDraftChange={registerDirtyItem} onDelete={() => deleteItem(p)} />
-                    ))}
-                  </tbody>
-                </table>
-                <InlineEquipmentAdder sectionId={section.id} models={models} onAdd={(m) => handleInlineAdd(section.id, m)} />
+              <div className="bg-white overflow-visible">
+                <div className="overflow-x-auto overflow-y-visible">
+                  <table className="w-full min-w-[950px] text-sm text-left">
+                    <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                      <tr>
+                        <th className="px-3 py-3 w-[25%]">Nazwa i Parametry</th>
+                        <th className="px-3 py-3 w-[20%]">Uwagi do pozycji</th>
+                        <th className="px-3 py-3 w-[10%] text-right">Cena PLN</th>
+                        <th className="px-3 py-3 w-[10%] text-center">Ilość</th>
+                        <th className="px-3 py-3 w-[9%] text-center">Dni</th>
+                        <th className="px-3 py-3 w-[8%] text-center">Rabat %</th>
+                        <th className="px-3 py-3 w-[7%] text-center">VAT %</th>
+                        <th className="px-2 py-3 w-[5%] text-center"><FileText size={14} className="mx-auto"/></th>
+                        <th className="px-3 py-3 text-right w-[10%]">Razem netto</th>
+                        <th className="px-3 py-3 w-[4%]"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {(section.pozycje || []).map((p: any) => (
+                        <OfferPositionRow key={p.id} item={p} onDraftChange={registerDirtyItem} onDelete={() => deleteItem(p)} />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <InlineEquipmentAdder 
+                  sectionId={section.id} 
+                  models={models} 
+                  onAdd={(m) => handleInlineAdd(section.id, m)} 
+                  onAddCustom={(name) => handleInlineAddCustom(section.id, name)}
+                />
                 {(!section.pozycje || section.pozycje.length === 0) && (
                   <div className="p-8 text-center text-sm font-bold text-slate-400 bg-slate-50/30">Ta grupa jest pusta.</div>
                 )}
@@ -864,7 +947,16 @@ export default function OfferDetailsPage() {
         <form onSubmit={applyBudget} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <Field label="Budżet netto (PLN)"><input type="number" step="0.01" className={inputClass} value={budgetForm.budzet_netto || ''} onChange={e => setBudgetForm({ ...budgetForm, budzet_netto: e.target.value })} required /></Field>
-            <Field label="Algorytm pomniejszania"><select className={inputClass} value={budgetForm.algorytm} onChange={e => setBudgetForm({ ...budgetForm, algorytm: e.target.value })}><option value="proporcjonalnie_sprzet">Tylko pozycje sprzętowe</option><option value="brak">Tylko zapisz kwotę w systemie</option></select></Field>
+            <Field label="Algorytm pomniejszania">
+              <SearchableSelect 
+                value={budgetForm.algorytm} 
+                onChange={val => setBudgetForm({ ...budgetForm, algorytm: val })} 
+                options={[
+                  { value: 'proporcjonalnie_sprzet', label: 'Tylko pozycje sprzętowe' },
+                  { value: 'brak', label: 'Tylko zapisz kwotę w systemie' }
+                ]} 
+              />
+            </Field>
           </div>
           <div className="rounded-2xl bg-slate-50 p-4 border border-slate-200">
             <p className="mb-3 text-sm font-black text-slate-700">Zamrożenie cen (grupy wyłączone z obniżki):</p>
@@ -887,9 +979,11 @@ export default function OfferDetailsPage() {
           <form onSubmit={addItem} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Typ pozycji">
-                <select className={inputClass} value={form.typ_pozycji || 'sprzet'} onChange={e => setForm({ ...form, typ_pozycji: e.target.value })}>
-                  {positionTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
+                <SearchableSelect 
+                  value={form.typ_pozycji || 'sprzet'} 
+                  onChange={val => setForm({ ...form, typ_pozycji: val })} 
+                  options={positionTypes} 
+                />
               </Field>
               <Field label="Nazwa pozycji">
                 <input className={inputClass} required value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} placeholder="np. Usługa transportowa, Licencja..." />
@@ -932,10 +1026,12 @@ export default function OfferDetailsPage() {
         <SimpleModal title={`Dodaj z szablonu do: ${showBundle.nazwa}`} onClose={() => setShowBundle(null)}>
           <form onSubmit={addBundle} className="space-y-4">
             <Field label="Wybierz szablon pakietu">
-              <select className={inputClass} required value={form.id_pakietu || ''} onChange={e => setForm({ ...form, id_pakietu: e.target.value })}>
-                <option value="">Wybierz...</option>
-                {bundles.map((b: any) => <option key={b.id} value={b.id}>{b.nazwa}</option>)}
-              </select>
+              <SearchableSelect 
+                value={form.id_pakietu || ''} 
+                onChange={val => setForm({ ...form, id_pakietu: val })} 
+                options={bundles.map((b: any) => ({ value: String(b.id), label: b.nazwa }))} 
+                placeholder="Wybierz pakiet..."
+              />
             </Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Wielokrotność (Sztuki)"><input type="number" min="1" className={inputClass} value={form.ilosc_pakietow || 1} onChange={e => setForm({ ...form, ilosc_pakietow: e.target.value })} /></Field>
@@ -986,9 +1082,11 @@ export default function OfferDetailsPage() {
                  <p className="text-xs font-black uppercase text-slate-400 mb-4">Manualne parametry pozycji</p>
                  <div className="space-y-3">
                    <Field label="Typ pozycji">
-                     <select className={inputClass} value={form.typ_pozycji || 'sprzet'} onChange={e => setForm({...form, typ_pozycji: e.target.value})}>
-                       {positionTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                     </select>
+                     <SearchableSelect 
+                       value={form.typ_pozycji || 'sprzet'} 
+                       onChange={val => setForm({...form, typ_pozycji: val})} 
+                       options={positionTypes} 
+                     />
                    </Field>
                    <Field label="Nazwa (edytowana na ofercie)"><input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} /></Field>
                    <Field label="Cena za 1 sztukę (PLN)"><input type="number" step="0.01" className={inputClass} value={form.cena_netto ?? 0} onChange={e => setForm({...form, cena_netto: e.target.value})} /></Field>

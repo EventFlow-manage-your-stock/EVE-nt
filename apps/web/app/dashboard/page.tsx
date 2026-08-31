@@ -362,7 +362,7 @@ const WIDGETS: Record<string, { title: string; colSpan: string; render: (data: a
     render: (data, router) => {
       const alertsList = [];
       if (data?.unreturned?.length > 0) {
-        alertsList.push({ icon: Truck, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', title: 'Zaległe zwroty', desc: `${data.unreturned.length} wynajmów po terminie`, href: '/dashboard/warehouse/unreturned' });
+        alertsList.push({ icon: Truck, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10', title: 'Zaległe zwroty', desc: `Sprawdź zaległe zwroty z wydarzeń`, href: '/dashboard/warehouse/unreturned' });
       }
       if (data?.alerts && data.alerts.length > 0) {
         alertsList.push({ icon: Wrench, color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10', title: 'Awarie i Serwis', desc: `${data.alerts.length} urządzeń zgłoszonych`, href: '/dashboard/service' });

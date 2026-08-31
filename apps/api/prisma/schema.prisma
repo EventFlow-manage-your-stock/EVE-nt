@@ -503,6 +503,7 @@ model TypWydarzenia {
   id_organizacji    Int
   nazwa             String    @db.VarChar(150)
   kolor             String?   @db.VarChar(20)
+  kategoria_glowna  String    @default("wydarzenie") @db.VarChar(50)
   kolejnosc         Int       @default(0)
   aktywny           Boolean   @default(true)
   data_utworzenia   DateTime  @default(now())
