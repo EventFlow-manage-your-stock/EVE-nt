@@ -559,7 +559,7 @@ export default function ItemEditorPage() {
                             }`}
                           >
                             <div>
-                              <p className="font-black text-sm text-slate-900 dark:text-white">{item.nazwa || item.model?.nazwa}</p>
+                              <p className="font-black text-sm text-slate-900 dark:text-white">{item.nazwa || item.model?.nazwa} nr {item.numer_egzemplarza || '-'}</p>
                               <p className="text-xs font-bold text-slate-400">Model: {item.model?.nazwa} · S/N: {item.sn || '-'} · Wartość: {Number(item.wartosc || item.model?.wartosc || 0).toFixed(2)} PLN</p>
                             </div>
                             <input type="checkbox" checked={isSelected} readOnly className="h-4 w-4 rounded border-slate-300 text-cyan-600 pointer-events-none" />
