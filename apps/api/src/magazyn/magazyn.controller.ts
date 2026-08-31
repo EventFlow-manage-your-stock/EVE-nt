@@ -256,4 +256,28 @@ export class MagazynController {
   async downloadZalacznik(@Param('zalacznikId', ParseIntPipe) id: number, @Req() req: Request) {
     return this.magazynService.getDownloadUrl(id, Number((req.user as any).id_organizacji));
   }
+
+  @Get('egzemplarze/:id/zawartosc-ilosciowa')
+  async getZawartoscIlosciowaCase(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    const id_organizacji = Number((req.user as any).id_organizacji);
+    return this.magazynService.getZawartoscIlosciowaCase(id, id_organizacji);
+  }
+
+  @Post('egzemplarze/:id/zawartosc-ilosciowa')
+  async modyfikujZawartoscIlosciowaCase(
+    @Param('id', ParseIntPipe) id_case: number,
+    @Body() body: { id_modelu: number; ilosc: number; action?: 'set' | 'remove' },
+    @Req() req: Request,
+  ) {
+    const id_organizacji = Number((req.user as any).id_organizacji);
+    const rawUserId = (req.user as any).id || (req.user as any).sub;
+    return this.magazynService.modyfikujZawartoscIlosciowaCase(
+      id_case,
+      Number(body.id_modelu),
+      Number(body.ilosc || 0),
+      body.action || 'set',
+      id_organizacji,
+      rawUserId ? Number(rawUserId) : null,
+    );
+  }
 }

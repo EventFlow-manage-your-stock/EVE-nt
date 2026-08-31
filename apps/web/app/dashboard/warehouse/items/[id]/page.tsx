@@ -14,8 +14,10 @@ import {
   ExternalLink,
   FileText,
   ImageIcon,
+  Layers,
   Loader2,
   PackagePlus,
+  Plus,
   QrCode,
   RotateCcw,
   Save,
@@ -25,9 +27,10 @@ import {
   Wrench,
 } from 'lucide-react';
 import { api } from '../../../../../lib/api';
-import { Button, Card, Field, inputClass, PageTitle } from '../../../../../components/ProductUI';
+import { Button, Card, Field, inputClass, PageTitle, SearchableSelect } from '../../../../../components/ProductUI';
 import { DataTable } from '../../../../../components/DataTable';
 import { PrintLabelsModal } from '../../../../../components/PrintLabelsModal';
+import { SimpleModal } from '../../../../../components/SimpleModal';
 
 // ============================================================================
 // KOMPONENT: MINI KALENDARZ ZAJĘTOŚCI EGZEMPLARZA
@@ -124,9 +127,14 @@ export default function ItemEditorPage() {
   const [form, setForm] = useState<any>({});
   const [dict, setDict] = useState<any>({ magazyny: [], cases: [] });
   const [availableItems, setAvailableItems] = useState<any[]>([]);
+  const [quantityModels, setQuantityModels] = useState<any[]>([]);
   const [selectedToAdd, setSelectedToAdd] = useState<number[]>([]);
   const [searchAvailable, setSearchAvailable] = useState('');
   const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
+
+  // Obsługa modala dodawania sprzętu ilościowego
+  const [showQtyModal, setShowQtyModal] = useState(false);
+  const [qtyForm, setQtyForm] = useState<{ id_modelu: string; ilosc: number }>({ id_modelu: '', ilosc: 1 });
 
   const isCase = useMemo(() => {
     return record?.model?.typ_sprzetu === 'opakowanie';
@@ -137,21 +145,30 @@ export default function ItemEditorPage() {
       record?.model?.typ_sprzetu === 'opakowanie' ||
       record?.model?.typ_sprzetu === 'zestaw' ||
       record?.model?.typ_sprzetu === 'rack' ||
-      (record?.zawartosc_case && record.zawartosc_case.length > 0)
+      (record?.zawartosc_case && record.zawartosc_case.length > 0) ||
+      (record?.zawartosc_ilosciowa_case && record.zawartosc_ilosciowa_case.length > 0)
     );
   }, [record]);
 
   const contents = record?.zawartosc_case || [];
+  const quantityContents = record?.zawartosc_ilosciowa_case || [];
 
-  // Automatyczne liczenie wartości dla opakowań na podstawie zawartości
+  // Automatyczne liczenie wartości dla opakowań na podstawie zawartości fizycznej i ilościowej
   const calculatedCaseValue = useMemo(() => {
     if (!isCase) return null;
-    const sum = contents.reduce((acc: number, curr: any) => {
+    const physicalSum = contents.reduce((acc: number, curr: any) => {
       const val = Number(curr.wartosc ?? curr.model?.wartosc_domyslna_egzemplarza ?? curr.model?.wartosc ?? 0);
       return acc + (Number.isFinite(val) ? val : 0);
     }, 0);
-    return sum;
-  }, [isCase, contents]);
+
+    const qtySum = quantityContents.reduce((acc: number, curr: any) => {
+      const unitVal = Number(curr.model?.wartosc_domyslna_egzemplarza ?? curr.model?.wartosc ?? 0);
+      const amount = Number(curr.ilosc || 0);
+      return acc + (unitVal * amount);
+    }, 0);
+
+    return physicalSum + qtySum;
+  }, [isCase, contents, quantityContents]);
 
   async function loadData() {
     setLoading(true);
@@ -160,29 +177,36 @@ export default function ItemEditorPage() {
       const rec = res.data;
       setRecord(rec);
 
-      const [mRes, magRes, casesRes, availRes, zajRes] = await Promise.all([
+      const [mRes, magRes, casesRes, availRes, zajRes, allModelsRes] = await Promise.all([
         api.get(`/api/magazyn/modele/${rec.id_modelu}`).catch(() => ({ data: null })),
         api.get('/api/magazyn/slowniki/magazyny').catch(() => ({ data: [] })),
         api.get('/api/magazyn/slowniki/cases').catch(() => ({ data: [] })),
         api.get(`/api/magazyn/slowniki/dostepne-do-case/${id}`).catch(() => ({ data: [] })),
         api.get(`/api/magazyn/modele/${rec.id_modelu}/zajetosc`).catch(() => ({ data: [] })),
+        api.get('/api/magazyn/modele').catch(() => ({ data: [] })),
       ]);
 
       const fetchedModel = mRes.data;
       setModel(fetchedModel);
       setDict({ magazyny: magRes.data || [], cases: casesRes.data || [] });
       setAvailableItems(availRes.data || []);
+      setQuantityModels((allModelsRes.data || []).filter((mod: any) => mod.tryb_ewidencji === 'ilosciowe' || mod.sprzet_ilosciowy));
 
       const isPkg = rec.model?.typ_sprzetu === 'opakowanie';
       const initialContents = rec.zawartosc_case || [];
+      const initialQtyContents = rec.zawartosc_ilosciowa_case || [];
       
-      // Automatyczne zaciągnięcie ceny z modelu, jeśli nie jest ustawiona
       let initialValue = rec.wartosc;
       if (isPkg) {
-        initialValue = initialContents.reduce(
+        const pSum = initialContents.reduce(
           (acc: number, curr: any) => acc + Number(curr.wartosc ?? curr.model?.wartosc_domyslna_egzemplarza ?? curr.model?.wartosc ?? 0),
           0
         );
+        const qSum = initialQtyContents.reduce(
+          (acc: number, curr: any) => acc + (Number(curr.model?.wartosc_domyslna_egzemplarza ?? curr.model?.wartosc ?? 0) * Number(curr.ilosc || 0)),
+          0
+        );
+        initialValue = pSum + qSum;
       } else if (initialValue === null || initialValue === undefined || initialValue === '') {
         initialValue = fetchedModel?.wartosc_domyslna_egzemplarza ?? fetchedModel?.wartosc ?? '';
       }
@@ -211,7 +235,6 @@ export default function ItemEditorPage() {
         objetosc: rec.objetosc || '',
       });
 
-      // Generowanie wydarzeń w kalendarzu
       const allReservations = zajRes.data || [];
       const itemReservations = allReservations.filter((z: any) =>
         z.egzemplarz === rec.nazwa || z.egzemplarz === rec.sn || z.egzemplarz === rec.numer_urzadzenia
@@ -240,7 +263,6 @@ export default function ItemEditorPage() {
 
   useEffect(() => { loadData(); }, [id]);
 
-  // Synchronizacja automatycznej wartości opakowania z formularzem
   useEffect(() => {
     if (isCase && calculatedCaseValue !== null) {
       setForm((prev: any) => ({ ...prev, wartosc: String(calculatedCaseValue) }));
@@ -318,6 +340,37 @@ export default function ItemEditorPage() {
     }
   }
 
+  async function saveQuantityItem(e: React.FormEvent) {
+    e.preventDefault();
+    if (!qtyForm.id_modelu || Number(qtyForm.ilosc) <= 0) return;
+    try {
+      await api.post(`/api/magazyn/egzemplarze/${id}/zawartosc-ilosciowa`, {
+        id_modelu: Number(qtyForm.id_modelu),
+        ilosc: Number(qtyForm.ilosc),
+        action: 'set',
+      });
+      setShowQtyModal(false);
+      setQtyForm({ id_modelu: '', ilosc: 1 });
+      await loadData();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Błąd dodawania pozycji ilościowej.');
+    }
+  }
+
+  async function removeQuantityItem(id_modelu: number) {
+    if (!confirm('Usunąć tę pozycję ilościową ze skrzyni/zestawu?')) return;
+    try {
+      await api.post(`/api/magazyn/egzemplarze/${id}/zawartosc-ilosciowa`, {
+        id_modelu,
+        ilosc: 0,
+        action: 'remove',
+      });
+      await loadData();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Błąd usuwania pozycji ilościowej.');
+    }
+  }
+
   const filteredAvailable = useMemo(() => {
     const q = searchAvailable.trim().toLowerCase();
     if (!q) return availableItems;
@@ -331,6 +384,28 @@ export default function ItemEditorPage() {
       <div className="flex h-96 items-center justify-center">
         <Loader2 className="animate-spin text-cyan-600 w-8 h-8" />
         <span className="ml-3 font-bold text-slate-500">Ładowanie egzemplarza...</span>
+      </div>
+    );
+  }
+
+  if (!record) {
+    return (
+      <div className="mx-auto max-w-[1600px] space-y-6">
+        <PageTitle
+          eyebrow="Magazyn"
+          title="Nie znaleziono egzemplarza"
+          description="Egzemplarz nie istnieje lub został usunięty."
+          action={
+            <Button variant="secondary" onClick={() => router.back()}>
+              <ArrowLeft size={16} className="inline mr-1" /> Powrót
+            </Button>
+          }
+        />
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+            {error}
+          </div>
+        )}
       </div>
     );
   }
@@ -378,7 +453,7 @@ export default function ItemEditorPage() {
                     activeTab === 'zawartosc' ? 'border-cyan-600 bg-white text-cyan-700 dark:bg-slate-900 dark:text-white' : 'border-transparent text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5'
                   }`}
                 >
-                  <Box size={16} /> Zawartość ({contents.length} szt.)
+                  <Box size={16} /> Zawartość ({contents.length} egz. + {quantityContents.length} ilościowych)
                 </button>
               )}
             </div>
@@ -393,7 +468,7 @@ export default function ItemEditorPage() {
                   <Field label="Numer boczny / urządzeniowy">
                     <input className={inputClass} value={form.numer_egzemplarza} onChange={(e) => setForm({ ...form, numer_egzemplarza: e.target.value, numer_urzadzenia: e.target.value })} />
                   </Field>
-                  <Field label="Numer seryjny (S/N)">
+                  <Field label="Numer seryjny (SN)">
                     <input className={inputClass} value={form.sn} onChange={(e) => setForm({ ...form, sn: e.target.value })} />
                   </Field>
                   <Field label="Data produkcji">
@@ -454,7 +529,6 @@ export default function ItemEditorPage() {
                     </Field>
                   )}
 
-                  {/* WARTOŚĆ Z PRZYCISKIEM ZACIĄGANIA Z MODELU */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="block text-sm font-bold text-slate-700 dark:text-slate-300">
@@ -482,7 +556,6 @@ export default function ItemEditorPage() {
                   </div>
 
                   <Field label="Cena zakupu [PLN]"><input type="number" step="0.01" className={inputClass} value={form.cena_zakupu} onChange={(e) => setForm({ ...form, cena_zakupu: e.target.value })} /></Field>
-
                   <Field label="Szerokość [cm]"><input type="number" step="0.01" className={inputClass} value={form.szerokosc} onChange={(e) => setForm({ ...form, szerokosc: e.target.value })} /></Field>
                   <Field label="Wysokość [cm]"><input type="number" step="0.01" className={inputClass} value={form.wysokosc} onChange={(e) => setForm({ ...form, wysokosc: e.target.value })} /></Field>
                   <Field label="Głębokość [cm]"><input type="number" step="0.01" className={inputClass} value={form.glebokosc} onChange={(e) => setForm({ ...form, glebokosc: e.target.value })} /></Field>
@@ -498,12 +571,61 @@ export default function ItemEditorPage() {
 
               {/* TAB 2: ZARZĄDZANIE ZAWARTOŚCIĄ CASE / RACK */}
               {activeTab === 'zawartosc' && isCaseOrZestaw && (
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
+                <div className="space-y-8">
+                  {/* SEKCJA: SPRZĘT ILOŚCIOWY W TYM CASE */}
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <h3 className="text-lg font-black text-slate-900 dark:text-white">Sprzęt spakowany w tym opakowaniu</h3>
-                        <p className="text-xs font-bold text-slate-400">Podczas skanowania kodu tej skrzyni na WZ/PZ, wszystkie poniższe pozycje zostaną automatycznie rozpakowane i dodane do dokumentu.</p>
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                          <Layers size={18} className="text-amber-500" /> Sprzęt ilościowy w tej skrzyni
+                        </h3>
+                        <p className="text-xs font-bold text-slate-400"></p>
+                      </div>
+                      <Button onClick={() => setShowQtyModal(true)}>
+                        <Plus size={16} className="inline mr-1" /> Dodaj pozycję ilościową
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {quantityContents.map((qc: any) => (
+                        <div key={qc.id} className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-white/10 bg-amber-50/20 dark:bg-amber-500/5 hover:border-amber-300 transition">
+                          <div>
+                            <b className="text-slate-900 dark:text-white text-sm">{qc.model?.nazwa}</b>
+                            <p className="text-xs font-bold text-slate-500 mt-0.5">
+                              Kategoria: {qc.model?.kategoria?.nazwa || 'Brak'} {qc.model?.kod_kreskowy ? `· Kod SKU: ${qc.model.kod_kreskowy}` : ''}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-black text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-3 py-1 rounded-lg">
+                              {Number(qc.ilosc)} {qc.model?.jednostka || 'szt.'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeQuantityItem(qc.id_modelu)}
+                              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition"
+                              title="Usuń z tej skrzyni"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      {quantityContents.length === 0 && (
+                        <p className="p-6 text-center text-xs font-bold text-slate-400 border border-dashed border-slate-200 dark:border-white/10 rounded-xl">
+                          Brak przypisanego sprzętu ilościowego w tej skrzyni.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* SEKCJA: FIZYCZNE EGZEMPLARZE W CASE */}
+                  <div className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                          <Box size={18} className="text-cyan-600" /> Fizyczne egzemplarze wewnątrz
+                        </h3>
+                        <p className="text-xs font-bold text-slate-400">Podczas skanowania kodu skrzyni na WZ/PZ, wszystkie poniższe egzemplarze zostaną automatycznie rozpakowane.</p>
                       </div>
                       <span className="rounded-xl bg-cyan-100 dark:bg-cyan-900/30 px-3 py-1 text-xs font-black text-cyan-700 dark:text-[#04e0ff]">
                         Łącznie: {contents.length} szt.
@@ -513,7 +635,7 @@ export default function ItemEditorPage() {
                     <DataTable
                       rows={contents}
                       onRowClick={(r: any) => router.push(`/dashboard/warehouse/items/${r.id}`)}
-                      empty="Skrzynia/zestaw jest aktualnie pusta."
+                      empty="Brak fizycznych egzemplarzy w skrzyni."
                       columns={[
                         { key: 'nazwa', label: 'Nazwa sprzętu', value: (r: any) => <b className="hover:underline text-cyan-600 dark:text-cyan-400">{r.nazwa || r.model?.nazwa}</b> },
                         { key: 'model', label: 'Model', value: (r: any) => r.model?.nazwa || '-' },
@@ -530,12 +652,12 @@ export default function ItemEditorPage() {
                     />
                   </div>
 
-                  {/* DODAWANIE DO SKRZYNI */}
+                  {/* DODAWANIE WOLNYCH EGZEMPLARZY DO SKRZYNI */}
                   <div className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <h4 className="font-black text-slate-900 dark:text-white">Dodaj wolny sprzęt do tej skrzyni</h4>
-                        <p className="text-xs font-bold text-slate-400">Wybierz egzemplarze luzem i przypisz je do tej skrzyni.</p>
+                        <h4 className="font-black text-slate-900 dark:text-white">Spakuj wolny sprzęt egzemplarzowy</h4>
+                        <p className="text-xs font-bold text-slate-400">Wybierz wolne egzemplarze z magazynu i przypisz je do tej skrzyni.</p>
                       </div>
                       <Button onClick={addToCase} disabled={!selectedToAdd.length}>
                         <PackagePlus size={16} className="inline mr-1" /> Przypisz zaznaczone ({selectedToAdd.length})
@@ -577,7 +699,7 @@ export default function ItemEditorPage() {
           </Card>
         </div>
 
-        {/* PRAWA KOLUMNA (SIDEBAR): MODEL BAZOWY, KATEGORIA, MINI KALENDARZ */}
+        {/* PRAWA KOLUMNA (SIDEBAR) */}
         <div className="space-y-6">
           <Card className="!p-0 overflow-hidden">
             {model?.zdjecie ? (
@@ -588,11 +710,18 @@ export default function ItemEditorPage() {
               </div>
             )}
             <div className="p-5 space-y-3">
-              <Link href={`/dashboard/warehouse/models/${record.id_modelu}`} className="flex items-center gap-4 p-3 rounded-2xl border border-slate-100 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition group">
-                <div className="bg-cyan-50 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400 p-2.5 rounded-xl"><Box size={18} /></div>
+              <Link 
+                href={`/dashboard/warehouse/models/${record.id_modelu || record.model?.id}`} 
+                className="flex items-center gap-4 p-3 rounded-2xl border border-slate-100 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition group"
+              >
+                <div className="bg-cyan-50 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400 p-2.5 rounded-xl">
+                  <Box size={18} />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-black uppercase text-slate-400">Model bazowy</p>
-                  <p className="text-sm font-black text-slate-900 dark:text-white truncate group-hover:text-cyan-600 transition">{model?.nazwa || 'Model'}</p>
+                  <p className="text-sm font-black text-slate-900 dark:text-white truncate group-hover:text-cyan-600 transition">
+                    {model?.nazwa || 'Model'}
+                  </p>
                 </div>
                 <ExternalLink size={14} className="text-slate-300 shrink-0" />
               </Link>
@@ -618,6 +747,42 @@ export default function ItemEditorPage() {
           </Card>
         </div>
       </div>
+
+      {/* MODAL DODAWANIA POZYCJI ILOŚCIOWEJ */}
+      {showQtyModal && (
+        <SimpleModal title="Dodaj sprzęt ilościowy do skrzyni / zestawu" onClose={() => setShowQtyModal(false)}>
+          <form onSubmit={saveQuantityItem} className="space-y-4">
+            <Field label="Wybierz model ilościowy">
+              <SearchableSelect
+                value={qtyForm.id_modelu}
+                onChange={(val) => setQtyForm({ ...qtyForm, id_modelu: val })}
+                options={quantityModels.map((qm: any) => ({
+                  value: String(qm.id),
+                  label: `${qm.nazwa} (Dostępne w magazynie: ${qm.ilosc_magazynowa || 0} ${qm.jednostka || 'szt.'})`,
+                }))}
+                placeholder="Wybierz model ilościowy..."
+              />
+            </Field>
+
+            <Field label="Liczba sztuk spakowanych w skrzyni">
+              <input
+                type="number"
+                min="0.01"
+                step="any"
+                required
+                className={inputClass}
+                value={qtyForm.ilosc}
+                onChange={(e) => setQtyForm({ ...qtyForm, ilosc: Number(e.target.value) })}
+              />
+            </Field>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
+              <Button variant="secondary" type="button" onClick={() => setShowQtyModal(false)}>Anuluj</Button>
+              <Button type="submit">Przypisz do skrzyni</Button>
+            </div>
+          </form>
+        </SimpleModal>
+      )}
 
       <PrintLabelsModal
         isOpen={showPrintModal}

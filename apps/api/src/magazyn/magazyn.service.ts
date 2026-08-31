@@ -785,6 +785,10 @@ export class MagazynService {
           include: { model: true, magazyn: true },
           orderBy: { nazwa: 'asc' },
         },
+        zawartosc_ilosciowa_case: {
+          include: { model: { include: { kategoria: true } } },
+          orderBy: { model: { nazwa: 'asc' } },
+        },
         serwisy: {
           include: { status: true, zglosil: true, rozwiazal: true },
           orderBy: { data_zgloszenia: 'desc' },
@@ -876,11 +880,19 @@ export class MagazynService {
 
   async getOpakowanieById(id: number, id_organizacji: number) {
     const opakowanie = await this.prisma.extendedClient.egzemplarz.findFirst({
-      where: { id, id_organizacji, aktywny: true, model: { typ_sprzetu: { in: ['opakowanie', 'rack', 'zestaw'] } } },
+      where: { id, id_organizacji, aktywny: true },
       include: {
         model: { include: { kategoria: true } },
         magazyn: true,
-        zawartosc_case: { where: { aktywny: true }, include: { model: true, magazyn: true }, orderBy: { nazwa: 'asc' } },
+        zawartosc_case: {
+          where: { aktywny: true },
+          include: { model: { include: { kategoria: true } }, magazyn: true },
+          orderBy: { nazwa: 'asc' },
+        },
+        zawartosc_ilosciowa_case: {
+          include: { model: { include: { kategoria: true } } },
+          orderBy: { model: { nazwa: 'asc' } },
+        },
       },
     });
     if (!opakowanie) throw new NotFoundException('Nie znaleziono opakowania');
@@ -1079,12 +1091,20 @@ export class MagazynService {
             include: { model: { include: { kategoria: true } }, magazyn: true },
             orderBy: [{ id_modelu: 'asc' }, { numer_egzemplarza: 'asc' }, { id: 'asc' }],
           },
+          zawartosc_ilosciowa_case: {
+            include: { model: { include: { kategoria: true } } },
+            orderBy: { model: { nazwa: 'asc' } },
+          },
         },
       },
       zawartosc_case: {
         where: { aktywny: true },
         include: { model: { include: { kategoria: true } }, magazyn: true },
         orderBy: [{ id_modelu: 'asc' }, { numer_egzemplarza: 'asc' }, { id: 'asc' }],
+      },
+      zawartosc_ilosciowa_case: {
+        include: { model: { include: { kategoria: true } } },
+        orderBy: { model: { nazwa: 'asc' } },
       },
     };
 
@@ -1094,8 +1114,9 @@ export class MagazynService {
         id_organizacji,
         aktywny: true,
         OR: [
-          { AND: [{ OR: codeOr }, { model: { typ_sprzetu: 'opakowanie' } }] },
+          { AND: [{ OR: codeOr }, { model: { typ_sprzetu: { in: ['opakowanie', 'case'] } } }] },
           { AND: [{ OR: codeOr }, { zawartosc_case: { some: { aktywny: true } } }] },
+          { AND: [{ OR: codeOr }, { zawartosc_ilosciowa_case: { some: {} } }] },
         ],
       },
       include: includeForScan,
@@ -1113,7 +1134,7 @@ export class MagazynService {
     }));
 
     if (!egzemplarz) {
-      // Sprzęt ilościowy na modelu
+      // Sprzęt ilościowy bezpośrednio na modelu
       const modelIlosciowy = await this.prisma.extendedClient.modelSprzetu.findFirst({
         where: {
           id_organizacji,
@@ -1127,7 +1148,9 @@ export class MagazynService {
         return {
           rowType: 'ilosciowy_model',
           quantityOnly: true,
+          isQuantity: true,
           id_modelu: modelIlosciowy.id,
+          id: modelIlosciowy.id,
           nazwa: modelIlosciowy.nazwa,
           nazwa_modelu: modelIlosciowy.nazwa,
           kategoria: modelIlosciowy.kategoria?.nazwa || 'Bez kategorii',
@@ -1136,6 +1159,7 @@ export class MagazynService {
           ilosc_dostepna: Number(modelIlosciowy.ilosc_magazynowa || 0),
           ilosc_magazynowa: Number(modelIlosciowy.ilosc_magazynowa || 0),
           jednostka: modelIlosciowy.jednostka || 'szt.',
+          waga: Number(modelIlosciowy.waga || 0),
           message: `Zeskanowano model ilościowy: ${modelIlosciowy.nazwa}. Podaj ilość sztuk.`,
         };
       }
@@ -1160,11 +1184,14 @@ export class MagazynService {
       magazyn_nazwa: e.magazyn?.nazwa || 'Brak przypisanego magazynu',
       magazyn: e.magazyn?.nazwa || 'Brak przypisanego magazynu',
       miejsce_w_mag: e.miejsce_w_mag || '',
+      waga: Number(e.waga || e.model?.waga || 0),
       ilosc: 1,
     });
 
     const makeCasePayload = (caseRow: any, reason = 'case') => {
       const meta = this.caseScanMeta(caseRow);
+
+      // 1. Fizyczne egzemplarze w skrzyni
       const contents = (caseRow.zawartosc_case || [])
         .filter((e: any) => e.aktywny !== false && e.model?.typ_sprzetu !== 'opakowanie')
         .map((child: any) => ({
@@ -1174,7 +1201,32 @@ export class MagazynService {
           nazwa_zeskanowanego_case: meta?.nazwa || caseRow.nazwa || caseRow.model?.nazwa || 'Case',
         }));
 
-      if (!contents.length) throw new NotFoundException(`Case/opakowanie ${kod} jest puste albo nie zawiera aktywnych egzemplarzy.`);
+      // 2. Sprzęt ilościowy w skrzyni
+      const quantityContents = (caseRow.zawartosc_ilosciowa_case || []).map((qItem: any) => ({
+        rowType: 'ilosciowy_model',
+        quantityOnly: true,
+        isQuantity: true,
+        id_modelu: qItem.id_modelu,
+        id: qItem.id_modelu,
+        id_egzemplarza: null,
+        nazwa: qItem.model?.nazwa || 'Sprzęt ilościowy w case',
+        nazwa_modelu: qItem.model?.nazwa,
+        kategoria: qItem.model?.kategoria?.nazwa || 'Bez kategorii',
+        kod: qItem.model?.kod_kreskowy || '',
+        ilosc: Number(qItem.ilosc || 1),
+        jednostka: qItem.model?.jednostka || 'szt.',
+        waga: Number(qItem.model?.waga || 0),
+        system_case_scan: meta,
+        id_zeskanowanego_case: meta?.id || caseRow.id,
+        nazwa_zeskanowanego_case: meta?.nazwa || caseRow.nazwa || caseRow.model?.nazwa || 'Case',
+        uwagi: `Zawartość ilościowa ze skrzyni: ${meta?.nazwa || 'Case'}`,
+      }));
+
+      const allItems = [...contents, ...quantityContents];
+      if (!allItems.length) {
+        throw new NotFoundException(`Case/zestaw ${kod} jest pusty (brak egzemplarzy i sprzętu ilościowego w środku).`);
+      }
+
       return {
         rowType: 'case',
         isCase: true,
@@ -1182,12 +1234,11 @@ export class MagazynService {
         id_egzemplarza: caseRow.id,
         nazwa: caseRow.nazwa || caseRow.model?.nazwa || 'Case',
         nazwa_modelu: caseRow.model?.nazwa,
-        kod: this.getEquipmentCode(caseRow) || kod,
-        kod_kreskowy: this.getEquipmentCode(caseRow) || kod,
+        kod: caseRow.kod_kreskowy || kod,
         kategoria: caseRow.model?.kategoria?.nazwa || 'Opakowania',
-        ilosc: contents.length,
-        contents,
-        message: `Zeskanowano case. Dodano ${contents.length} egzemplarzy z wnętrza case.`,
+        ilosc: allItems.length,
+        contents: allItems,
+        message: `Zeskanowano case. Do dokumentu dodano ${contents.length} egz. oraz ${quantityContents.length} pozycji ilościowych.`,
         scan_reason: reason,
       };
     };
@@ -1201,7 +1252,7 @@ export class MagazynService {
       };
     }
 
-    const isDirectCase = this.isOpakowanie(egzemplarz) || (egzemplarz.zawartosc_case?.length || 0) > 0;
+    const isDirectCase = this.isOpakowanie(egzemplarz) || (egzemplarz.zawartosc_case?.length || 0) > 0 || (egzemplarz.zawartosc_ilosciowa_case?.length || 0) > 0;
     if (isDirectCase) {
       return makeCasePayload(egzemplarz, 'direct_case_scan');
     }
@@ -1217,7 +1268,7 @@ export class MagazynService {
       parentCase?.numer_egzemplarza,
     ].filter(Boolean).map((v: any) => String(v));
 
-    if (parentCase && parentCaseCodes.includes(String(kod)) && (parentCase.zawartosc_case?.length || 0) > 0) {
+    if (parentCase && parentCaseCodes.includes(String(kod)) && ((parentCase.zawartosc_case?.length || 0) > 0 || (parentCase.zawartosc_ilosciowa_case?.length || 0) > 0)) {
       return makeCasePayload(parentCase, 'parent_case_code_matched');
     }
 
@@ -1306,6 +1357,7 @@ export class MagazynService {
       for (const p of pozycje) {
         const id_egzemplarza = this.cleanNumber(p.id_egzemplarza);
 
+        // Pozycja ilościowa (bez egzemplarza fizycznego)
         if (!id_egzemplarza) {
           const id_modelu = this.cleanNumber(p.id_modelu);
           const modelIlosciowy = id_modelu
@@ -1315,15 +1367,15 @@ export class MagazynService {
               })
             : null;
 
-          if (modelIlosciowy && this.isSprzetIlosciowy(modelIlosciowy)) {
+          if (modelIlosciowy) {
             const qty = Number(p.ilosc || 0);
             if (!qty || qty <= 0) {
-              throw new BadRequestException(`Podaj prawidłową ilość dla sprzętu ilościowego: ${modelIlosciowy.nazwa}.`);
+              throw new BadRequestException(`Podaj prawidłową ilość dla sprzętu: ${modelIlosciowy.nazwa}.`);
             }
             const availableQty = Number(modelIlosciowy.ilosc_magazynowa || 0);
-            if (typ === 'wydanie' && qty > availableQty) {
+            if (typ === 'wydanie' && this.isSprzetIlosciowy(modelIlosciowy) && qty > availableQty) {
               throw new BadRequestException(
-                `Brak wystarczającej ilości: ${modelIlosciowy.nazwa}. Dostępne ${availableQty} ${modelIlosciowy.jednostka || 'szt.'}, próba wydania ${qty}.`,
+                `Brak wystarczającej ilości w magazynie: ${modelIlosciowy.nazwa}. Dostępne ${availableQty} ${modelIlosciowy.jednostka || 'szt.'}, próba wydania ${qty}.`,
               );
             }
             expandedPozycje.push({
@@ -1332,7 +1384,7 @@ export class MagazynService {
               id_egzemplarza: null,
               nazwa: this.cleanString(p.nazwa_na_dokumencie || p.nazwa) || modelIlosciowy.nazwa,
               ilosc: qty,
-              uwagi: [this.cleanString(p.uwagi), 'Sprzęt ilościowy bez egzemplarzy'].filter(Boolean).join(' | '),
+              uwagi: this.cleanString(p.uwagi) || null,
             });
             continue;
           }
@@ -1349,18 +1401,27 @@ export class MagazynService {
               include: { model: { include: { kategoria: true } }, magazyn: true },
               orderBy: [{ id_modelu: 'asc' }, { numer_egzemplarza: 'asc' }, { id: 'asc' }],
             },
+            zawartosc_ilosciowa_case: {
+              include: { model: { include: { kategoria: true } } },
+            },
           },
         });
 
         if (!egz) throw new BadRequestException(`Nie znaleziono egzemplarza #${id_egzemplarza}.`);
 
-        const isCaseInstance = this.isOpakowanie(egz) || (egz.zawartosc_case?.length || 0) > 0;
+        const isCaseInstance = this.isOpakowanie(egz) || (egz.zawartosc_case?.length || 0) > 0 || (egz.zawartosc_ilosciowa_case?.length || 0) > 0;
+
         if (isCaseInstance) {
           const contents = (egz.zawartosc_case || []).filter((child: any) => !this.isOpakowanie(child));
-          if (!contents.length) {
+          const quantityContents = egz.zawartosc_ilosciowa_case || [];
+
+          if (!contents.length && !quantityContents.length) {
             throw new BadRequestException(`Zeskanowany case "${egz.nazwa || egz.model?.nazwa}" jest pusty.`);
           }
+
           const meta = this.caseScanMeta(egz);
+
+          // Rozpakowanie egzemplarzy fizycznych ze skrzyni
           for (const child of contents) {
             const validation = await this.validateInstanceMovement(tx, child.id, child.nazwa || child.model?.nazwa, typ, id_wydarzenia, id_organizacji);
             expandedPozycje.push({
@@ -1386,6 +1447,22 @@ export class MagazynService {
             }
             instancesToUpdate.push(itemUpdate);
           }
+
+          // Rozpakowanie pozycji ilościowych ze skrzyni
+          for (const qChild of quantityContents) {
+            expandedPozycje.push({
+              ...p,
+              system_case_scan: meta,
+              id_zeskanowanego_case: meta?.id || egz.id,
+              nazwa_zeskanowanego_case: meta?.nazwa || egz.nazwa || egz.model?.nazwa || 'Case',
+              id_modelu: qChild.id_modelu,
+              id_egzemplarza: null,
+              nazwa: qChild.model?.nazwa || 'Sprzęt ilościowy z case',
+              ilosc: Number(qChild.ilosc || 1),
+              uwagi: `Zawartość ilościowa ze skrzyni: ${meta?.nazwa || 'Case'}`,
+            });
+          }
+
           continue;
         }
 
@@ -1394,7 +1471,6 @@ export class MagazynService {
         }
 
         const validation = await this.validateInstanceMovement(tx, egz.id, egz.nazwa || egz.model?.nazwa, typ, id_wydarzenia, id_organizacji);
-
         expandedPozycje.push({
           ...p,
           id_modelu: egz.id_modelu,
@@ -1448,6 +1524,7 @@ export class MagazynService {
         include: { pozycje: true },
       });
 
+      // Aktualizacja stanów modeli ilościowych
       if (typ === 'wydanie' || typ === 'przyjecie') {
         const deltas = new Map<number, number>();
         for (const p of expandedPozycje) {
@@ -1470,24 +1547,10 @@ export class MagazynService {
         const updateData: any = { status_serwisowy: item.targetStatus };
         if (item.id_magazynu !== undefined) updateData.id_magazynu = item.id_magazynu;
         if (item.miejsce_w_mag !== undefined) updateData.miejsce_w_mag = item.miejsce_w_mag;
-
         await tx.egzemplarz.update({
           where: { id: item.id },
           data: updateData,
         });
-
-        if (item.id_magazynu) {
-          await tx.logZmian.create({
-            data: {
-              id_organizacji,
-              id_uzytkownika: isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika),
-              typ_obiektu: 'Egzemplarz',
-              id_obiektu: item.id,
-              akcja: 'PRZENIESIENIE_MAGAZYN_PZ',
-              nowa_wartosc: JSON.stringify({ id_magazynu: item.id_magazynu, miejsce_w_mag: item.miejsce_w_mag }),
-            },
-          });
-        }
       }
 
       await tx.logZmian.create({
@@ -1497,7 +1560,7 @@ export class MagazynService {
           typ_obiektu: 'WydanieMagazynowe',
           id_obiektu: doc.id,
           akcja: typ.toUpperCase(),
-          nowa_wartosc: JSON.stringify({ ...dto, pozycje_count: expandedPozycje.length, case_expanded: expandedPozycje.length !== pozycje.length }),
+          nowa_wartosc: JSON.stringify({ ...dto, pozycje_count: expandedPozycje.length }),
         },
       });
 
@@ -2079,6 +2142,91 @@ export class MagazynService {
       });
 
       return { success: true, pzId: pz.id, wzId: wz.id };
+    });
+  }
+
+  async getZawartoscIlosciowaCase(id_case: number, id_organizacji: number) {
+    return this.prisma.extendedClient.zawartoscCaseIlosciowa.findMany({
+      where: { id_case, id_organizacji},
+      include: {
+        model: {
+          include: { kategoria: true },
+        },
+      },
+      orderBy: { model: { nazwa: 'asc' } },
+    });
+  }
+
+  async modyfikujZawartoscIlosciowaCase(
+    id_case: number,
+    id_modelu: number,
+    ilosc: number,
+    action: 'set' | 'remove',
+    id_organizacji: number,
+    id_uzytkownika: number | null,
+  ) {
+    const safeUserId = isNaN(Number(id_uzytkownika)) ? null : Number(id_uzytkownika);
+    const parsedQty = Number(ilosc);
+
+    return this.prisma.extendedClient.$transaction(async (tx) => {
+      const skrzynia = await tx.egzemplarz.findFirst({
+        where: { id: id_case, id_organizacji, aktywny: true },
+      });
+      if (!skrzynia) throw new NotFoundException('Nie znaleziono wybranego egzemplarza / case');
+
+      const model = await tx.modelSprzetu.findFirst({
+        where: { id: id_modelu, id_organizacji, aktywny: true },
+      });
+      if (!model) throw new NotFoundException('Nie znaleziono modelu sprzętu');
+
+      if (action === 'remove' || parsedQty <= 0) {
+        await tx.zawartoscCaseIlosciowa.deleteMany({
+          where: { 
+            id_case, 
+            id_modelu, 
+            id_organizacji 
+          },
+        });
+      } else {
+        const existing = await tx.zawartoscCaseIlosciowa.findFirst({
+          where: { 
+            id_case, 
+            id_modelu, 
+            id_organizacji 
+          },
+        });
+
+        if (existing) {
+          await tx.zawartoscCaseIlosciowa.update({
+            where: { id: existing.id },
+            data: { 
+              ilosc: parsedQty,
+            },
+          });
+        } else {
+          await tx.zawartoscCaseIlosciowa.create({
+            data: {
+              id_organizacji,
+              id_case,
+              id_modelu,
+              ilosc: parsedQty,
+            },
+          });
+        }
+      }
+
+      await tx.logZmian.create({
+        data: {
+          id_organizacji,
+          id_uzytkownika: safeUserId,
+          typ_obiektu: 'Egzemplarz',
+          id_obiektu: id_case,
+          akcja: 'MODYFIKACJA_ZAWARTOSCI_ILOSCIOWEJ_CASE',
+          nowa_wartosc: JSON.stringify({ id_modelu, ilosc: parsedQty, action }),
+        },
+      });
+
+      return { success: true };
     });
   }
 }

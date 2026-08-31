@@ -91,6 +91,7 @@ model Organizacja {
   powiadomienia_ekipa        PowiadomienieEkipa[]
   powiadomienia              Powiadomienie[]
   powiadomienia_cykliczne    PowiadomienieCykliczne[]
+  zawartosci_case_ilosciowe  ZawartoscCaseIlosciowa[]
 
   @@map("organizacje")
 }
@@ -371,6 +372,7 @@ model ModelSprzetu {
   pobor_pradu              Decimal?                     @db.Decimal(10, 2)
   stawki                   CenaModelu[]                 @relation("ModelStawki")
   pozycje_pakietow         PozycjaPakietu[]
+  zawartosc_w_case         ZawartoscCaseIlosciowa[]
   
 
   @@index([id_kategorii])
@@ -424,6 +426,7 @@ model Egzemplarz {
   zadania          Zadanie[]
   pozycje_wydan    PozycjaWydaniaMagazynowego[]
   pozycje_pakietow PozycjaPakietu[]
+  zawartosc_ilosciowa_case ZawartoscCaseIlosciowa[]
 
   @@index([id_modelu])
   @@index([id_magazynu])
@@ -431,6 +434,23 @@ model Egzemplarz {
   @@index([qr_kod])
   @@index([kod_kreskowy])
   @@map("egzemplarze")
+}
+
+model ZawartoscCaseIlosciowa {
+  id             Int      @id @default(autoincrement())
+  id_organizacji Int
+  id_case        Int
+  id_modelu      Int
+  ilosc          Decimal  @default(1.00) @db.Decimal(10, 2)
+  uwagi          String?  @db.Text
+  data_utworzenia DateTime @default(now())
+
+  organizacja Organizacja  @relation(fields: [id_organizacji], references: [id])
+  case        Egzemplarz   @relation(fields: [id_case], references: [id], onDelete: Cascade)
+  model       ModelSprzetu @relation(fields: [id_modelu], references: [id], onDelete: Cascade)
+
+  @@unique([id_case, id_modelu])
+  @@map("zawartosc_case_ilosciowa")
 }
 
 model CenaModelu {

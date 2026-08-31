@@ -90,7 +90,7 @@ function buildCategoryTree(categories: any[]) {
     else roots.push(cat);
   }
   const sortByOrder = (items: any[]) => {
-    items.sort((a, b) => numberOrZero(a.kolejnosc) - numberOrZero(b.kolejnosc) || String(a.nazwa || '').localeCompare(String(a.nazwa || ''), 'pl'));
+    items.sort((a, b) => numberOrZero(a.kolejnosc) - numberOrZero(b.kolejnosc) || String(a.nazwa || '').localeCompare(String(b.nazwa || ''), 'pl'));
     items.forEach((item) => sortByOrder(item.dzieci || []));
   };
   sortByOrder(roots);
@@ -677,7 +677,7 @@ export default function EventDetailsPage() {
 }
 
 // ============================================================================
-// MODAL ZARZĄDZANIA KONKRETNYM ETAPEM (WIDOK DLA ETAPU)
+// MODAL ZARZĄDZANIA KONKRETNYM ETAPEM
 // ============================================================================
 function EtapManagementModal({ etap, ekipa, pojazdy, eventId, onClose, reloadEvent }: any) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -893,7 +893,7 @@ function Info({ label, value }: { label: string; value: string }) {
 }
 
 // -------------------------------------------------------------
-// NOCLEGI (Z PEŁNĄ EDYCJĄ I PODGLĄDEM OPISU)
+// NOCLEGI
 // -------------------------------------------------------------
 function EventNoclegiPanel({ eventId, noclegi, reloadEvent }: any) {
   const [showModal, setShowModal] = useState(false);
@@ -1031,7 +1031,7 @@ function EventNoclegiPanel({ eventId, noclegi, reloadEvent }: any) {
         {noclegi.length === 0 && !showModal && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak zaplanowanych noclegów dla tego wyjazdu.</div>}
       </div>
     </div>
-  )
+  );
 }
 
 function EventCrewSummaryPanel({ ekipa }: { ekipa: any[] }) {
@@ -1071,7 +1071,7 @@ function EventCrewSummaryPanel({ ekipa }: { ekipa: any[] }) {
         </div>
       </Card>
     </div>
-  )
+  );
 }
 
 // -------------------------------------------------------------
@@ -1730,7 +1730,7 @@ function EventFleetPanel({ eventId, pojazdy, etapy = [], dict, tabQuery = '', re
 }
 
 // -------------------------------------------------------------
-// ZAŁĄCZNIKI (Wsparcie dla S3 / MinIO) - Wydarzenia
+// ZAŁĄCZNIKI
 // -------------------------------------------------------------
 function AttachmentsPanel({ eventId, zalaczniki, tabQuery = '', reloadEvent }: any) {
   const [form, setForm] = useState<any>({});
@@ -1887,7 +1887,7 @@ function HistoryPanel({ history, tabQuery = '' }: { history: any[], tabQuery?: s
 }
 
 // -------------------------------------------------------------
-// SPRZĘT (EquipmentPanel - Zaawansowana obsługa WMS i Multi-Warehouse)
+// SPRZĘT (EquipmentPanel)
 // -------------------------------------------------------------
 function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: string }) {
   const router = useRouter();
@@ -2113,13 +2113,31 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       }
     });
 
+    // Zliczanie zeskanowanych pozycji z aktualnego koszyka (w tym sprzętu ilościowego ze skrzyń)
     docItems.forEach((p: any) => {
-      const id = modelIdOf(p);
+      const id = p.id_modelu || p.model?.id || modelIdOf(p);
       if (!id) return;
       const key = String(id);
-      if (map.has(key)) {
-        map.get(key).scanned += Number(p.ilosc || 1);
+      if (!map.has(key)) {
+        const sourceModel = modelById.get(String(id)) || p.model || p;
+        map.set(key, {
+          id_modelu: Number(id),
+          nazwa: modelNameOf(p),
+          kategoria: categoryOf(p),
+          kategoria_id: modelCategoryIdOf(p),
+          quantityOnly: isQuantityOnly(p) || isQuantityOnly(sourceModel),
+          kod: p.kod || sourceModel?.kod_kreskowy || '',
+          jednostka: p.jednostka || sourceModel?.jednostka || 'szt.',
+          plan: 0,
+          wydane: 0,
+          przyjete: 0,
+          scanned: 0,
+          egzemplarze_wydane: [],
+          egzemplarze_przyjete: [],
+          egzemplarze_w_terenie: [],
+        });
       }
+      map.get(key).scanned += Number(p.ilosc || 1);
     });
 
     return Array.from(map.values()).map((row: any) => {
@@ -2133,6 +2151,44 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       };
     }).sort((a, b) => String(a.kategoria).localeCompare(String(b.kategoria), 'pl') || String(a.nazwa).localeCompare(String(b.nazwa), 'pl'));
   }, [data, docItems, equipmentCategoryById, modelById]);
+
+  // ==========================================================================
+  // KALKULACJA WAGI: SPRZĘT + OPAKOWANIA / CASE TRANSPORTOWE
+  // ==========================================================================
+  const currentBasketWeight = useMemo(() => {
+    let gearKg = 0;
+    const caseWeightsMap = new Map<number, { nazwa: string; waga: number }>();
+
+    for (const item of docItems) {
+      const model = modelById.get(String(item.id_modelu));
+      const unitWeight = Number(item.waga ?? item.egzemplarz?.waga ?? model?.waga ?? 0);
+      gearKg += unitWeight * Number(item.ilosc || 1);
+
+      const caseMeta = item.system_case_scan;
+      if (caseMeta?.id) {
+        const caseId = Number(caseMeta.id);
+        if (!caseWeightsMap.has(caseId)) {
+          const caseObj = items.find((x: any) => Number(x.id) === caseId);
+          const caseModel = caseObj?.id_modelu ? modelById.get(String(caseObj.id_modelu)) : null;
+          const caseWeight = Number(caseObj?.waga ?? caseModel?.waga ?? 0);
+          caseWeightsMap.set(caseId, {
+            nazwa: caseMeta.nazwa || caseObj?.nazwa || 'Skrzynia Case',
+            waga: caseWeight,
+          });
+        }
+      }
+    }
+
+    const casesTotalKg = Array.from(caseWeightsMap.values()).reduce((acc, c) => acc + c.waga, 0);
+
+    return {
+      gearKg: Number(gearKg.toFixed(2)),
+      casesTotalKg: Number(casesTotalKg.toFixed(2)),
+      totalKg: Number((gearKg + casesTotalKg).toFixed(2)),
+      casesCount: caseWeightsMap.size,
+      casesList: Array.from(caseWeightsMap.values()),
+    };
+  }, [docItems, modelById, items]);
 
   const plannedGroups = useMemo(() => {
     const groups = new Map<string, any>();
@@ -2300,42 +2356,45 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
 
   function normalizeDocumentItem(row: any, source: 'scan' | 'manual' = 'manual') {
     if (isQuantityOnly(row)) {
+      const model = modelById.get(String(row.id_modelu || row.id)) || row.model || row;
       return {
         source,
         rowType: 'ilosciowy_model',
         quantityOnly: true,
-        id_modelu: row.id_modelu || row.model?.id || row.id,
+        id_modelu: row.id_modelu || model?.id || row.id,
         id_egzemplarza: null,
-        nazwa: row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy',
-        nazwa_modelu: row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy',
+        nazwa: row.nazwa_modelu || row.nazwa || model?.nazwa || 'Sprzęt ilościowy',
+        nazwa_modelu: row.nazwa_modelu || row.nazwa || model?.nazwa || 'Sprzęt ilościowy',
         numer_egzemplarza: '',
         kategoria: categoryOf(row),
-        kod: row.kod || row.kod_kreskowy || row.model?.kod_kreskowy || '',
+        kod: row.kod || row.kod_kreskowy || model?.kod_kreskowy || '',
         ilosc: Number(row.ilosc || 1),
-        jednostka: row.jednostka || row.model?.jednostka || 'szt.',
-        uwagi: row.uwagi || 'Sprzęt ilościowy bez egzemplarzy',
+        jednostka: row.jednostka || model?.jednostka || 'szt.',
+        waga: Number(row.waga || model?.waga || 0),
+        uwagi: row.uwagi || 'Sprzęt ilościowy',
       };
     }
     const egz = row.egzemplarz || row;
-    const model = row.model || row.egzemplarz?.model;
+    const model = row.model || row.egzemplarz?.model || modelById.get(String(egz?.id_modelu));
     const instanceNo = numberOf(row);
-    const baseName = model?.nazwa || row.nazwa_modelu || egz.model?.nazwa || row.nazwa || 'Sprzęt';
+    const baseName = model?.nazwa || row.nazwa_modelu || egz?.model?.nazwa || row.nazwa || 'Sprzęt';
     return {
       source,
       rowType: 'egzemplarz',
-      id_modelu: row.id_modelu || model?.id || egz.id_modelu,
-      id_egzemplarza: row.id_egzemplarza || egz.id,
-      id_magazynu: row.id_magazynu || egz.id_magazynu,
-      magazyn_nazwa: row.magazyn_nazwa || egz.magazyn?.nazwa || 'Brak',
-      miejsce_w_mag: row.miejsce_w_mag || egz.miejsce_w_mag || '',
+      id_modelu: row.id_modelu || model?.id || egz?.id_modelu,
+      id_egzemplarza: row.id_egzemplarza || egz?.id,
+      id_magazynu: row.id_magazynu || egz?.id_magazynu,
+      magazyn_nazwa: row.magazyn_nazwa || egz?.magazyn?.nazwa || 'Brak',
+      miejsce_w_mag: row.miejsce_w_mag || egz?.miejsce_w_mag || '',
       zmien_magazyn: Boolean(row.zmien_magazyn),
       nowe_miejsce_w_mag: row.nowe_miejsce_w_mag || '',
-      nazwa: [isZestawRow(row) ? `[ZESTAW] ${baseName}` : baseName, egz.nazwa && egz.nazwa !== model?.nazwa ? egz.nazwa : null, instanceNo ? `nr ${instanceNo}` : null].filter(Boolean).join(' · '),
+      nazwa: [isZestawRow(row) ? `[ZESTAW] ${baseName}` : baseName, egz?.nazwa && egz?.nazwa !== model?.nazwa ? egz.nazwa : null, instanceNo ? `nr ${instanceNo}` : null].filter(Boolean).join(' · '),
       nazwa_modelu: baseName,
       numer_egzemplarza: instanceNo,
       kategoria: categoryOf(row),
-      kod: row.kod || egz.kod_kreskowy || egz.zewnetrzny_kod_kreskowy || egz.zewnetrzny_qr_kod || egz.qr_kod || egz.sn || '',
+      kod: row.kod || egz?.kod_kreskowy || egz?.zewnetrzny_kod_kreskowy || egz?.zewnetrzny_qr_kod || egz?.qr_kod || egz?.sn || '',
       ilosc: 1,
+      waga: Number(egz?.waga || model?.waga || 0),
       uwagi: row.uwagi || '',
     };
   }
@@ -2362,34 +2421,41 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
       }
     }
 
-    if (mode === 'przyjecie') {
-      for (const item of normalized) {
-        if (item.id_egzemplarza && !eventInstanceStatus.issuedMap.has(Number(item.id_egzemplarza))) {
-          setNotice(`Uwaga: Egzemplarz "${item.nazwa}" nie był wydany na to wydarzenie. Zostanie przyjęty na magazyn jako zwrot z innej realizacji.`);
-        }
-      }
-    }
-
     setDocItems((prev) => {
       const existingIds = new Set(prev.map((p: any) => Number(p.id_egzemplarza)).filter(Boolean));
-      const toAdd: any[] = [];
-      
+      const nextBasket = [...prev];
+      let addedCount = 0;
+
       for (const item of normalized) {
-        if (item.id_egzemplarza) {
+        if (item.quantityOnly) {
+          // Sprzęt ilościowy: sumujemy liczbę sztuk w koszyku
+          const existingIdx = nextBasket.findIndex((p: any) => p.quantityOnly && Number(p.id_modelu) === Number(item.id_modelu) && p.id_zeskanowanego_case === item.id_zeskanowanego_case);
+          if (existingIdx >= 0) {
+            nextBasket[existingIdx] = {
+              ...nextBasket[existingIdx],
+              ilosc: Number(nextBasket[existingIdx].ilosc || 0) + Number(item.ilosc || 1),
+            };
+          } else {
+            nextBasket.push(item);
+          }
+          addedCount += Number(item.ilosc || 1);
+        } else if (item.id_egzemplarza) {
+          // Fizyczny egzemplarz: zapobiegamy duplikatom
           const id = Number(item.id_egzemplarza);
-          if (existingIds.has(id)) continue;
-          existingIds.add(id);
+          if (!existingIds.has(id)) {
+            existingIds.add(id);
+            nextBasket.push(item);
+            addedCount++;
+          }
         }
-        toAdd.push(item);
       }
 
-      const skipped = normalized.length - toAdd.length;
-      if (!toAdd.length) {
+      if (!addedCount) {
         setNotice(sourceLabel ? `${sourceLabel}: wszystkie pozycje są już w koszyku dokumentu.` : 'Ten sprzęt jest już w koszyku dokumentu.');
         return prev;
       }
-      setNotice(sourceLabel ? `${sourceLabel}` : `Dodano ${toAdd.length} elementów${skipped ? `, pominięto duplikaty: ${skipped}` : ''}.`);
-      return [...prev, ...toAdd];
+      setNotice(sourceLabel ? `${sourceLabel}` : `Dodano pozycje ze skrzyni do koszyka.`);
+      return nextBasket;
     });
   }
 
@@ -2473,7 +2539,6 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     setError('');
     setNotice('');
 
-    // WERYFIKACJA RELOKACJI MAGAZYNU PRZY PZ
     if (mode === 'przyjecie' && targetWarehouseId && isEquipmentInstance(row) && !isQuantityOnly(row) && !isZestawRow(row) && !isCaseRow(row)) {
       const itemMagId = row.id_magazynu || row.egzemplarz?.id_magazynu;
       if (itemMagId && String(itemMagId) !== String(targetWarehouseId) && !row.zmien_magazyn) {
@@ -2499,13 +2564,13 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
     }
 
     if (isCaseRow(row)) {
-      const contents = (row.zawartosc_case || row.contents || []).filter((child: any) => !isCaseRow(child) && isEquipmentInstance(child));
+      const contents = (row.contents || row.zawartosc_case || []).filter((child: any) => !isCaseRow(child));
       if (!contents.length) { 
-        setError(`Case "${row.nazwa || 'opakowanie'}" jest pusty. Do dokumentów WZ/PZ trafia tylko zawartość.`); 
+        setError(`Case "${row.nazwa || 'opakowanie'}" jest pusty.`); 
         return; 
       }
-      const label = row.nazwa || row.nazwa_modelu || row.kod || `kontener #${row.id || row.id_egzemplarza || ''}`;
-      addDocumentItemsBulk(contents, source, `Rozpakowano zawartość case'a: ${label}`, caseScanMeta(row));
+      const label = row.nazwa || row.nazwa_modelu || row.kod || `skrzynia #${row.id || row.id_egzemplarza || ''}`;
+      addDocumentItemsBulk(contents, source, `Rozpakowano zawartość skrzyni: ${label}`, caseScanMeta(row));
       return;
     }
 
@@ -2608,13 +2673,14 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Sprzęt wydarzenia</p>
             <h3 className="mt-1 text-2xl font-black text-slate-900 dark:text-white">Plan sprzętu, wydanie i przyjęcie</h3>
             <p className="mt-1.5 max-w-3xl text-sm font-bold text-slate-500 dark:text-slate-400 leading-relaxed">
-              Plan edytujesz po modelach i ilościach. Wydanie oraz przyjęcie działa na fizycznych egzemplarzach.
+              Plan edytujesz po modelach i ilościach. Wydanie oraz przyjęcie automatycznie rozpakowuje całą zawartość case'ów i podlicza masę skrzyń.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
+          <div className="grid grid-cols-4 gap-3 sm:min-w-[560px]">
             <Metric label="Plan" value={`${plannedTotal} szt.`} />
             <Metric label="Wydano" value={`${issuedTotal} szt.`} />
             <Metric label="Przyjęto" value={`${returnedTotal} szt.`} />
+            <Metric label="Waga koszyka" value={`${currentBasketWeight.totalKg} kg`} />
           </div>
         </div>
 
@@ -2976,7 +3042,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
               </div>
             </div>
 
-            {/* PRAWA KOLUMNA: SKANER & KOSZYK */}
+            {/* PRAWA KOLUMNA: SKANER, PODSUMOWANIE MASY I KOSZYK */}
             <div className="border-l border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/20 p-6 shadow-inner min-w-0 flex flex-col">
               <div className="sticky top-4 space-y-5 min-w-0">
                 <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
@@ -3020,9 +3086,26 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                     </div>
                   </Field>
                   <p className="mt-3 text-xs font-bold text-slate-400 leading-relaxed">
-                    Zeskanowanie kontenera (Case) automatycznie rozpakuje go i doda na listę ukryty w nim sprzęt.
+                    Zeskanowanie kontenera (Case) automatycznie rozpakuje go i doda na listę ukryty w nim sprzęt (zarówno unikalny, jak i ilościowy).
                   </p>
                 </div>
+
+                {/* PODSUMOWANIE WAGI DOKUMENTU WRAZ ZE SKRZYNIAMI */}
+                {/* <div className="rounded-2xl border border-amber-200/80 bg-amber-50/40 dark:bg-amber-950/20 p-4 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-amber-200/60 pb-2 mb-2">
+                    <span className="text-xs font-black uppercase text-amber-800 dark:text-amber-400">Podsumowanie załadunku (Waga)</span>
+                    <span className="text-sm font-black text-amber-900 dark:text-amber-300">{currentBasketWeight.totalKg} kg</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
+                    <div>Waga urządzeń: <b className="text-slate-900 dark:text-white">{currentBasketWeight.gearKg} kg</b></div>
+                    <div>Waga skrzyń (Case): <b className="text-amber-700 dark:text-amber-400">{currentBasketWeight.casesTotalKg} kg</b></div>
+                  </div>
+                  {currentBasketWeight.casesCount > 0 && (
+                    <div className="mt-2 pt-2 border-t border-amber-200/40 text-[11px] text-slate-500">
+                      Zeskanowane skrzynie transportowe: {currentBasketWeight.casesList.map(c => `${c.nazwa} (${c.waga}kg)`).join(', ')}
+                    </div>
+                  )}
+                </div> */}
 
                 <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
                   <div className="mb-4 flex items-center justify-between min-w-0">
