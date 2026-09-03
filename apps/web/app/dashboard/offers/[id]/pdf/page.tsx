@@ -39,6 +39,7 @@ function lineWeight(p: any) {
   const unitWeight = asNumber(p.model?.waga, 0);
   return unitWeight * asNumber(p.ilosc, 1);
 }
+
 function formatKg(val: number) {
   return val > 0 ? `${val.toFixed(2)} kg` : '-';
 }
@@ -95,6 +96,18 @@ export default function OfferPdfPage() {
   const showSummaryVat = searchParams.get('showSummaryVat') !== 'false';
   const showSummaryBrutto = searchParams.get('showSummaryBrutto') !== 'false';
 
+  // Pozycje z ukrytą ceną
+  const hiddenPriceIds = useMemo(() => {
+    const raw = searchParams.get('hiddenPriceIds') || '';
+    if (!raw) return new Set<number>();
+    return new Set(
+      raw
+        .split(',')
+        .map((x) => Number(x.trim()))
+        .filter((n) => Number.isFinite(n))
+    );
+  }, [searchParams]);
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -105,6 +118,12 @@ export default function OfferPdfPage() {
       .catch((err) => setError(err?.response?.data?.message || err.message || 'Nie udało się pobrać oferty.'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!offer || searchParams.get('drukuj') !== '1') return;
+    const timer = window.setTimeout(() => window.print(), 350);
+    return () => window.clearTimeout(timer);
+  }, [offer, searchParams]);
 
   const sections = useMemo(() => {
     const raw = offer?.wersje?.[0]?.sekcje || [];
@@ -126,11 +145,12 @@ export default function OfferPdfPage() {
   const hasAnyDiscount = useMemo(() => {
     return sections.some((s: any) => s.pozycje.some((p: any) => Number(p.rabat_proc) > 0 || Number(p.rabat_netto) > 0));
   }, [sections]);
+
   const actuallyShowDiscounts = showDiscounts && hasAnyDiscount;
 
-  if (loading) return <div className="pdf-loading">Ładowanie oferty...</div>;
-  if (error) return <div className="pdf-loading text-red-700">{error}</div>;
-  if (!offer) return <div className="pdf-loading">Nie znaleziono oferty.</div>;
+  if (loading) return <div className="p-10 font-bold text-slate-500">Ładowanie oferty...</div>;
+  if (error) return <div className="p-10 font-bold text-red-700">{error}</div>;
+  if (!offer) return <div className="p-10 font-bold text-slate-500">Nie znaleziono oferty.</div>;
 
   const version = offer.wersje?.[0];
   const issueDate = offer.data_sporzadzenia || offer.data_utworzenia || new Date();
@@ -147,23 +167,18 @@ export default function OfferPdfPage() {
           color-adjust: exact;
           box-sizing: border-box;
         }
-
         .eventflow-offer-pdf-page {
           color: #0f172a;
           font-family: Arial, Helvetica, sans-serif;
         }
-
         .eventflow-offer-pdf-section-title {
-          background: #fb8500;
           color: #ffffff;
         }
-
         .eventflow-offer-pdf-table-head,
         .eventflow-offer-pdf-summary-card,
         .eventflow-offer-pdf-terms {
           background: #f1f5f9;
         }
-
         .eventflow-offer-pdf-footer {
           margin-top: 10mm;
           padding-top: 3mm;
@@ -172,28 +187,23 @@ export default function OfferPdfPage() {
           color: #94a3b8;
           font-size: 10px;
         }
-
         .eventflow-offer-pdf-section {
           break-inside: auto;
           page-break-inside: auto;
         }
-
         .eventflow-offer-pdf-section-title {
           break-after: avoid;
           page-break-after: avoid;
         }
-
         .eventflow-offer-pdf-table {
           width: 100%;
           border-collapse: collapse;
         }
-
         .eventflow-offer-pdf-table th,
         .eventflow-offer-pdf-table td {
           break-inside: avoid;
           page-break-inside: avoid;
         }
-
         .eventflow-offer-pdf-table th {
           padding: 8px;
           color: #475569;
@@ -203,7 +213,6 @@ export default function OfferPdfPage() {
           text-transform: uppercase;
           border-bottom: 1px solid #e2e8f0;
         }
-
         .eventflow-offer-pdf-table td {
           padding: 8px;
           vertical-align: top;
@@ -211,32 +220,26 @@ export default function OfferPdfPage() {
           line-height: 1.35;
           border-bottom: 1px solid #edf2f7;
         }
-
         .eventflow-offer-pdf-table tr:last-child td {
           border-bottom: 0;
         }
-
         .eventflow-offer-pdf-item-name {
           font-weight: 900;
           color: #0f172a;
         }
-
         .eventflow-offer-pdf-item-meta {
           margin-top: 3px;
           color: #64748b;
           font-size: 9.5px;
         }
-
         .eventflow-offer-pdf-text-right {
           text-align: right !important;
         }
-
         @media print {
           @page {
             size: A4 portrait;
             margin: 11mm;
           }
-
           html,
           body {
             width: auto !important;
@@ -246,7 +249,6 @@ export default function OfferPdfPage() {
             overflow: visible !important;
             background: #ffffff !important;
           }
-
           .eventflow-offer-pdf-page {
             display: block !important;
             width: auto !important;
@@ -255,11 +257,9 @@ export default function OfferPdfPage() {
             overflow: visible !important;
             background: #ffffff !important;
           }
-
           .eventflow-offer-pdf-toolbar {
             display: none !important;
           }
-
           .eventflow-offer-pdf-sheet {
             display: block !important;
             width: auto !important;
@@ -272,7 +272,6 @@ export default function OfferPdfPage() {
             background: #ffffff !important;
             overflow: visible !important;
           }
-
           .eventflow-offer-pdf-header,
           .eventflow-offer-pdf-meta,
           .eventflow-offer-pdf-summary,
@@ -280,18 +279,14 @@ export default function OfferPdfPage() {
             break-inside: avoid;
             page-break-inside: avoid;
           }
-
           .eventflow-offer-pdf-section {
             margin-bottom: 8mm !important;
           }
-
           .eventflow-offer-pdf-section-title {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            background: #fb8500 !important;
             color: #ffffff !important;
           }
-
           .eventflow-offer-pdf-table-head,
           .eventflow-offer-pdf-summary-card,
           .eventflow-offer-pdf-terms {
@@ -299,19 +294,15 @@ export default function OfferPdfPage() {
             print-color-adjust: exact !important;
             background: #f1f5f9 !important;
           }
-
           table {
             page-break-inside: auto;
           }
-
           thead {
             display: table-header-group;
           }
-
           tfoot {
             display: table-footer-group;
           }
-
           tr,
           td,
           th,
@@ -322,11 +313,13 @@ export default function OfferPdfPage() {
         }
       `}</style>
 
+      {/* PASEK AKCJI */}
       <div className="eventflow-offer-pdf-toolbar mx-auto mb-4 flex max-w-[210mm] justify-end gap-2">
         <Button onClick={() => window.print()}>Drukuj / zapisz jako PDF</Button>
         <Button variant="secondary" onClick={() => window.close()}>Zamknij</Button>
       </div>
 
+      {/* ARKUSZ A4 */}
       <main className="eventflow-offer-pdf-sheet mx-auto min-h-[297mm] w-[210mm] max-w-full bg-white p-[12mm] text-slate-900 shadow-xl print:shadow-none">
         <header className="eventflow-offer-pdf-header mb-10 grid grid-cols-2 gap-8">
           <div>
@@ -335,9 +328,7 @@ export default function OfferPdfPage() {
               alt={offer.organizacja?.nazwa || "Logo firmy"}
               className="mb-6 max-h-16 max-w-[260px] object-contain object-left"
             />
-           { /*<p className="text-sm font-bold">{offer.organizacja?.nazwa || ''}</p>*/}
           </div>
-
           <div className="text-right">
             <h1 className="text-2xl font-black uppercase leading-tight">Oferta</h1>
             <p className="mt-2 text-sm">Numer: <b>{text(offer.numer)}</b></p>
@@ -355,7 +346,6 @@ export default function OfferPdfPage() {
             {client?.adres && <p>{client.adres}</p>}
             {client?.email && <p>{client.email}</p>}
           </div>
-
           <div>
             <h2 className="mb-2 border-b pb-1 font-black uppercase text-slate-500">
               {offer.wynajem ? 'Wypożyczenie' : 'Wydarzenie'}
@@ -376,6 +366,7 @@ export default function OfferPdfPage() {
           <p className="text-lg font-black">{text(offer.nazwa, 'Oferta')}</p>
         </section>
 
+        {/* GRUPY SPRZĘTOWE */}
         {sections.map((section: any) => (
           <section className="eventflow-offer-pdf-section mb-7" key={section.id || section.nazwa}>
             <div
@@ -388,7 +379,6 @@ export default function OfferPdfPage() {
               </div>
               {showSectionSummary && <div className="whitespace-nowrap">{money(sectionTotal(section))}</div>}
             </div>
-
             <table className="eventflow-offer-pdf-table">
               <thead>
                 <tr className="eventflow-offer-pdf-table-head">
@@ -405,68 +395,65 @@ export default function OfferPdfPage() {
                 </tr>
               </thead>
               <tbody>
-                {section.pozycje.map((p: any) => (
-                  <tr key={p.id || `${section.id}-${p.nazwa}`}>
-                    {showThumbnails && (
-                      <td style={{ padding: '6px 8px', verticalAlign: 'middle' }}>
-                        {p.model?.zdjecie ? (
-                          <img
-                            src={p.model.zdjecie}
-                            alt=""
-                            style={{
-                              width: '42px',
-                              height: '32px',
-                              objectFit: 'cover',
-                              borderRadius: '6px',
-                              border: '1px solid #dbe4ea',
-                            }}
-                          />
-                        ) : null}
+                {section.pozycje.map((p: any) => {
+                  const isPriceHidden = hiddenPriceIds.has(Number(p.id));
+
+                  return (
+                    <tr key={p.id || `${section.id}-${p.nazwa}`}>
+                      {showThumbnails && (
+                        <td style={{ padding: '6px 8px', verticalAlign: 'middle' }}>
+                          {p.model?.zdjecie ? (
+                            <img
+                              src={p.model.zdjecie}
+                              alt=""
+                              style={{
+                                width: '42px',
+                                height: '32px',
+                                objectFit: 'cover',
+                                borderRadius: '6px',
+                                border: '1px solid #dbe4ea',
+                              }}
+                            />
+                          ) : null}
+                        </td>
+                      )}
+                      <td>
+                        <div className="eventflow-offer-pdf-item-name">{text(p.nazwa)}</div>
+                        <div className="eventflow-offer-pdf-item-meta">
+                          {/* {text(p.typ_pozycji, 'pozycja')} */}
+                          {/* {p.model?.nazwa ? ` • ${p.model.nazwa}` : ''}
+                          {p.kategoria?.nazwa ? ` • ${p.kategoria.nazwa}` : ''} */}
+                        </div>
                       </td>
-                    )}
-
-                    <td>
-                      <div className="eventflow-offer-pdf-item-name">{text(p.nazwa)}</div>
-                      <div className="eventflow-offer-pdf-item-meta">
-                        {text(p.typ_pozycji, 'pozycja')}
-                        {p.model?.nazwa ? ` · ${p.model.nazwa}` : ''}
-                        {p.kategoria?.nazwa ? ` · ${p.kategoria.nazwa}` : ''}
-                      </div>
-                    </td>
-
-                    <td>{text(p.opis || p.uwagi, '')}</td>
-
-                    {showWeight && (
-                      <td className="eventflow-offer-pdf-text-right">{formatKg(lineWeight(p))}</td>
-                    )}
-
-                    {showUnitPrices && (
-                      <td className="eventflow-offer-pdf-text-right">{money(p.cena_netto)}</td>
-                    )}
-
-                    <td className="eventflow-offer-pdf-text-right font-bold">
-                      {asNumber(p.ilosc, 1)} {p.model?.jednostka || 'szt.'}
-                    </td>
-
-                    {showDays && (
-                      <td className="eventflow-offer-pdf-text-right">{asNumber(p.dni_pracy, 1)}</td>
-                    )}
-
-                    {actuallyShowDiscounts && (
+                      <td>{text(p.opis || p.uwagi, '')}</td>
+                      {showWeight && (
+                        <td className="eventflow-offer-pdf-text-right">{formatKg(lineWeight(p))}</td>
+                      )}
+                      {showUnitPrices && (
+                        <td className="eventflow-offer-pdf-text-right">
+                          {isPriceHidden ? '-' : money(p.cena_netto)}
+                        </td>
+                      )}
+                      <td className="eventflow-offer-pdf-text-right font-bold">
+                        {asNumber(p.ilosc, 1)} {p.model?.jednostka || 'szt.'}
+                      </td>
+                      {showDays && (
+                        <td className="eventflow-offer-pdf-text-right">{asNumber(p.dni_pracy, 1)}</td>
+                      )}
+                      {actuallyShowDiscounts && (
+                        <td className="eventflow-offer-pdf-text-right">
+                          {isPriceHidden ? '-' : (asNumber(p.rabat_proc, 0) > 0 ? `${asNumber(p.rabat_proc, 0)}%` : '-')}
+                        </td>
+                      )}
+                      {showVat && (
+                        <td className="eventflow-offer-pdf-text-right">{asNumber(p.vat, 23)}%</td>
+                      )}
                       <td className="eventflow-offer-pdf-text-right">
-                        {asNumber(p.rabat_proc, 0) > 0 ? `${asNumber(p.rabat_proc, 0)}%` : '-'}
+                        <strong>{isPriceHidden ? '-' : money(lineNetto(p))}</strong>
                       </td>
-                    )}
-
-                    {showVat && (
-                      <td className="eventflow-offer-pdf-text-right">{asNumber(p.vat, 23)}%</td>
-                    )}
-
-                    <td className="eventflow-offer-pdf-text-right">
-                      <strong>{money(lineNetto(p))}</strong>
-                    </td>
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </section>
@@ -474,7 +461,7 @@ export default function OfferPdfPage() {
 
         {sections.length === 0 && (
           <section className="eventflow-offer-pdf-section mb-7">
-            <div className="eventflow-offer-pdf-section-title mb-2 rounded px-3 py-2 text-sm font-black text-white">
+            <div className="eventflow-offer-pdf-section-title mb-2 rounded bg-slate-700 px-3 py-2 text-sm font-black text-white">
               Brak widocznych pozycji
             </div>
             <div className="p-4 text-xs text-slate-500">
@@ -483,6 +470,7 @@ export default function OfferPdfPage() {
           </section>
         )}
 
+        {/* WARUNKI ORAZ STOPKA PODSUMOWANIA */}
         <section className="eventflow-offer-pdf-summary mt-8 grid grid-cols-[1fr_320px] gap-6 text-sm">
           <div className="eventflow-offer-pdf-terms rounded-xl bg-slate-100 p-4">
             <h2 className="mb-2 font-black uppercase text-slate-500">Warunki i uwagi</h2>
@@ -493,7 +481,6 @@ export default function OfferPdfPage() {
               )}
             </div>
           </div>
-
           <div className="space-y-2">
             {showSummaryNetto && (
               <div className="eventflow-offer-pdf-summary-card flex items-center justify-between rounded-xl bg-slate-100 px-4 py-3">
@@ -501,34 +488,31 @@ export default function OfferPdfPage() {
                 <strong>{money(summary.netto)}</strong>
               </div>
             )}
-
             {showSummaryVat && (
               <div className="eventflow-offer-pdf-summary-card flex items-center justify-between rounded-xl bg-slate-100 px-4 py-3">
                 <span className="text-xs font-black uppercase text-slate-500">VAT</span>
                 <strong>{money(summary.vat)}</strong>
               </div>
             )}
-
             {showSummaryBrutto && (
-              <div className="rounded-xl bg-slate-900 px-4 py-4 text-white">
-                <p className="text-xs font-black uppercase opacity-70">Razem brutto</p>
-                <p className="mt-1 text-2xl font-black">{money(summary.brutto)}</p>
+              <div className="rounded-xl bg-slate-100 px-4 py-4 text-white">
+                <p className="text-xs font-black uppercase opacity-70 text-slate-500">Razem brutto</p>
+                <p className="mt-1 text-2xl font-black text-slate-900">{money(summary.brutto)}</p>
               </div>
             )}
-
             {asNumber(offer.rabat_budzetowy_netto) > 0 && (
               <div className="eventflow-offer-pdf-summary-card flex items-center justify-between rounded-xl bg-slate-100 px-4 py-3">
-                <span className="text-xs font-black uppercase text-slate-500">Rabat budżetowy</span>
+                <span className="text-xs font-black uppercase text-slate-500">Dodatkowy Rabat</span>
                 <strong>{money(offer.rabat_budzetowy_netto)}</strong>
               </div>
             )}
           </div>
         </section>
 
-<footer className="mt-10 flex justify-between gap-4 border-t pt-3 text-[10px] font-bold text-slate-400">
-  <span>Ofertę wygenerowano w systemie EVE-nt by Evenement Systems.</span>
-  <span>{text(offer.numer)} · {date(new Date())}</span>
-</footer>
+        <footer className="eventflow-offer-pdf-footer mt-10 flex justify-between gap-4 border-t pt-3 text-[10px] font-bold text-slate-400">
+          <span>Ofertę wygenerowano w systemie EventFlow.</span>
+          <span>{text(offer.numer)} • {date(new Date())}</span>
+        </footer>
       </main>
     </div>
   );

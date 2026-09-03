@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   ArrowLeft, Box, Calculator, CheckCircle2, Copy, FileText, 
   Layers, Link as LinkIcon, Mail, PackagePlus, Pencil, Plus, 
-  Save, Search, Trash2, Printer, Calendar, MapPin, Loader2 
+  Save, Search, Trash2, Printer, Calendar, MapPin, Loader2,
+  ChevronUp, ChevronDown, GripVertical, EyeOff
 } from 'lucide-react';
 import { api } from '../../../../lib/api';
 import { Button, Card, Field, inputClass, PageTitle, SearchableSelect } from '../../../../components/ProductUI';
@@ -16,10 +17,12 @@ import { OfferDuplicateTargetModal } from '../../../../components/OfferDuplicate
 function money(v: any) {
   return `${Number(v || 0).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
 }
+
 function asNumber(v: any, fallback = 0) {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
+
 function calc(p: any) {
   const cena = asNumber(p.cena_netto, 0);
   const ilosc = asNumber(p.ilosc, 1);
@@ -40,6 +43,7 @@ const positionTypes = [
 function numberOrZero(value: any) { return Number.isFinite(Number(value)) ? Number(value) : 0; }
 function modelCategoryId(model: any) { return String(model?.kategoria?.id || model?.id_kategorii || model?.kategoria_id || ''); }
 function getCategoryParentId(cat: any) { return cat?.id_rodzica || cat?.id_kategorii_glownej || cat?.parent_id || null; }
+
 function flattenCategories(categories: any[]): any[] {
   const result: any[] = [];
   const walk = (items: any[], parent: any = null, level = 0) => {
@@ -54,6 +58,7 @@ function flattenCategories(categories: any[]): any[] {
   walk(categories || []);
   return result;
 }
+
 function buildCategoryTree(categories: any[]) {
   const flatInput = flattenCategories(categories || []);
   const byId = new Map<string, any>();
@@ -71,6 +76,7 @@ function buildCategoryTree(categories: any[]) {
   sortByOrder(roots);
   return { roots, byId };
 }
+
 function descendantsOf(categoryId: string, byId: Map<string, any>) {
   const ids = new Set<string>();
   const walk = (id: string) => {
@@ -82,6 +88,7 @@ function descendantsOf(categoryId: string, byId: Map<string, any>) {
   walk(categoryId);
   return ids;
 }
+
 function categoryPath(categoryId: string, byId: Map<string, any>) {
   const parts: string[] = [];
   let current = byId.get(categoryId);
@@ -97,7 +104,7 @@ function categoryPath(categoryId: string, byId: Map<string, any>) {
 const tableInputClass = "w-full border border-transparent bg-transparent hover:border-slate-300 focus:border-cyan-500 focus:bg-white rounded-lg px-2 py-1.5 outline-none transition font-semibold text-slate-800 placeholder-slate-300";
 
 // ============================================================================
-// WYSZUKIWARKA SPRZĘTU INLINE
+// WYSZUKIWARKA SPRZĘTU INLINE (POPRAWIONE ZAWIESZANIE SIĘ FOCUSU)
 // ============================================================================
 function InlineEquipmentAdder({ 
   sectionId, 
@@ -107,12 +114,13 @@ function InlineEquipmentAdder({
 }: { 
   sectionId: number; 
   models: any[]; 
-  onAdd: (model: any) => void;
-  onAddCustom: (name: string) => void;
+  onAdd: (model: any) => void; 
+  onAddCustom: (name: string) => void; 
 }) {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
@@ -126,19 +134,26 @@ function InlineEquipmentAdder({
     }).slice(0, 10);
   }, [query, models]);
 
+  function handleAdd(model: any) {
+    onAdd(model);
+    setQuery('');
+  }
+
+  function handleAddCustom(name: string) {
+    onAddCustom(name);
+    setQuery('');
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       e.preventDefault();
       const trimmed = query.trim();
       if (!trimmed) return;
-
       if (filtered.length > 0) {
-        onAdd(filtered[0]);
+        handleAdd(filtered[0]);
       } else {
-        onAddCustom(trimmed);
+        handleAddCustom(trimmed);
       }
-      setQuery('');
-      setIsFocused(false);
     }
   }
 
@@ -147,6 +162,7 @@ function InlineEquipmentAdder({
       <div className="relative flex-1 max-w-md">
         <Search size={15} className="absolute left-3 top-2.5 text-slate-400" />
         <input 
+          ref={inputRef}
           type="text" 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -165,7 +181,10 @@ function InlineEquipmentAdder({
                     key={m.id} 
                     type="button"
                     className="w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-cyan-50 hover:text-cyan-800 transition flex justify-between items-center group"
-                    onMouseDown={(e) => { e.preventDefault(); onAdd(m); setQuery(''); setIsFocused(false); }}
+                    onMouseDown={(e) => { 
+                      e.preventDefault(); 
+                      handleAdd(m);
+                    }}
                   >
                     <div>
                       <span className="text-slate-800 font-bold group-hover:text-cyan-900">{m.nazwa}</span>
@@ -180,9 +199,12 @@ function InlineEquipmentAdder({
             ) : (
               <div 
                 className="p-3.5 text-xs font-bold text-slate-500 bg-slate-50 flex items-center justify-between cursor-pointer hover:bg-cyan-50 hover:text-cyan-800 transition"
-                onMouseDown={(e) => { e.preventDefault(); onAddCustom(query.trim()); setQuery(''); setIsFocused(false); }}
+                onMouseDown={(e) => { 
+                  e.preventDefault(); 
+                  handleAddCustom(query.trim());
+                }}
               >
-                <span>Brak w bazie. Naciśnij <b>Enter</b> lub kliknij, aby dodać pozycję ręczną: <b>"{query.trim()}"</b></span>
+                <span>Brak w bazie. Naciśnij <b>Enter</b> lub kliknij, aby dodać pozycję: <b>"{query.trim()}"</b></span>
                 <Plus size={14} className="text-cyan-600 shrink-0 ml-2" />
               </div>
             )}
@@ -200,7 +222,7 @@ export default function OfferDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  
+
   // Dane z API
   const [offer, setOffer] = useState<any>(null);
   const [localSections, setLocalSections] = useState<any[]>([]);
@@ -210,7 +232,7 @@ export default function OfferDetailsPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [rentals, setRentals] = useState<any[]>([]);
   const [dict, setDict] = useState<any>({ kontrahenci: [], statusy: [] });
-  
+
   // Stany formularzy / modali
   const [offerMetaForm, setOfferMetaForm] = useState<any>({});
   const [metaDirty, setMetaDirty] = useState(false);
@@ -222,13 +244,13 @@ export default function OfferDetailsPage() {
   const [showBundle, setShowBundle] = useState<any>(null);
   const [form, setForm] = useState<any>({});
   const [budgetForm, setBudgetForm] = useState<any>({ budzet_netto: '', algorytm: '', pomin_sekcje_ids: [] });
-  
+
   // Magazyn Picker
   const [equipmentSearch, setEquipmentSearch] = useState('');
   const [equipmentRoot, setEquipmentRoot] = useState('all');
   const [equipmentSub, setEquipmentSub] = useState('');
   const [equipmentQuickQty, setEquipmentQuickQty] = useState<Record<string, string>>({});
-  
+
   // Auto-Zapis i Status
   const [savingId, setSavingId] = useState<number | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle'|'saving'|'saved'>('idle');
@@ -236,6 +258,15 @@ export default function OfferDetailsPage() {
   const [duplicateTarget, setDuplicateTarget] = useState<any>(null);
   const [dirtyItems, setDirtyItems] = useState<Record<number, any>>({});
   const [notice, setNotice] = useState('');
+
+  // Trwałe rabaty grupowe
+  const [sectionDiscounts, setSectionDiscounts] = useState<Record<number, number>>({});
+
+  // Ukrywanie cen wybranych pozycji na PDF
+  const [hiddenPriceItemIds, setHiddenPriceItemIds] = useState<Set<number>>(new Set());
+
+  // Focus po dodaniu sprzętu
+  const [autoFocusItemId, setAutoFocusItemId] = useState<number | null>(null);
 
   // Opcje PDF
   const [showPdfSettings, setShowPdfSettings] = useState(false);
@@ -263,9 +294,36 @@ export default function OfferDetailsPage() {
       api.get('/api/wydarzenia').catch(() => ({ data: [] })),
       api.get('/api/wynajmy').catch(() => ({ data: [] })),
     ]);
+
     const offerData = o.data;
     setOffer(offerData);
-    setLocalSections(offerData?.wersje?.[0]?.sekcje || []);
+
+    const sections = (offerData?.wersje?.[0]?.sekcje || []).sort((a: any, b: any) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0));
+    setLocalSections(sections);
+
+    // Inicjalizacja zapamiętanych rabatów grup
+    const initialDiscounts: Record<number, number> = {};
+    sections.forEach((s: any) => {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem(`ef_offer_${id}_sec_${s.id}_discount`) : null;
+      if (stored !== null && !isNaN(Number(stored))) {
+        initialDiscounts[s.id] = Number(stored);
+      } else {
+        const itemDiscounts = (s.pozycje || []).map((p: any) => Number(p.rabat_proc || 0)).filter((r: number) => r > 0);
+        initialDiscounts[s.id] = itemDiscounts.length > 0 ? itemDiscounts[0] : 0;
+      }
+    });
+    setSectionDiscounts(initialDiscounts);
+
+    // Inicjalizacja ukrytych cen pozycji z localStorage
+    if (typeof window !== 'undefined') {
+      const storedHidden = localStorage.getItem(`ef_offer_${id}_hidden_prices`);
+      if (storedHidden) {
+        try {
+          setHiddenPriceItemIds(new Set(JSON.parse(storedHidden)));
+        } catch (_) {}
+      }
+    }
+
     setEvents(ev.data || []);
     setRentals(ren.data || []);
     setOfferMetaForm({
@@ -289,15 +347,23 @@ export default function OfferDetailsPage() {
   useEffect(() => { load(); }, [id]);
 
   // ==========================================================================
-  // OBLICZENIA I PODSUMOWANIA (Dynamiczne)
+  // OBLICZENIA I PODSUMOWANIA W CZASIE RZECZYWISTYM
   // ==========================================================================
+  const getSectionTotal = useCallback((section: any, currentDirtyItems: Record<number, any>) => {
+    return (section.pozycje || []).reduce((sum: number, p: any) => {
+      const current = currentDirtyItems[p.id] ? { ...p, ...currentDirtyItems[p.id] } : p;
+      const itemTotal = currentDirtyItems[p.id] ? calc(current) : (current.razem_netto !== undefined ? Number(current.razem_netto) : calc(current));
+      return sum + itemTotal;
+    }, 0);
+  }, []);
+
   const summary = useMemo(() => {
     let sprzet = 0, transport = 0, obsluga = 0, nocleg = 0, usluga = 0, inne = 0;
     const positions = localSections.flatMap((s: any) => s.pozycje || []);
     
     positions.forEach((p: any) => {
       const current = dirtyItems[p.id] ? { ...p, ...dirtyItems[p.id] } : p;
-      const total = current.razem_netto !== undefined && !dirtyItems[p.id] ? Number(current.razem_netto) : calc(current);
+      const total = dirtyItems[p.id] ? calc(current) : (current.razem_netto !== undefined ? Number(current.razem_netto) : calc(current));
       
       if (current.typ_pozycji === 'sprzet') sprzet += total;
       else if (current.typ_pozycji === 'transport') transport += total;
@@ -306,7 +372,6 @@ export default function OfferDetailsPage() {
       else if (current.typ_pozycji === 'usluga') usluga += total;
       else inne += total;
     });
-
     const netto = sprzet + transport + obsluga + nocleg + usluga + inne;
     return { sprzet, transport, obsluga, nocleg, usluga, inne, netto, vat: netto * 0.23, brutto: netto * 1.23 };
   }, [localSections, dirtyItems]);
@@ -392,15 +457,25 @@ export default function OfferDetailsPage() {
   // ==========================================================================
   async function addSection(e: any) {
     e.preventDefault();
-    await api.post(`/api/oferty/${id}/sekcje`, form);
+    const maxOrder = localSections.reduce((max, s) => Math.max(max, Number(s.kolejnosc || 0)), 0);
+    await api.post(`/api/oferty/${id}/sekcje`, {
+      ...form,
+      kolejnosc: maxOrder + 1,
+    });
     setForm({});
     setShowSection(false);
-    load();
+    await load();
   }
 
   function openEditSection(section: any) {
     setShowSectionEdit(section);
-    setForm({ nazwa: section.nazwa || '', opis: section.opis || '', kolor: section.kolor || '#0891B2', kolejnosc: section.kolejnosc ?? 0, budzet_netto: section.budzet_netto || '' });
+    setForm({ 
+      nazwa: section.nazwa || '', 
+      opis: section.opis || '', 
+      kolor: section.kolor || '#0891B2', 
+      kolejnosc: section.kolejnosc ?? 0, 
+      budzet_netto: section.budzet_netto || '' 
+    });
   }
 
   async function saveSectionEdit(e: any) {
@@ -417,7 +492,7 @@ export default function OfferDetailsPage() {
   }
 
   async function deleteSection(section: any) {
-    if (!confirm(`Usunąć grupę „${section.nazwa}”?`)) return;
+    if (!confirm(`Usunąć grupę "${section.nazwa}"?`)) return;
     try {
       await api.delete(`/api/oferty/${id}/sekcje/${section.id}`);
       await load();
@@ -434,48 +509,116 @@ export default function OfferDetailsPage() {
     const [moved] = newSections.splice(srcIdx, 1);
     newSections.splice(targetIdx, 0, moved);
     setLocalSections(newSections);
-
     setSavingId(-999999);
     try {
       await Promise.all(newSections.map((sec, i) => api.put(`/api/oferty/${id}/sekcje/${sec.id}`, { kolejnosc: i + 1 })));
       await load();
     } catch (err) {
-      setError('Nie udało się zmienić kolejności.');
+      setError('Nie udało się zmienić kolejności grup.');
       await load();
     } finally {
       setSavingId(null);
     }
   }
 
-  async function updateSectionColor(section: any, color: string) {
-    const newSections = localSections.map(s => s.id === section.id ? { ...s, kolor: color } : s);
-    setLocalSections(newSections);
-    await api.put(`/api/oferty/${id}/sekcje/${section.id}`, { kolor: color });
+  // Zmiana kolejności pozycji wewnątrz sekcji (góra / dół / drop)
+  function movePosition(sectionId: number, fromIdx: number, delta: number) {
+    const section = localSections.find(s => s.id === sectionId);
+    if (!section) return;
+    const sorted = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0));
+    const targetIdx = fromIdx + delta;
+    if (targetIdx < 0 || targetIdx >= sorted.length) return;
+
+    const [moved] = sorted.splice(fromIdx, 1);
+    sorted.splice(targetIdx, 0, moved);
+
+    const reordered = sorted.map((p, idx) => ({ ...p, kolejnosc: idx + 1 }));
+    setLocalSections(prev => prev.map(s => s.id === sectionId ? { ...s, pozycje: reordered } : s));
+
+    reordered.forEach(p => {
+      api.put(`/api/oferty/${id}/pozycje/${p.id}`, { kolejnosc: p.kolejnosc }).catch(console.error);
+    });
   }
 
-  async function applySectionPatch(section: any, patch: any) {
-    const items = section.pozycje || [];
-    if (!items.length) return;
-    setSavingId(-section.id);
-    try {
-      await Promise.all(items.map((p: any) => api.put(`/api/oferty/${id}/pozycje/${p.id}`, { ...p, ...patch })));
-      await load();
-    } finally {
-      setSavingId(null);
-    }
+  function handlePositionDrop(sectionId: number, fromIdx: number, toIdx: number) {
+    if (fromIdx === toIdx || isNaN(fromIdx) || isNaN(toIdx)) return;
+    const section = localSections.find(s => s.id === sectionId);
+    if (!section) return;
+    const sorted = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0));
+    const [moved] = sorted.splice(fromIdx, 1);
+    sorted.splice(toIdx, 0, moved);
+
+    const reordered = sorted.map((p, idx) => ({ ...p, kolejnosc: idx + 1 }));
+    setLocalSections(prev => prev.map(s => s.id === sectionId ? { ...s, pozycje: reordered } : s));
+
+    reordered.forEach(p => {
+      api.put(`/api/oferty/${id}/pozycje/${p.id}`, { kolejnosc: p.kolejnosc }).catch(console.error);
+    });
   }
 
+  // Zmiana rabatu grupy sprzętowej z natychmiastowym przeliczeniem i zapamiętaniem
   async function promptSectionDiscount(section: any) {
-    const value = window.prompt(`Jaki rabat % nadać całej grupie „${section.nazwa}”?`, '0');
+    const currentDiscount = sectionDiscounts[section.id] ?? 0;
+    const value = window.prompt(`Podaj rabat % dla grupy "${section.nazwa}":`, String(currentDiscount));
     if (value === null) return;
-    await applySectionPatch(section, { rabat_proc: Number(value) });
+    const numDiscount = Math.max(0, Math.min(100, Number(value) || 0));
+
+    setSectionDiscounts(prev => ({ ...prev, [section.id]: numDiscount }));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`ef_offer_${id}_sec_${section.id}_discount`, String(numDiscount));
+    }
+
+    const items = section.pozycje || [];
+    if (items.length > 0) {
+      setLocalSections(prev => prev.map(s => {
+        if (s.id !== section.id) return s;
+        return {
+          ...s,
+          pozycje: (s.pozycje || []).map((p: any) => ({
+            ...p,
+            rabat_proc: numDiscount,
+            razem_netto: calc({ ...p, rabat_proc: numDiscount })
+          }))
+        };
+      }));
+
+      items.forEach((p: any) => {
+        registerDirtyItem(p.id, { rabat_proc: numDiscount, razem_netto: calc({ ...p, rabat_proc: numDiscount }) });
+      });
+
+      setSavingId(-section.id);
+      try {
+        await Promise.all(items.map((p: any) => api.put(`/api/oferty/${id}/pozycje/${p.id}`, { ...p, rabat_proc: numDiscount })));
+        await load();
+      } finally {
+        setSavingId(null);
+      }
+    }
+  }
+
+  // Przełączanie ukrywania cen poszczególnych pozycji na PDF
+  function toggleHidePrice(itemId: number) {
+    setHiddenPriceItemIds(prev => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`ef_offer_${id}_hidden_prices`, JSON.stringify(Array.from(next)));
+      }
+      return next;
+    });
   }
 
   // Szybkie dodawanie z wyszukiwarki inline
   async function handleInlineAdd(sectionId: number, model: any) {
     const price = model.cena_podstawowa || model.cena_netto || model.wartosc_domyslna_egzemplarza || 0;
+    const section = localSections.find(s => s.id === sectionId);
+    const maxOrder = (section?.pozycje || []).reduce((max: number, p: any) => Math.max(max, Number(p.kolejnosc || 0)), 0);
+    const sectionDiscount = sectionDiscounts[sectionId] || 0;
+
     try {
-      await api.post(`/api/oferty/${id}/pozycje`, {
+      const res = await api.post(`/api/oferty/${id}/pozycje`, {
         id_sekcji: sectionId,
         typ_pozycji: 'sprzet',
         id_modelu: model.id,
@@ -484,11 +627,15 @@ export default function OfferDetailsPage() {
         cena_netto: price,
         ilosc: 1,
         dni_pracy: 1,
-        rabat_proc: 0,
+        rabat_proc: sectionDiscount,
         vat: 23,
+        kolejnosc: maxOrder + 1,
         widoczna_w_pdf: true,
       });
-      load();
+      if (res.data?.id) {
+        setAutoFocusItemId(res.data.id);
+      }
+      await load();
     } catch (err) {
       console.error(err);
     }
@@ -496,19 +643,27 @@ export default function OfferDetailsPage() {
 
   // Dodawanie pozycji ręcznej ze stringa wpisanego w wyszukiwarkę inline
   async function handleInlineAddCustom(sectionId: number, name: string) {
+    const section = localSections.find(s => s.id === sectionId);
+    const maxOrder = (section?.pozycje || []).reduce((max: number, p: any) => Math.max(max, Number(p.kolejnosc || 0)), 0);
+    const sectionDiscount = sectionDiscounts[sectionId] || 0;
+
     try {
-      await api.post(`/api/oferty/${id}/pozycje`, {
+      const res = await api.post(`/api/oferty/${id}/pozycje`, {
         id_sekcji: sectionId,
         typ_pozycji: 'sprzet',
         nazwa: name,
         cena_netto: 0,
         ilosc: 1,
         dni_pracy: 1,
-        rabat_proc: 0,
+        rabat_proc: sectionDiscount,
         vat: 23,
+        kolejnosc: maxOrder + 1,
         widoczna_w_pdf: true,
       });
-      load();
+      if (res.data?.id) {
+        setAutoFocusItemId(res.data.id);
+      }
+      await load();
     } catch (err) {
       console.error(err);
     }
@@ -517,13 +672,14 @@ export default function OfferDetailsPage() {
   // Dodawanie pozycji ręcznej przez modal
   function openAddItem(section: any) {
     setShowItem(section);
+    const sectionDiscount = sectionDiscounts[section.id] || 0;
     setForm({
       typ_pozycji: 'sprzet',
       nazwa: '',
       cena_netto: '',
       ilosc: 1,
       dni_pracy: 1,
-      rabat_proc: 0,
+      rabat_proc: sectionDiscount,
       vat: 23,
       opis: '',
       widoczna_w_pdf: true,
@@ -533,8 +689,9 @@ export default function OfferDetailsPage() {
   async function addItem(e: any) {
     e.preventDefault();
     if (!showItem) return;
+    const maxOrder = (showItem?.pozycje || []).reduce((max: number, p: any) => Math.max(max, Number(p.kolejnosc || 0)), 0);
     try {
-      await api.post(`/api/oferty/${id}/pozycje`, {
+      const res = await api.post(`/api/oferty/${id}/pozycje`, {
         ...form,
         id_sekcji: showItem.id,
         cena_netto: Number(form.cena_netto || 0),
@@ -542,7 +699,11 @@ export default function OfferDetailsPage() {
         dni_pracy: Number(form.dni_pracy || 1),
         rabat_proc: Number(form.rabat_proc || 0),
         vat: Number(form.vat || 23),
+        kolejnosc: maxOrder + 1,
       });
+      if (res.data?.id) {
+        setAutoFocusItemId(res.data.id);
+      }
       setForm({});
       setShowItem(null);
       await load();
@@ -558,7 +719,8 @@ export default function OfferDetailsPage() {
     setEquipmentRoot('all');
     setEquipmentSub('');
     setEquipmentQuickQty({});
-    setForm({ typ_pozycji: 'sprzet', id_modelu: '', nazwa: '', cena_netto: 0, ilosc: 1, dni_pracy: 1, rabat_proc: 0, vat: 23, widoczna_w_pdf: true });
+    const sectionDiscount = sectionDiscounts[section.id] || 0;
+    setForm({ typ_pozycji: 'sprzet', id_modelu: '', nazwa: '', cena_netto: 0, ilosc: 1, dni_pracy: 1, rabat_proc: sectionDiscount, vat: 23, widoczna_w_pdf: true });
   }
 
   function pickEquipmentModel(model: any) {
@@ -580,8 +742,11 @@ export default function OfferDetailsPage() {
       return;
     }
     const price = model.cena_podstawowa || model.cena_netto || model.wartosc_domyslna_egzemplarza || 0;
+    const maxOrder = (showEquipment?.pozycje || []).reduce((max: number, p: any) => Math.max(max, Number(p.kolejnosc || 0)), 0);
+    const sectionDiscount = sectionDiscounts[showEquipment.id] || 0;
     setError('');
-    await api.post(`/api/oferty/${id}/pozycje`, {
+
+    const res = await api.post(`/api/oferty/${id}/pozycje`, {
       id_sekcji: showEquipment.id,
       typ_pozycji: 'sprzet',
       id_modelu: model.id,
@@ -590,10 +755,14 @@ export default function OfferDetailsPage() {
       cena_netto: price,
       ilosc: qty,
       dni_pracy: Number(form.dni_pracy || 1) || 1,
-      rabat_proc: Number(form.rabat_proc || 0) || 0,
+      rabat_proc: sectionDiscount,
       vat: Number(form.vat || 23) || 23,
+      kolejnosc: maxOrder + 1,
       widoczna_w_pdf: true,
     });
+    if (res.data?.id) {
+      setAutoFocusItemId(res.data.id);
+    }
     await load();
   }
 
@@ -604,29 +773,35 @@ export default function OfferDetailsPage() {
       setError('Wybierz model sprzętu albo wpisz nazwę dla pozycji ręcznej.');
       return;
     }
-    await api.post(`/api/oferty/${id}/pozycje`, {
+    const maxOrder = (showEquipment?.pozycje || []).reduce((max: number, p: any) => Math.max(max, Number(p.kolejnosc || 0)), 0);
+    const sectionDiscount = sectionDiscounts[showEquipment.id] || 0;
+
+    const res = await api.post(`/api/oferty/${id}/pozycje`, {
       ...form,
       id_sekcji: showEquipment.id,
       typ_pozycji: form.typ_pozycji || 'sprzet',
       cena_netto: Number(form.cena_netto || 0),
       ilosc: Number(form.ilosc || 1),
       dni_pracy: Number(form.dni_pracy || 1),
-      rabat_proc: Number(form.rabat_proc || 0),
+      rabat_proc: Number(form.rabat_proc ?? sectionDiscount),
       vat: Number(form.vat || 23),
+      kolejnosc: maxOrder + 1,
     });
+    if (res.data?.id) {
+      setAutoFocusItemId(res.data.id);
+    }
     setForm({});
     setShowEquipment(null);
     load();
   }
 
   async function deleteItem(item: any) {
-    if (!confirm(`Usunąć pozycję „${item.nazwa}”?`)) return;
+    if (!confirm(`Usunąć pozycję "${item.nazwa}"?`)) return;
     await api.delete(`/api/oferty/${id}/pozycje/${item.id}`);
     registerDirtyItem(item.id, null);
     load();
   }
 
-  // Synchronizacja z wydarzeniem
   async function sync(direction: 'event-to-offer' | 'offer-to-event') {
     setError(''); setNotice('');
     try {
@@ -636,8 +811,7 @@ export default function OfferDetailsPage() {
       await load();
     } catch (err: any) { setError(err?.response?.data?.message || 'Błąd synchronizacji.'); }
   }
-  
-  // Zastosowanie budżetu
+
   async function applyBudget(e: any) {
     e.preventDefault(); setError('');
     try {
@@ -656,17 +830,22 @@ export default function OfferDetailsPage() {
   function generatePdf() {
     const q = new URLSearchParams();
     Object.entries(pdfConfig).forEach(([k, v]) => q.set(k, String(v)));
+    if (hiddenPriceItemIds.size > 0) {
+      q.set('hiddenPriceIds', Array.from(hiddenPriceItemIds).join(','));
+    }
     window.open(`/dashboard/offers/${id}/pdf?${q.toString()}`, '_blank');
     setShowPdfSettings(false);
   }
 
   const { roots: equipmentCategoryRoots, byId: equipmentCategoryById } = useMemo(() => buildCategoryTree(equipmentCategories), [equipmentCategories]);
   const activeEquipmentRootObj = equipmentRoot !== 'all' ? equipmentCategoryById.get(equipmentRoot) : null;
+
   function totalForEquipmentCategory(categoryId: string) {
     if (categoryId === 'all') return models.length;
     const ids = descendantsOf(categoryId, equipmentCategoryById);
     return models.filter((m: any) => ids.has(modelCategoryId(m))).length;
   }
+
   const equipmentModels = useMemo(() => {
     const q = equipmentSearch.trim().toLowerCase();
     const selectedCategoryId = equipmentSub || (equipmentRoot === 'all' ? '' : equipmentRoot);
@@ -679,7 +858,7 @@ export default function OfferDetailsPage() {
         return matchesCategory && matchesQuery;
       }).slice(0, 100);
   }, [models, equipmentSearch, equipmentRoot, equipmentSub, equipmentCategoryById]);
-  
+
   async function addBundle(e: any) {
     e.preventDefault();
     if (!showBundle) return;
@@ -697,7 +876,7 @@ export default function OfferDetailsPage() {
       <PageTitle
         eyebrow="Sprzedaż / Oferty"
         title={offerMetaForm.nazwa || 'Oferta'}
-        description={`${offer.numer || ''} · ${offer.kontrahent?.nazwa || 'Brak powiązanego klienta'} · Powiązanie: ${offer.wydarzenie?.nazwa || (offer.wynajem ? `Wynajem #${offer.wynajem.numer}` : 'Brak')}`}
+        description={`${offer.numer || ''} • ${offer.kontrahent?.nazwa || 'Brak powiązanego klienta'} • Powiązanie: ${offer.wydarzenie?.nazwa || (offer.wynajem ? `Wynajem #${offer.wynajem.numer}` : 'Brak')}`}
         action={
           <div className="flex flex-wrap items-center gap-3">
             {autoSaveStatus === 'saving' && <span className="text-sm font-bold text-slate-400 flex items-center gap-2"><Loader2 size={14} className="animate-spin"/> Zapisywanie...</span>}
@@ -724,17 +903,17 @@ export default function OfferDetailsPage() {
             </Field>
             <Field label="Status oferty">
               <SearchableSelect 
-                value={offerMetaForm.id_statusu_oferty || ''} 
-                onChange={val => handleMetaChange('id_statusu_oferty', val)} 
-                options={dict.statusy.map((s: any) => ({ value: String(s.id), label: s.nazwa }))} 
+                value={offerMetaForm.id_statusu_oferty || ''}
+                onChange={val => handleMetaChange('id_statusu_oferty', val)}
+                options={dict.statusy.map((s: any) => ({ value: String(s.id), label: s.nazwa }))}
                 placeholder="Wybierz status..."
               />
             </Field>
             <Field label="Klient z bazy (CRM)">
               <SearchableSelect 
-                value={offerMetaForm.id_kontrahenta || ''} 
-                onChange={val => handleMetaChange('id_kontrahenta', val)} 
-                options={dict.kontrahenci.map((k: any) => ({ value: String(k.id), label: k.nazwa }))} 
+                value={offerMetaForm.id_kontrahenta || ''}
+                onChange={val => handleMetaChange('id_kontrahenta', val)}
+                options={dict.kontrahenci.map((k: any) => ({ value: String(k.id), label: k.nazwa }))}
                 placeholder="Wybierz klienta..."
               />
             </Field>
@@ -766,7 +945,7 @@ export default function OfferDetailsPage() {
                 {localSections.map((s: any) => (
                   <div key={s.id} className="flex justify-between text-xs">
                     <span className="text-slate-500 truncate pr-2">{s.nazwa}</span>
-                    <b className="text-slate-800">{money((s.pozycje || []).reduce((a: number, p: any) => a + Number(p.razem_netto || calc(p)), 0))}</b>
+                    <b className="text-slate-800">{money(getSectionTotal(s, dirtyItems))}</b>
                   </div>
                 ))}
               </div>
@@ -782,23 +961,22 @@ export default function OfferDetailsPage() {
         <Card className="flex flex-col h-full">
           <h2 className="text-lg font-black text-slate-800 mb-4">Powiązanie operacyjne</h2>
           <div className="flex-1 space-y-4">
-            <Field label="Przypisane wydarzenie (zmieniaj ostrożnie)">
+            <Field label="Przypisane wydarzenie">
               <SearchableSelect 
-                value={offerMetaForm.id_wydarzenia || ''} 
-                onChange={val => { handleMetaChange('id_wydarzenia', val); handleMetaChange('id_wynajmu', ''); }} 
-                options={[{ value: '', label: 'Brak / Wolna oferta' }, ...events.map((ev: any) => ({ value: String(ev.id), label: `${ev.numer ? `${ev.numer} - ` : ''}${ev.nazwa}` }))]} 
+                value={offerMetaForm.id_wydarzenia || ''}
+                onChange={val => { handleMetaChange('id_wydarzenia', val); handleMetaChange('id_wynajmu', ''); }}
+                options={[{ value: '', label: 'Brak / Wolna oferta' }, ...events.map((ev: any) => ({ value: String(ev.id), label: `${ev.numer ? `${ev.numer} - ` : ''}${ev.nazwa}` }))]}
                 placeholder="Wybierz wydarzenie..."
               />
             </Field>
-            <Field label="Lub przypisany wynajem (zmieniaj ostrożnie)">
+            <Field label="Lub przypisany wynajem">
               <SearchableSelect 
-                value={offerMetaForm.id_wynajmu || ''} 
-                onChange={val => { handleMetaChange('id_wynajmu', val); handleMetaChange('id_wydarzenia', ''); }} 
-                options={[{ value: '', label: 'Brak / Wolna oferta' }, ...rentals.map((r: any) => ({ value: String(r.id), label: r.numer || `Wynajem #${r.id}` }))]} 
+                value={offerMetaForm.id_wynajmu || ''}
+                onChange={val => { handleMetaChange('id_wynajmu', val); handleMetaChange('id_wydarzenia', ''); }}
+                options={[{ value: '', label: 'Brak / Wolna oferta' }, ...rentals.map((r: any) => ({ value: String(r.id), label: r.numer || `Wynajem #${r.id}` }))]}
                 placeholder="Wybierz wynajem..."
               />
             </Field>
-
             <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2">
               <Button variant="secondary" onClick={() => sync('event-to-offer')} disabled={!offerMetaForm.id_wydarzenia && !offerMetaForm.id_wynajmu}><LinkIcon size={14} className="inline mr-2 text-cyan-600" /> Zaciągnij plan sprzętu z operacji</Button>
               <Button variant="secondary" onClick={() => sync('offer-to-event')} disabled={!offerMetaForm.id_wydarzenia && !offerMetaForm.id_wynajmu}><Save size={14} className="inline mr-2 text-emerald-600" /> Wyślij plan na wydarzenie</Button>
@@ -814,12 +992,16 @@ export default function OfferDetailsPage() {
           <div className="flex flex-wrap gap-2 flex-1">
             {localSections.map((s: any, idx: number) => 
               <div 
-                key={s.id} draggable onDragStart={(e) => { e.dataTransfer.setData('sectionIndex', String(idx)); e.dataTransfer.effectAllowed = 'move'; }} onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }} onDrop={(e) => handleSummaryDrop(e, idx)}
+                key={s.id} 
+                draggable 
+                onDragStart={(e) => { e.dataTransfer.setData('sectionIndex', String(idx)); e.dataTransfer.effectAllowed = 'move'; }} 
+                onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }} 
+                onDrop={(e) => handleSummaryDrop(e, idx)}
                 className="rounded-xl border border-slate-200 bg-white shadow-sm px-4 py-2 text-sm font-black flex items-center gap-2 cursor-grab active:cursor-grabbing hover:border-cyan-400 transition"
               >
                 <span className="inline-block h-3 w-3 rounded-full shrink-0" style={{ background: s.kolor || '#0891B2' }} />
                 <span className="truncate max-w-[150px]">{s.nazwa}</span>
-                <span className="ml-2 text-cyan-700 whitespace-nowrap">{money((s.pozycje || []).reduce((a: number, p: any) => a + Number(p.razem_netto || calc(p)), 0))}</span>
+                <span className="ml-2 text-cyan-700 whitespace-nowrap">{money(getSectionTotal(s, dirtyItems))}</span>
               </div>
             )}
           </div>
@@ -827,67 +1009,118 @@ export default function OfferDetailsPage() {
         </div>
 
         <div className="space-y-6">
-          {localSections.map((section: any) => (
-            <div key={section.id} className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-visible flex flex-col">
-              <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-white rounded-t-2xl relative overflow-hidden" style={{ backgroundColor: section.kolor || '#0891B2' }}>
-                <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none" />
-                <div className="flex items-center gap-4 z-10">
-                  <div>
-                    <h3 className="text-xl font-black">{section.nazwa}</h3>
-                    {section.opis && <p className="text-xs font-medium text-white/80 mt-0.5">{section.opis}</p>}
+          {localSections.map((section: any) => {
+            const sortedPositions = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0));
+
+            return (
+              <div key={section.id} className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-visible flex flex-col">
+                <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-white rounded-t-2xl relative overflow-hidden" style={{ backgroundColor: section.kolor || '#0891B2' }}>
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none" />
+                  <div className="flex items-center gap-4 z-10">
+                    <div>
+                      <h3 className="text-xl font-black">{section.nazwa}</h3>
+                      {section.opis && <p className="text-xs font-medium text-white/80 mt-0.5">{section.opis}</p>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 z-10">
+                    <div className="font-black text-lg mr-4 bg-black/20 px-3 py-1 rounded-lg">
+                      {money(getSectionTotal(section, dirtyItems))}
+                    </div>
+                    <button onClick={() => openEditSection(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition shadow-sm" title="Edytuj grupę"><Pencil size={14} /></button>
+                    
+                    {/* PRZYCISK TRWAŁEGO RABATU GRUPY */}
+                    <button 
+                      onClick={() => promptSectionDiscount(section)} 
+                      className={`rounded-lg px-3 py-2 text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
+                        (sectionDiscounts[section.id] || 0) > 0 
+                          ? 'bg-amber-400 text-slate-900 ring-2 ring-amber-300 font-black' 
+                          : 'bg-white/20 text-white hover:bg-white/30'
+                      }`}
+                      title="Kliknij, aby zmienić rabat dla całej grupy"
+                    >
+                      % Rabat: {sectionDiscounts[section.id] || 0}%
+                    </button>
+
+                    <button onClick={() => { setShowBundle(section); setForm({ ilosc_pakietow: 1, dni_pracy: 1 }); }} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition flex items-center gap-1.5"><Layers size={14}/> Pakiet</button>
+                    <button onClick={() => openAddEquipment(section)} className="rounded-lg bg-white/30 px-3 py-2 text-xs font-black hover:bg-white/40 transition flex items-center gap-1.5"><Search size={14}/> Baza sprzętu</button>
+                    <button onClick={() => openAddItem(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition flex items-center gap-1.5">+ Pozycja ręczna</button>
+                    <button onClick={() => deleteSection(section)} className="rounded-lg bg-red-500/80 px-3 py-2 text-xs font-black hover:bg-red-600 transition shadow-sm ml-2"><Trash2 size={14} /></button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 z-10">
-                  <div className="font-black text-lg mr-4 bg-black/20 px-3 py-1 rounded-lg">{money((section.pozycje || []).reduce((a: number, p: any) => a + Number(p.razem_netto || calc(p)), 0))}</div>
-                  <button onClick={() => openEditSection(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition shadow-sm"><Pencil size={14} /></button>
-                  <button onClick={() => promptSectionDiscount(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition shadow-sm">% Rabat grupy</button>
-                  <button onClick={() => { setShowBundle(section); setForm({ ilosc_pakietow: 1, dni_pracy: 1 }); }} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition flex items-center gap-1.5"><Layers size={14}/> Pakiet</button>
-                  <button onClick={() => openAddEquipment(section)} className="rounded-lg bg-white/30 px-3 py-2 text-xs font-black hover:bg-white/40 transition flex items-center gap-1.5"><Search size={14}/> Baza sprzętu</button>
-                  <button onClick={() => openAddItem(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition flex items-center gap-1.5">+ Pozycja ręczna</button>
-                  <button onClick={() => deleteSection(section)} className="rounded-lg bg-red-500/80 px-3 py-2 text-xs font-black hover:bg-red-600 transition shadow-sm ml-2"><Trash2 size={14} /></button>
-                </div>
-              </div>
 
-              <div className="bg-white overflow-visible">
-                <div className="overflow-x-auto overflow-y-visible">
-                  <table className="w-full min-w-[950px] text-sm text-left">
-                    <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                      <tr>
-                        <th className="px-3 py-3 w-[25%]">Nazwa i Parametry</th>
-                        <th className="px-3 py-3 w-[20%]">Uwagi do pozycji</th>
-                        <th className="px-3 py-3 w-[10%] text-right">Cena PLN</th>
-                        <th className="px-3 py-3 w-[10%] text-center">Ilość</th>
-                        <th className="px-3 py-3 w-[9%] text-center">Dni</th>
-                        <th className="px-3 py-3 w-[8%] text-center">Rabat %</th>
-                        <th className="px-3 py-3 w-[7%] text-center">VAT %</th>
-                        <th className="px-2 py-3 w-[5%] text-center"><FileText size={14} className="mx-auto"/></th>
-                        <th className="px-3 py-3 text-right w-[10%]">Razem netto</th>
-                        <th className="px-3 py-3 w-[4%]"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {(section.pozycje || []).map((p: any) => (
-                        <OfferPositionRow key={p.id} item={p} onDraftChange={registerDirtyItem} onDelete={() => deleteItem(p)} />
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="bg-white overflow-visible">
+                  <div className="overflow-x-auto overflow-y-visible">
+                    <table className="w-full min-w-[1050px] text-sm text-left">
+                      <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                        <tr>
+                          <th className="px-2 py-3 w-[45px] text-center">Poz.</th>
+                          <th className="px-3 py-3 w-[26%]">Nazwa pozycji</th>
+                          <th className="px-3 py-3 w-[20%]">Uwagi do pozycji</th>
+                          <th className="px-3 py-3 w-[10%] text-right">Cena PLN</th>
+                          <th className="px-3 py-3 w-[10%] text-center">Ilość</th>
+                          <th className="px-3 py-3 w-[9%] text-center">Dni</th>
+                          <th className="px-3 py-3 w-[8%] text-center">Rabat %</th>
+                          <th className="px-3 py-3 w-[7%] text-center">VAT %</th>
+                          <th className="px-2 py-3 w-[4%] text-center" title="Pokaż w PDF"><FileText size={14} className="mx-auto text-slate-400"/></th>
+                          <th className="px-2 py-3 w-[4%] text-center" title="Ukryj cenę tej pozycji na PDF"><EyeOff size={14} className="mx-auto text-amber-500"/></th>
+                          <th className="px-3 py-3 text-right w-[10%]">Razem netto</th>
+                          <th className="px-3 py-3 w-[4%]"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {sortedPositions.map((p: any, idx: number) => (
+                          <OfferPositionRow 
+                            key={p.id} 
+                            item={p} 
+                            index={idx}
+                            isFirst={idx === 0}
+                            isLast={idx === sortedPositions.length - 1}
+                            autoFocus={autoFocusItemId === p.id}
+                            onFocused={() => setAutoFocusItemId(null)}
+                            onMoveUp={() => movePosition(section.id, idx, -1)}
+                            onMoveDown={() => movePosition(section.id, idx, 1)}
+                            onDragPositionStart={(e) => {
+                              e.dataTransfer.setData('posSectionId', String(section.id));
+                              e.dataTransfer.setData('posIndex', String(idx));
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                            onDragPositionDrop={(e) => {
+                              e.preventDefault();
+                              const srcSecId = Number(e.dataTransfer.getData('posSectionId'));
+                              const srcIdx = Number(e.dataTransfer.getData('posIndex'));
+                              if (srcSecId === section.id) {
+                                handlePositionDrop(section.id, srcIdx, idx);
+                              }
+                            }}
+                            isPriceHiddenOnPdf={hiddenPriceItemIds.has(Number(p.id))}
+                            onToggleHidePrice={() => toggleHidePrice(Number(p.id))}
+                            onDraftChange={registerDirtyItem} 
+                            onDelete={() => deleteItem(p)} 
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* SZYBKIE DODAWANIE INLINE */}
+                  <InlineEquipmentAdder 
+                    sectionId={section.id} 
+                    models={models} 
+                    onAdd={(m) => handleInlineAdd(section.id, m)} 
+                    onAddCustom={(name) => handleInlineAddCustom(section.id, name)} 
+                  />
+
+                  {(!section.pozycje || section.pozycje.length === 0) && (
+                    <div className="p-8 text-center text-sm font-bold text-slate-400 bg-slate-50/30">Ta grupa jest pusta. Użyj wyszukiwarki poniżej, aby dodać pierwszy sprzęt.</div>
+                  )}
                 </div>
-                <InlineEquipmentAdder 
-                  sectionId={section.id} 
-                  models={models} 
-                  onAdd={(m) => handleInlineAdd(section.id, m)} 
-                  onAddCustom={(name) => handleInlineAddCustom(section.id, name)}
-                />
-                {(!section.pozycje || section.pozycje.length === 0) && (
-                  <div className="p-8 text-center text-sm font-bold text-slate-400 bg-slate-50/30">Ta grupa jest pusta.</div>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Card>
 
-      {/* MODAL USTAWIEN PDF */}
+      {/* MODAL USTAWIEŃ PDF */}
       {showPdfSettings && (
         <SimpleModal title="Opcje wydruku (PDF)" onClose={() => setShowPdfSettings(false)}>
           <div className="space-y-5">
@@ -895,7 +1128,7 @@ export default function OfferDetailsPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-cyan-300 hover:bg-cyan-50 transition shadow-sm">
                 <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-cyan-600" checked={pdfConfig.showUnitPrices} onChange={(e) => setPdfConfig({...pdfConfig, showUnitPrices: e.target.checked})} />
-                <div><span className="font-bold text-slate-800 block">Pokaż ceny jednostkowe</span><span className="text-xs text-slate-500">Wyświetla bazową cenę.</span></div>
+                <div><span className="font-bold text-slate-800 block">Pokaż ceny jednostkowe</span><span className="text-xs text-slate-500">Wyświetla bazową cenę dla pozycji nieukrytych.</span></div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-cyan-300 hover:bg-cyan-50 transition shadow-sm">
                 <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-cyan-600" checked={pdfConfig.showDiscounts} onChange={(e) => setPdfConfig({...pdfConfig, showDiscounts: e.target.checked})} />
@@ -922,6 +1155,13 @@ export default function OfferDetailsPage() {
                 <div><span className="font-bold text-slate-800 block">Pokaż podsumowania grup</span><span className="text-xs text-slate-500">Dodaje kwoty na nagłówku grupy na PDF.</span></div>
               </label>
             </div>
+
+            {hiddenPriceItemIds.size > 0 && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-bold text-amber-800">
+                Liczba pozycji z ukrytą ceną jednostkową: <b>{hiddenPriceItemIds.size}</b>. Ich ceny zostaną zastąpione kreską „-”, ale wliczą się do sumy dokumentu.
+              </div>
+            )}
+
             <div className="pt-2 border-t mt-4">
               <p className="text-sm font-bold text-slate-500 mb-3">Podsumowanie końcowe (stopka):</p>
               <div className="flex flex-wrap gap-5">
@@ -975,7 +1215,7 @@ export default function OfferDetailsPage() {
 
       {/* MODAL DODAWANIA POZYCJI RĘCZNEJ */}
       {showItem && (
-        <SimpleModal title={`Dodaj pozycję ręczną do grupy: ${showItem.nazwa}`} onClose={() => setShowItem(null)}>
+        <SimpleModal title={`Dodaj pozycję do grupy: ${showItem.nazwa}`} onClose={() => setShowItem(null)}>
           <form onSubmit={addItem} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Typ pozycji">
@@ -1016,10 +1256,50 @@ export default function OfferDetailsPage() {
       )}
 
       {/* MODAL DODAWANIA GRUPY */}
-      {showSection && <SimpleModal title="Dodaj grupę / sekcję" onClose={() => setShowSection(false)}><form onSubmit={addSection} className="space-y-4"><div className="grid gap-4 md:grid-cols-2"><Field label="Nazwa"><input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} required /></Field><Field label="Kolor grupy"><input type="color" className={inputClass} value={form.kolor || '#0891B2'} onChange={e => setForm({ ...form, kolor: e.target.value })} /></Field></div><Field label="Opis dodatkowy"><textarea className={inputClass} value={form.opis || ''} onChange={e => setForm({ ...form, opis: e.target.value })} /></Field><div className="flex justify-end gap-2"><Button variant="secondary" onClick={() => setShowSection(false)}>Anuluj</Button><Button type="submit">Zapisz</Button></div></form></SimpleModal>}
+      {showSection && (
+        <SimpleModal title="Dodaj grupę / sekcję" onClose={() => setShowSection(false)}>
+          <form onSubmit={addSection} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Nazwa">
+                <input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} required />
+              </Field>
+              <Field label="Kolor grupy">
+                <input type="color" className={inputClass} value={form.kolor || '#0891B2'} onChange={e => setForm({ ...form, kolor: e.target.value })} />
+              </Field>
+            </div>
+            <Field label="Opis dodatkowy">
+              <textarea className={inputClass} value={form.opis || ''} onChange={e => setForm({ ...form, opis: e.target.value })} />
+            </Field>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setShowSection(false)}>Anuluj</Button>
+              <Button type="submit">Zapisz na końcu</Button>
+            </div>
+          </form>
+        </SimpleModal>
+      )}
       
       {/* MODAL EDYCJI GRUPY */}
-      {showSectionEdit && <SimpleModal title={`Edytuj grupę: ${showSectionEdit.nazwa}`} onClose={() => setShowSectionEdit(null)}><form onSubmit={saveSectionEdit} className="space-y-4"><div className="grid gap-4 md:grid-cols-2"><Field label="Nazwa grupy"><input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} required /></Field><Field label="Kolor grupy"><input type="color" className={inputClass} value={form.kolor || '#0891B2'} onChange={e => setForm({ ...form, kolor: e.target.value })} /></Field></div><Field label="Opis"><textarea className={inputClass} value={form.opis || ''} onChange={e => setForm({ ...form, opis: e.target.value })} /></Field><div className="flex justify-end gap-2"><Button variant="secondary" onClick={() => setShowSectionEdit(null)}>Anuluj</Button><Button type="submit">Zapisz</Button></div></form></SimpleModal>}
+      {showSectionEdit && (
+        <SimpleModal title={`Edytuj grupę: ${showSectionEdit.nazwa}`} onClose={() => setShowSectionEdit(null)}>
+          <form onSubmit={saveSectionEdit} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Nazwa grupy">
+                <input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} required />
+              </Field>
+              <Field label="Kolor grupy">
+                <input type="color" className={inputClass} value={form.kolor || '#0891B2'} onChange={e => setForm({ ...form, kolor: e.target.value })} />
+              </Field>
+            </div>
+            <Field label="Opis">
+              <textarea className={inputClass} value={form.opis || ''} onChange={e => setForm({ ...form, opis: e.target.value })} />
+            </Field>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setShowSectionEdit(null)}>Anuluj</Button>
+              <Button type="submit">Zapisz</Button>
+            </div>
+          </form>
+        </SimpleModal>
+      )}
       
       {/* MODAL PAKIETU */}
       {showBundle && (
@@ -1030,7 +1310,7 @@ export default function OfferDetailsPage() {
                 value={form.id_pakietu || ''} 
                 onChange={val => setForm({ ...form, id_pakietu: val })} 
                 options={bundles.map((b: any) => ({ value: String(b.id), label: b.nazwa }))} 
-                placeholder="Wybierz pakiet..."
+                placeholder="Wybierz pakiet..." 
               />
             </Field>
             <div className="grid grid-cols-2 gap-4">
@@ -1043,72 +1323,118 @@ export default function OfferDetailsPage() {
       )}
       
       {/* MODAL BAZY SPRZĘTOWEJ */}
-      {showEquipment && <SimpleModal className="max-w-[1500px]" title={`Wyszukiwarka sprzętu i pozycji ręcznych`} onClose={() => setShowEquipment(null)}>
-        <form onSubmit={addEquipment} className="space-y-5">
-          <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-            <div className="grid gap-0 xl:grid-cols-[380px_1fr_320px]">
-              <aside className="border-b border-slate-200 bg-slate-50/40 p-5 xl:border-b-0 xl:border-r">
-                <Field label="Szukaj w bazie sprzętowej">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 text-slate-400" size={17}/>
-                    <input className={`${inputClass} pl-10`} value={equipmentSearch} onChange={(e) => setEquipmentSearch(e.target.value)} placeholder="Wpisz np. projektor..." />
+      {showEquipment && (
+        <SimpleModal className="max-w-[1500px]" title={`Wyszukiwarka sprzętu i pozycji ręcznych`} onClose={() => setShowEquipment(null)}>
+          <form onSubmit={addEquipment} className="space-y-5">
+            <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+              <div className="grid gap-0 xl:grid-cols-[380px_1fr_320px]">
+                <aside className="border-b border-slate-200 bg-slate-50/40 p-5 xl:border-b-0 xl:border-r">
+                  <Field label="Szukaj w bazie sprzętowej">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 text-slate-400" size={17}/>
+                      <input className={`${inputClass} pl-10`} value={equipmentSearch} onChange={(e) => setEquipmentSearch(e.target.value)} placeholder="Wpisz np. projektor..." />
+                    </div>
+                  </Field>
+                  <div className="mt-4 rounded-xl bg-white border border-slate-200 p-3">
+                    <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Kategorie Sprzętowe</p>
+                    <div className="flex max-h-[160px] flex-wrap gap-2 overflow-y-auto pr-1 custom-scrollbar">
+                      <button type="button" onClick={() => { setEquipmentRoot('all'); setEquipmentSub(''); }} className={`rounded-lg px-3 py-1.5 text-xs font-black ${equipmentRoot === 'all' ? 'bg-cyan-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Wszystkie</button>
+                      {equipmentCategoryRoots.map((root: any) => <button key={root.id} type="button" onClick={() => { setEquipmentRoot(String(root.id)); setEquipmentSub(''); }} className={`rounded-lg px-3 py-1.5 text-xs font-black ${equipmentRoot === String(root.id) ? 'bg-cyan-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{root.nazwa}</button>)}
+                    </div>
                   </div>
-                </Field>
-                <div className="mt-4 rounded-xl bg-white border border-slate-200 p-3">
-                  <p className="mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">Kategorie Sprzętowe</p>
-                  <div className="flex max-h-[160px] flex-wrap gap-2 overflow-y-auto pr-1 custom-scrollbar">
-                    <button type="button" onClick={() => { setEquipmentRoot('all'); setEquipmentSub(''); }} className={`rounded-lg px-3 py-1.5 text-xs font-black ${equipmentRoot === 'all' ? 'bg-cyan-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Wszystkie</button>
-                    {equipmentCategoryRoots.map((root: any) => <button key={root.id} type="button" onClick={() => { setEquipmentRoot(String(root.id)); setEquipmentSub(''); }} className={`rounded-lg px-3 py-1.5 text-xs font-black ${equipmentRoot === String(root.id) ? 'bg-cyan-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{root.nazwa}</button>)}
-                  </div>
-                </div>
-              </aside>
-              <main className="bg-white p-5 border-r border-slate-200">
-                <div className="max-h-[600px] space-y-2 overflow-y-auto pr-2 custom-scrollbar">
-                  {equipmentModels.map((m: any) => {
-                    const active = Number(form.id_modelu) === Number(m.id);
-                    const price = m.cena_podstawowa || m.cena_netto || m.wartosc_domyslna_egzemplarza || 0;
-                    return (
-                      <div key={m.id} className={`flex items-center justify-between p-3 rounded-xl border transition ${active ? 'border-cyan-400 bg-cyan-50' : 'border-slate-200 hover:border-cyan-200'}`}>
-                        <div className="flex gap-3 items-center">
-                          <div className="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden">{m.zdjecie ? <img src={m.zdjecie} className="w-full h-full object-cover" alt="img"/> : <Box size={16} className="text-slate-400"/>}</div>
-                          <div><b className="text-sm cursor-pointer hover:underline" onClick={() => pickEquipmentModel(m)}>{m.nazwa}</b><p className="text-xs text-slate-500">{money(price)} · Dost.: {m.dostepnych ?? '-'}</p></div>
+                </aside>
+                <main className="bg-white p-5 border-r border-slate-200">
+                  <div className="max-h-[600px] space-y-2 overflow-y-auto pr-2 custom-scrollbar">
+                    {equipmentModels.map((m: any) => {
+                      const active = Number(form.id_modelu) === Number(m.id);
+                      const price = m.cena_podstawowa || m.cena_netto || m.wartosc_domyslna_egzemplarza || 0;
+                      return (
+                        <div key={m.id} className={`flex items-center justify-between p-3 rounded-xl border transition ${active ? 'border-cyan-400 bg-cyan-50' : 'border-slate-200 hover:border-cyan-200'}`}>
+                          <div className="flex gap-3 items-center">
+                            <div className="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden">{m.zdjecie ? <img src={m.zdjecie} className="w-full h-full object-cover" alt="img"/> : <Box size={16} className="text-slate-400"/>}</div>
+                            <div><b className="text-sm cursor-pointer hover:underline" onClick={() => pickEquipmentModel(m)}>{m.nazwa}</b><p className="text-xs text-slate-500">{money(price)} • Dostępne: {m.dostepnych ?? '-'}</p></div>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </main>
-              <aside className="bg-slate-50/40 p-5">
-                 <p className="text-xs font-black uppercase text-slate-400 mb-4">Manualne parametry pozycji</p>
-                 <div className="space-y-3">
-                   <Field label="Typ pozycji">
-                     <SearchableSelect 
-                       value={form.typ_pozycji || 'sprzet'} 
-                       onChange={val => setForm({...form, typ_pozycji: val})} 
-                       options={positionTypes} 
-                     />
-                   </Field>
-                   <Field label="Nazwa (edytowana na ofercie)"><input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} /></Field>
-                   <Field label="Cena za 1 sztukę (PLN)"><input type="number" step="0.01" className={inputClass} value={form.cena_netto ?? 0} onChange={e => setForm({...form, cena_netto: e.target.value})} /></Field>
-                   <Field label="Ilość sztuk"><input type="number" className={inputClass} value={form.ilosc ?? 1} onChange={e => setForm({...form, ilosc: e.target.value})} /></Field>
-                 </div>
-                 <div className="mt-6 pt-4 border-t border-slate-200">
+                      );
+                    })}
+                  </div>
+                </main>
+                <aside className="bg-slate-50/40 p-5">
+                  <p className="text-xs font-black uppercase text-slate-400 mb-4">Manualne parametry pozycji</p>
+                  <div className="space-y-3">
+                    <Field label="Typ pozycji">
+                      <SearchableSelect 
+                        value={form.typ_pozycji || 'sprzet'} 
+                        onChange={val => setForm({...form, typ_pozycji: val})} 
+                        options={positionTypes} 
+                      />
+                    </Field>
+                    <Field label="Nazwa (edytowana na ofercie)"><input className={inputClass} value={form.nazwa || ''} onChange={e => setForm({...form, nazwa: e.target.value})} /></Field>
+                    <Field label="Cena za 1 sztukę (PLN)"><input type="number" step="0.01" className={inputClass} value={form.cena_netto ?? 0} onChange={e => setForm({...form, cena_netto: e.target.value})} /></Field>
+                    <Field label="Ilość sztuk"><input type="number" className={inputClass} value={form.ilosc ?? 1} onChange={e => setForm({...form, ilosc: e.target.value})} /></Field>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-200">
                     <Button type="submit" className="w-full">Dodaj na dokument</Button>
-                 </div>
-              </aside>
+                  </div>
+                </aside>
+              </div>
             </div>
-          </div>
-        </form>
-      </SimpleModal>}
+          </form>
+        </SimpleModal>
+      )}
     </div>
   );
 }
 
-function OfferPositionRow({ item, onDraftChange, onDelete }: { item: any; onDraftChange: (itemId: number, patch: any | null) => void; onDelete: () => void }) {
+// ============================================================================
+// WIERSZ POZYCJI OFERTY (BEZ SELECTA TYPU, Z FOCUS I STRZAŁKAMI/DRAG)
+// ============================================================================
+function OfferPositionRow({ 
+  item, 
+  index,
+  isFirst,
+  isLast,
+  autoFocus,
+  onFocused,
+  onMoveUp,
+  onMoveDown,
+  onDragPositionStart,
+  onDragPositionDrop,
+  isPriceHiddenOnPdf,
+  onToggleHidePrice,
+  onDraftChange, 
+  onDelete 
+}: { 
+  item: any; 
+  index: number;
+  isFirst: boolean;
+  isLast: boolean;
+  autoFocus?: boolean;
+  onFocused?: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onDragPositionStart: (e: React.DragEvent) => void;
+  onDragPositionDrop: (e: React.DragEvent) => void;
+  isPriceHiddenOnPdf: boolean;
+  onToggleHidePrice: () => void;
+  onDraftChange: (itemId: number, patch: any | null) => void; 
+  onDelete: () => void;
+}) {
   const [draft, setDraft] = useState<any>(item);
+  const priceInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => setDraft(item), [item]);
-  
+
+  useEffect(() => {
+    if (autoFocus && priceInputRef.current) {
+      priceInputRef.current.focus();
+      priceInputRef.current.select();
+      onFocused?.();
+    }
+  }, [autoFocus, onFocused]);
+
   const predicted = calc(draft);
+
   const isChanged = JSON.stringify({
     nazwa: draft.nazwa,
     opis: draft.opis,
@@ -1157,40 +1483,134 @@ function OfferPositionRow({ item, onDraftChange, onDelete }: { item: any; onDraf
   };
 
   return (
-    <tr className="border-b border-slate-100 hover:bg-cyan-50/30 transition group">
+    <tr 
+      onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
+      onDrop={onDragPositionDrop}
+      className="border-b border-slate-100 hover:bg-cyan-50/30 transition group"
+    >
+      {/* REORDER ARROWS & DRAG HANDLE */}
+      <td className="px-2 py-2 align-top text-center pt-3.5">
+        <div className="flex items-center justify-center gap-0.5">
+          <div 
+            draggable 
+            onDragStart={onDragPositionStart}
+            className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-600 p-0.5" 
+            title="Przeciągnij, aby zmienić kolejność"
+          >
+            <GripVertical size={14} />
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <button 
+              type="button" 
+              disabled={isFirst} 
+              onClick={onMoveUp}
+              className="text-slate-400 hover:text-cyan-600 disabled:opacity-20 transition"
+              title="Przesuń w górę"
+            >
+              <ChevronUp size={13} />
+            </button>
+            <button 
+              type="button" 
+              disabled={isLast} 
+              onClick={onMoveDown}
+              className="text-slate-400 hover:text-cyan-600 disabled:opacity-20 transition"
+              title="Przesuń w dół"
+            >
+              <ChevronDown size={13} />
+            </button>
+          </div>
+        </div>
+      </td>
+
+      {/* NAZWA POZYCJI (BEZ SELECTA TYPU) */}
       <td className="px-3 py-2 align-top">
-        <input className={`${tableInputClass} mb-1 text-[13px]`} value={draft.nazwa || ''} onChange={(e) => setDraft({ ...draft, nazwa: e.target.value })} placeholder="Nazwa pozycji" />
-        <select className={`${tableInputClass} text-[11px] text-slate-500 !py-1 !px-1 font-bold bg-slate-50/50 hover:bg-slate-100 w-auto inline-block cursor-pointer`} value={draft.typ_pozycji || 'sprzet'} onChange={(e) => setDraft({ ...draft, typ_pozycji: e.target.value })}>
-          {positionTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
+        <input 
+          className={`${tableInputClass} text-[13px] font-bold`} 
+          value={draft.nazwa || ''} 
+          onChange={(e) => setDraft({ ...draft, nazwa: e.target.value })} 
+          placeholder="Nazwa pozycji" 
+        />
       </td>
+
+      {/* UWAGI DO POZYCJI */}
       <td className="px-2 py-2 align-top">
-        <textarea className={`${tableInputClass} min-h-[58px] resize-none text-xs leading-tight`} value={draft.opis || ''} onChange={(e) => setDraft({ ...draft, opis: e.target.value })} placeholder="Notatki i dopiski do pozycji na ofercie..." />
+        <textarea 
+          className={`${tableInputClass} min-h-[58px] resize-none text-xs leading-tight`} 
+          value={draft.opis || ''} 
+          onChange={(e) => setDraft({ ...draft, opis: e.target.value })} 
+          placeholder="Notatki i dopiski do pozycji na ofercie..." 
+        />
       </td>
+
+      {/* CENA NETTO */}
       <td className="px-2 py-2 align-top">
-        <input type="number" step="0.01" className={`${tableInputClass} text-right text-[13px]`} value={draft.cena_netto || 0} onChange={(e) => setDraft({ ...draft, cena_netto: e.target.value })} />
+        <input 
+          ref={priceInputRef}
+          type="number" 
+          step="0.01" 
+          className={`${tableInputClass} text-right text-[13px]`} 
+          value={draft.cena_netto ?? 0} 
+          onChange={(e) => setDraft({ ...draft, cena_netto: e.target.value })} 
+        />
       </td>
+
+      {/* ILOŚĆ */}
       <td className="px-2 py-2 align-top">
         <Stepper value={draft.ilosc || 1} onMinus={() => bump('ilosc', -1, 0)} onPlus={() => bump('ilosc', 1, 0)} onChange={(value) => setDraft({ ...draft, ilosc: value })} />
       </td>
+
+      {/* DNI PRACY */}
       <td className="px-2 py-2 align-top">
         <Stepper value={draft.dni_pracy || 1} onMinus={() => bump('dni_pracy', -1, 0)} onPlus={() => bump('dni_pracy', 1, 0)} onChange={(value) => setDraft({ ...draft, dni_pracy: value })} />
       </td>
+
+      {/* RABAT % */}
       <td className="px-2 py-2 align-top">
         <Stepper value={draft.rabat_proc || 0} suffix="%" onMinus={() => bump('rabat_proc', -5, 0)} onPlus={() => bump('rabat_proc', 5, 0)} onChange={(value) => setDraft({ ...draft, rabat_proc: value })} />
       </td>
+
+      {/* VAT % */}
       <td className="px-2 py-2 align-top">
         <input type="number" step="0.01" className={`${tableInputClass} text-right text-[13px] text-slate-500`} value={draft.vat || 23} onChange={(e) => setDraft({ ...draft, vat: e.target.value })} />
       </td>
+
+      {/* WIDOCZNOŚĆ W PDF */}
       <td className="px-2 py-3 align-top text-center pt-4">
-        <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 cursor-pointer" checked={Boolean(draft.widoczna_w_pdf)} onChange={(e) => setDraft({ ...draft, widoczna_w_pdf: e.target.checked })} title="Widoczna na wygenerowanym pliku PDF" />
+        <input 
+          type="checkbox" 
+          className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 cursor-pointer" 
+          checked={Boolean(draft.widoczna_w_pdf)} 
+          onChange={(e) => setDraft({ ...draft, widoczna_w_pdf: e.target.checked })} 
+          title="Widoczna na wygenerowanym pliku PDF" 
+        />
       </td>
+
+      {/* UKRYJ CENĘ NA PDF */}
+      <td className="px-2 py-3 align-top text-center pt-4">
+        <input 
+          type="checkbox" 
+          className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer" 
+          checked={isPriceHiddenOnPdf} 
+          onChange={onToggleHidePrice} 
+          title="Ukryj cenę i wartość tej pozycji na PDF (wyświetli myślnik zamiast kwoty)" 
+        />
+      </td>
+
+      {/* RAZEM NETTO */}
       <td className="px-3 py-3 align-top text-right pt-4">
-        <span className={`text-[15px] font-black ${isChanged ? 'text-cyan-600' : 'text-slate-800'}`}>{money(isChanged ? predicted : (item.razem_netto || predicted))}</span>
-        {Number(item.rabat_budzetowy_netto || 0) > 0 && <p className="text-[10px] font-bold text-emerald-600 mt-1 uppercase tracking-wider">Korekta -{money(item.rabat_budzetowy_netto)}</p>}
+        <span className={`text-[15px] font-black ${isChanged ? 'text-cyan-600' : 'text-slate-800'}`}>
+          {money(isChanged ? predicted : (item.razem_netto || predicted))}
+        </span>
+        {Number(item.rabat_budzetowy_netto || 0) > 0 && (
+          <p className="text-[10px] font-bold text-emerald-600 mt-1 uppercase tracking-wider">Korekta -{money(item.rabat_budzetowy_netto)}</p>
+        )}
       </td>
+
+      {/* AKCJE */}
       <td className="px-2 py-3 align-top text-center pt-3.5">
-        <button onClick={onDelete} className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-md transition opacity-0 group-hover:opacity-100" title="Usuń pozycję"><Trash2 size={16} /></button>
+        <button onClick={onDelete} className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-md transition opacity-0 group-hover:opacity-100" title="Usuń pozycję">
+          <Trash2 size={16} />
+        </button>
       </td>
     </tr>
   );
@@ -1199,7 +1619,7 @@ function OfferPositionRow({ item, onDraftChange, onDelete }: { item: any; onDraf
 function Stepper({ value, suffix, onMinus, onPlus, onChange }: { value: any; suffix?: string; onMinus: () => void; onPlus: () => void; onChange: (value: string) => void }) {
   return (
     <div className="flex w-full min-w-[90px] max-w-[120px] items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 focus-within:border-cyan-500 focus-within:bg-white transition shadow-sm">
-      <button type="button" onClick={onMinus} className="px-2 py-2 font-black text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition">−</button>
+      <button type="button" onClick={onMinus} className="px-2 py-2 font-black text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition">-</button>
       <input 
         type="number" 
         step="0.01" 

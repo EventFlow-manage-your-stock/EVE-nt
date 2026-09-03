@@ -16,9 +16,6 @@ export type QuickAddDictionaries = {
   uzytkownicy?: any[];
 };
 
-// Słowa kluczowe kwalifikujące typ do kategorii "Inne / Firmowe"
-const INTERNAL_KEYWORDS = ['spotkanie', 'biur', 'szkolen', 'zarząd', 'zarzad', 'wewnętrzn', 'wewnetrzn', 'serwis', 'przegląd', 'przeglad', 'inne', 'organizacyjn', 'firmow'];
-
 export function QuickAddCalendarModal({
   dict,
   onClose,
@@ -44,6 +41,8 @@ export function QuickAddCalendarModal({
       startTime: '', 
       endDate: startDateStr,
       endTime: '',
+      id_kontrahenta: '',
+      id_kontaktu: '',
     };
   });
 
@@ -61,26 +60,12 @@ export function QuickAddCalendarModal({
   useEffect(() => {
     if (form.id_kontrahenta) {
       api.get(`/api/crm/kontakty?kontrahentId=${form.id_kontrahenta}`)
-         .then(res => setKontakty(res.data))
+         .then(res => setKontakty(res.data || []))
          .catch(() => setKontakty([]));
     } else {
       setKontakty([]);
     }
   }, [form.id_kontrahenta]);
-
-  // Podział typów wydarzeń na eventowe i wewnętrzne/firmowe
-  const { eventTypes, otherTypes } = useMemo(() => {
-    const all = dict.typy || [];
-    const other = all.filter((t: any) => {
-      const name = String(t.nazwa || '').toLowerCase();
-      return INTERNAL_KEYWORDS.some(kw => name.includes(kw));
-    });
-    const event = all.filter((t: any) => !other.includes(t));
-    return { 
-      eventTypes: event.length > 0 ? event : all, 
-      otherTypes: other.length > 0 ? other : all 
-    };
-  }, [dict.typy]);
 
   async function submit(e: any) {
     e.preventDefault();
@@ -88,9 +73,8 @@ export function QuickAddCalendarModal({
     setError('');
     
     try {
-      const payload = { ...form };
+      const payload: any = { ...form };
       
-      // Kategoria "inne" zapisywana jest w bazie jako standardowe wydarzenie
       if (form.typ === 'inne') {
         payload.typ = 'wydarzenie';
       }
@@ -102,6 +86,13 @@ export function QuickAddCalendarModal({
       payload.data_koniec = form.endTime 
         ? `${form.endDate}T${form.endTime}:00` 
         : `${form.endDate}T23:59:59`;
+
+      // Precyzyjna normalizacja powiązań CRM dla backendu
+      payload.id_kontrahenta = form.id_kontrahenta ? Number(form.id_kontrahenta) : null;
+      payload.id_kontaktu = form.id_kontaktu ? Number(form.id_kontaktu) : null;
+      payload.id_typu_wydarzenia = form.id_typu_wydarzenia ? Number(form.id_typu_wydarzenia) : null;
+      payload.id_statusu_wydarzenia = form.id_statusu_wydarzenia ? Number(form.id_statusu_wydarzenia) : null;
+      payload.id_miejsca = form.id_miejsca ? Number(form.id_miejsca) : null;
 
       await api.post('/api/kalendarz/szybkie-dodanie', payload);
       onSaved();
@@ -125,6 +116,7 @@ export function QuickAddCalendarModal({
 
   const maps = googleMapsDirectionsUrl(form.adres_reczny);
   const typ = form.typ;
+
   const currentTypesList = useMemo(() => {
     const all = dict.typy || [];
     if (form.typ === 'inne') {
@@ -136,7 +128,6 @@ export function QuickAddCalendarModal({
     if (form.typ === 'wynajem' || form.typ === 'wypozyczenie') {
       return all.filter((t: any) => t.kategoria_glowna === 'wynajem' || t.kategoria_glowna === 'wypozyczenie');
     }
-    // Dla 'wydarzenie'
     return all.filter((t: any) => !t.kategoria_glowna || t.kategoria_glowna === 'wydarzenie');
   }, [dict.typy, form.typ]);
 
@@ -208,24 +199,55 @@ export function QuickAddCalendarModal({
                   </select>
                 </Field>
 
+                {/* KLIENT Z PEŁNĄ ZGODNOŚCIĄ SearchableSelect */}
                 <Field label="Klient">
-                  <SearchableSelect
-                    value={form.id_kontrahenta || ''}
-                    onChange={(val) => setForm({ ...form, id_kontrahenta: val, id_kontaktu: '' })}
-                    options={(localKontrahenci || []).map((k: any) => ({ id: k.id, label: k.nazwa }))}
-                    placeholder="Brak / wpiszę później"
-                  />
+                  <div className="flex gap-2">
+                    <div className="flex-1 min-w-0">
+                      <SearchableSelect
+                        value={form.id_kontrahenta ? String(form.id_kontrahenta) : ''}
+                        onChange={(val) => setForm({ ...form, id_kontrahenta: val ? String(val) : '', id_kontaktu: '' })}
+                        options={(localKontrahenci || []).map((k: any) => ({
+                          id: k.id,
+                          value: String(k.id),
+                          label: k.nazwa || `${k.imie || ''} ${k.nazwisko || ''}`.trim()
+                        }))}
+                        placeholder="Brak / wpiszę później"
+                      />
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => setCrmModalMode('kontrahent')} 
+                      className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"
+                      title="Dodaj klienta"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
                 </Field>
 
+                {/* OSOBA KONTAKTOWA Z SearchableSelect */}
                 <Field label="Osoba kontaktowa">
                   <div className="flex gap-2">
-                    <select className={`${inputClass} flex-1 disabled:opacity-50`} disabled={!form.id_kontrahenta} value={form.id_kontaktu || ''} onChange={(e) => setForm({ ...form, id_kontaktu: e.target.value })}>
-                      <option value="">{form.id_kontrahenta ? 'Wybierz osobę...' : 'Najpierw wybierz klienta'}</option>
-                      {kontakty.map((k: any) => (
-                        <option key={k.id} value={k.id}>{k.imie} {k.nazwisko} {k.stanowisko ? `(${k.stanowisko})` : ''}</option>
-                      ))}
-                    </select>
-                    <button type="button" disabled={!form.id_kontrahenta} onClick={() => setCrmModalMode('kontakt')} className="flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-slate-600 hover:bg-slate-100 transition disabled:opacity-50 disabled:pointer-events-none" title="Dodaj nową osobę kontaktową">
+                    <div className="flex-1 min-w-0">
+                      <SearchableSelect
+                        value={form.id_kontaktu ? String(form.id_kontaktu) : ''}
+                        onChange={(val) => setForm({ ...form, id_kontaktu: val ? String(val) : '' })}
+                        options={(kontakty || []).map((k: any) => ({
+                          id: k.id,
+                          value: String(k.id),
+                          label: `${k.imie || ''} ${k.nazwisko || ''} ${k.stanowisko ? `(${k.stanowisko})` : ''}`.trim() || `Kontakt #${k.id}`
+                        }))}
+                        placeholder={form.id_kontrahenta ? "Wybierz osobę..." : "Najpierw wybierz klienta"}
+                        disabled={!form.id_kontrahenta}
+                      />
+                    </div>
+                    <button 
+                      type="button" 
+                      disabled={!form.id_kontrahenta} 
+                      onClick={() => setCrmModalMode('kontakt')} 
+                      className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition disabled:opacity-50 disabled:pointer-events-none" 
+                      title="Dodaj nową osobę kontaktową"
+                    >
                       <Plus size={18} />
                     </button>
                   </div>

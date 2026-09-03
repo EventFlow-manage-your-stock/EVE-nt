@@ -245,8 +245,9 @@ export default function ModelDetailsPage() {
                 {edit && <input type="file" accept="image/*" onChange={e => onPhoto(e.target.files?.[0])} className="block w-full text-xs font-bold text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-cyan-600 file:px-3 file:py-2 file:font-black file:text-white" />}
                 {edit && form.zdjecie && <button type="button" onClick={() => setForm({ ...form, zdjecie: '' })} className="text-xs font-black text-red-500">Usuń zdjęcie</button>}
               </div>
+            </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Nazwa modelu"><input disabled={!edit} className={inputClass} value={form.nazwa || ''} onChange={e => setForm({ ...form, nazwa: e.target.value })} /></Field>
                 <Field label="Kategoria"><select disabled={!edit} className={inputClass} value={form.id_kategorii || ''} onChange={e => setForm({ ...form, id_kategorii: e.target.value })}><option value="">Brak</option>{categories.map((k: any) => <option key={k.id} value={k.id}>{k.nazwa}</option>)}</select></Field>
                 <Field label="Producent"><input disabled={!edit} className={inputClass} value={form.producent || ''} onChange={e => setForm({ ...form, producent: e.target.value })} /></Field>
@@ -330,7 +331,6 @@ export default function ModelDetailsPage() {
                 <Field label="Objętość [m³]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.objetosc || ''} onChange={e => setForm({ ...form, objetosc: e.target.value })} /></Field>
                 <Field label="Pobór prądu [W]"><input disabled={!edit} type="number" step="0.01" className={inputClass} value={form.pobor_pradu || ''} onChange={e => setForm({ ...form, pobor_pradu: e.target.value })} /></Field>
               </div>
-            </div>
             
             <Field label="Opis"><textarea disabled={!edit} className={`${inputClass} min-h-[70px] resize-none`} value={form.opis || ''} onChange={e => setForm({ ...form, opis: e.target.value })} /></Field>
             <Field label="Notatka wewnętrzna"><textarea disabled={!edit} className={`${inputClass} min-h-[70px] resize-none`} value={form.notatki_wewnetrzne || ''} onChange={e => setForm({ ...form, notatki_wewnetrzne: e.target.value })} /></Field>

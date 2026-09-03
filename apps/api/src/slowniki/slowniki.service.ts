@@ -16,7 +16,7 @@ export class SlownikiService {
   async getTypyWydarzen(id_organizacji: number) {
     return this.prisma.extendedClient.typWydarzenia.findMany({
       where: { id_organizacji, aktywny: true },
-      select: { id: true, nazwa: true, kolor: true, kategoria_glowna: true, kolejnosc: true },
+      select: { id: true, nazwa: true, kolor: true, kolejnosc: true, kategoria_glowna: true },
       orderBy: { kolejnosc: 'asc' },
     });
   }

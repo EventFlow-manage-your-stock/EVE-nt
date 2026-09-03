@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [isDark, setIsDark] = useState(true); 
+  const [isDark, setIsDark] = useState(false); 
   const [mounted, setMounted] = useState(false);
 
   // Pola formularza
@@ -102,10 +102,27 @@ export default function LoginPage() {
 
         {/* HEADER */}
         <header className="relative z-20 flex-shrink-0">
-          <div className="max-w-[1400px] mx-auto px-6 py-6 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 group">
-              <img src="/eventflow-mark.svg" alt="EventFlow" className="h-8 w-8 transition-transform group-hover:scale-110" onError={(e) => e.currentTarget.style.display = 'none'} />
-              <span className={`text-xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>Event<span className="text-cyan-500">Flow</span></span>
+          <div className="max-w-[1400px] mx-auto px-6 py-2 flex items-center justify-between">
+            <Link href="/" className="flex items-center group">
+              {isDark ? (
+                <img 
+                  src="/eve_nt_primary_with_symbol_reverse_transparent.png" 
+                  alt="EVE-nt" 
+                  className="h-24 w-auto transition-transform group-hover:scale-110" 
+                  onError={(e) => e.currentTarget.style.display = 'none'} 
+                  width={150}
+                  height={60}
+                />
+              ) : (
+                <img 
+                  src="/eve_nt_with_symbol_transparent.png" 
+                  alt="EVE-nt" 
+                  className="h-24 w-auto transition-transform group-hover:scale-110" 
+                  onError={(e) => e.currentTarget.style.display = 'none'} 
+                  width={150}
+                  height={60}
+                />
+              )}
             </Link>
             
             {/* Przełącznik motywu */}
@@ -155,16 +172,17 @@ export default function LoginPage() {
                 Logowanie
               </button>
               <button 
+                disabled={true}
                 onClick={() => { setIsLogin(false); setError(''); setSuccessMsg(''); }}
                 className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${!isLogin ? (isDark ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-900 shadow-sm') : (isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700')}`}
               >
-                Rejestracja
+                Rejestracja<br></br>(Wyłączona systemowo)
               </button>
             </div>
 
             <div className="mb-8 text-center">
               <h1 className={`text-3xl font-black tracking-tight mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {isLogin ? 'Witaj z powrotem.' : 'Zacznij z EventFlow.'}
+                {isLogin ? 'Witaj z powrotem.' : 'Zacznij z EVE-nt.'}
               </h1>
               <p className={`text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                 {isLogin ? 'Zaloguj się, aby zarządzać wydarzeniami.' : 'Utwórz konto, aby rozpocząć darmowy test.'}
@@ -329,7 +347,7 @@ export default function LoginPage() {
                 <ShieldCheck size={14} className="text-emerald-500" /> Połączenie szyfrowane i bezpieczne
               </div>
               <div className={`flex items-center gap-2 text-[11px] font-semibold ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-                <Sparkles size={12} className="text-cyan-600" /> Wersja 2.0 Enterprise
+                <Sparkles size={12} className="text-cyan-600" /> Wersja 4.0 Enterprise PRO
               </div>
             </motion.div>
 
@@ -340,7 +358,7 @@ export default function LoginPage() {
         <footer className="relative z-20 flex-shrink-0">
           <div className="max-w-[1400px] mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className={`text-xs font-semibold ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-              &copy; {new Date().getFullYear()} EventFlow. Wszelkie prawa zastrzeżone.
+              &copy; {new Date().getFullYear()} Evenement Systems. Wszelkie prawa zastrzeżone.
             </p>
             <div className={`flex items-center gap-6 text-xs font-bold ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
               <Link href="#" className="hover:text-cyan-500 transition-colors">Regulamin</Link>

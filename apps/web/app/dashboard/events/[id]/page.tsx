@@ -30,8 +30,8 @@ const TABS = [
   { id: 'podsumowanie_ekipy', label: 'Technicy (Liczniki)', icon: Users },
   { id: 'flota', label: 'Flota', icon: Truck },
   { id: 'nocleg', label: 'Noclegi', icon: Home },
-  { id: 'zadania', label: 'Zadania', icon: CheckSquare },
-  { id: 'chat', label: 'Chat Grupowy', icon: MessageSquare },
+  // { id: 'zadania', label: 'Zadania', icon: CheckSquare },
+  // { id: 'chat', label: 'Chat Grupowy', icon: MessageSquare },
   { id: 'zalaczniki', label: 'Załączniki', icon: FileArchive },
   { id: 'historia', label: 'Historia Zmian', icon: History },
 ];
@@ -421,6 +421,17 @@ export default function EventDetailsPage() {
         </div>
 
         <div className="flex flex-col gap-6">
+          <Card>
+             <div className="flex items-center justify-between mb-4">
+               <h3 className="font-black text-lg text-slate-900 dark:text-white">Notatki / Wytyczne ogólne (Brief)</h3>
+             </div>
+             <textarea 
+               className={`${inputClass} min-h-[400px] resize-none text-base p-4 bg-slate-50 dark:bg-black/20`} 
+               value={form.opis || ''} 
+               onChange={(e) => setForm({ ...form, opis: e.target.value })} 
+               placeholder="Wpisz pełne wytyczne dla eventu, sprzętu, ekipy. Pamiętaj, że każdy ma do tego wgląd."
+             />
+          </Card>
           <Card className="space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3 mb-2">
                <h3 className="font-black text-lg text-slate-900 dark:text-white">Project Managerowie</h3>
@@ -460,17 +471,7 @@ export default function EventDetailsPage() {
               </div>
             </div>
           </Card>
-          <Card>
-             <div className="flex items-center justify-between mb-4">
-               <h3 className="font-black text-lg text-slate-900 dark:text-white">Notatki / Wytyczne ogólne (Brief)</h3>
-             </div>
-             <textarea 
-               className={`${inputClass} min-h-[400px] resize-none text-base p-4 bg-slate-50 dark:bg-black/20`} 
-               value={form.opis || ''} 
-               onChange={(e) => setForm({ ...form, opis: e.target.value })} 
-               placeholder="Wpisz pełne wytyczne dla eventu, sprzętu, ekipy. Pamiętaj, że każdy ma do tego wgląd."
-             />
-          </Card>
+          
         </div>
 
         {/* HARMONOGRAM Z OSIĄ Czasu */}
@@ -607,7 +608,7 @@ export default function EventDetailsPage() {
       
       {showManagerModal && (
         <SimpleModal title="Dodaj Managera Projektu" onClose={() => setShowManagerModal(false)}>
-          <div className="space-y-4">
+          <div className="space-y-6 min-h-[300px]">
             <Field label="Wybierz osobę z zespołu">
               <SearchableSelect 
                 options={dict.uzytkownicy.filter((u: any) => u.stanowisko !== 'Współpracownik Zewnętrzny').map((u:any)=>({value:String(u.id), label:`${u.imie} ${u.nazwisko}`}))} 
@@ -2719,7 +2720,10 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                     <div className="divide-y divide-slate-100 dark:divide-white/5">
                       {group.rows.map((row: any) => (
                         <div key={row.id_modelu} className="grid gap-4 px-5 py-4 md:grid-cols-[1fr_280px] md:items-center">
-                          <div><p className="font-black text-slate-900 dark:text-white text-[15px]">{row.nazwa}</p><p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-0.5">model · {row.kategoria}</p></div>
+                          <div>
+                            <p className="font-black text-slate-900 dark:text-white text-[15px]">{row.nazwa}</p>
+                            {/* <p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-0.5">model · {row.kategoria}</p> */}
+                          </div>
                           <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 dark:bg-white/5 p-2 text-center text-xs font-black border border-slate-100 dark:border-transparent"><span><b className="block text-lg text-slate-900 dark:text-white">{row.plan}</b>plan</span><span><b className="block text-lg text-emerald-600 dark:text-emerald-400">{row.wydane}</b>WZ</span><span><b className="block text-lg text-blue-600 dark:text-blue-400">{row.przyjete}</b>PZ</span></div>
                         </div>
                       ))}

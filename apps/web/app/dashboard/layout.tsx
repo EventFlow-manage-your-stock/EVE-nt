@@ -26,6 +26,7 @@ type MenuItem = {
 // Mapowanie linków do wymaganych uprawnień (ACL z permissions.enum.ts)
 const menuConfig: MenuItem[] = [
   { icon: UserCircle, label: 'Profil', href: '/dashboard/settings/profile' },
+  { label: 'Wiadomości', href: '/dashboard/notifications', icon: Bell },
   { icon: Home, label: 'Kokpit', href: '/dashboard' },
   { icon: Calendar, label: 'Kalendarz', href: '/dashboard/calendar' },
   { icon: Star, label: 'Wydarzenia', requiredPermission: 'events:view', children: [
@@ -60,7 +61,6 @@ const menuConfig: MenuItem[] = [
   ]},
   { icon: FileText, label: 'Oferty', requiredPermission: 'offers:view', href: '/dashboard/offers' },
   { icon: FileText, label: 'Zapytanie ofertowe', requiredPermission: 'offers:view', href: '/dashboard/zapytania' },
-  { label: 'Powiadomienia i Komunikaty', href: '/dashboard/notifications', icon: Bell },
   { label: 'Globalne Załączniki', href: '/dashboard/attachments', icon: FileArchive },
   { icon: Settings, label: 'Ustawienia', requiredPermission: 'settings:view', children: [
     { label: 'Personalizacja systemu', href: '/dashboard/settings', icon: Settings },
