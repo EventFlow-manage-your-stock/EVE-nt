@@ -510,7 +510,7 @@ export default function OfferPdfPage() {
         </section>
 
         <footer className="eventflow-offer-pdf-footer mt-10 flex justify-between gap-4 border-t pt-3 text-[10px] font-bold text-slate-400">
-          <span>Ofertę wygenerowano w systemie EventFlow.</span>
+          <span>Ofertę wygenerowano w systemie EVE-nt by Evenement Systems.</span>
           <span>{text(offer.numer)} • {date(new Date())}</span>
         </footer>
       </main>

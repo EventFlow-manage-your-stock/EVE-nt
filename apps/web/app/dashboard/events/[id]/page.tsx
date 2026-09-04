@@ -2275,6 +2275,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
         id_magazynu: x.id_magazynu,
         miejsce_w_mag: x.miejsce_w_mag || '',
         kod: x.kod_kreskowy || x.zewnetrzny_kod_kreskowy || x.zewnetrzny_qr_kod || x.qr_kod || x.sn || '',
+        numer: x.numer_egzemplarza || x.numer_urzadzenia || '',
       }));
 
     const quantityList = models
@@ -3129,6 +3130,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                           <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
                             {p.kategoria} · {isQuantityOnly(p) ? <span className="text-[#04e0ff]">{p.ilosc || 1} {p.jednostka || 'szt.'}</span> : `${p.nazwa_zeskanowanego_case ? `w: ${p.nazwa_zeskanowanego_case} · ` : ''}${p.kod || '-'}` }
                             {p.magazyn_nazwa && !isQuantityOnly(p) ? ` · Magazyn: ${p.magazyn_nazwa}` : ''}
+                            {p.numer && !isQuantityOnly(p) ? ` · Numer: ${p.numer}` : ''}
                           </p>
                           {p.zmien_magazyn && (
                             <span className="mt-1 inline-block text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
@@ -3170,7 +3172,7 @@ function EquipmentPanel({ eventId, eventName }: { eventId: number; eventName: st
                       >
                         <b className="text-[13px] text-slate-900 dark:text-white block truncate">{r.nazwa_wiersza || r.nazwa}</b>
                         <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
-                          {r.kategoria_nazwa} {r.kod ? `· Kod/SN: ${r.kod}` : ''} {r.isQuantity ? `· [STAN: ${r.ilosc_magazynowa || 0} ${r.jednostka || 'szt.'}]` : `· Mag: ${r.magazyn_nazwa || '-'}`}
+                          {r.kategoria_nazwa} {r.kod ? `· Kod: ${r.kod}` : ''} {r.numer ? `· Numer: ${r.numer}` : ''} {r.isQuantity ? `· [STAN: ${r.ilosc_magazynowa || 0} ${r.jednostka || 'szt.'}]` : `· ${r.magazyn_nazwa || '-'}`}
                         </p>
                       </button>
                     ))}

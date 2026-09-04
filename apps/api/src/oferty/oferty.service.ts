@@ -34,7 +34,20 @@ export class OfertyService {
         status: true,
         wersje: {
           orderBy: { numer_wersji: 'desc' },
-          include: { sekcje: { where: { aktywny: true }, orderBy: { kolejnosc: 'asc' }, include: { pozycje: { where: { aktywny: true }, orderBy: { kolejnosc: 'asc' }, include: { model: true, kategoria: true } } } }, pozycje: { where: { aktywny: true } } },
+          include: {
+            sekcje: {
+              where: { aktywny: true },
+              orderBy: [{ kolejnosc: 'asc' }, { id: 'asc' }], // Deterministyczne sortowanie sekcji
+              include: {
+                pozycje: {
+                  where: { aktywny: true },
+                  orderBy: [{ kolejnosc: 'asc' }, { id: 'asc' }], // Deterministyczne sortowanie pozycji
+                  include: { model: true, kategoria: true },
+                },
+              },
+            },
+            pozycje: { where: { aktywny: true } },
+          },
         },
       },
     });
@@ -91,7 +104,23 @@ export class OfertyService {
 
   async update(id: number, dto: any, id_organizacji: number) {
     await this.findOne(id, id_organizacji);
-    return this.prisma.extendedClient.oferta.update({ where: { id }, data: { nazwa: dto.nazwa, id_kontrahenta: this.n(dto.id_kontrahenta), id_wydarzenia: this.n(dto.id_wydarzenia), id_wynajmu: this.n(dto.id_wynajmu), budzet_netto: this.n(dto.budzet_netto), budzet_brutto: this.n(dto.budzet_brutto), warunki_zamowienia: dto.warunki_zamowienia || null, notatki_wewnetrzne: dto.notatki_wewnetrzne || null } });
+    return this.prisma.extendedClient.oferta.update({
+      where: { id },
+      data: {
+        nazwa: dto.nazwa,
+        id_statusu_oferty: dto.id_statusu_oferty !== undefined ? this.n(dto.id_statusu_oferty) : undefined, 
+        termin_platnosci_dni: dto.termin_platnosci_dni !== undefined ? (Number(dto.termin_platnosci_dni) || 14) : undefined, 
+        id_kontrahenta: dto.id_kontrahenta !== undefined ? this.n(dto.id_kontrahenta) : undefined,
+        id_kontaktu: dto.id_kontaktu !== undefined ? this.n(dto.id_kontaktu) : undefined,
+        id_managera: dto.id_managera !== undefined ? this.n(dto.id_managera) : undefined,
+        id_wydarzenia: dto.id_wydarzenia !== undefined ? this.n(dto.id_wydarzenia) : undefined,
+        id_wynajmu: dto.id_wynajmu !== undefined ? this.n(dto.id_wynajmu) : undefined,
+        budzet_netto: dto.budzet_netto !== undefined ? this.n(dto.budzet_netto) : undefined,
+        budzet_brutto: dto.budzet_brutto !== undefined ? this.n(dto.budzet_brutto) : undefined,
+        warunki_zamowienia: dto.warunki_zamowienia !== undefined ? (dto.warunki_zamowienia || null) : undefined,
+        notatki_wewnetrzne: dto.notatki_wewnetrzne !== undefined ? (dto.notatki_wewnetrzne || null) : undefined,
+      },
+    });
   }
 
   async remove(id: number, id_organizacji: number) {

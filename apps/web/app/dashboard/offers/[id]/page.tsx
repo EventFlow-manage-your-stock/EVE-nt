@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   ArrowLeft, Box, Calculator, CheckCircle2, Copy, FileText, 
   Layers, Link as LinkIcon, Mail, PackagePlus, Pencil, Plus, 
   Save, Search, Trash2, Printer, Calendar, MapPin, Loader2,
-  ChevronUp, ChevronDown, GripVertical, EyeOff
+  ChevronUp, ChevronDown, GripVertical, EyeOff, ExternalLink
 } from 'lucide-react';
 import { api } from '../../../../lib/api';
 import { Button, Card, Field, inputClass, PageTitle, SearchableSelect } from '../../../../components/ProductUI';
@@ -104,7 +105,7 @@ function categoryPath(categoryId: string, byId: Map<string, any>) {
 const tableInputClass = "w-full border border-transparent bg-transparent hover:border-slate-300 focus:border-cyan-500 focus:bg-white rounded-lg px-2 py-1.5 outline-none transition font-semibold text-slate-800 placeholder-slate-300";
 
 // ============================================================================
-// WYSZUKIWARKA SPRZĘTU INLINE (POPRAWIONE ZAWIESZANIE SIĘ FOCUSU)
+// WYSZUKIWARKA SPRZĘTU INLINE
 // ============================================================================
 function InlineEquipmentAdder({ 
   sectionId, 
@@ -298,10 +299,24 @@ export default function OfferDetailsPage() {
     const offerData = o.data;
     setOffer(offerData);
 
-    const sections = (offerData?.wersje?.[0]?.sekcje || []).sort((a: any, b: any) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0));
+    // DETERMINISTYCZNE SORTOWANIE (ZABEZPIECZENIE PRZED SAMOCZYNNĄ ZMIANĄ KOLEJNOŚCI)
+    const sections = (offerData?.wersje?.[0]?.sekcje || [])
+      .map((s: any) => ({
+        ...s,
+        pozycje: (s.pozycje || []).sort(
+          (a: any, b: any) =>
+            Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0) ||
+            Number(a.id || 0) - Number(b.id || 0)
+        ),
+      }))
+      .sort(
+        (a: any, b: any) =>
+          Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0) ||
+          Number(a.id || 0) - Number(b.id || 0)
+      );
     setLocalSections(sections);
 
-    // Inicjalizacja zapamiętanych rabatów grup
+    // Inicjalizacja rabatów grup
     const initialDiscounts: Record<number, number> = {};
     sections.forEach((s: any) => {
       const stored = typeof window !== 'undefined' ? localStorage.getItem(`ef_offer_${id}_sec_${s.id}_discount`) : null;
@@ -314,7 +329,7 @@ export default function OfferDetailsPage() {
     });
     setSectionDiscounts(initialDiscounts);
 
-    // Inicjalizacja ukrytych cen pozycji z localStorage
+    // Inicjalizacja ukrytych cen z localStorage
     if (typeof window !== 'undefined') {
       const storedHidden = localStorage.getItem(`ef_offer_${id}_hidden_prices`);
       if (storedHidden) {
@@ -330,7 +345,7 @@ export default function OfferDetailsPage() {
       nazwa: offerData.nazwa,
       id_kontrahenta: offerData.id_kontrahenta ? String(offerData.id_kontrahenta) : '',
       id_statusu_oferty: offerData.id_statusu_oferty ? String(offerData.id_statusu_oferty) : '',
-      termin_platnosci_dni: offerData.termin_platnosci_dni,
+      termin_platnosci_dni: offerData.termin_platnosci_dni ?? 14,
       id_wydarzenia: offerData.id_wydarzenia ? String(offerData.id_wydarzenia) : '',
       id_wynajmu: offerData.id_wynajmu ? String(offerData.id_wynajmu) : '',
       budzet_netto: offerData.budzet_netto,
@@ -347,7 +362,7 @@ export default function OfferDetailsPage() {
   useEffect(() => { load(); }, [id]);
 
   // ==========================================================================
-  // OBLICZENIA I PODSUMOWANIA W CZASIE RZECZYWISTYM
+  // DYNAMICZNE PRZELICZANIE KWOT W CZASIE RZECZYWISTYM
   // ==========================================================================
   const getSectionTotal = useCallback((section: any, currentDirtyItems: Record<number, any>) => {
     return (section.pozycje || []).reduce((sum: number, p: any) => {
@@ -398,7 +413,7 @@ export default function OfferDetailsPage() {
   useEffect(() => {
     if (dirtyCount === 0 && !metaDirty) return;
     setAutoSaveStatus('saving');
-    const timer = setTimeout(() => { saveAllChanges(); }, 1500);
+    const timer = setTimeout(() => { saveAllChanges(); }, 1200);
     return () => clearTimeout(timer);
   }, [dirtyItems, offerMetaForm, metaDirty]);
 
@@ -407,6 +422,9 @@ export default function OfferDetailsPage() {
     setSavingId(-999999);
     setAutoSaveStatus('saving');
     setError('');
+
+    const currentPatches = { ...dirtyItems };
+
     try {
       const promises: Promise<any>[] = [];
       if (metaDirty) {
@@ -414,25 +432,44 @@ export default function OfferDetailsPage() {
           nazwa: offerMetaForm.nazwa,
           id_kontrahenta: offerMetaForm.id_kontrahenta ? Number(offerMetaForm.id_kontrahenta) : null,
           id_statusu_oferty: offerMetaForm.id_statusu_oferty ? Number(offerMetaForm.id_statusu_oferty) : null,
-          termin_platnosci_dni: Number(offerMetaForm.termin_platnosci_dni),
+          termin_platnosci_dni: Number(offerMetaForm.termin_platnosci_dni || 14),
           id_wydarzenia: offerMetaForm.id_wydarzenia ? Number(offerMetaForm.id_wydarzenia) : null,
           id_wynajmu: offerMetaForm.id_wynajmu ? Number(offerMetaForm.id_wynajmu) : null,
         }));
       }
-      const entries = Object.entries(dirtyItems);
+
+      const entries = Object.entries(currentPatches);
       if (entries.length > 0) {
         entries.forEach(([itemId, patch]) => {
           promises.push(api.put(`/api/oferty/${id}/pozycje/${itemId}`, patch));
         });
       }
+
       await Promise.all(promises);
+
+      // BEZPOŚREDNIA AKTUALIZACJA localSections ZAPOBIEGAJĄCA POWRACANIU CEN PO AUTO-SAVE
+      setLocalSections((prev) =>
+        prev.map((sec) => ({
+          ...sec,
+          pozycje: (sec.pozycje || []).map((p: any) => {
+            const patch = currentPatches[p.id];
+            if (!patch) return p;
+            const merged = { ...p, ...patch };
+            return {
+              ...merged,
+              razem_netto: calc(merged),
+            };
+          }),
+        }))
+      );
+
       setDirtyItems({});
       setMetaDirty(false);
       setAutoSaveStatus('saved');
-      setTimeout(() => setAutoSaveStatus('idle'), 3000);
+      setTimeout(() => setAutoSaveStatus('idle'), 2500);
       api.get(`/api/oferty/${id}/przelicz`).catch(() => {});
     } catch (err: any) {
-      setError('Błąd zapisu. Sprawdź połączenie.');
+      setError('Błąd zapisu. Sprawdź połączenie z serwerem.');
       setAutoSaveStatus('idle');
     } finally {
       setSavingId(null);
@@ -440,10 +477,10 @@ export default function OfferDetailsPage() {
   }
 
   // ==========================================================================
-  // USUWANIE OFERTY
+  // USUWANIE I DUPLIKACJA OFERTY
   // ==========================================================================
   async function removeOffer() {
-    if (!confirm(`Na pewno chcesz usunąć ofertę "${offer?.nazwa}"? Operacja ta ukryje ofertę w systemie.`)) return;
+    if (!confirm(`Na pewno chcesz usunąć ofertę "${offer?.nazwa}"?`)) return;
     try {
       await api.delete(`/api/oferty/${id}`);
       router.push('/dashboard/offers');
@@ -501,6 +538,42 @@ export default function OfferDetailsPage() {
     }
   }
 
+  // DUPLIKACJA SEKCJI (ZACHOWANA FUNKCJONALNOŚĆ)
+  async function dupSection(section: any) {
+    try {
+      await api.post(`/api/oferty/${id}/sekcje/${section.id}/duplikuj`, {});
+      await load();
+    } catch (err: any) {
+      setError('Nie udało się zduplikować grupy.');
+    }
+  }
+
+  // ZMIANA KOLORU SEKCJI (ZACHOWANA FUNKCJONALNOŚĆ)
+  async function updateSectionColor(section: any, color: string) {
+    const newSections = localSections.map(s => s.id === section.id ? { ...s, kolor: color } : s);
+    setLocalSections(newSections);
+    try {
+      await api.put(`/api/oferty/${id}/sekcje/${section.id}`, { kolor: color });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // MASOWY PATCH DLA SEKCJI (np. DNI = 1 - ZACHOWANA FUNKCJONALNOŚĆ)
+  async function applySectionPatch(section: any, patch: any) {
+    const items = section.pozycje || [];
+    if (!items.length) return;
+    setSavingId(-section.id);
+    try {
+      await Promise.all(items.map((p: any) => api.put(`/api/oferty/${id}/pozycje/${p.id}`, { ...p, ...patch })));
+      await load();
+    } catch (err: any) {
+      setError('Nie udało się zaaplikować zmian do grupy.');
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   async function handleSummaryDrop(e: React.DragEvent, targetIdx: number) {
     e.preventDefault();
     const srcIdx = Number(e.dataTransfer.getData('sectionIndex'));
@@ -521,11 +594,11 @@ export default function OfferDetailsPage() {
     }
   }
 
-  // Zmiana kolejności pozycji wewnątrz sekcji (góra / dół / drop)
+  // ZMIANA KOLEJNOŚCI POZYCJI W GRUPIE (STRZAŁKI + DRAG & DROP)
   function movePosition(sectionId: number, fromIdx: number, delta: number) {
     const section = localSections.find(s => s.id === sectionId);
     if (!section) return;
-    const sorted = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0));
+    const sorted = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0) || Number(a.id || 0) - Number(b.id || 0));
     const targetIdx = fromIdx + delta;
     if (targetIdx < 0 || targetIdx >= sorted.length) return;
 
@@ -544,7 +617,7 @@ export default function OfferDetailsPage() {
     if (fromIdx === toIdx || isNaN(fromIdx) || isNaN(toIdx)) return;
     const section = localSections.find(s => s.id === sectionId);
     if (!section) return;
-    const sorted = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0));
+    const sorted = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0) || Number(a.id || 0) - Number(b.id || 0));
     const [moved] = sorted.splice(fromIdx, 1);
     sorted.splice(toIdx, 0, moved);
 
@@ -556,7 +629,7 @@ export default function OfferDetailsPage() {
     });
   }
 
-  // Zmiana rabatu grupy sprzętowej z natychmiastowym przeliczeniem i zapamiętaniem
+  // TRWAŁY RABAT GRUPOWY
   async function promptSectionDiscount(section: any) {
     const currentDiscount = sectionDiscounts[section.id] ?? 0;
     const value = window.prompt(`Podaj rabat % dla grupy "${section.nazwa}":`, String(currentDiscount));
@@ -596,7 +669,6 @@ export default function OfferDetailsPage() {
     }
   }
 
-  // Przełączanie ukrywania cen poszczególnych pozycji na PDF
   function toggleHidePrice(itemId: number) {
     setHiddenPriceItemIds(prev => {
       const next = new Set(prev);
@@ -610,7 +682,7 @@ export default function OfferDetailsPage() {
     });
   }
 
-  // Szybkie dodawanie z wyszukiwarki inline
+  // SZYBKIE DODAWANIE INLINE
   async function handleInlineAdd(sectionId: number, model: any) {
     const price = model.cena_podstawowa || model.cena_netto || model.wartosc_domyslna_egzemplarza || 0;
     const section = localSections.find(s => s.id === sectionId);
@@ -641,7 +713,6 @@ export default function OfferDetailsPage() {
     }
   }
 
-  // Dodawanie pozycji ręcznej ze stringa wpisanego w wyszukiwarkę inline
   async function handleInlineAddCustom(sectionId: number, name: string) {
     const section = localSections.find(s => s.id === sectionId);
     const maxOrder = (section?.pozycje || []).reduce((max: number, p: any) => Math.max(max, Number(p.kolejnosc || 0)), 0);
@@ -669,7 +740,6 @@ export default function OfferDetailsPage() {
     }
   }
 
-  // Dodawanie pozycji ręcznej przez modal
   function openAddItem(section: any) {
     setShowItem(section);
     const sectionDiscount = sectionDiscounts[section.id] || 0;
@@ -708,11 +778,10 @@ export default function OfferDetailsPage() {
       setShowItem(null);
       await load();
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Nie udało się dodać pozycji ręcznej.');
+      setError(err?.response?.data?.message || err.message || 'Nie udało się dodać pozycji.');
     }
   }
 
-  // Zaawansowany picker sprzętu z magazynu
   function openAddEquipment(section: any) {
     setShowEquipment(section);
     setEquipmentSearch('');
@@ -870,6 +939,8 @@ export default function OfferDetailsPage() {
 
   if (!offer) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-cyan-600 w-10 h-10"/></div>;
 
+  const linkedEventId = offerMetaForm.id_wydarzenia || offer?.id_wydarzenia;
+
   return (
     <div className="mx-auto max-w-[1900px] space-y-6 animate-fade-in-up">
       {/* NAGŁÓWEK OFERTY */}
@@ -881,10 +952,24 @@ export default function OfferDetailsPage() {
           <div className="flex flex-wrap items-center gap-3">
             {autoSaveStatus === 'saving' && <span className="text-sm font-bold text-slate-400 flex items-center gap-2"><Loader2 size={14} className="animate-spin"/> Zapisywanie...</span>}
             {autoSaveStatus === 'saved' && <span className="text-sm font-bold text-emerald-600 flex items-center gap-2"><CheckCircle2 size={14}/> Zapisano</span>}
+            
+            {/* PRZYCISK PRZEJŚCIA DO WYDARZENIA */}
+            {linkedEventId && (
+              <Button variant="secondary" onClick={() => router.push(`/dashboard/events/${linkedEventId}`)}>
+                <Calendar size={16} className="inline mr-1.5 text-cyan-600" /> Idź do wydarzenia
+              </Button>
+            )}
+
             <Button variant="secondary" onClick={() => router.back()}><ArrowLeft size={16} className="inline mr-2" /> Powrót</Button>
             <Button variant="danger" onClick={removeOffer} disabled={savingId === -999999}><Trash2 size={16} className="inline mr-2" /> Usuń</Button>
             <Button onClick={saveAllChanges} disabled={autoSaveStatus === 'saving' || (dirtyCount === 0 && !metaDirty)}><Save size={16} className="inline mr-2" /> Zapisz</Button>
             <Button variant="secondary" onClick={() => setDuplicateTarget(offer)}><Copy size={16} className="inline mr-2" /> Duplikuj</Button>
+            
+            {/* ZACHOWANY PRZYCISK WYŚLIJ E-MAILEM
+            <Button variant="secondary" onClick={() => alert('Wysyłanie oferty e-mailem...')}>
+              <Mail size={16} className="inline mr-2" /> Wyślij E-mailem
+            </Button> */}
+            
             <Button variant="secondary" onClick={() => setShowPdfSettings(true)}><Printer size={16} className="inline mr-2" /> Drukuj PDF</Button>
           </div>
         }
@@ -901,6 +986,8 @@ export default function OfferDetailsPage() {
             <Field label="Nazwa oferty">
               <input className={inputClass} value={offerMetaForm.nazwa || ''} onChange={e => handleMetaChange('nazwa', e.target.value)} />
             </Field>
+            
+            {/* ZAPIS STATUSU OFERTY */}
             <Field label="Status oferty">
               <SearchableSelect 
                 value={offerMetaForm.id_statusu_oferty || ''}
@@ -909,6 +996,7 @@ export default function OfferDetailsPage() {
                 placeholder="Wybierz status..."
               />
             </Field>
+
             <Field label="Klient z bazy (CRM)">
               <SearchableSelect 
                 value={offerMetaForm.id_kontrahenta || ''}
@@ -917,6 +1005,8 @@ export default function OfferDetailsPage() {
                 placeholder="Wybierz klienta..."
               />
             </Field>
+
+            {/* ZAPIS TERMINU PŁATNOŚCI */}
             <Field label="Termin płatności (Dni)">
               <input type="number" className={inputClass} value={offerMetaForm.termin_platnosci_dni ?? 14} onChange={e => handleMetaChange('termin_platnosci_dni', e.target.value)} />
             </Field>
@@ -969,6 +1059,17 @@ export default function OfferDetailsPage() {
                 placeholder="Wybierz wydarzenie..."
               />
             </Field>
+            {linkedEventId && (
+              <div className="-mt-2">
+                <Link
+                  href={`/dashboard/events/${linkedEventId}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-black text-cyan-600 hover:text-cyan-700 hover:underline"
+                >
+                  <ExternalLink size={13} target="_blank" /> Otwórz panel tego wydarzenia →
+                </Link>
+              </div>
+            )}
+
             <Field label="Lub przypisany wynajem">
               <SearchableSelect 
                 value={offerMetaForm.id_wynajmu || ''}
@@ -1010,7 +1111,7 @@ export default function OfferDetailsPage() {
 
         <div className="space-y-6">
           {localSections.map((section: any) => {
-            const sortedPositions = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0));
+            const sortedPositions = [...(section.pozycje || [])].sort((a, b) => Number(a.kolejnosc || 0) - Number(b.kolejnosc || 0) || Number(a.id || 0) - Number(b.id || 0));
 
             return (
               <div key={section.id} className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-visible flex flex-col">
@@ -1022,13 +1123,24 @@ export default function OfferDetailsPage() {
                       {section.opis && <p className="text-xs font-medium text-white/80 mt-0.5">{section.opis}</p>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 z-10">
-                    <div className="font-black text-lg mr-4 bg-black/20 px-3 py-1 rounded-lg">
+                  
+                  {/* KOMPLETNY PAKIET PRZYCISKÓW W NAGŁÓWKU SEKCJI */}
+                  <div className="flex items-center gap-2 z-10 flex-wrap">
+                    <div className="font-black text-lg mr-2 bg-black/20 px-3 py-1 rounded-lg">
                       {money(getSectionTotal(section, dirtyItems))}
                     </div>
-                    <button onClick={() => openEditSection(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition shadow-sm" title="Edytuj grupę"><Pencil size={14} /></button>
+
+                    {/* WYBÓR KOLORU GRUPY */}
+                    <label className="flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1.5 text-xs font-bold hover:bg-white/30 transition shadow-sm cursor-pointer" title="Zmień kolor grupy">
+                      Kolor <input type="color" value={section.kolor || '#0891B2'} onChange={(e) => updateSectionColor(section, e.target.value)} className="h-5 w-6 rounded border-0 bg-transparent cursor-pointer" />
+                    </label>
+
+                    {/* EDYCJA NAZWY / GRUPY */}
+                    <button onClick={() => openEditSection(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition shadow-sm flex items-center gap-1" title="Edytuj nazwę grupy">
+                      <Pencil size={14} /> Edytuj
+                    </button>
                     
-                    {/* PRZYCISK TRWAŁEGO RABATU GRUPY */}
+                    {/* TRWAŁY RABAT GRUPY */}
                     <button 
                       onClick={() => promptSectionDiscount(section)} 
                       className={`rounded-lg px-3 py-2 text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
@@ -1038,13 +1150,38 @@ export default function OfferDetailsPage() {
                       }`}
                       title="Kliknij, aby zmienić rabat dla całej grupy"
                     >
-                      % Rabat: {sectionDiscounts[section.id] || 0}%
+                      Rabat: {sectionDiscounts[section.id] || 0}%
                     </button>
 
-                    <button onClick={() => { setShowBundle(section); setForm({ ilosc_pakietow: 1, dni_pracy: 1 }); }} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition flex items-center gap-1.5"><Layers size={14}/> Pakiet</button>
-                    <button onClick={() => openAddEquipment(section)} className="rounded-lg bg-white/30 px-3 py-2 text-xs font-black hover:bg-white/40 transition flex items-center gap-1.5"><Search size={14}/> Baza sprzętu</button>
-                    <button onClick={() => openAddItem(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition flex items-center gap-1.5">+ Pozycja ręczna</button>
-                    <button onClick={() => deleteSection(section)} className="rounded-lg bg-red-500/80 px-3 py-2 text-xs font-black hover:bg-red-600 transition shadow-sm ml-2"><Trash2 size={14} /></button>
+                    {/* PRZYCISK SZYBKIEGO USTAWIANIA DNI = 1 */}
+                    {/* <button onClick={() => applySectionPatch(section, { dni_pracy: 1 })} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition shadow-sm" title="Ustaw Dni pracy = 1 dla wszystkich pozycji w grupie">
+                      Dni = 1
+                    </button> */}
+
+                    {/* DUPLIKOWANIE CAŁEJ GRUPY */}
+                    <button onClick={() => dupSection(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition shadow-sm flex items-center gap-1" title="Zduplikuj tę grupę wraz ze sprzętem">
+                      <Copy size={14} /> Duplikuj grupę
+                    </button>
+
+                    {/* PAKIET Z SZABLONU */}
+                    <button onClick={() => { setShowBundle(section); setForm({ ilosc_pakietow: 1, dni_pracy: 1 }); }} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition flex items-center gap-1.5">
+                      <Layers size={14}/> Pakiet
+                    </button>
+
+                    {/* BAZA SPRZĘTU */}
+                    <button onClick={() => openAddEquipment(section)} className="rounded-lg bg-white/30 px-3 py-2 text-xs font-black hover:bg-white/40 transition flex items-center gap-1.5">
+                      <Search size={14}/> Baza sprzętu
+                    </button>
+
+                    {/* POZYCJA RĘCZNA */}
+                    <button onClick={() => openAddItem(section)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 transition flex items-center gap-1.5">
+                      + Pozycja ręczna
+                    </button>
+
+                    {/* USUNIĘCIE GRUPY */}
+                    <button onClick={() => deleteSection(section)} className="rounded-lg bg-red-500/80 px-3 py-2 text-xs font-black hover:bg-red-600 transition shadow-sm ml-1" title="Usuń grupę">
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
 
@@ -1102,7 +1239,6 @@ export default function OfferDetailsPage() {
                     </table>
                   </div>
 
-                  {/* SZYBKIE DODAWANIE INLINE */}
                   <InlineEquipmentAdder 
                     sectionId={section.id} 
                     models={models} 
@@ -1111,7 +1247,7 @@ export default function OfferDetailsPage() {
                   />
 
                   {(!section.pozycje || section.pozycje.length === 0) && (
-                    <div className="p-8 text-center text-sm font-bold text-slate-400 bg-slate-50/30">Ta grupa jest pusta. Użyj wyszukiwarki poniżej, aby dodać pierwszy sprzęt.</div>
+                    <div className="p-8 text-center text-sm font-bold text-slate-400 bg-slate-50/30">Ta grupa jest pusta. Użyj wyszukiwarki poniżej, aby dodać sprzęt.</div>
                   )}
                 </div>
               </div>
@@ -1128,7 +1264,7 @@ export default function OfferDetailsPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-cyan-300 hover:bg-cyan-50 transition shadow-sm">
                 <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-cyan-600" checked={pdfConfig.showUnitPrices} onChange={(e) => setPdfConfig({...pdfConfig, showUnitPrices: e.target.checked})} />
-                <div><span className="font-bold text-slate-800 block">Pokaż ceny jednostkowe</span><span className="text-xs text-slate-500">Wyświetla bazową cenę dla pozycji nieukrytych.</span></div>
+                <div><span className="font-bold text-slate-800 block">Pokaż ceny jednostkowe</span><span className="text-xs text-slate-500">Wyświetla bazową cenę oraz cenę netto dla pozycji.</span></div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-cyan-300 hover:bg-cyan-50 transition shadow-sm">
                 <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-cyan-600" checked={pdfConfig.showDiscounts} onChange={(e) => setPdfConfig({...pdfConfig, showDiscounts: e.target.checked})} />
@@ -1387,7 +1523,7 @@ export default function OfferDetailsPage() {
 }
 
 // ============================================================================
-// WIERSZ POZYCJI OFERTY (BEZ SELECTA TYPU, Z FOCUS I STRZAŁKAMI/DRAG)
+// WIERSZ POZYCJI OFERTY
 // ============================================================================
 function OfferPositionRow({ 
   item, 
@@ -1488,7 +1624,7 @@ function OfferPositionRow({
       onDrop={onDragPositionDrop}
       className="border-b border-slate-100 hover:bg-cyan-50/30 transition group"
     >
-      {/* REORDER ARROWS & DRAG HANDLE */}
+      {/* UCHWYT DRAG & DROP I STRZAŁKI GÓRA / DÓŁ */}
       <td className="px-2 py-2 align-top text-center pt-3.5">
         <div className="flex items-center justify-center gap-0.5">
           <div 
@@ -1522,7 +1658,7 @@ function OfferPositionRow({
         </div>
       </td>
 
-      {/* NAZWA POZYCJI (BEZ SELECTA TYPU) */}
+      {/* NAZWA POZYCJI */}
       <td className="px-3 py-2 align-top">
         <input 
           className={`${tableInputClass} text-[13px] font-bold`} 
