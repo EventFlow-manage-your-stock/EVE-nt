@@ -24,6 +24,22 @@ function asNumber(v: any, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function isZestawModel(m: any): boolean {
+  if (!m) return false;
+  const type = String(m?.typ_sprzetu || '').toLowerCase();
+  const name = String(m?.nazwa || '').toLowerCase();
+  return type === 'zestaw' || type === 'rack' || m?.czy_zestaw === true || name.includes('rack');
+}
+function isCaseModel(m: any): boolean {
+  if (!m) return false;
+  if (isZestawModel(m)) return false; // PRIORYTET: Zestawy i Racki bezwzględnie zostają w ofercie!
+  const type = String(m?.typ_sprzetu || '').toLowerCase();
+  return (
+    type === 'opakowanie' ||
+    type === 'case'
+  );
+}
+
 function calc(p: any) {
   const cena = asNumber(p.cena_netto, 0);
   const ilosc = asNumber(p.ilosc, 1);
@@ -125,14 +141,16 @@ function InlineEquipmentAdder({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return models.filter((m: any) => {
-      const tagsStr = Array.isArray(m.tagi) ? m.tagi.join(' ') : (m.tagi || '');
-      const serialsStr = Array.isArray(m.egzemplarze) 
-        ? m.egzemplarze.map((e: any) => `${e.numer_egzemplarza || ''} ${e.sn || ''} ${e.kod_kreskowy || ''}`).join(' ')
-        : '';
-      const fullSearch = `${m.nazwa || ''} ${m.kod_kreskowy || ''} ${tagsStr} ${serialsStr} ${m.producent || ''}`.toLowerCase();
-      return fullSearch.includes(q);
-    }).slice(0, 10);
+    return models
+      .filter((m: any) => !isCaseModel(m)) // WYKLUCZENIE CASE'ÓW Z SZYBKIEJ WYSZUKIWARKI
+      .filter((m: any) => {
+        const tagsStr = Array.isArray(m.tagi) ? m.tagi.join(' ') : (m.tagi || '');
+        const serialsStr = Array.isArray(m.egzemplarze) 
+          ? m.egzemplarze.map((e: any) => `${e.numer_egzemplarza || ''} ${e.sn || ''} ${e.kod_kreskowy || ''}`).join(' ')
+          : '';
+        const fullSearch = `${m.nazwa || ''} ${m.kod_kreskowy || ''} ${tagsStr} ${serialsStr} ${m.producent || ''}`.toLowerCase();
+        return fullSearch.includes(q);
+      }).slice(0, 10);
   }, [query, models]);
 
   function handleAdd(model: any) {
@@ -283,6 +301,11 @@ export default function OfferDetailsPage() {
     showSummaryVat: true,
     showSummaryBrutto: true 
   });
+
+  const availableEquipmentModels = useMemo(() => {
+    return models.filter((m: any) => !isCaseModel(m));
+  }, [models]);
+
 
   async function load() {
     const [o, m, k, b, kon, stat, ev, ren] = await Promise.all([
@@ -910,23 +933,23 @@ export default function OfferDetailsPage() {
   const activeEquipmentRootObj = equipmentRoot !== 'all' ? equipmentCategoryById.get(equipmentRoot) : null;
 
   function totalForEquipmentCategory(categoryId: string) {
-    if (categoryId === 'all') return models.length;
+    if (categoryId === 'all') return availableEquipmentModels.length;
     const ids = descendantsOf(categoryId, equipmentCategoryById);
-    return models.filter((m: any) => ids.has(modelCategoryId(m))).length;
+    return availableEquipmentModels.filter((m: any) => ids.has(modelCategoryId(m))).length;
   }
 
   const equipmentModels = useMemo(() => {
     const q = equipmentSearch.trim().toLowerCase();
     const selectedCategoryId = equipmentSub || (equipmentRoot === 'all' ? '' : equipmentRoot);
     const selectedIds = selectedCategoryId ? descendantsOf(selectedCategoryId, equipmentCategoryById) : null;
-    return models.filter((m: any) => {
+    return availableEquipmentModels.filter((m: any) => {
         const catId = modelCategoryId(m);
         const matchesCategory = !selectedIds || selectedIds.has(catId);
         const tagsStr = (m.tagi || []).join(' ');
         const matchesQuery = !q || [m.nazwa, m.typ_sprzetu, m.kod_kreskowy, tagsStr].filter(Boolean).join(' ').toLowerCase().includes(q);
         return matchesCategory && matchesQuery;
       }).slice(0, 100);
-  }, [models, equipmentSearch, equipmentRoot, equipmentSub, equipmentCategoryById]);
+  }, [availableEquipmentModels, equipmentSearch, equipmentRoot, equipmentSub, equipmentCategoryById]);
 
   async function addBundle(e: any) {
     e.preventDefault();
@@ -1241,7 +1264,7 @@ export default function OfferDetailsPage() {
 
                   <InlineEquipmentAdder 
                     sectionId={section.id} 
-                    models={models} 
+                    models={availableEquipmentModels} 
                     onAdd={(m) => handleInlineAdd(section.id, m)} 
                     onAddCustom={(name) => handleInlineAddCustom(section.id, name)} 
                   />

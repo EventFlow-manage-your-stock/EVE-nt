@@ -280,4 +280,16 @@ export class MagazynController {
       rawUserId ? Number(rawUserId) : null,
     );
   }
+  @Put('wynajmy/:id/packlista')
+  async updatePacklistaWynajmuUwagi(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: any,
+    @Req() req: Request,
+  ) {
+    return this.magazynService.updatePacklistaWynajmuUwagi(
+      id,
+      dto,
+      Number((req.user as any).id_organizacji),
+    );
+  }
 }

@@ -2229,4 +2229,45 @@ export class MagazynService {
       return { success: true };
     });
   }
+
+  async updatePacklistaWynajmuUwagi(id_wynajmu: number, dto: any, id_organizacji: number) {
+    const pozycje = Array.isArray(dto?.pozycje) ? dto.pozycje : [];
+    return this.prisma.extendedClient.$transaction(async (tx) => {
+      const wynajem = await tx.wynajem.findFirst({
+        where: {
+          id: id_wynajmu,
+          id_organizacji,
+          aktywny: true,
+        },
+      });
+      if (!wynajem) {
+        throw new NotFoundException('Nie znaleziono wynajmu');
+      }
+
+      await tx.wynajem.update({
+        where: { id: id_wynajmu },
+        data: {
+          uwagi_packlista: this.cleanString(dto?.uwagi_packlista),
+        },
+      });
+
+      for (const p of pozycje) {
+        const id_modelu = this.cleanNumber(p.id_modelu);
+        if (!id_modelu) continue;
+        await tx.pozycjaWynajmu.updateMany({
+          where: {
+            id_organizacji,
+            id_wynajmu,
+            id_modelu,
+            aktywny: true,
+          },
+          data: {
+            notatki_wewnetrzne: this.cleanString(p.uwagi),
+          },
+        });
+      }
+
+      return { ok: true };
+    });
+  }
 }

@@ -92,6 +92,12 @@ model Organizacja {
   powiadomienia              Powiadomienie[]
   powiadomienia_cykliczne    PowiadomienieCykliczne[]
   zawartosci_case_ilosciowe  ZawartoscCaseIlosciowa[]
+  wynajmy_managerowie        WynajemManager[]
+  etapy_wynajmow             EtapWynajmu[]
+  etapy_wynajmow_uzytkownicy EtapWynajmuUzytkownik[]
+  etapy_wynajmow_pojazdy     EtapWynajmuPojazd[]
+  wynajmy_noclegi            WynajemNocleg[]
+  powiadomienia_wynajem_ekipa PowiadomienieWynajemEkipa[]
 
   @@map("organizacje")
 }
@@ -161,6 +167,10 @@ model Uzytkownik {
   otrzymane_powiadomienia      Powiadomienie[] @relation("OdbiorcaPowiadomienia")
   wyslane_powiadomienia        Powiadomienie[] @relation("NadawcaPowiadomienia")
   utworzone_cykliczne          PowiadomienieCykliczne[]
+  utworzone_wynajmy            Wynajem[]                   @relation("TworcaWynajmu")
+  wynajmy_managerowie          WynajemManager[]
+  etapy_wynajmow_przypisania   EtapWynajmuUzytkownik[]
+  powiadomienia_wynajem_ekipa  PowiadomienieWynajemEkipa[]
 
   @@unique([id_organizacji, email])
   @@map("uzytkownicy")
@@ -999,23 +1009,28 @@ model StatusWynajmu {
 model Wynajem {
   id                      Int       @id @default(autoincrement())
   id_organizacji          Int
-  id_wydarzenia           Int? // DEPRECATED
+  id_wydarzenia           Int?      // Relacja opcjonalna / historyczna
   id_oferty               Int?
   id_kontrahenta          Int?
   id_kontaktu             Int?
-  id_managera             Int?
+  id_managera             Int?      // Główny opiekun
+  id_tworcy               Int?      // Użytkownik, który utworzył wynajem
   id_miejsca              Int?
   id_statusu_wynajmu      Int?
   id_statusu_magazynowego Int?
   id_statusu_ksiegowego   Int?
   nazwa                   String?   @db.VarChar(255)
   numer                   String?   @db.VarChar(100)
+  opis                    String?   @db.Text // Pełne wytyczne / brief
+  uwagi_packlista         String?   @db.Text // Uwagi widoczne na wydruku packlisty
   data_wydania            DateTime?
   data_zwrotu_planowana   DateTime?
   data_zwrotu_rzeczywista DateTime?
   budzet_netto            Decimal?  @db.Decimal(12, 2)
+  budzet_brutto           Decimal?  @db.Decimal(12, 2)
   miejsce_reczne          String?   @db.VarChar(255)
   adres_reczny            String?   @db.VarChar(255)
+  link_google_maps        String?   @db.VarChar(500)
   notatki_wewnetrzne      String?   @db.Text
   aktywny                 Boolean   @default(true)
   data_utworzenia         DateTime  @default(now())
@@ -1030,6 +1045,7 @@ model Wynajem {
   status_magazynowy StatusMagazynowy?   @relation(fields: [id_statusu_magazynowego], references: [id])
   status_ksiegowy   StatusKsiegowy?     @relation(fields: [id_statusu_ksiegowego], references: [id])
   manager           Uzytkownik?         @relation("ManagerWynajmu", fields: [id_managera], references: [id])
+  tworca            Uzytkownik?         @relation("TworcaWynajmu", fields: [id_tworcy], references: [id])
   kontakt           KontaktKontrahenta? @relation(fields: [id_kontaktu], references: [id])
   miejsce           Miejsce?            @relation(fields: [id_miejsca], references: [id])
 
@@ -1038,7 +1054,12 @@ model Wynajem {
   ekipa              WynajemUzytkownik[]
   pojazdy            WynajemPojazd[]
   zadania            Zadanie[]
+  managerowie        WynajemManager[]
+  etapy              EtapWynajmu[]
+  noclegi            WynajemNocleg[]
+  powiadomienia      PowiadomienieWynajemEkipa[]
 
+  @@index([data_wydania, data_zwrotu_planowana])
   @@map("wynajmy")
 }
 
@@ -1065,7 +1086,8 @@ model WynajemPojazd {
   id                Int       @id @default(autoincrement())
   id_organizacji    Int
   id_wynajmu        Int
-  id_pojazdu        Int
+  id_pojazdu        Int?      // Null, jeśli pojazd jest z zewnątrz / spoza bazy floty
+  pojazd_zewnetrzny String?   @db.VarChar(255)
   rola_pojazdu      String?   @db.VarChar(100)
   aktywny           Boolean   @default(true)
   data_utworzenia   DateTime  @default(now())
@@ -1073,11 +1095,114 @@ model WynajemPojazd {
   data_usuniecia    DateTime?
 
   organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
-  wynajem     Wynajem     @relation(fields: [id_wynajmu], references: [id])
-  pojazd      Pojazd      @relation(fields: [id_pojazdu], references: [id])
+  wynajem     Wynajem     @relation(fields: [id_wynajmu], references: [id], onDelete: Cascade)
+  pojazd      Pojazd?     @relation(fields: [id_pojazdu], references: [id])
 
-  @@unique([id_wynajmu, id_pojazdu])
   @@map("wynajmy_pojazdy")
+}
+
+model WynajemManager {
+  id              Int      @id @default(autoincrement())
+  id_organizacji  Int
+  id_wynajmu      Int
+  id_uzytkownika  Int
+  aktywny         Boolean  @default(true)
+  data_utworzenia DateTime @default(now())
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
+  wynajem     Wynajem     @relation(fields: [id_wynajmu], references: [id], onDelete: Cascade)
+  uzytkownik  Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+
+  @@unique([id_wynajmu, id_uzytkownika])
+  @@map("wynajmy_managerowie")
+}
+
+model EtapWynajmu {
+  id                Int       @id @default(autoincrement())
+  id_organizacji    Int
+  id_wynajmu        Int
+  nazwa             String    @db.VarChar(150)
+  data_start        DateTime
+  data_koniec       DateTime
+  opis              String?   @db.Text
+  kolejnosc         Int       @default(0)
+  aktywny           Boolean   @default(true)
+  data_utworzenia   DateTime  @default(now())
+  data_aktualizacji DateTime  @updatedAt
+  data_usuniecia    DateTime?
+
+  organizacja            Organizacja             @relation(fields: [id_organizacji], references: [id])
+  wynajem                Wynajem                 @relation(fields: [id_wynajmu], references: [id], onDelete: Cascade)
+  przypisani_uzytkownicy EtapWynajmuUzytkownik[]
+  przypisane_pojazdy     EtapWynajmuPojazd[]
+
+  @@index([id_wynajmu])
+  @@map("etapy_wynajmu")
+}
+
+model EtapWynajmuUzytkownik {
+  id             Int     @id @default(autoincrement())
+  id_organizacji Int
+  id_etapu       Int
+  id_uzytkownika Int
+  aktywny        Boolean @default(true)
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
+  etap        EtapWynajmu @relation(fields: [id_etapu], references: [id], onDelete: Cascade)
+  uzytkownik  Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+
+  @@unique([id_etapu, id_uzytkownika])
+  @@map("etapy_wynajmu_uzytkownicy")
+}
+
+model EtapWynajmuPojazd {
+  id                Int       @id @default(autoincrement())
+  id_organizacji    Int
+  id_etapu          Int
+  id_pojazdu        Int?      // Null jeśli auto zewnętrzne
+  pojazd_zewnetrzny String?   @db.VarChar(255)
+  aktywny           Boolean   @default(true)
+  data_utworzenia   DateTime  @default(now())
+  data_aktualizacji DateTime  @default(now()) @updatedAt
+  data_usuniecia    DateTime?
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
+  etap        EtapWynajmu @relation(fields: [id_etapu], references: [id], onDelete: Cascade)
+  pojazd      Pojazd?     @relation(fields: [id_pojazdu], references: [id])
+
+  @@map("etapy_wynajmu_pojazdy")
+}
+
+model WynajemNocleg {
+  id                Int       @id @default(autoincrement())
+  id_organizacji    Int
+  id_wynajmu        Int
+  nazwa_obiektu     String    @db.VarChar(255)
+  adres             String?   @db.VarChar(255)
+  data_zameldowania DateTime?
+  data_wymeldowania DateTime?
+  liczba_osob       Int?
+  opis              String?   @db.Text
+  aktywny           Boolean   @default(true)
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
+  wynajem     Wynajem     @relation(fields: [id_wynajmu], references: [id], onDelete: Cascade)
+
+  @@map("wynajmy_noclegi")
+}
+
+model PowiadomienieWynajemEkipa {
+  id             Int      @id @default(autoincrement())
+  id_organizacji Int
+  id_wynajmu     Int
+  id_uzytkownika Int
+  data_wyslania  DateTime @default(now())
+
+  organizacja Organizacja @relation(fields: [id_organizacji], references: [id])
+  wynajem     Wynajem     @relation(fields: [id_wynajmu], references: [id], onDelete: Cascade)
+  uzytkownik  Uzytkownik  @relation(fields: [id_uzytkownika], references: [id])
+
+  @@map("powiadomienia_wynajem_ekipa")
 }
 
 model PozycjaWynajmu {
@@ -1312,6 +1437,7 @@ model Pojazd {
   przeglady_pojazdu PrzegladPojazdu[]
   wynajmy_pojazdy   WynajemPojazd[]
   etapy_przypisania EtapPojazd[]
+  etapy_wynajmow_przypisania  EtapWynajmuPojazd[]
 
   @@unique([id_organizacji, nr_rejestracyjny])
   @@index([vin])

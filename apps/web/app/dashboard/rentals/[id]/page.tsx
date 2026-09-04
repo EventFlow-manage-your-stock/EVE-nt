@@ -26,11 +26,12 @@ import { openLabelsPage } from '../../../../lib/labels';
 const TABS = [
   { id: 'sprzet', label: 'Sprzęt (Wydania/Zwroty)', icon: Box },
   { id: 'oferty', label: 'Oferty', icon: DollarSign },
-  { id: 'ekipa', label: 'Ekipa / Logistyka', icon: Users },
+  { id: 'ekipa', label: 'Ekipa', icon: Users },
   { id: 'podsumowanie_ekipy', label: 'Technicy (Liczniki)', icon: Users },
   { id: 'flota', label: 'Flota', icon: Truck },
-  { id: 'zadania', label: 'Zadania', icon: CheckSquare },
-  { id: 'chat', label: 'Chat Wynajmu', icon: MessageSquare },
+  { id: 'nocleg', label: 'Noclegi', icon: Home },
+  // { id: 'zadania', label: 'Zadania', icon: CheckSquare },
+  // { id: 'chat', label: 'Chat Wynajmu', icon: MessageSquare },
   { id: 'zalaczniki', label: 'Załączniki', icon: FileArchive },
   { id: 'historia', label: 'Historia Zmian', icon: History },
 ];
@@ -41,6 +42,7 @@ const PREDEFINED_ROLES = [
   'Wydający / Magazynier',
   'Odbierający / Kontrola',
   'Serwisant techniczny',
+  'Kierownik Techniczny / Szef Ekipy',
   'Inne (Wpisz własną...)',
 ];
 
@@ -85,7 +87,7 @@ function buildCategoryTree(categories: any[]) {
     else roots.push(cat);
   }
   const sortByOrder = (items: any[]) => {
-    items.sort((a, b) => numberOrZero(a.kolejnosc) - numberOrZero(b.kolejnosc) || String(a.nazwa || '').localeCompare(String(a.nazwa || ''), 'pl'));
+    items.sort((a, b) => numberOrZero(a.kolejnosc) - numberOrZero(b.kolejnosc) || String(a.nazwa || '').localeCompare(String(b.nazwa || ''), 'pl'));
     items.forEach((item) => sortByOrder(item.dzieci || []));
   };
   sortByOrder(roots);
@@ -128,7 +130,7 @@ function modelCategoryIdOf(row: any) { return row?.id_kategorii || row?.model?.i
 function numberOf(row: any) { const egz = row?.egzemplarz || row; return egz?.numer_egzemplarza || egz?.numer_urzadzenia || egz?.sn || egz?.kod_kreskowy || ''; }
 
 // ============================================================================
-// KOMPONENT GŁÓWNY (Szczegóły Wynajmu)
+// KOMPONENT GŁÓWNY (Szczegóły Wypożyczenia)
 // ============================================================================
 
 export default function RentalDetailsPage() {
@@ -149,6 +151,13 @@ export default function RentalDetailsPage() {
   const [offerName, setOfferName] = useState('');
   const [duplicateTarget, setDuplicateTarget] = useState<any>(null);
   const [crmModalMode, setCrmModalMode] = useState<'kontrahent' | 'kontakt' | null>(null);
+
+  const [showManagerModal, setShowManagerModal] = useState(false);
+  const [selectedManagerId, setSelectedManagerId] = useState('');
+  
+  const [etapToManage, setEtapToManage] = useState<any>(null);
+  const [etapToEdit, setEtapToEdit] = useState<any>(null);
+  const [showMassAssign, setShowMassAssign] = useState<{type: 'user' | 'vehicle', obj: any} | null>(null);
 
   useEffect(() => { setTabSearchQuery(''); }, [activeTab]);
 
@@ -183,10 +192,17 @@ export default function RentalDetailsPage() {
       const res = await api.get(`/api/wynajmy/${params.id}`);
       const w = res.data;
       setRentalData(w);
+
+      setEtapToManage((currentEtap: any) => {
+        if (!currentEtap?.id) return currentEtap;
+        return w?.etapy?.find((etap: any) => etap.id === currentEtap.id) || currentEtap;
+      });
+
       setOfferName(w?.nazwa ? `Oferta - ${w.nazwa}` : `Oferta do wynajmu #${w.id}`);
       setForm({
         numer: w.numer || '',
         nazwa: w.nazwa || '',
+        opis: w.opis || '',
         id_statusu_wynajmu: toSelect(w.id_statusu_wynajmu),
         id_statusu_magazynowego: toSelect(w.id_statusu_magazynowego),
         id_statusu_ksiegowego: toSelect(w.id_statusu_ksiegowego),
@@ -225,6 +241,7 @@ export default function RentalDetailsPage() {
   const payload = useMemo(() => ({
     numer: strOrNull(form.numer),
     nazwa: strOrNull(form.nazwa),
+    opis: strOrNull(form.opis),
     notatki_wewnetrzne: strOrNull(form.notatki_wewnetrzne),
     data_wydania: strOrNull(form.data_wydania),
     data_zwrotu_planowana: strOrNull(form.data_zwrotu_planowana),
@@ -288,6 +305,22 @@ export default function RentalDetailsPage() {
     setCrmModalMode(null);
   }
 
+  async function assignManager() {
+    if (!selectedManagerId) return alert('Wybierz osobę!');
+    try {
+      await api.post(`/api/wynajmy/${params.id}/managerowie`, { id_uzytkownika: selectedManagerId });
+      setShowManagerModal(false); 
+      setSelectedManagerId(''); 
+      loadRental();
+    } catch (err: any) { alert(err?.response?.data?.message || 'Nie udało się dodać opiekuna.'); }
+  }
+
+  async function removeManager(managerId: number) {
+    if (!confirm('Odpisać opiekuna od tego wynajmu?')) return;
+    await api.delete(`/api/wynajmy/${params.id}/managerowie/${managerId}`);
+    loadRental();
+  }
+
   if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-[#04e0ff] w-10 h-10" /> <span className="ml-4 font-bold text-slate-500">Ładowanie danych wynajmu...</span></div>;
 
   const offers = rentalData?.oferty || [];
@@ -296,6 +329,7 @@ export default function RentalDetailsPage() {
 
   return (
     <div className="mx-auto max-w-[1800px] space-y-6 animate-fade-in-up">
+      {/* GÓRNY PASEK NAWIGACJI I AKCJI */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">
@@ -303,13 +337,18 @@ export default function RentalDetailsPage() {
             <span>/</span>
             <Link href="/dashboard/rentals" className="hover:text-[#04e0ff] transition">Wypożyczenia</Link>
             <span>/</span>
-            <span className="font-black text-slate-900 dark:text-white">{isNew ? 'Nowe wypożyczenie' : rentalData?.numer}</span>
+            <span className="font-black text-slate-900 dark:text-white">{isNew ? 'Nowe wypożyczenie' : (rentalData?.nazwa || rentalData?.numer)}</span>
           </div>
           <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
              {isNew ? 'Utwórz Wypożyczenie' : 'Panel Wypożyczenia'}
           </h1>
         </div>
         <div className="flex flex-wrap gap-2">
+          {!isNew && (form.data_wydania || rentalData?.data_wydania) && (
+            <Button variant="secondary" onClick={() => { router.push(`/dashboard/calendar?date=${(form.data_wydania || rentalData?.data_wydania).slice(0, 10)}`); }} title="Przenosi do kalendarza na tę datę">
+              <Calendar size={16} className="inline mr-1 text-[#04e0ff]" /> Zobacz w kalendarzu
+            </Button>
+          )}
           {!isNew && <Button variant="danger" onClick={remove}><Trash2 size={16} className="inline mr-1" /> Usuń</Button>}
           <Button onClick={submit} disabled={saving}><Save size={16} className="inline mr-1" /> {saving ? 'Zapisywanie...' : 'Zapisz zmiany'}</Button>
         </div>
@@ -321,113 +360,140 @@ export default function RentalDetailsPage() {
         <div className="grid gap-4 md:grid-cols-4">
           <Metric label="Numer Wypożyczenia" value={rentalData?.numer || `#${rentalData?.id}`} />
           <Metric label="Przypisane Oferty" value={`${offers.length}`} />
-          <Metric label="Wydanie -> Zwrot" value={`${dateTime(rentalData?.data_wydania).split(' ')[0]} → ${dateTime(rentalData?.data_zwrotu_planowana).split(' ')[0]}`} />
+          <Metric label="Wydanie → Zwrot" value={`${dateTime(rentalData?.data_wydania).split(' ')[0]} → ${dateTime(rentalData?.data_zwrotu_planowana).split(' ')[0]}`} />
           <Metric label="Budżet" value={rentalData?.budzet_netto ? money(rentalData.budzet_netto) : 'Brak limitu'} />
         </div>
       )}
 
+      {/* GŁÓWNY FORMULARZ: 3-KOLUMNOWY UKŁAD IDENTYCZNY Z WYDARZENIAMI */}
       <form onSubmit={submit} className="grid gap-6 xl:grid-cols-[1.1fr_.9fr_1.1fr]">
-        <Card className="space-y-4">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Podstawowe Informacje</p>
-              <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-white">{form.nazwa || form.numer || 'Nowe wypożyczenie'}</h2>
-            </div>
-            <div className="flex flex-wrap gap-2 justify-end">
-               {rentalData?.status && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: rentalData.status.kolor || '#0891B2' }}>{rentalData.status.ikona || '●'} {rentalData.status.nazwa}</span>}
-               {rentalData?.status_magazynowy && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: rentalData.status_magazynowy.kolor || '#F97316' }}>{rentalData.status_magazynowy.ikona || '📦'} {rentalData.status_magazynowy.nazwa}</span>}
-               {rentalData?.status_ksiegowy && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: rentalData.status_ksiegowy.kolor || '#22C55E' }}>{rentalData.status_ksiegowy.ikona || '💰'} {rentalData.status_ksiegowy.nazwa}</span>}
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Nazwa (Opcjonalnie)"><input className={inputClass} value={form.nazwa || ''} onChange={(e) => setForm({ ...form, nazwa: e.target.value })} placeholder="Krótki tytuł wynajmu" /></Field>
-            <Field label="Numer systemowy"><input className={inputClass} value={form.numer || ''} onChange={(e) => setForm({ ...form, numer: e.target.value })} placeholder="Automatyczny jeśli puste" /></Field>
-            
-            <Field label="Wydanie sprzętu"><input type="datetime-local" className={inputClass} value={form.data_wydania || ''} onChange={(e) => setForm({ ...form, data_wydania: e.target.value })} /></Field>
-            <Field label="Planowany zwrot"><input type="datetime-local" className={inputClass} value={form.data_zwrotu_planowana || ''} onChange={(e) => setForm({ ...form, data_zwrotu_planowana: e.target.value })} /></Field>
-            
-            <Field label="Status główny">
-              <SearchableSelect value={form.id_statusu_wynajmu || ''} onChange={(v) => setForm({ ...form, id_statusu_wynajmu: v })} options={dict.statusy.map((s: any) => ({ value: String(s.id), label: `${s.nazwa}` }))} placeholder="Wybierz..." />
-            </Field>
-
-            <Field label="Założony budżet netto (PLN)">
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><DollarSign size={15} className="text-slate-400" /></div>
-                <input type="number" step="0.01" min="0" className={`${inputClass} pl-9`} value={form.budzet_netto || ''} onChange={(e) => setForm({ ...form, budzet_netto: e.target.value })} placeholder="np. 1500.00" />
-              </div>
-            </Field>
-            
-            <Field label="Klient z bazy">
-              <div className="flex gap-2">
-                <div className="flex-1 min-w-0">
-                  <SearchableSelect value={form.id_kontrahenta || ''} onChange={(v) => setForm({ ...form, id_kontrahenta: v, id_kontaktu: '' })} options={dict.kontrahenci.map((k: any) => ({ value: String(k.id), label: k.nazwa }))} placeholder="Brak" />
-                </div>
-                <button type="button" onClick={() => setCrmModalMode('kontrahent')} className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"><Plus size={18} /></button>
-              </div>
-            </Field>
-            
-            <Field label="Osoba kontaktowa">
-              <div className="flex gap-2">
-                <div className="flex-1 min-w-0">
-                  <SearchableSelect value={form.id_kontaktu || ''} onChange={(v) => setForm({ ...form, id_kontaktu: v })} options={dict.kontakty?.map((k: any) => ({ value: String(k.id), label: `${k.imie} ${k.nazwisko} ${k.stanowisko ? `(${k.stanowisko})` : ''}` })) || []} placeholder={form.id_kontrahenta ? "Wybierz osobę..." : "Najpierw wybierz klienta"} disabled={!form.id_kontrahenta} />
-                </div>
-                <button type="button" disabled={!form.id_kontrahenta} onClick={() => setCrmModalMode('kontakt')} className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition disabled:opacity-50 disabled:pointer-events-none"><Plus size={18} /></button>
-              </div>
-            </Field>
-
-            <Field label="Miejsce z bazy (Opcjonalnie)">
-              <SearchableSelect value={form.id_miejsca || ''} onChange={(v) => setForm({ ...form, id_miejsca: v })} options={dict.miejsca.map((m: any) => ({ value: String(m.id), label: m.nazwa }))} placeholder="Wpiszę ręcznie (lub wybierz)" />
-            </Field>
-            
-             <Field label="Miejsce ręcznie"><input className={inputClass} value={form.miejsce_reczne || ''} onChange={(e) => setForm({ ...form, miejsce_reczne: e.target.value })} /></Field>
-          </div>
-          
-          <div className="grid gap-4 md:grid-cols-1 border-t border-slate-100 dark:border-white/10 pt-5 mt-4">
-             <Field label="Adres docelowy / Dostawa (Opcjonalnie)">
-               <div className="flex gap-2">
-                 <input className={inputClass} value={form.adres_reczny || ''} onChange={(e) => setForm({ ...form, adres_reczny: e.target.value })} placeholder="np. Odbiór własny" />
-                 {maps && <a className="flex items-center justify-center gap-2 rounded-xl bg-cyan-50 dark:bg-cyan-500/10 px-4 py-2 text-sm font-black text-cyan-700 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition whitespace-nowrap" href={maps} target="_blank" rel="noreferrer"><MapPin size={16} /> Otwórz trasę</a>}
-               </div>
-             </Field>
-             <div className="h-64 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#02080a] shadow-sm relative">
-               {form.adres_reczny ? (
-                 <iframe
-                   width="100%"
-                   height="100%"
-                   style={{ border: 0, filter: 'contrast(0.9)' }} 
-                   loading="lazy"
-                   allowFullScreen
-                   referrerPolicy="no-referrer-when-downgrade"
-                   src={`https://maps.google.com/maps?q=${encodeURIComponent(form.adres_reczny)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
-                 ></iframe>
-               ) : (
-                 <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                   <MapPin size={32} className="mb-2 opacity-30" />
-                   <p className="text-sm font-bold opacity-60">Wpisz adres dostawy (opcjonalnie)</p>
-                 </div>
-               )}
-             </div>
-          </div>
-
-          <Field label="Notatki wewnętrzne (ukryte)"><textarea className={`${inputClass} min-h-[100px] resize-none`} value={form.notatki_wewnetrzne || ''} onChange={(e) => setForm({ ...form, notatki_wewnetrzne: e.target.value })} /></Field>
-        </Card>
-
         <div className="flex flex-col gap-6">
           <Card className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/10 dark:to-white/5 text-lg font-black text-slate-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10">
-                {initials(currentManager)}
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Podstawowe Informacje</p>
+                <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-white">{form.nazwa || form.numer || 'Nowe wypożyczenie'}</h2>
               </div>
-              <div className="min-w-0">
-                <p className="font-black text-slate-900 dark:text-white text-lg truncate">{currentManager ? `${currentManager.imie || ''} ${currentManager.nazwisko || ''}`.trim() : 'Brak opiekuna'}</p>
-                <p className="text-sm font-bold text-[#04e0ff] uppercase tracking-wider mt-0.5">Opiekun Wynajmu</p>
+              <div className="flex flex-wrap gap-2 justify-end">
+                 {rentalData?.status && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: rentalData.status.kolor || '#0891B2' }}>{rentalData.status.ikona || '●'} {rentalData.status.nazwa}</span>}
+                 {rentalData?.status_magazynowy && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: rentalData.status_magazynowy.kolor || '#F97316' }}>{rentalData.status_magazynowy.ikona || '📦'} {rentalData.status_magazynowy.nazwa}</span>}
+                 {rentalData?.status_ksiegowy && <span className="rounded-xl px-3 py-1.5 text-[11px] font-black text-white shadow-sm" style={{ backgroundColor: rentalData.status_ksiegowy.kolor || '#22C55E' }}>{rentalData.status_ksiegowy.ikona || '💰'} {rentalData.status_ksiegowy.nazwa}</span>}
               </div>
             </div>
-            <div className="pt-2">
-              <Field label="Zmień Opiekuna (Managera)">
-                <SearchableSelect value={form.id_managera || ''} onChange={(v) => setForm({ ...form, id_managera: v })} options={dict.uzytkownicy.map((u: any) => ({ value: String(u.id), label: `${u.imie} ${u.nazwisko}` }))} placeholder="Brak" />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Nazwa (Odbiorca / Projekt)"><input className={inputClass} value={form.nazwa || ''} onChange={(e) => setForm({ ...form, nazwa: e.target.value })} required placeholder="np. Wynajem oświetlenia na Galę" /></Field>
+              <Field label="Numer systemowy"><input className={inputClass} value={form.numer || ''} onChange={(e) => setForm({ ...form, numer: e.target.value })} placeholder="Automatyczny jeśli puste" /></Field>
+              
+              <Field label="Założony budżet netto (PLN)">
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><DollarSign size={15} className="text-slate-400" /></div>
+                  <input type="number" step="0.01" min="0" className={`${inputClass} pl-9`} value={form.budzet_netto || ''} onChange={(e) => setForm({ ...form, budzet_netto: e.target.value })} placeholder="np. 4500.00" />
+                </div>
               </Field>
+
+              <Field label="Status główny">
+                <SearchableSelect value={form.id_statusu_wynajmu || ''} onChange={(v) => setForm({ ...form, id_statusu_wynajmu: v })} options={dict.statusy.map((s: any) => ({ value: String(s.id), label: `${s.nazwa}` }))} placeholder="Wybierz status..." />
+              </Field>
+
+              <Field label="Wydanie sprzętu (Start)"><input type="datetime-local" className={inputClass} value={form.data_wydania || ''} onChange={(e) => setForm({ ...form, data_wydania: e.target.value })} /></Field>
+              <Field label="Planowany zwrot (Koniec)"><input type="datetime-local" className={inputClass} value={form.data_zwrotu_planowana || ''} onChange={(e) => setForm({ ...form, data_zwrotu_planowana: e.target.value })} /></Field>
+              
+              <Field label="Klient z bazy (CRM)">
+                <div className="flex gap-2">
+                  <div className="flex-1 min-w-0">
+                    <SearchableSelect value={form.id_kontrahenta || ''} onChange={(v) => setForm({ ...form, id_kontrahenta: v, id_kontaktu: '' })} options={dict.kontrahenci.map((k: any) => ({ value: String(k.id), label: k.nazwa }))} placeholder="Brak" />
+                  </div>
+                  <button type="button" onClick={() => setCrmModalMode('kontrahent')} className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition"><Plus size={18} /></button>
+                </div>
+              </Field>
+              
+              <Field label="Osoba kontaktowa">
+                <div className="flex gap-2">
+                  <div className="flex-1 min-w-0">
+                    <SearchableSelect value={form.id_kontaktu || ''} onChange={(v) => setForm({ ...form, id_kontaktu: v })} options={dict.kontakty?.map((k: any) => ({ value: String(k.id), label: `${k.imie} ${k.nazwisko} ${k.stanowisko ? `(${k.stanowisko})` : ''}` })) || []} placeholder={form.id_kontrahenta ? "Wybierz osobę..." : "Najpierw wybierz klienta"} disabled={!form.id_kontrahenta} />
+                  </div>
+                  <button type="button" disabled={!form.id_kontrahenta} onClick={() => setCrmModalMode('kontakt')} className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition disabled:opacity-50 disabled:pointer-events-none"><Plus size={18} /></button>
+                </div>
+              </Field>
+
+              <Field label="Miejsce z bazy (Opcjonalnie)">
+                <SearchableSelect value={form.id_miejsca || ''} onChange={(v) => setForm({ ...form, id_miejsca: v })} options={dict.miejsca.map((m: any) => ({ value: String(m.id), label: m.nazwa }))} placeholder="Wpiszę ręcznie (lub wybierz)" />
+              </Field>
+              
+              <Field label="Miejsce ręcznie (Gdy brak w bazie)"><input className={inputClass} value={form.miejsce_reczne || ''} onChange={(e) => setForm({ ...form, miejsce_reczne: e.target.value })} placeholder="np. Odbiór osobisty / Magazyn" /></Field>
+            </div>
+            
+            <div className="grid gap-4 md:grid-cols-1 border-t border-slate-100 dark:border-white/10 pt-5 mt-4">
+               <Field label="Adres docelowy / Dostawa (Opcjonalnie)">
+                 <div className="flex gap-2">
+                   <input className={inputClass} value={form.adres_reczny || ''} onChange={(e) => setForm({ ...form, adres_reczny: e.target.value })} placeholder="Wpisz adres dostawy, np. ul. Magazynowa 4, Poznań" />
+                   {maps && <a className="flex items-center justify-center gap-2 rounded-xl bg-cyan-50 dark:bg-cyan-500/10 px-4 py-2 text-sm font-black text-cyan-700 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition whitespace-nowrap" href={maps} target="_blank" rel="noreferrer"><MapPin size={16} /> Otwórz trasę</a>}
+                 </div>
+               </Field>
+               <div className="h-64 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#02080a] shadow-sm relative">
+                 {form.adres_reczny ? (
+                   <iframe
+                     width="100%"
+                     height="100%"
+                     style={{ border: 0, filter: 'contrast(0.9)' }} 
+                     loading="lazy"
+                     allowFullScreen
+                     referrerPolicy="no-referrer-when-downgrade"
+                     src={`https://maps.google.com/maps?q=${encodeURIComponent(form.adres_reczny)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                   ></iframe>
+                 ) : (
+                   <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                     <MapPin size={32} className="mb-2 opacity-30" />
+                     <p className="text-sm font-bold opacity-60">Wpisz adres dostawy, aby wygenerować podgląd mapy</p>
+                   </div>
+                 )}
+               </div>
+            </div>
+
+            <Field label="Notatki wewnętrzne (ukryte)"><textarea className={`${inputClass} min-h-[100px] resize-none`} value={form.notatki_wewnetrzne || ''} onChange={(e) => setForm({ ...form, notatki_wewnetrzne: e.target.value })} placeholder="Dodatkowe notatki operacyjne widoczne tylko wewnątrz..." /></Field>
+          </Card>
+        </div>
+
+        {/* ŚRODKOWA KOLUMNA: BRIEF + OPIEKUNOWIE PROJEKTU */}
+        <div className="flex flex-col gap-6">
+          <Card>
+             <div className="flex items-center justify-between mb-4">
+               <h3 className="font-black text-lg text-slate-900 dark:text-white">Wytyczne ogólne (Brief dla magazynu i logistyki)</h3>
+             </div>
+             <textarea 
+               className={`${inputClass} min-h-[350px] resize-none text-base p-4 bg-slate-50 dark:bg-black/20`} 
+               value={form.opis || ''} 
+               onChange={(e) => setForm({ ...form, opis: e.target.value })} 
+               placeholder="Wpisz szczegółowe wytyczne dla zlecenia: specyfikację kabli, adapterów, godziny odbioru i transportu..."
+             />
+          </Card>
+
+          <Card className="space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3 mb-2">
+               <h3 className="font-black text-lg text-slate-900 dark:text-white">Opiekunowie Zlecenia (Project Managerowie)</h3>
+               <Button variant="secondary" onClick={() => setShowManagerModal(true)}><Plus size={14} className="inline mr-1"/>Dodaj</Button>
+            </div>
+            
+            <div className="space-y-3">
+              {(rentalData?.managerowie || []).map((m: any) => (
+                <div key={m.id} className="flex items-center gap-4 p-3 border border-slate-200 dark:border-white/10 rounded-xl bg-slate-50 dark:bg-white/5 hover:border-cyan-300 transition group">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 to-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 text-sm font-black text-cyan-700 dark:text-cyan-400 shadow-inner">
+                    {initials(m.uzytkownik)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-black text-slate-900 dark:text-white truncate">{m.uzytkownik?.imie} {m.uzytkownik?.nazwisko}</p>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 truncate mt-0.5">{m.uzytkownik?.email && <a href={`mailto:${m.uzytkownik?.email}`} className="hover:underline">{m.uzytkownik?.email}</a>} • {m.uzytkownik?.telefon && <a href={`tel:${m.uzytkownik?.telefon}`} className="hover:underline">{m.uzytkownik?.telefon}</a> || 'Brak tel.'}</p>
+                  </div>
+                  <button type="button" onClick={() => removeManager(m.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition opacity-0 group-hover:opacity-100"><X size={16}/></button>
+                </div>
+              ))}
+              {!rentalData?.managerowie?.length && <p className="text-sm font-bold text-slate-400 text-center py-4">Brak przypisanych opiekunów.</p>}
+            </div>
+
+            <div className="grid gap-3 grid-cols-2 pt-6 border-t border-slate-100 dark:border-white/10">
+              <Info label="Waga sprzętu" value="Wymaga planu" />
+              <Info label="Objętość" value="Wymaga planu" />
             </div>
 
             <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-5 mt-4">
@@ -443,8 +509,71 @@ export default function RentalDetailsPage() {
             </div>
           </Card>
         </div>
+
+        {/* PRAWA KOLUMNA: HARMONOGRAM I ETAPY WYPOŻYCZENIA */}
+        <div className="flex flex-col gap-6">
+          <Card className="flex-1 flex flex-col">
+            <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Harmonogram i Oś Czasu</p>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white mt-1">Etapy Wynajmu</h2>
+              </div>
+              <Button variant="secondary" onClick={() => setEtapToEdit({ isNew: true })}><Plus size={16} className="inline" /> Dodaj etap</Button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar relative">
+              {rentalData?.etapy?.length > 0 ? (
+                <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-5 space-y-8 pb-4 pt-2">
+                  {(rentalData.etapy || []).map((etap: any) => (
+                    <div key={etap.id} className="relative pl-8 group">
+                      <div className="absolute -left-[11px] top-1.5 h-5 w-5 rounded-full border-4 border-white dark:border-slate-900 bg-[#04e0ff] z-10"></div>
+                      
+                      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:border-cyan-300 dark:hover:border-cyan-500/50 hover:shadow-md relative">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="text-lg font-black text-slate-900 dark:text-white">{etap.nazwa}</h4>
+                            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+                              <Clock size={13} className="text-[#04e0ff]" /> {dateTime(etap.data_start)} → {dateTime(etap.data_koniec)}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button type="button" onClick={() => setEtapToEdit(etap)} className="p-2 bg-slate-50 dark:bg-white/5 text-slate-500 rounded-xl hover:text-[#04e0ff] transition" title="Edytuj dane etapu"><Edit2 size={16} /></button>
+                            <button type="button" onClick={async () => { if(confirm('Usunąć ten etap?')) { await api.delete(`/api/wynajmy/${params.id}/etapy/${etap.id}`); loadRental(); } }} className="p-2 bg-slate-50 dark:bg-red-500/10 text-slate-400 hover:text-red-500 rounded-xl transition"><Trash2 size={16} /></button>
+                          </div>
+                        </div>
+
+                        {etap.opis && <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{etap.opis}</p>}
+                        
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/5">
+                          <div className="flex gap-2">
+                            <span className="text-[10px] font-black uppercase bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 px-2 py-1 rounded shadow-sm border border-cyan-100 dark:border-cyan-500/20">
+                              Ekipa: {etap.przypisani_uzytkownicy?.length || 0}
+                            </span>
+                            <span className="text-[10px] font-black uppercase bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 px-2 py-1 rounded shadow-sm border border-indigo-100 dark:border-indigo-500/20">
+                              Flota: {etap.przypisane_pojazdy?.length || 0}
+                            </span>
+                          </div>
+                          <button type="button" onClick={() => setEtapToManage(etap)} className="text-[11px] font-black text-slate-500 dark:text-slate-400 hover:text-[#04e0ff] transition flex items-center gap-1 bg-slate-50 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-white/10 shadow-sm">
+                            <Wrench size={12} /> Zarządzaj przydziałem
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center p-8 text-center border border-dashed border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/5 mt-4">
+                  <Clock size={24} className="text-slate-300 dark:text-slate-600 mb-3" />
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400">Brak zdefiniowanych etapów</p>
+                  <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-1">Zbuduj harmonogram dodając kompletowanie, dostawę, zwrot.</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
       </form>
 
+      {/* DOLNY PASEK ZAKŁADEK */}
       <Card className="!p-0 border-transparent shadow-none bg-transparent mt-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-t-3xl shadow-sm px-3 pt-3 pb-0">
           <div className="flex overflow-x-auto custom-scrollbar">
@@ -468,7 +597,7 @@ export default function RentalDetailsPage() {
             })}
           </div>
 
-          {['oferty', 'ekipa', 'flota', 'historia', 'sprzet', 'zadania', 'zalaczniki'].includes(activeTab) && (
+          {['oferty', 'ekipa', 'flota', 'historia', 'sprzet', 'zadania', 'zalaczniki', 'nocleg'].includes(activeTab) && (
             <div className="p-3 border-t md:border-t-0 border-slate-100 dark:border-white/10 w-full md:w-auto">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -486,9 +615,22 @@ export default function RentalDetailsPage() {
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 border-t-0 rounded-b-3xl shadow-sm min-h-[500px]">
           {activeTab === 'chat' && <RentalChatPanel rentalId={rentalIdAsNumber} historia={rentalData?.historia || []} reloadRental={loadRental} />}
           {activeTab === 'zadania' && <RentalTasksPanel rentalId={rentalIdAsNumber} zadania={rentalData?.zadania || []} dict={dict} reloadRental={loadRental} tabQuery={tabSearchQuery} />}
-          {activeTab === 'ekipa' && <RentalCrewPanel rentalId={rentalIdAsNumber} ekipa={rentalData?.ekipa || []} dict={dict} tabQuery={tabSearchQuery} reloadRental={loadRental} />}
+          {activeTab === 'ekipa' && (
+            <RentalCrewPanel 
+              rentalId={rentalIdAsNumber} 
+              ekipa={rentalData?.ekipa || []} 
+              etapy={rentalData?.etapy || []} 
+              powiadomienia={rentalData?.powiadomienia || []} 
+              dict={dict} 
+              tabQuery={tabSearchQuery} 
+              reloadRental={loadRental} 
+              reloadDictionaries={loadDictionaries}
+              onMassAssign={(u: any) => setShowMassAssign({type: 'user', obj: u})} 
+            />
+          )}
           {activeTab === 'podsumowanie_ekipy' && <RentalCrewSummaryPanel ekipa={rentalData?.ekipa || []} />}
-          {activeTab === 'flota' && <RentalFleetPanel rentalId={rentalIdAsNumber} pojazdy={rentalData?.pojazdy || []} dict={dict} tabQuery={tabSearchQuery} reloadRental={loadRental} />}
+          {activeTab === 'flota' && <RentalFleetPanel rentalId={rentalIdAsNumber} pojazdy={rentalData?.pojazdy || []} etapy={rentalData?.etapy || []} dict={dict} tabQuery={tabSearchQuery} reloadRental={loadRental} onMassAssign={(v: any) => setShowMassAssign({type: 'vehicle', obj: v})} />}
+          {activeTab === 'nocleg' && <RentalNoclegiPanel rentalId={rentalIdAsNumber} noclegi={rentalData?.noclegi || []} reloadRental={loadRental} />}
           {activeTab === 'zalaczniki' && <AttachmentsPanel rentalId={rentalIdAsNumber} zalaczniki={rentalData?.zalaczniki || []} reloadRental={loadRental} tabQuery={tabSearchQuery} />}
           
           {activeTab === 'oferty' && <OffersPanel offers={offers} mainOfferId={form.id_oferty} setMainOfferId={(id: any) => setForm({ ...form, id_oferty: id })} offerName={offerName} setOfferName={setOfferName} createOffer={createOffer} duplicateOffer={(o:any)=>setDuplicateTarget(o)} tabQuery={tabSearchQuery} />}
@@ -497,22 +639,435 @@ export default function RentalDetailsPage() {
         </div>
       </Card>
 
-      {/* MODALS */}
+      {/* MODALE GŁÓWNE */}
       {crmModalMode && <QuickAddCrmModal mode={crmModalMode} parentId={form.id_kontrahenta} onClose={() => setCrmModalMode(null)} onSuccess={() => { setCrmModalMode(null); loadDictionaries(); }} />}
       {duplicateTarget && <OfferDuplicateTargetModal offer={duplicateTarget} defaultRentalId={params.id as any} onClose={() => setDuplicateTarget(null)} onDone={(o) => router.push(`/dashboard/offers/${o.id}`)} />}
+      
+      {showManagerModal && (
+        <SimpleModal title="Dodaj Opiekuna Wynajmu" onClose={() => setShowManagerModal(false)}>
+          <div className="space-y-6 min-h-[300px]">
+            <Field label="Wybierz osobę z zespołu">
+              <SearchableSelect 
+                options={dict.uzytkownicy.filter((u: any) => u.stanowisko !== 'Współpracownik Zewnętrzny').map((u:any)=>({value:String(u.id), label:`${u.imie} ${u.nazwisko}`}))} 
+                onChange={(v) => setSelectedManagerId(v)} 
+                value={selectedManagerId} 
+                placeholder="Szukaj osoby..."
+              />
+            </Field>
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10 mt-4">
+              <Button variant="secondary" onClick={() => setShowManagerModal(false)}>Anuluj</Button>
+              <Button onClick={assignManager}>Przypisz</Button>
+            </div>
+          </div>
+        </SimpleModal>
+      )}
+
+      {etapToEdit && (
+        <SimpleModal title={etapToEdit.isNew ? "Dodaj nowy etap wynajmu" : `Edycja etapu: ${etapToEdit.nazwa}`} onClose={() => setEtapToEdit(null)}>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const f = new FormData(e.currentTarget);
+            const body = { nazwa: f.get('nazwa'), opis: f.get('opis'), data_start: f.get('start'), data_koniec: f.get('koniec') };
+            if (etapToEdit.isNew) {
+               await api.post(`/api/wynajmy/${params.id}/etapy`, body);
+            } else {
+               await api.put(`/api/wynajmy/${params.id}/etapy/${etapToEdit.id}`, body);
+            }
+            setEtapToEdit(null);
+            loadRental();
+          }} className="space-y-4">
+            <Field label="Nazwa etapu (np. Pakowanie, Dostawa, Zwrot)"><input name="nazwa" defaultValue={etapToEdit.nazwa || ''} required className={inputClass} /></Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Start"><input type="datetime-local" name="start" defaultValue={toDateInput(etapToEdit.data_start)} required className={inputClass} /></Field>
+              <Field label="Koniec"><input type="datetime-local" name="koniec" defaultValue={toDateInput(etapToEdit.data_koniec)} required className={inputClass} /></Field>
+            </div>
+            <Field label="Opis / Wytyczne"><textarea name="opis" defaultValue={etapToEdit.opis || ''} className={`${inputClass} resize-none min-h-[100px]`} /></Field>
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
+              <Button variant="secondary" type="button" onClick={() => setEtapToEdit(null)}>Anuluj</Button>
+              <Button type="submit">{etapToEdit.isNew ? 'Utwórz etap' : 'Zapisz zmiany'}</Button>
+            </div>
+          </form>
+        </SimpleModal>
+      )}
+
+      {showMassAssign && (
+        <MassAssignModal 
+          data={showMassAssign} 
+          rentalId={rentalIdAsNumber} 
+          etapy={rentalData?.etapy || []} 
+          onClose={() => setShowMassAssign(null)} 
+          reloadRental={loadRental} 
+        />
+      )}
+
+      {etapToManage && (
+        <EtapManagementModal 
+          etap={etapToManage} 
+          ekipa={rentalData?.ekipa || []}
+          pojazdy={rentalData?.pojazdy || []}
+          rentalId={rentalIdAsNumber}
+          onClose={() => setEtapToManage(null)} 
+          reloadRental={loadRental}
+        />
+      )}
     </div>
   );
 }
 
 // ============================================================================
-// KOMPONENTY ZAKŁADEK DOLNYCH
+// MODAL ZARZĄDZANIA KONKRETNYM ETAPEM WYNAJMU
 // ============================================================================
+function EtapManagementModal({ etap, ekipa, pojazdy, rentalId, onClose, reloadRental }: any) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  async function assignPerson(id_uzytkownika: number) {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await api.post(`/api/wynajmy/${rentalId}/etapy/${etap.id}/ekipa`, { id_uzytkownika });
+      await reloadRental();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function removePerson(przypisanieId: number) {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await api.delete(`/api/wynajmy/${rentalId}/etapy/ekipa/${przypisanieId}`);
+      await reloadRental();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function assignVehicle(id_pojazdu: number | null, customName: string | null = null) {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await api.post(`/api/wynajmy/${rentalId}/etapy/${etap.id}/flota`, {
+        id_pojazdu: id_pojazdu || null,
+        pojazd_zewnetrzny: customName || null,
+      });
+      await reloadRental();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function removeVehicle(przypisanieId: number) {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await api.delete(`/api/wynajmy/${rentalId}/etapy/flota/${przypisanieId}`);
+      await reloadRental();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  const assignedUsers = new Set(etap.przypisani_uzytkownicy?.map((p: any) => p.id_uzytkownika));
+
+  return (
+    <SimpleModal title={`Przydział do etapu: ${etap.nazwa}`} className="max-w-4xl" onClose={onClose}>
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
+          <h3 className="text-lg font-black mb-4 text-cyan-700 border-b border-slate-100 dark:border-white/10 pb-2">Ekipa na tym etapie</h3>
+          <div className="space-y-2 max-h-[400px] overflow-auto custom-scrollbar pr-2">
+            {ekipa.map((e: any) => {
+              const isAssigned = assignedUsers.has(e.id_uzytkownika);
+              const p_id = etap.przypisani_uzytkownicy?.find((x: any) => x.id_uzytkownika === e.id_uzytkownika)?.id;
+              return (
+                <div key={e.id} className={`flex items-center justify-between p-3 border rounded-xl ${isAssigned ? 'border-cyan-300 bg-cyan-50 dark:bg-cyan-900/20' : 'border-slate-100 bg-slate-50 dark:bg-white/5'} ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <div>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">{e.uzytkownik?.imie} {e.uzytkownik?.nazwisko}</p>
+                    <p className="text-[10px] text-slate-500">{e.rola_w_wynajmie}</p>
+                  </div>
+                  {isAssigned ? (
+                    <button onClick={() => removePerson(p_id)} className="text-xs font-black text-red-500 hover:text-red-700 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-red-100 dark:border-red-900/30">Odłącz</button>
+                  ) : (
+                    <button onClick={() => assignPerson(e.id_uzytkownika)} className="text-xs font-black text-cyan-700 hover:text-cyan-900 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-cyan-100 dark:border-cyan-900/30">Przypisz</button>
+                  )}
+                </div>
+              );
+            })}
+            {ekipa.length === 0 && <p className="text-xs text-slate-500 font-bold">Brak ekipy przypisanej do wynajmu ogółem.</p>}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-black mb-4 text-indigo-700 border-b border-slate-100 dark:border-white/10 pb-2">Pojazdy na tym etapie</h3>
+          <div className="space-y-2 max-h-[400px] overflow-auto custom-scrollbar pr-2">
+            {pojazdy.map((v: any) => {
+              const assignedItem = etap.przypisane_pojazdy?.find((x: any) =>
+                (v.id_pojazdu && x.id_pojazdu === v.id_pojazdu) ||
+                (v.pojazd_zewnetrzny && x.pojazd_zewnetrzny === v.pojazd_zewnetrzny)
+              );
+              const isAssigned = Boolean(assignedItem);
+              const name = v.pojazd?.nazwa || v.pojazd_zewnetrzny || 'Pojazd zewnętrzny';
+              const sub = v.pojazd?.nr_rejestracyjny || 'Auto spoza bazy';
+
+              return (
+                <div key={v.id} className={`flex items-center justify-between p-3 border rounded-xl ${isAssigned ? 'border-indigo-300 bg-indigo-50 dark:bg-indigo-900/20' : 'border-slate-100 bg-slate-50 dark:bg-white/5'} ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <div>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white">{name}</p>
+                    <p className="text-[10px] text-slate-500">{sub}</p>
+                  </div>
+                  {isAssigned ? (
+                    <button onClick={() => removeVehicle(assignedItem.id)} className="text-xs font-black text-red-500 hover:text-red-700 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-red-100 dark:border-red-900/30">Odłącz</button>
+                  ) : (
+                    <button onClick={() => assignVehicle(v.id_pojazdu, v.pojazd_zewnetrzny)} className="text-xs font-black text-indigo-700 hover:text-indigo-900 bg-white dark:bg-black/20 px-3 py-1.5 rounded-lg shadow-sm border border-indigo-100 dark:border-indigo-900/30">Przypisz</button>
+                  )}
+                </div>
+              );
+            })}
+            {pojazdy.length === 0 && <p className="text-xs text-slate-500 font-bold">Brak pojazdów przypisanych do wynajmu ogółem.</p>}
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-end pt-6 border-t border-slate-100 dark:border-white/10 mt-6">
+        <Button onClick={onClose} disabled={isProcessing}>Zamknij</Button>
+      </div>
+    </SimpleModal>
+  );
+}
+
+// ============================================================================
+// MODAL SZYBKIEGO PRZYPISANIA DO WIELU ETAPÓW
+// ============================================================================
+function MassAssignModal({ data, rentalId, etapy, onClose, reloadRental }: any) {
+  const isUser = data.type === 'user';
+  const targetId = isUser ? data.obj.id_uzytkownika : (data.obj.id_pojazdu || null);
+  const externalName = !isUser ? data.obj.pojazd_zewnetrzny : null;
+  const name = isUser 
+    ? `${data.obj.uzytkownik?.imie} ${data.obj.uzytkownik?.nazwisko}` 
+    : (data.obj.pojazd?.nazwa || data.obj.pojazd_zewnetrzny || 'Pojazd');
+
+  const [selectedStages, setSelectedStages] = useState<number[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const current = etapy.filter((etap: any) => {
+      if (isUser) return etap.przypisani_uzytkownicy?.some((u: any) => u.id_uzytkownika === targetId);
+      return etap.przypisane_pojazdy?.some((p: any) =>
+        (targetId && p.id_pojazdu === targetId) ||
+        (externalName && p.pojazd_zewnetrzny === externalName)
+      );
+    }).map((e: any) => e.id);
+    setSelectedStages(current);
+  }, [etapy, isUser, targetId, externalName]);
+
+  const toggle = (id: number) => setSelectedStages((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
+
+  async function save() {
+    setSaving(true);
+    try {
+      if (isUser) {
+        await api.post(`/api/wynajmy/${rentalId}/ekipa/${targetId}/etapy`, { stageIds: selectedStages });
+      } else {
+        await api.post(`/api/wynajmy/${rentalId}/flota/etapy-przypisanie`, {
+          id_pojazdu: targetId,
+          pojazd_zewnetrzny: externalName,
+          stageIds: selectedStages,
+        });
+      }
+      await reloadRental();
+      onClose();
+    } catch {
+      alert('Wystąpił błąd zapisu etapów.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <SimpleModal title={`Przypisz do etapów: ${name}`} onClose={onClose}>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Zaznacz wszystkie etapy wypożyczenia, w których ta jednostka bierze udział.</p>
+      <div className="space-y-2 mb-6 max-h-[400px] overflow-y-auto custom-scrollbar">
+        {etapy.map((etap: any) => (
+          <label key={etap.id} className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${selectedStages.includes(etap.id) ? 'border-cyan-400 bg-cyan-50 dark:bg-cyan-900/20' : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 hover:bg-slate-50'} ${saving ? 'opacity-50 pointer-events-none' : ''}`}>
+            <input type="checkbox" className="w-5 h-5 rounded border-slate-300 text-cyan-600" checked={selectedStages.includes(etap.id)} onChange={() => toggle(etap.id)} disabled={saving} />
+            <div>
+              <p className="font-black text-slate-900 dark:text-white">{etap.nazwa}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{dateTime(etap.data_start)} → {dateTime(etap.data_koniec)}</p>
+            </div>
+          </label>
+        ))}
+        {etapy.length === 0 && <p className="text-red-500 font-bold">Wypożyczenie nie ma jeszcze zdefiniowanych etapów!</p>}
+      </div>
+      <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-white/10 pt-4">
+        <Button variant="secondary" onClick={onClose} disabled={saving}>Anuluj</Button>
+        <Button onClick={save} disabled={saving}>{saving ? 'Zapisywanie...' : 'Zapisz harmonogram'}</Button>
+      </div>
+    </SimpleModal>
+  );
+}
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md transition">
       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">{label}</p>
       <p className="mt-2 truncate text-xl font-black text-slate-900 dark:text-white tracking-tight">{value}</p>
+    </div>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-transparent p-4">
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">{label}</p>
+      <p className="mt-1 text-sm font-black text-slate-800 dark:text-slate-200">{value}</p>
+    </div>
+  );
+}
+
+// -------------------------------------------------------------
+// NOCLEGI
+// -------------------------------------------------------------
+function RentalNoclegiPanel({ rentalId, noclegi, reloadRental }: any) {
+  const [showModal, setShowModal] = useState(false);
+  const [editingNocleg, setEditingNocleg] = useState<any>(null);
+  const [form, setForm] = useState<any>({});
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  function openAdd() {
+    setEditingNocleg(null);
+    setForm({
+      nazwa_obiektu: '',
+      adres: '',
+      data_zameldowania: '',
+      data_wymeldowania: '',
+      liczba_osob: '',
+      opis: ''
+    });
+    setShowModal(true);
+  }
+
+  function openEdit(n: any) {
+    setEditingNocleg(n);
+    setForm({
+      nazwa_obiektu: n.nazwa_obiektu || '',
+      adres: n.adres || '',
+      data_zameldowania: toDateInput(n.data_zameldowania),
+      data_wymeldowania: toDateInput(n.data_wymeldowania),
+      liczba_osob: n.liczba_osob || '',
+      opis: n.opis || ''
+    });
+    setShowModal(true);
+  }
+
+  async function saveNocleg(e: any) {
+    e.preventDefault();
+    if(isProcessing) return;
+    setIsProcessing(true);
+    try {
+      if (editingNocleg) {
+        await api.put(`/api/wynajmy/${rentalId}/noclegi/${editingNocleg.id}`, form);
+      } else {
+        await api.post(`/api/wynajmy/${rentalId}/noclegi`, form);
+      }
+      setForm({});
+      setShowModal(false);
+      setEditingNocleg(null);
+      await reloadRental();
+    } catch(err) { 
+      alert('Nie udało się zapisać rezerwacji noclegu.');
+    } finally { 
+      setIsProcessing(false); 
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-black text-xl text-slate-900 dark:text-white">Rezerwacje Hotelowe i Noclegi</h3>
+        <Button onClick={openAdd} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Zarezerwuj nocleg</Button>
+      </div>
+
+      {showModal && (
+        <SimpleModal 
+          title={editingNocleg ? `Edycja rezerwacji: ${editingNocleg.nazwa_obiektu}` : "Nowa rezerwacja hotelowa / nocleg"} 
+          onClose={() => { setShowModal(false); setEditingNocleg(null); }}
+        >
+          <form onSubmit={saveNocleg} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Nazwa obiektu (Hotel, Apartament) *">
+                <input required className={inputClass} disabled={isProcessing} value={form.nazwa_obiektu || ''} onChange={e => setForm({...form, nazwa_obiektu: e.target.value})} placeholder="np. Hotel Mercure Poznań" />
+              </Field>
+              <Field label="Adres obiektu">
+                <input className={inputClass} disabled={isProcessing} value={form.adres || ''} onChange={e => setForm({...form, adres: e.target.value})} placeholder="np. ul. Roosevelta 20, Poznań" />
+              </Field>
+              <Field label="Data zameldowania (Check-in)">
+                <input type="datetime-local" disabled={isProcessing} className={inputClass} value={form.data_zameldowania || ''} onChange={e => setForm({...form, data_zameldowania: e.target.value})} />
+              </Field>
+              <Field label="Data wymeldowania (Check-out)">
+                <input type="datetime-local" disabled={isProcessing} className={inputClass} value={form.data_wymeldowania || ''} onChange={e => setForm({...form, data_wymeldowania: e.target.value})} />
+              </Field>
+              <Field label="Liczba zarezerwowanych miejsc / osób">
+                <input type="number" min="1" className={inputClass} disabled={isProcessing} value={form.liczba_osob || ''} onChange={e => setForm({...form, liczba_osob: e.target.value})} placeholder="np. 4" />
+              </Field>
+            </div>
+
+            <Field label="Opis / Wytyczne i podział pokoi">
+              <textarea className={`${inputClass} resize-none min-h-[90px]`} disabled={isProcessing} value={form.opis || ''} onChange={e => setForm({...form, opis: e.target.value})} placeholder="np. Pokoje 2-osobowe dla kierowców. Opłacone firmową kartą." />
+            </Field>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
+              <Button variant="secondary" type="button" onClick={() => { setShowModal(false); setEditingNocleg(null); }} disabled={isProcessing}>Anuluj</Button>
+              <Button type="submit" disabled={isProcessing}>{isProcessing ? 'Zapisywanie...' : editingNocleg ? 'Zapisz zmiany' : 'Zapisz nocleg'}</Button>
+            </div>
+          </form>
+        </SimpleModal>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {noclegi.map((n: any) => (
+          <div key={n.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm flex flex-col group hover:shadow-md transition ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className="flex justify-between items-start mb-2">
+              <div className="min-w-0 pr-2">
+                <p className="font-black text-slate-900 dark:text-white text-lg flex items-center gap-2 truncate">
+                  <Home size={18} className="text-[#04e0ff] shrink-0"/> {n.nazwa_obiektu}
+                </p>
+                <p className="text-xs font-bold text-slate-500 mt-0.5 truncate">{n.adres || 'Brak podanego adresu'}</p>
+              </div>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => openEdit(n)} className="p-1.5 text-slate-400 hover:text-[#04e0ff] hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg transition" title="Edytuj dane noclegu">
+                  <Edit2 size={16} />
+                </button>
+                <button onClick={async () => { 
+                  if(isProcessing || !confirm('Odwołać/Usunąć ten nocleg?')) return; 
+                  setIsProcessing(true);
+                  try { await api.delete(`/api/wynajmy/${rentalId}/noclegi/${n.id}`); await reloadRental(); } catch(e) {} finally { setIsProcessing(false); }
+                }} className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition" title="Usuń nocleg">
+                  <Trash2 size={16}/>
+                </button>
+              </div>
+            </div>
+
+            {n.opis && (
+              <p className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-black/20 p-2.5 rounded-xl border border-slate-100 dark:border-white/5 my-2 leading-relaxed">
+                {n.opis}
+              </p>
+            )}
+
+            <div className="mt-auto pt-3 border-t border-slate-100 dark:border-white/5 grid grid-cols-2 gap-2 text-xs font-bold">
+              <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg"><span className="text-slate-400 block mb-0.5">Zamel.</span>{n.data_zameldowania ? new Date(n.data_zameldowania).toLocaleDateString() : '-'}</div>
+              <div className="bg-slate-50 dark:bg-black/20 p-2 rounded-lg"><span className="text-slate-400 block mb-0.5">Wymel.</span>{n.data_wymeldowania ? new Date(n.data_wymeldowania).toLocaleDateString() : '-'}</div>
+              <div className="col-span-2 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 p-2 rounded-lg text-center mt-1">Dla {n.liczba_osob || '?'} osób</div>
+            </div>
+          </div>
+        ))}
+        {noclegi.length === 0 && !showModal && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak zaplanowanych noclegów dla tego wynajmu.</div>}
+      </div>
     </div>
   );
 }
@@ -542,7 +1097,7 @@ function RentalCrewSummaryPanel({ ekipa }: { ekipa: any[] }) {
         <Metric label="Konta zew. (Freelance)" value={`${stats.external} osób`} />
       </div>
       <Card>
-        <h4 className="font-black text-lg mb-4 text-slate-800 dark:text-white">Podział według ról logistycznych</h4>
+        <h4 className="font-black text-lg mb-4 text-slate-800 dark:text-white">Podział według stanowisk</h4>
         <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
           {Object.entries(stats.roles).map(([rola, count]) => (
             <div key={rola} className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/10 flex items-center justify-between">
@@ -736,9 +1291,10 @@ function RentalTasksPanel({ rentalId, zadania, dict, reloadRental, tabQuery = ''
 // -------------------------------------------------------------
 // EKIPA DLA WYNAJMU (ROZDZIELENIE PRACOWNIKÓW I FREELANCERÓW)
 // -------------------------------------------------------------
-function RentalCrewPanel({ rentalId, ekipa, dict, tabQuery = '', reloadRental }: any) {
+function RentalCrewPanel({ rentalId, ekipa, etapy = [], powiadomienia, dict, tabQuery = '', reloadRental, onMassAssign, reloadDictionaries }: any) {
   const [adding, setAdding] = useState(false);
   const [editingCrew, setEditingCrew] = useState<any>(null);
+  const [sendingMails, setSendingMails] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [form, setForm] = useState<any>({ 
@@ -858,7 +1414,7 @@ function RentalCrewPanel({ rentalId, ekipa, dict, tabQuery = '', reloadRental }:
 
       setAdding(false);
       setEditingCrew(null);
-      await reloadRental();
+      await Promise.all([reloadRental(), reloadDictionaries?.()]);
     } catch(err: any) { 
       alert(err?.response?.data?.message || 'Nie udało się zapisać przypisania.');
     } finally { 
@@ -866,10 +1422,32 @@ function RentalCrewPanel({ rentalId, ekipa, dict, tabQuery = '', reloadRental }:
     }
   }
 
+  async function handleSendMails() {
+    if(!ekipa.length) return alert('Brak ekipy do powiadomienia.');
+    if(!confirm('Na pewno wysłać powiadomienia e-mail do wszystkich przypisanych członków ekipy?')) return;
+    
+    setSendingMails(true);
+    try {
+      const userIds = ekipa.map((e: any) => e.id_uzytkownika);
+      await api.post(`/api/wynajmy/${rentalId}/powiadomienia/ekipa`, { userIds });
+      alert('Powiadomienia zostały wygenerowane i przesłane do wysyłki.');
+      await reloadRental();
+    } catch(err: any) {
+      alert(err?.response?.data?.message || 'Nie udało się wysłać maili.');
+    } finally {
+      setSendingMails(false);
+    }
+  }
+
   return <div className="space-y-4">
     <div className="flex justify-between items-center mb-6">
-      <h3 className="font-black text-xl text-slate-900 dark:text-white">Ekipa (np. Kierowca, Magazynier)</h3>
-      <Button onClick={openAddModal} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Przypisz osobę</Button>
+      <h3 className="font-black text-xl text-slate-900 dark:text-white">Personel i Ekipa Techniczna</h3>
+      <div className="flex gap-2">
+        <Button variant="secondary" disabled={sendingMails || isProcessing} onClick={handleSendMails}>
+           {sendingMails ? <Loader2 size={16} className="animate-spin inline mr-1"/> : <Send size={16} className="inline mr-1"/>} Wyślij maile do ekipy
+        </Button>
+        <Button onClick={openAddModal} disabled={isProcessing}><Plus size={16} className="inline mr-1"/> Przypisz osobę</Button>
+      </div>
     </div>
 
     {adding && (
@@ -938,7 +1516,7 @@ function RentalCrewPanel({ rentalId, ekipa, dict, tabQuery = '', reloadRental }:
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="Imię *"><input required className={inputClass} value={form.imie || ''} onChange={e => setForm({...form, imie: e.target.value})} placeholder="Imię..." /></Field>
                   <Field label="Nazwisko *"><input required className={inputClass} value={form.nazwisko || ''} onChange={e => setForm({...form, nazwisko: e.target.value})} placeholder="Nazwisko..." /></Field>
-                  <Field label="Adres e-mail"><input type="email" className={inputClass} value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} placeholder="Do opcjonalnych powiadomień" /></Field>
+                  <Field label="Adres e-mail"><input type="email" className={inputClass} value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} placeholder="Do powiadomień..." /></Field>
                   <Field label="Numer telefonu"><input type="tel" className={inputClass} value={form.telefon || ''} onChange={e => setForm({...form, telefon: e.target.value})} placeholder="+48..." /></Field>
                   <div className="col-span-2 text-xs font-bold text-amber-700 bg-amber-50 p-3 rounded-xl border border-amber-200">
                     Osoba zostanie zapisana w bazie jako współpracownik i będzie dostępna przy kolejnych zleceniach.
@@ -990,34 +1568,52 @@ function RentalCrewPanel({ rentalId, ekipa, dict, tabQuery = '', reloadRental }:
     )}
 
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {filtered.map((p: any) => <div key={p.id} className="rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group">
-         <div className="flex items-center gap-4">
-           <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-black text-slate-500 dark:text-slate-300 text-lg border border-slate-200 dark:border-white/10">
-             {initials(p.uzytkownik)}
-           </div>
-           <div>
-             <p className="font-black text-slate-900 dark:text-white text-[15px]">{p.uzytkownik?.imie} {p.uzytkownik?.nazwisko}</p>
-             <div className="flex items-center gap-2 mt-1">
-               <p className="text-[11px] font-bold text-[#04e0ff] bg-cyan-50 dark:bg-[#04e0ff]/10 px-2 py-0.5 rounded-md inline-block uppercase tracking-wider">{p.rola_w_wynajmie || 'Obsługa'}</p>
-               {p.uzytkownik?.stanowisko === 'Współpracownik Zewnętrzny' && <span className="text-[9px] font-bold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800">Freelancer</span>}
-             </div>
-           </div>
-         </div>
-         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-           <button title="Edytuj dane i rolę" onClick={() => openEditModal(p)} className="p-2 text-slate-500 hover:text-cyan-600 bg-slate-50 hover:bg-cyan-50 dark:bg-white/5 rounded-xl transition"><Edit2 size={16}/></button>
-           <button title="Odłącz od wynajmu" onClick={async () => { if(confirm('Odpiąć osobę od wynajmu?')) { await api.delete(`/api/wynajmy/${rentalId}/ekipa/${p.id}`); reloadRental(); } }} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
-         </div>
-      </div>)}
+      {filtered.map((p: any) => {
+         const hasBeenNotified = powiadomienia?.some((pow: any) => pow.id_uzytkownika === p.id_uzytkownika);
+         return (
+          <div key={p.id} className={`rounded-[20px] border border-slate-200 dark:border-white/10 p-5 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between group ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center font-black text-slate-500 dark:text-slate-300 text-lg border border-slate-200 dark:border-white/10 relative">
+                {initials(p.uzytkownik)}
+                {hasBeenNotified && <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5" title="Wysłano powiadomienie email"><MailCheck size={10}/></div>}
+              </div>
+              <div>
+                <p className="font-black text-slate-900 dark:text-white text-[15px]">{p.uzytkownik?.imie} {p.uzytkownik?.nazwisko}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-[11px] font-bold text-[#04e0ff] bg-cyan-50 dark:bg-[#04e0ff]/10 px-2 py-0.5 rounded-md inline-block uppercase tracking-wider">{p.rola_w_wynajmie || 'Obsługa'}</p>
+                  {p.uzytkownik?.stanowisko === 'Współpracownik Zewnętrzny' && <span className="text-[9px] font-bold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800">Freelancer</span>}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button title="Edytuj dane i rolę" onClick={() => openEditModal(p)} className="p-2 text-slate-500 hover:text-cyan-600 bg-slate-50 hover:bg-cyan-50 dark:bg-white/5 rounded-xl transition"><Edit2 size={16}/></button>
+              <button title="Przypisz do etapów" onClick={() => onMassAssign(p)} className="p-2 text-cyan-600 bg-cyan-50 dark:bg-[#04e0ff]/10 hover:bg-cyan-100 rounded-xl transition"><Clock size={16}/></button>
+              <button title="Odłącz od wynajmu" onClick={async () => { 
+                if(confirm('Odpiąć osobę od wynajmu?')) { 
+                  setIsProcessing(true);
+                  try {
+                    await api.post(`/api/wynajmy/${rentalId}/ekipa/${p.id_uzytkownika}/etapy`, { stageIds: [] });
+                    await api.delete(`/api/wynajmy/${rentalId}/ekipa/${p.id}`);
+                    await Promise.all([reloadRental(), reloadDictionaries?.()]);
+                  } catch(e) {
+                    alert('Nie udało się odpiąć osoby.');
+                  } finally { setIsProcessing(false); }
+                } 
+              }} className="p-2 text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
+            </div>
+          </div>
+         );
+      })}
       {filtered.length === 0 && ekipa.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak osób pasujących do wyszukiwania.</div>}
-      {ekipa.length === 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak przypisanej ekipy.</div>}
+      {ekipa.length === 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak przypisanej ekipy do tego wynajmu.</div>}
     </div>
-  </div>
+  </div>;
 }
 
 // -------------------------------------------------------------
 // FLOTA DLA WYNAJMU (Z OBSŁUGĄ POJAZDÓW Z BAZY ORAZ SPOZA BAZY)
 // -------------------------------------------------------------
-function RentalFleetPanel({ rentalId, pojazdy, dict, tabQuery = '', reloadRental }: any) {
+function RentalFleetPanel({ rentalId, pojazdy, etapy = [], dict, tabQuery = '', reloadRental, onMassAssign }: any) {
   const [form, setForm] = useState<any>({ 
     isExternal: false, 
     id_pojazdu: '', 
@@ -1098,7 +1694,7 @@ function RentalFleetPanel({ rentalId, pojazdy, dict, tabQuery = '', reloadRental
               value={form.id_pojazdu} 
               onChange={(v) => setForm({...form, id_pojazdu: v})} 
               options={dict.pojazdy.map((p:any)=>({value: String(p.id), label: `${p.nazwa} (${p.nr_rejestracyjny})`}))} 
-              placeholder="Wybierz auto..." 
+              placeholder="Wybierz auto firmowe..." 
             />
           </Field>
         ) : (
@@ -1142,19 +1738,30 @@ function RentalFleetPanel({ rentalId, pojazdy, dict, tabQuery = '', reloadRental
                 {v.rola_pojazdu || 'Rezerwacja'}
               </p>
             </div>
-            <button onClick={async () => { 
-              if(confirm('Zwolnić rezerwację pojazdu?')) { 
-                await api.delete(`/api/wynajmy/${rentalId}/flota/${v.id}`); 
-                reloadRental(); 
-              } 
-            }} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition opacity-0 group-hover:opacity-100"><Trash2 size={16}/></button>
+            
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button title="Przypisz auto do etapów wynajmu" onClick={() => onMassAssign(v)} className="p-2 text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 rounded-xl transition"><Clock size={16}/></button>
+              <button title="Usuń rezerwację" onClick={async () => { 
+                if(confirm('Zwolnić rezerwację pojazdu?')) { 
+                  setIsProcessing(true);
+                  try {
+                    const targetKey = v.id_pojazdu || v.id;
+                    await api.post(`/api/wynajmy/${rentalId}/flota/${targetKey}/etapy`, { stageIds: [] });
+                    await api.delete(`/api/wynajmy/${rentalId}/flota/${v.id}`);
+                    await reloadRental();
+                  } catch(e) {
+                    alert('Nie udało się usunąć pojazdu.');
+                  } finally { setIsProcessing(false); }
+                } 
+              }} className="p-2 text-red-500 hover:text-red-700 bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition"><Trash2 size={16}/></button>
+            </div>
           </div>
         );
       })}
       {filtered.length === 0 && pojazdy.length > 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak aut pasujących do wyszukiwania.</div>}
       {pojazdy.length === 0 && <div className="col-span-full p-12 border border-dashed border-slate-200 dark:border-white/10 rounded-[28px] text-center text-slate-400 font-bold bg-slate-50/50 dark:bg-black/20">Brak zarezerwowanych aut dla tego wynajmu.</div>}
     </div>
-  </div>
+  </div>;
 }
 
 // -------------------------------------------------------------
@@ -1206,7 +1813,7 @@ function AttachmentsPanel({ rentalId, zalaczniki, tabQuery = '', reloadRental }:
         if (res.data?.url) window.open(res.data.url, '_blank');
       }
     } catch (err: any) {
-      alert(err?.response?.data?.message || 'Nie udało się uzyskać bezpiecznego linku.');
+      alert(err?.response?.data?.message || 'Nie udało się uzyskać linku do pliku.');
     }
   }
 
@@ -1261,7 +1868,7 @@ function AttachmentsPanel({ rentalId, zalaczniki, tabQuery = '', reloadRental }:
               </div>
             </div>
             <div className="flex items-center gap-1 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
-              <button type="button" onClick={() => handleDownload(z)} className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-400 dark:text-slate-500 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:text-cyan-400 dark:hover:bg-cyan-500/10 transition-all duration-150 cursor-pointer" title="Pobierz bezpiecznie">
+              <button type="button" onClick={() => handleDownload(z)} className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-400 dark:text-slate-500 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:text-cyan-400 dark:hover:bg-cyan-500/10 transition-all duration-150 cursor-pointer" title="Pobierz">
                 <Download size={17} strokeWidth={1.8} />
               </button>
               <button type="button" onClick={async () => { if (confirm('Usunąć załącznik z serwera?')) { await api.delete(`/api/wynajmy/${rentalId}/zalaczniki/${z.id}`); reloadRental(); } }} className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-500/10 transition-all duration-150 cursor-pointer" title="Usuń">
@@ -1315,7 +1922,7 @@ function HistoryPanel({ history, tabQuery = '' }: { history: any[], tabQuery?: s
 }
 
 // -------------------------------------------------------------
-// SPRZĘT W Wypożyczeniu (Zaawansowana obsługa WMS i Multi-Warehouse)
+// SPRZĘT W WYPOŻYCZENIU (EquipmentPanel)
 // -------------------------------------------------------------
 function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName: string }) {
   const router = useRouter();
@@ -1383,7 +1990,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
     });
 
     setPacklistNotes(loadedPacklistNotes);
-    setPacklistGeneralNotes(gearData.wynajem?.notatki_wewnetrzne || '');
+    setPacklistGeneralNotes(gearData.wynajem?.uwagi_packlista || gearData.wynajem?.notatki_wewnetrzne || '');
     setPacklistNotesLoaded(true);
 
     setItems(i.data || []);
@@ -1546,9 +2153,26 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
       const id = modelIdOf(p);
       if (!id) return;
       const key = String(id);
-      if (map.has(key)) {
-        map.get(key).scanned += Number(p.ilosc || 1);
+      if (!map.has(key)) {
+        const sourceModel = modelById.get(String(id)) || p.model || p;
+        map.set(key, {
+          id_modelu: Number(id),
+          nazwa: modelNameOf(p),
+          kategoria: categoryOf(p),
+          kategoria_id: modelCategoryIdOf(p),
+          quantityOnly: isQuantityOnly(p) || isQuantityOnly(sourceModel),
+          kod: p.kod || sourceModel?.kod_kreskowy || '',
+          jednostka: p.jednostka || sourceModel?.jednostka || 'szt.',
+          plan: 0,
+          wydane: 0,
+          przyjete: 0,
+          scanned: 0,
+          egzemplarze_wydane: [],
+          egzemplarze_przyjete: [],
+          egzemplarze_w_terenie: [],
+        });
       }
+      map.get(key).scanned += Number(p.ilosc || 1);
     });
 
     return Array.from(map.values()).map((row: any) => {
@@ -1563,10 +2187,48 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
     }).sort((a, b) => String(a.kategoria).localeCompare(String(b.kategoria), 'pl') || String(a.nazwa).localeCompare(String(b.nazwa), 'pl'));
   }, [data, docItems, equipmentCategoryById, modelById]);
 
+  // KALKULACJA WAGI: SPRZĘT + SKRZYNIE TRANSPORTOWE (CASE)
+  const currentBasketWeight = useMemo(() => {
+    let gearKg = 0;
+    const caseWeightsMap = new Map<number, { nazwa: string; waga: number }>();
+
+    for (const item of docItems) {
+      const model = modelById.get(String(item.id_modelu));
+      const unitWeight = Number(item.waga ?? item.egzemplarz?.waga ?? model?.waga ?? 0);
+      gearKg += unitWeight * Number(item.ilosc || 1);
+
+      const caseMeta = item.system_case_scan;
+      if (caseMeta?.id) {
+        const caseId = Number(caseMeta.id);
+        if (!caseWeightsMap.has(caseId)) {
+          const caseObj = items.find((x: any) => Number(x.id) === caseId);
+          const caseModel = caseObj?.id_modelu ? modelById.get(String(caseObj.id_modelu)) : null;
+          const caseWeight = Number(caseObj?.waga ?? caseModel?.waga ?? 0);
+          caseWeightsMap.set(caseId, {
+            nazwa: caseMeta.nazwa || caseObj?.nazwa || 'Skrzynia Case',
+            waga: caseWeight,
+          });
+        }
+      }
+    }
+
+    const casesTotalKg = Array.from(caseWeightsMap.values()).reduce((acc, c) => acc + c.waga, 0);
+
+    return {
+      gearKg: Number(gearKg.toFixed(2)),
+      casesTotalKg: Number(casesTotalKg.toFixed(2)),
+      totalKg: Number((gearKg + casesTotalKg).toFixed(2)),
+      casesCount: caseWeightsMap.size,
+      casesList: Array.from(caseWeightsMap.values()),
+    };
+  }, [docItems, modelById, items]);
+
   const plannedGroups = useMemo(() => {
     const groups = new Map<string, any>();
     plannedRows.forEach((row: any) => {
-      if (!groups.has(row.kategoria)) groups.set(row.kategoria, { nazwa: row.kategoria, rows: [], plan: 0, wydane: 0, przyjete: 0, scanned: 0 });
+      if (!groups.has(row.kategoria)) {
+        groups.set(row.kategoria, { nazwa: row.kategoria, rows: [], plan: 0, wydane: 0, przyjete: 0, scanned: 0 });
+      }
       const group = groups.get(row.kategoria);
       group.rows.push(row);
       group.plan += row.plan;
@@ -1590,6 +2252,23 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
     });
     return Array.from(groups.values());
   }, [plannedRows]);
+
+  useEffect(() => {
+    if (!packlistNotesLoaded) return;
+    const timer = window.setTimeout(async () => {
+      try {
+        setPacklistSaveStatus('saving');
+        await api.put(`/api/magazyn/wynajmy/${rentalId}/packlista`, {
+          uwagi_packlista: packlistGeneralNotes || null,
+          pozycje: Object.entries(packlistNotes).map(([id_modelu, uwagi]) => ({ id_modelu: Number(id_modelu), uwagi: uwagi || null })),
+        });
+        setPacklistSaveStatus('saved');
+      } catch (e) {
+        setPacklistSaveStatus('error');
+      }
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [packlistNotes, packlistGeneralNotes, packlistNotesLoaded, rentalId]);
 
   const activeCategoryIds = useMemo(() => {
     if (activeSub) return descendantsOf(activeSub, equipmentCategoryById);
@@ -1628,6 +2307,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
         id_magazynu: x.id_magazynu,
         miejsce_w_mag: x.miejsce_w_mag || '',
         kod: x.kod_kreskowy || x.zewnetrzny_kod_kreskowy || x.zewnetrzny_qr_kod || x.qr_kod || x.sn || '',
+        numer: x.numer_egzemplarza || x.numer_urzadzenia || '',
       }));
 
     const quantityList = models
@@ -1676,9 +2356,9 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
     const mult = Number(bundleForm.mnoznik) || 1;
     const newPlanQty = { ...planQty };
     (bundle.pozycje || []).forEach((p: any) => {
-       const modelId = p.id_modelu;
-       const current = Number(newPlanQty[String(modelId)] || 0);
-       newPlanQty[String(modelId)] = String(current + Number(p.ilosc || 1) * mult);
+      const modelId = p.id_modelu;
+      const current = Number(newPlanQty[String(modelId)] || 0);
+      newPlanQty[String(modelId)] = String(current + Number(p.ilosc || 1) * mult);
     });
     setPlanQty(newPlanQty);
     setShowBundlePicker(false);
@@ -1710,42 +2390,45 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
 
   function normalizeDocumentItem(row: any, source: 'scan' | 'manual' = 'manual') {
     if (isQuantityOnly(row)) {
+      const model = modelById.get(String(row.id_modelu || row.id)) || row.model || row;
       return {
         source,
         rowType: 'ilosciowy_model',
         quantityOnly: true,
-        id_modelu: row.id_modelu || row.model?.id || row.id,
+        id_modelu: row.id_modelu || model?.id || row.id,
         id_egzemplarza: null,
-        nazwa: row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy',
-        nazwa_modelu: row.nazwa_modelu || row.nazwa || row.model?.nazwa || 'Sprzęt ilościowy',
+        nazwa: row.nazwa_modelu || row.nazwa || model?.nazwa || 'Sprzęt ilościowy',
+        nazwa_modelu: row.nazwa_modelu || row.nazwa || model?.nazwa || 'Sprzęt ilościowy',
         numer_egzemplarza: '',
         kategoria: categoryOf(row),
-        kod: row.kod || row.kod_kreskowy || row.model?.kod_kreskowy || '',
+        kod: row.kod || row.kod_kreskowy || model?.kod_kreskowy || '',
         ilosc: Number(row.ilosc || 1),
-        jednostka: row.jednostka || row.model?.jednostka || 'szt.',
-        uwagi: row.uwagi || 'Sprzęt ilościowy bez egzemplarzy',
+        jednostka: row.jednostka || model?.jednostka || 'szt.',
+        waga: Number(row.waga || model?.waga || 0),
+        uwagi: row.uwagi || 'Sprzęt ilościowy',
       };
     }
     const egz = row.egzemplarz || row;
-    const model = row.model || row.egzemplarz?.model;
+    const model = row.model || row.egzemplarz?.model || modelById.get(String(egz?.id_modelu));
     const instanceNo = numberOf(row);
-    const baseName = model?.nazwa || row.nazwa_modelu || egz.model?.nazwa || row.nazwa || 'Sprzęt';
+    const baseName = model?.nazwa || row.nazwa_modelu || egz?.model?.nazwa || row.nazwa || 'Sprzęt';
     return {
       source,
       rowType: 'egzemplarz',
-      id_modelu: row.id_modelu || model?.id || egz.id_modelu,
-      id_egzemplarza: row.id_egzemplarza || egz.id,
-      id_magazynu: row.id_magazynu || egz.id_magazynu,
-      magazyn_nazwa: row.magazyn_nazwa || egz.magazyn?.nazwa || 'Brak',
-      miejsce_w_mag: row.miejsce_w_mag || egz.miejsce_w_mag || '',
+      id_modelu: row.id_modelu || model?.id || egz?.id_modelu,
+      id_egzemplarza: row.id_egzemplarza || egz?.id,
+      id_magazynu: row.id_magazynu || egz?.id_magazynu,
+      magazyn_nazwa: row.magazyn_nazwa || egz?.magazyn?.nazwa || 'Brak',
+      miejsce_w_mag: row.miejsce_w_mag || egz?.miejsce_w_mag || '',
       zmien_magazyn: Boolean(row.zmien_magazyn),
       nowe_miejsce_w_mag: row.nowe_miejsce_w_mag || '',
-      nazwa: [isZestawRow(row) ? `[ZESTAW] ${baseName}` : baseName, egz.nazwa && egz.nazwa !== model?.nazwa ? egz.nazwa : null, instanceNo ? `nr ${instanceNo}` : null].filter(Boolean).join(' · '),
+      nazwa: [isZestawRow(row) ? `[ZESTAW] ${baseName}` : baseName, egz?.nazwa && egz?.nazwa !== model?.nazwa ? egz.nazwa : null, instanceNo ? `nr ${instanceNo}` : null].filter(Boolean).join(' · '),
       nazwa_modelu: baseName,
       numer_egzemplarza: instanceNo,
       kategoria: categoryOf(row),
-      kod: row.kod || egz.kod_kreskowy || egz.zewnetrzny_kod_kreskowy || egz.zewnetrzny_qr_kod || egz.qr_kod || egz.sn || '',
+      kod: row.kod || egz?.kod_kreskowy || egz?.zewnetrzny_kod_kreskowy || egz?.zewnetrzny_qr_kod || egz?.qr_kod || egz?.sn || '',
       ilosc: 1,
+      waga: Number(egz?.waga || model?.waga || 0),
       uwagi: row.uwagi || '',
     };
   }
@@ -1767,39 +2450,44 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
     if (mode === 'wydanie') {
       const alreadyIssuedOnThisRental = normalized.filter(item => item.id_egzemplarza && rentalInstanceStatus.currentlyInFieldIds.has(Number(item.id_egzemplarza)));
       if (alreadyIssuedOnThisRental.length > 0) {
-        setError(`Egzemplarz "${alreadyIssuedOnThisRental[0].nazwa}" został już wydany na ten wynajem`);
+        setError(`Egzemplarz "${alreadyIssuedOnThisRental[0].nazwa}" został już wydany na to wypożyczenie.`);
         return;
-      }
-    }
-
-    if (mode === 'przyjecie') {
-      for (const item of normalized) {
-        if (item.id_egzemplarza && !rentalInstanceStatus.issuedMap.has(Number(item.id_egzemplarza))) {
-          setNotice(`Uwaga: Egzemplarz "${item.nazwa}" nie był wydany na ten wynajem. Zostanie przyjęty na magazyn jako zwrot.`);
-        }
       }
     }
 
     setDocItems((prev) => {
       const existingIds = new Set(prev.map((p: any) => Number(p.id_egzemplarza)).filter(Boolean));
-      const toAdd: any[] = [];
-      
+      const nextBasket = [...prev];
+      let addedCount = 0;
+
       for (const item of normalized) {
-        if (item.id_egzemplarza) {
+        if (item.quantityOnly) {
+          const existingIdx = nextBasket.findIndex((p: any) => p.quantityOnly && Number(p.id_modelu) === Number(item.id_modelu) && p.id_zeskanowanego_case === item.id_zeskanowanego_case);
+          if (existingIdx >= 0) {
+            nextBasket[existingIdx] = {
+              ...nextBasket[existingIdx],
+              ilosc: Number(nextBasket[existingIdx].ilosc || 0) + Number(item.ilosc || 1),
+            };
+          } else {
+            nextBasket.push(item);
+          }
+          addedCount += Number(item.ilosc || 1);
+        } else if (item.id_egzemplarza) {
           const id = Number(item.id_egzemplarza);
-          if (existingIds.has(id)) continue;
-          existingIds.add(id);
+          if (!existingIds.has(id)) {
+            existingIds.add(id);
+            nextBasket.push(item);
+            addedCount++;
+          }
         }
-        toAdd.push(item);
       }
 
-      const skipped = normalized.length - toAdd.length;
-      if (!toAdd.length) {
+      if (!addedCount) {
         setNotice(sourceLabel ? `${sourceLabel}: wszystkie pozycje są już w koszyku dokumentu.` : 'Ten sprzęt jest już w koszyku dokumentu.');
         return prev;
       }
-      setNotice(sourceLabel ? `${sourceLabel}` : `Dodano ${toAdd.length} elementów${skipped ? `, pominięto duplikaty: ${skipped}` : ''}.`);
-      return [...prev, ...toAdd];
+      setNotice(sourceLabel ? `${sourceLabel}` : `Dodano pozycje do koszyka.`);
+      return nextBasket;
     });
   }
 
@@ -1883,103 +2571,59 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
     setError('');
     setNotice('');
 
-    // 1. Sprawdzamy czy to nie jest opakowanie / Case
-    if (isCaseRow(row)) {
-      const contents = (row.zawartosc_case || row.contents || []).filter(
-        (child: any) => !isCaseRow(child) && isEquipmentInstance(child)
-      );
-      if (!contents.length) {
-        setError(`Case "${row.nazwa || 'opakowanie'}" jest pusty. Do dokumentów WZ/PZ trafia tylko zawartość.`);
-        return;
-      }
-
-      // Weryfikacja magazynu dla elementów w Case podczas PZ
-      if (mode === 'przyjecie' && targetWarehouseId) {
-        const foreignItem = contents.find((child: any) => {
-          const itemMag = child.id_magazynu ?? child.magazyn_id;
-          return itemMag && String(itemMag) !== String(targetWarehouseId) && !child.zmien_magazyn;
-        });
-
-        if (foreignItem) {
-          const curMag = foreignItem.magazyn_nazwa || foreignItem.magazyn || 'Inny magazyn';
-          const targetMag = warehousesList.find((m) => String(m.id) === String(targetWarehouseId));
-          setLocationConflict({
-            item: row,
-            isCase: true,
-            currentWarehouseName: curMag,
-            targetWarehouseName: targetMag?.nazwa || 'Wybrany magazyn docelowy',
-          });
-          return;
-        }
-      }
-
-      const label = row.nazwa || row.nazwa_modelu || row.kod || `kontener #${row.id || row.id_egzemplarza || ''}`;
-      addDocumentItemsBulk(contents, source, `Rozpakowano zawartość case'a: ${label}`, caseScanMeta(row));
-      return;
-    }
-
-    // 2. Obsługa sprzętu ilościowego
-    if (isQuantityOnly(row) || row.isQuantity) {
-      addQuantityDocumentItem(row, source);
-      return;
-    }
-
-    // 3. Weryfikacja fizycznego egzemplarza przy Przyjęciu (PZ)
-    if (mode === 'przyjecie' && targetWarehouseId && isEquipmentInstance(row) && !isZestawRow(row)) {
-      const itemMagId = row.id_magazynu ?? row.magazyn_id ?? row.egzemplarz?.id_magazynu;
-      
+    if (mode === 'przyjecie' && targetWarehouseId && isEquipmentInstance(row) && !isQuantityOnly(row) && !isZestawRow(row) && !isCaseRow(row)) {
+      const itemMagId = row.id_magazynu || row.egzemplarz?.id_magazynu;
       if (itemMagId && String(itemMagId) !== String(targetWarehouseId) && !row.zmien_magazyn) {
-        const currentMagName = row.magazyn_nazwa || row.magazyn || row.egzemplarz?.magazyn?.nazwa || 'Inny magazyn';
-        const targetMag = warehousesList.find((m) => String(m.id) === String(targetWarehouseId));
-        
+        const currentMagName = row.magazyn_nazwa || row.egzemplarz?.magazyn?.nazwa || 'Inny magazyn';
+        const targetMag = warehousesList.find(m => String(m.id) === String(targetWarehouseId));
         setLocationConflict({
           item: row,
-          isCase: false,
           currentWarehouseName: currentMagName,
-          targetWarehouseName: targetMag?.nazwa || 'Wybrany magazyn docelowy',
+          targetWarehouseName: targetMag?.nazwa || 'Wybrany magazyn docelowy'
         });
         return;
       }
     }
-
+    
+    if (isQuantityOnly(row) || row.isQuantity) { 
+      addQuantityDocumentItem(row, source); 
+      return; 
+    }
+    
     if (isZestawRow(row)) {
       addDocumentItemsBulk([row], source, 'Zeskanowano zestaw jako spójną pozycję');
       return;
     }
 
-    if (!isEquipmentInstance(row)) {
-      setError('Wydanie/przyjęcie wymaga użycia fizycznych egzemplarzy sprzętu.');
+    if (isCaseRow(row)) {
+      const contents = (row.contents || row.zawartosc_case || []).filter((child: any) => !isCaseRow(child));
+      if (!contents.length) { 
+        setError(`Case "${row.nazwa || 'opakowanie'}" jest pusty.`); 
+        return; 
+      }
+      const label = row.nazwa || row.nazwa_modelu || row.kod || `skrzynia #${row.id || row.id_egzemplarza || ''}`;
+      addDocumentItemsBulk(contents, source, `Rozpakowano zawartość skrzyni: ${label}`, caseScanMeta(row));
       return;
     }
 
+    if (!isEquipmentInstance(row)) { 
+      setError('Wydanie/przyjęcie wymaga użycia fizycznych egzemplarzy sprzętu.'); 
+      return; 
+    }
+    
     addDocumentItemsBulk([row], source);
   }
 
   function confirmRelocation(newPlace: string) {
     if (!locationConflict) return;
-
-    if (locationConflict.isCase) {
-      const contents = (locationConflict.item.zawartosc_case || locationConflict.item.contents || []).map((child: any) => ({
-        ...child,
-        zmien_magazyn: true,
-        nowe_miejsce_w_mag: newPlace || child.miejsce_w_mag || '',
-        id_magazynu: Number(targetWarehouseId),
-        id_magazynu_docelowego: Number(targetWarehouseId),
-      }));
-      const label = locationConflict.item.nazwa || 'Case';
-      addDocumentItemsBulk(contents, 'scan', `Przyjęto i przeniesiono zawartość case'a: ${label}`);
-    } else {
-      const modified = {
-        ...locationConflict.item,
-        zmien_magazyn: true,
-        nowe_miejsce_w_mag: newPlace || locationConflict.item.miejsce_w_mag || '',
-        id_magazynu: Number(targetWarehouseId),
-        id_magazynu_docelowego: Number(targetWarehouseId),
-      };
-      addDocumentItemsBulk([modified], 'scan', `Przyjęto ze zmianą magazynu docelowego`);
-    }
-
+    const modified = {
+      ...locationConflict.item,
+      zmien_magazyn: true,
+      nowe_miejsce_w_mag: newPlace || locationConflict.item.miejsce_w_mag || '',
+      id_magazynu: Number(targetWarehouseId),
+    };
     setLocationConflict(null);
+    addDocumentItem(modified, 'scan');
   }
 
   function focusScanInput() {
@@ -2014,10 +2658,6 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
       return alert('Koszyk WZ/PZ jest pusty. Zeskanuj egzemplarze, skrzynie albo wybierz sprzęt z listy.');
     }
 
-    if (type === 'wydanie' && !docForm.osoba_odbierajaca?.trim()) {
-      return alert('Wpisz osobę odbierającą sprzęt przy wydaniu do wynajmu.');
-    }
-
     setError('');
     setSavingDocs(true);
     try {
@@ -2027,7 +2667,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
         id_magazynu_docelowego: targetWarehouseId ? Number(targetWarehouseId) : null,
         osoba_odbierajaca: docForm.osoba_odbierajaca,
         podpis_odbierajacego: docForm.podpis_odbierajacego,
-        uwagi: docForm.uwagi || `Dokument ${type === 'wydanie' ? 'wydania' : 'przyjęcia'} dla wynajmu: ${rentalName}`,
+        uwagi: docForm.uwagi || `Dokument ${type === 'wydanie' ? 'wydania' : 'przyjęcia'} dla wypożyczenia: ${rentalName}`,
         pozycje: docItems.map((p) => ({ 
           ...p, 
           ilosc: Number(p.ilosc || 1), 
@@ -2062,16 +2702,17 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
       <section className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
         <div className="flex flex-col gap-4 border-b border-slate-100 dark:border-white/5 p-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Sprzęt wynajmu</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Sprzęt wypożyczenia</p>
             <h3 className="mt-1 text-2xl font-black text-slate-900 dark:text-white">Plan sprzętu, wydanie i przyjęcie</h3>
             <p className="mt-1.5 max-w-3xl text-sm font-bold text-slate-500 dark:text-slate-400 leading-relaxed">
-              Plan edytujesz po modelach i ilościach. Wydanie oraz przyjęcie działa na fizycznych egzemplarzach.
+              Plan edytujesz po modelach i ilościach. Wydanie oraz przyjęcie automatycznie rozpakowuje całą zawartość case'ów i podlicza masę skrzyń.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
+          <div className="grid grid-cols-4 gap-3 sm:min-w-[560px]">
             <Metric label="Plan" value={`${plannedTotal} szt.`} />
             <Metric label="Wydano" value={`${issuedTotal} szt.`} />
             <Metric label="Przyjęto" value={`${returnedTotal} szt.`} />
+            <Metric label="Waga koszyka" value={`${currentBasketWeight.totalKg} kg`} />
           </div>
         </div>
 
@@ -2096,7 +2737,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
             <div className="p-6">
               <div className="mb-6 flex items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-xl font-black text-slate-900 dark:text-white">Plan sprzętowy przypisany do wynajmu</h4>
+                  <h4 className="text-xl font-black text-slate-900 dark:text-white">Plan sprzętowy przypisany do wypożyczenia</h4>
                   <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">Podział na kategorie główne i modele.</p>
                 </div>
               </div>
@@ -2110,7 +2751,9 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
                     <div className="divide-y divide-slate-100 dark:divide-white/5">
                       {group.rows.map((row: any) => (
                         <div key={row.id_modelu} className="grid gap-4 px-5 py-4 md:grid-cols-[1fr_280px] md:items-center">
-                          <div><p className="font-black text-slate-900 dark:text-white text-[15px]">{row.nazwa}</p><p className="text-xs font-bold text-slate-400 dark:text-slate-500 mt-0.5">model · {row.kategoria}</p></div>
+                          <div>
+                            <p className="font-black text-slate-900 dark:text-white text-[15px]">{row.nazwa}</p>
+                          </div>
                           <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 dark:bg-white/5 p-2 text-center text-xs font-black border border-slate-100 dark:border-transparent"><span><b className="block text-lg text-slate-900 dark:text-white">{row.plan}</b>plan</span><span><b className="block text-lg text-emerald-600 dark:text-emerald-400">{row.wydane}</b>WZ</span><span><b className="block text-lg text-blue-600 dark:text-blue-400">{row.przyjete}</b>PZ</span></div>
                         </div>
                       ))}
@@ -2126,7 +2769,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
                 <div className="sticky top-4 space-y-5">
                   <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm">
                     <div className="mb-5 flex items-start justify-between gap-3 border-b border-slate-100 dark:border-white/5 pb-4">
-                      <div><h4 className="text-lg font-black text-slate-900 dark:text-white">Dodaj sprzęt do planu wynajmu</h4><p className="text-xs font-bold text-slate-500 mt-1">Wybierz kategorię i wpisz ilość przy modelu.</p></div>
+                      <div><h4 className="text-lg font-black text-slate-900 dark:text-white">Dodaj sprzęt do planu</h4><p className="text-xs font-bold text-slate-500 mt-1">Wybierz kategorię i wpisz ilość przy modelu.</p></div>
                       <button type="button" onClick={() => setShowEditor(false)} className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-xs font-black text-slate-600 dark:text-slate-300">Zamknij</button>
                     </div>
 
@@ -2219,8 +2862,8 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
             <div className="packlist-screen p-6">
               <div className="mb-6 flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Packlista Wynajmu</p>
-                  <h4 className="mt-1 text-xl font-black text-slate-900 dark:text-white">Sprzęt do wydania</h4>
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#04e0ff]">Packlista</p>
+                  <h4 className="mt-1 text-xl font-black text-slate-900 dark:text-white">Sprzęt do przygotowania</h4>
                   <p className="mt-1 text-sm font-bold text-slate-500">{rentalName}</p>
                 </div>
                 <Button onClick={() => window.print()}><FileText size={16} className="inline mr-1" /> Drukuj / zapisz PDF</Button>
@@ -2239,7 +2882,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
                           <div className="text-sm font-bold text-slate-400">{index + 1}.</div>
                           <div><p className="font-black text-slate-900 dark:text-white">{row.nazwa}</p></div>
                           <div className="text-center"><p className="text-xl font-black text-slate-900 dark:text-white">{row.plan}</p><p className="text-[9px] font-black uppercase text-slate-400">{row.jednostka || 'szt.'}</p></div>
-                          <textarea value={packlistNotes[String(row.id_modelu)] || ''} onChange={(e) => setPacklistNotes((prev) => ({ ...prev, [String(row.id_modelu)]: e.target.value }))} placeholder="Uwagi logistyczne..." className="min-h-[42px] w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-950 dark:text-white" />
+                          <textarea value={packlistNotes[String(row.id_modelu)] || ''} onChange={(e) => setPacklistNotes((prev) => ({ ...prev, [String(row.id_modelu)]: e.target.value }))} placeholder="Uwagi..." className="min-h-[42px] w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-400 dark:border-white/10 dark:bg-slate-950 dark:text-white" />
                         </div>
                       ))}
                     </div>
@@ -2256,19 +2899,19 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
               <header className="packlist-print-header mb-[7mm] grid grid-cols-2 gap-[10mm]">
                 <div><img src={data.wynajem?.organizacja?.logo || '/eventflow-logo.svg'} alt={data.wynajem?.organizacja?.nazwa || 'Logo firmy'} className="max-h-[16mm] max-w-[70mm] object-contain object-left" /></div>
                 <div className="text-right">
-                  <h1 className="text-[20px] font-black uppercase leading-tight">Packlista Wynajmu</h1>
+                  <h1 className="text-[20px] font-black uppercase leading-tight">Packlista Wypożyczenia</h1>
                   <p className="mt-2 text-[9px]">Numer: <b>{data.wynajem?.numer || `#${rentalId}`}</b></p>
                   <p className="text-[9px]">Wydanie: <b>{data.wynajem?.data_wydania ? new Date(data.wynajem.data_wydania).toLocaleString('pl-PL') : '-'}</b></p>
                 </div>
               </header>
               <section className="packlist-print-meta mb-[6mm] grid grid-cols-2 gap-[10mm] text-[9px]">
                 <div>
-                  <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Zlecenie Wynajmu</h2>
+                  <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Wypożyczenie</h2>
                   <p className="font-black">{data.wynajem?.nazwa || rentalName}</p>
                   <p>{data.wynajem?.kontrahent?.nazwa || ''}</p>
                 </div>
                 <div>
-                  <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Miejsce / Dostawa</h2>
+                  <h2 className="mb-1 border-b pb-1 text-[8px] font-black uppercase text-slate-500">Lokalizacja / Dostawa</h2>
                   <p className="font-black">{data.wynajem?.miejsce?.nazwa || data.wynajem?.miejsce_reczne || '-'}</p>
                   {data.wynajem?.adres_reczny && <p>{data.wynajem.adres_reczny}</p>}
                 </div>
@@ -2433,13 +3076,12 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
               </div>
             </div>
 
-            {/* PRAWA KOLUMNA: SKANER & KOSZYK */}
+            {/* PRAWA KOLUMNA: SKANER, WYBÓR MAGAZYNU I KOSZYK */}
             <div className="border-l border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/20 p-6 shadow-inner min-w-0 flex flex-col">
               <div className="sticky top-4 space-y-5 min-w-0">
                 <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 shadow-sm min-w-0">
                   <h4 className="mb-3 text-lg font-black text-slate-900 dark:text-white">Lokalizacja operacji & Skaner</h4>
                   
-                  {/* WYBÓR MAGAZYNU DLA DOKUMENTU WZ/PZ */}
                   <div className="mb-4">
                     <Field label="Magazyn docelowy operacji">
                       <div className="relative">
@@ -2459,7 +3101,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
                     </Field>
                   </div>
 
-                  <Field label="Skanuj kod kreskowy / QR / SN / Case z Naklejki">
+                  <Field label="Skanuj kod kreskowy / QR / SN / Case">
                     <div className="flex gap-2">
                       <input
                         ref={scanInputRef}
@@ -2477,7 +3119,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
                     </div>
                   </Field>
                   <p className="mt-3 text-xs font-bold text-slate-400 leading-relaxed">
-                    Zeskanowanie kontenera (Case) automatycznie rozpakuje go i doda na listę ukryty w nim sprzęt.
+                    Zeskanowanie skrzyni (Case) automatycznie rozpakuje ją i doda jej zawartość do koszyka.
                   </p>
                 </div>
 
@@ -2499,6 +3141,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
                           <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
                             {p.kategoria} · {isQuantityOnly(p) ? <span className="text-[#04e0ff]">{p.ilosc || 1} {p.jednostka || 'szt.'}</span> : `${p.nazwa_zeskanowanego_case ? `w: ${p.nazwa_zeskanowanego_case} · ` : ''}${p.kod || '-'}` }
                             {p.magazyn_nazwa && !isQuantityOnly(p) ? ` · Magazyn: ${p.magazyn_nazwa}` : ''}
+                            {p.numer && !isQuantityOnly(p) ? ` · Numer: ${p.numer}` : ''}
                           </p>
                           {p.zmien_magazyn && (
                             <span className="mt-1 inline-block text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
@@ -2540,7 +3183,7 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
                       >
                         <b className="text-[13px] text-slate-900 dark:text-white block truncate">{r.nazwa_wiersza || r.nazwa}</b>
                         <p className="text-[11px] font-bold text-slate-400 mt-1 truncate">
-                          {r.kategoria_nazwa} {r.kod ? `· Kod/SN: ${r.kod}` : ''} {r.isQuantity ? `· [STAN: ${r.ilosc_magazynowa || 0} ${r.jednostka || 'szt.'}]` : `· Mag: ${r.magazyn_nazwa || '-'}`}
+                          {r.kategoria_nazwa} {r.kod ? `· Kod: ${r.kod}` : ''} {r.numer ? `· Numer: ${r.numer}` : ''} {r.isQuantity ? `· [STAN: ${r.ilosc_magazynowa || 0} ${r.jednostka || 'szt.'}]` : `· ${r.magazyn_nazwa || '-'}`}
                         </p>
                       </button>
                     ))}
@@ -2582,23 +3225,33 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
         )}
       </section>
 
-      {/* DOKUMENTY WYGENEROWANE */}
+      {/* DOKUMENTY WYGENEROWANE DLA WYPOŻYCZENIA */}
       <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-sm mt-8">
         <h3 className="mb-4 text-xl font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/5 pb-4">
-          Wygenerowane dokumenty magazynowe dla tego wynajmu
+          Wygenerowane dokumenty magazynowe dla tego wypożyczenia
         </h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {(data.dokumenty || []).map((d: any) => (
             <a key={d.id} href={`/dashboard/warehouse/documents/${d.id}`} className="rounded-2xl border border-slate-200 dark:border-white/10 p-5 bg-slate-50 dark:bg-white/5 hover:border-[#04e0ff] transition shadow-sm group">
               <div className="flex items-center justify-between mb-2">
                 <b className="text-lg font-black text-slate-900 dark:text-white group-hover:text-[#04e0ff] transition">{d.numer}</b>
-                <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${d.typ === 'wydanie' ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700'}`}>{d.typ}</span>
+                <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${d.typ === 'wydanie' ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                  {d.typ}
+                </span>
               </div>
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5"><Calendar size={13}/> {new Date(d.data_operacji).toLocaleString('pl-PL')}</p>
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1.5"><Box size={13}/> Pozycji: {d.pozycje?.length || 0}</p>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
+                <Calendar size={13} /> {new Date(d.data_operacji).toLocaleString('pl-PL')}
+              </p>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1.5">
+                <Box size={13} /> Pozycji: {d.pozycje?.length || 0}
+              </p>
             </a>
           ))}
-          {!data.dokumenty?.length && <div className="col-span-full p-10 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-center font-bold text-slate-400 bg-slate-50/50 dark:bg-transparent">Brak wystawionych dokumentów logistycznych.</div>}
+          {!data.dokumenty?.length && (
+            <div className="col-span-full p-10 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl text-center font-bold text-slate-400 bg-slate-50/50 dark:bg-transparent">
+              Brak wystawionych dokumentów logistycznych.
+            </div>
+          )}
         </div>
       </div>
 
@@ -2607,17 +3260,38 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
         <SimpleModal title="Dodaj gotowy pakiet do planu" onClose={() => setShowBundlePicker(false)}>
           <form onSubmit={handleAddBundle} className="space-y-4">
             <Field label="Wybierz pakiet ze słowników">
-              <select className={inputClass} value={bundleForm.id_pakietu} onChange={e => setBundleForm({...bundleForm, id_pakietu: e.target.value})} required>
+              <select
+                className={inputClass}
+                value={bundleForm.id_pakietu}
+                onChange={(e) => setBundleForm({ ...bundleForm, id_pakietu: e.target.value })}
+                required
+              >
                 <option value="">Wybierz pakiet...</option>
-                {bundles.map(b => <option key={b.id} value={b.id}>{b.nazwa} ({b._count?.pozycje || 0} elementów)</option>)}
+                {bundles.map((b: any) => (
+                  <option key={b.id} value={b.id}>
+                    {b.nazwa} ({b._count?.pozycje || 0} elementów)
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label="Mnożnik (Ile pakietów dodać?)">
-              <input type="number" min="1" step="1" className={inputClass} value={bundleForm.mnoznik} onChange={e => setBundleForm({...bundleForm, mnoznik: Number(e.target.value)})} required />
+              <input
+                type="number"
+                min="1"
+                step="1"
+                className={inputClass}
+                value={bundleForm.mnoznik}
+                onChange={(e) => setBundleForm({ ...bundleForm, mnoznik: Number(e.target.value) })}
+                required
+              />
             </Field>
             <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
-              <Button variant="secondary" type="button" onClick={() => setShowBundlePicker(false)}>Anuluj</Button>
-              <Button type="submit"><Layers size={16} className="inline mr-1.5"/> Dodaj do planu</Button>
+              <Button variant="secondary" type="button" onClick={() => setShowBundlePicker(false)}>
+                Anuluj
+              </Button>
+              <Button type="submit">
+                <Layers size={16} className="inline mr-1.5" /> Dodaj do planu
+              </Button>
             </div>
           </form>
         </SimpleModal>
@@ -2657,11 +3331,15 @@ function EquipmentPanel({ rentalId, rentalName }: { rentalId: number; rentalName
                   );
                 })}
               {items.filter((egz: any) => egz.id_modelu === instanceModalModel.id_modelu).length === 0 && (
-                <p className="text-center text-sm font-bold text-slate-400 py-8">Brak zdefiniowanych egzemplarzy dla tego modelu.</p>
+                <p className="text-center text-sm font-bold text-slate-400 py-8">
+                  Brak zdefiniowanych egzemplarzy dla tego modelu.
+                </p>
               )}
             </div>
             <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-white/10">
-              <Button variant="secondary" onClick={() => setInstanceModalModel(null)}>Zamknij</Button>
+              <Button variant="secondary" onClick={() => setInstanceModalModel(null)}>
+                Zamknij
+              </Button>
             </div>
           </div>
         </SimpleModal>
